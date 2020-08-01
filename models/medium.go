@@ -45,7 +45,7 @@ type Medium struct {
 	Broken      bool      `json:"broken" bson:"broken"`
 	ReleaseDate time.Time `json:"release_date" bson:"release_date"`
 	Paths       []struct {
-		Id        primitive.ObjectID `json:"ID" bson:"ID"`
+		Id        primitive.ObjectID `json:"id" bson:"_id"`
 		Type      primitive.Symbol   `json:"type" bson:"type"`
 		Remote    string             `json:"remote" bson:"remote"`
 		Local     string             `json:"local" bson:"local"`

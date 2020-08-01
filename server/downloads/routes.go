@@ -18,10 +18,31 @@ func Routes() {
 
 	r := app.Router.Group("/downloads")
 	r.GET("/", indexHandler)
-
+	r.POST("/", createHandler)
+	r.GET("/:id", showHandler)
+	r.PUT("/:id", updateHandler)
+	r.DELETE("/:id", deleteHandler)
 }
 
 func indexHandler(c *gin.Context) {
-
 	Index(c)
+}
+
+func createHandler(c *gin.Context) {
+	Create(c)
+}
+
+func showHandler(c *gin.Context) {
+	id := c.Param("id")
+	Show(c, id)
+}
+
+func updateHandler(c *gin.Context) {
+	id := c.Param("id")
+	Update(c, id)
+}
+
+func deleteHandler(c *gin.Context) {
+	id := c.Param("id")
+	Delete(c, id)
 }

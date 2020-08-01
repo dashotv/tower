@@ -3,16 +3,10 @@ repo: github.com/dashotv/tower
 groups:
   downloads:
     path: /downloads
-    routes:
-      index:
-        path: /
+    rest: true
   media:
     path: /media
-    routes:
-      index:
-        path: /
+    rest: true
   releases:
     path: /releases
-    routes:
-      index:
-        path: /
+    rest: true

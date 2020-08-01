@@ -67,6 +67,8 @@ fields:
     fields:
       - name: ID
         type: primitive.ObjectID
+        json: id
+        bson: _id
       - name: type
         type: primitive.Symbol
       - name: remote
