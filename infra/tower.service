@@ -1,0 +1,10 @@
+[Unit]
+Description=Job that runs the tower daemon
+
+[Service]
+Type=exec
+ExecStartPre=/snap/bin/go get -u github.com/dashotv/tower
+ExecStart=/home/shawn/go/bin/tower --config /home/shawn/.tower.yaml server
+
+[Install]
+WantedBy=multi-user.target
