@@ -36,8 +36,6 @@ func (s *Server) Start() error {
 	//s.Jobs configuration
 
 	s.Log.Info("starting web...")
-	s.Log.Debugf("config: %#v", cfg)
-	s.Log.Debugf("router: %#v", s.Router)
 	if err := s.Router.Run(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		return errors.Wrap(err, "starting router")
 	}
