@@ -1,0 +1,18 @@
+name: tower
+repo: github.com/dashotv/tower
+groups:
+  downloads:
+    path: /downloads
+    routes:
+      index:
+        path: /
+  media:
+    path: /media
+    routes:
+      index:
+        path: /
+  releases:
+    path: /releases
+    routes:
+      index:
+        path: /
