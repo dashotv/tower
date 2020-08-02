@@ -19,10 +19,10 @@ var instance *App
 type App struct {
 	Config *config.Config
 	Router *gin.Engine
+	DB     *models.Connector
 	// Cache  *redis.Client
 	Log *logrus.Entry
 	// Add additional clients and connections
-	DB *models.Connector
 }
 
 func logger() *logrus.Entry {
@@ -35,9 +35,6 @@ func logger() *logrus.Entry {
 func initialize() *App {
 	cfg := config.Instance()
 	log := logger()
-
-	router := gin.New()
-	router.Use(ginlogrus.Logger(log), gin.Recovery())
 
 	db, err := models.NewConnector()
 	if err != nil {
@@ -52,6 +49,9 @@ func initialize() *App {
 		gin.SetMode(cfg.Mode)
 	}
 
+	router := gin.New()
+	router.Use(ginlogrus.Logger(log), gin.Recovery())
+
 	// TODO: add this to config
 	// cache := redis.NewClient(&redis.Options{
 	//	Addr: "localhost:6379",
@@ -63,9 +63,9 @@ func initialize() *App {
 	return &App{
 		Config: cfg,
 		Router: router,
+		DB:     db,
 		// Cache:    cache,
 		Log: log,
-		DB:  db,
 	}
 }
 
