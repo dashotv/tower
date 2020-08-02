@@ -8,16 +8,18 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/dashotv/tower/server/downloads"
-	"github.com/dashotv/tower/server/media"
+	"github.com/dashotv/tower/server/movies"
 	"github.com/dashotv/tower/server/releases"
+	"github.com/dashotv/tower/server/series"
 )
 
 func (s *Server) Routes() {
 	s.Router.GET("/", homeHandler)
 
 	downloads.Routes()
-	media.Routes()
+	movies.Routes()
 	releases.Routes()
+	series.Routes()
 
 }
 

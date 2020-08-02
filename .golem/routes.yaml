@@ -4,8 +4,11 @@ groups:
   downloads:
     path: /downloads
     rest: true
-  media:
-    path: /media
+  series:
+    path: /series
+    rest: true
+  movies:
+    path: /movies
     rest: true
   releases:
     path: /releases

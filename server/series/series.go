@@ -1,4 +1,4 @@
-package media
+package series
 
 import (
 	"net/http"
@@ -9,7 +9,7 @@ import (
 func Index(c *gin.Context) {
 	q := app.DB.Medium.Query()
 	results, err := q.
-		In("_type", []string{"Series", "Movie"}).
+		Where("_type", "Series").
 		Desc("created_at").Run()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
