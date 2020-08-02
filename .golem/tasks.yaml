@@ -1,0 +1,31 @@
+name: tower
+default: test
+tasks:
+  test:
+    cmd: go test -v ./...
+  generate:
+    cmd: golem generate
+  build:
+    invoke: [generate]
+    cmd: go build
+  install:
+    invoke: [build]
+    cmd: go install
+  server:
+    cmd: go run main.go server
+  deps:
+    cmd: |
+      go get golang.org/x/tools/cmd/goimports
+      go get github.com/dashotv/golem
+  production:
+    cmd: |
+      sed -i \
+      	-e 's/seer_development/seer_production/g' \
+      	-e 's/torch_development/torch_production/g' \
+      	.golem/.golem.yaml
+  docker:build:
+    cmd: docker build -t tower .
+  docker:run:
+    cmd: docker run -d --rm --name tower -p 9000:9000 tower
+  docker:stop:
+    cmd: docker stop tower
