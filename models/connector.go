@@ -63,6 +63,10 @@ func settingsFor(name string) (*config.Connection, error) {
 		return nil, fmt.Errorf("no connection configuration for %s", name)
 	}
 
+	if _, ok := cfg.Connections[name]; !ok {
+		return cfg.Connections["default"], nil
+	}
+
 	s := cfg.Connections["default"]
 	a := cfg.Connections[name]
 

@@ -7,7 +7,10 @@ import (
 )
 
 func Index(c *gin.Context) {
-	results, err := app.DB.Medium.Query().Run()
+	q := app.DB.Medium.Query()
+	results, err := q.
+		In("_type", []string{"Series", "Movie"}).
+		Desc("created_at").Run()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

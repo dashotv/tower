@@ -4,3 +4,13 @@ connections:
   default:
     uri: mongodb://localhost:27017
     database: database
+  medium:
+    database: seer_development
+    collection: media
+  download:
+    database: seer_development
+    collection: downloads
+  release:
+    database: torch_development
+    collection: torrents
+
