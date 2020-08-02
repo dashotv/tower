@@ -11,6 +11,7 @@ import (
 	"github.com/dashotv/tower/server/movies"
 	"github.com/dashotv/tower/server/releases"
 	"github.com/dashotv/tower/server/series"
+	"github.com/dashotv/tower/server/upcoming"
 )
 
 func (s *Server) Routes() {
@@ -20,6 +21,7 @@ func (s *Server) Routes() {
 	movies.Routes()
 	releases.Routes()
 	series.Routes()
+	upcoming.Routes()
 
 }
 

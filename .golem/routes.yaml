@@ -4,6 +4,11 @@ groups:
   downloads:
     path: /downloads
     rest: true
+  upcoming:
+    path: /upcoming
+    routes:
+      index:
+        path: /
   series:
     path: /series
     rest: true
