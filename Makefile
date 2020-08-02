@@ -29,8 +29,10 @@ docker:
 	docker build -t tower .
 
 docker-run:
-	#DOCKER_HOST := `/sbin/ifconfig docker0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`
-	docker run -d --rm --name tower tower
+	docker run -d --rm --name tower -p 9000:9000 tower
+
+# this works on linux, for mac you use host.docker.internal
+# DOCKER_HOST := `/sbin/ifconfig docker0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`
 # to allow docker to talk to localhost mongo
 # $ docker run -it my_application --add-host 'DOCKER_HOST:$DOCKER_HOST'
 
