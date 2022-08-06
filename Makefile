@@ -16,8 +16,8 @@ server:
 	go run main.go server
 
 deps:
-	go get golang.org/x/tools/cmd/goimports
-	go get github.com/dashotv/golem
+	go install golang.org/x/tools/cmd/goimports@latest
+	go install github.com/dashotv/golem@latest
 
 production:
 	sed -i \
