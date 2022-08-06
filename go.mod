@@ -17,7 +17,7 @@ require (
 )
 
 require (
-	github.com/Kamva/mgm/v3 v3.0.1 // indirect
+	github.com/kamva/mgm/v3 v3.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
