@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -27,8 +29,10 @@ func (s *MediumStore) Upcoming() ([]Medium, error) {
 		Where("downloaded", false).
 		Where("completed", false).
 		Where("skipped", false).
+		Where("missing", false).
 		GreaterThan("season_number", 0).
 		GreaterThan("episode_number", 0).
+		GreaterThan("release_date", time.Now()).
 		Asc("release_date").Asc("season_number").Asc("episode_number").
 		Run()
 }
