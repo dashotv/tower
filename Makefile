@@ -3,7 +3,7 @@ all: test
 test:
 	go test -v ./...
 
-generate:
+generate: deps
 	golem generate
 
 build: generate
@@ -18,6 +18,7 @@ server: generate
 deps:
 	go install golang.org/x/tools/cmd/goimports@latest
 	go install github.com/dashotv/golem@latest
+	go install github.com/codegangsta/gin@latest
 
 production:
 	sed -i \
