@@ -31,7 +31,23 @@ func Create(c *gin.Context) {
 }
 
 func Show(c *gin.Context, id string) {
-	c.JSON(http.StatusOK, gin.H{"error": false})
+	result, err := app.DB.Download.Find(id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	m, err := app.DB.Medium.FindByID(result.MediumId)
+	if err != nil {
+		app.Log.Errorf("could not find medium: %s", result.MediumId)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	app.Log.Infof("found %s: %s", m.ID, m.Title)
+	result.Medium = *m
+
+	c.JSON(http.StatusOK, result)
 }
 
 func Update(c *gin.Context, id string) {
