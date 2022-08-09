@@ -2,7 +2,7 @@ mode: dev
 port: 9000
 connections:
   default:
-    uri: mongodb://localhost:27017
+    uri: mongodb://dashotv-db-1:27017
     database: database
   medium:
     database: seer_development
