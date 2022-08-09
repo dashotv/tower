@@ -13,13 +13,14 @@ func Index(c *gin.Context) {
 		return
 	}
 
-	for _, d := range results {
+	for i, d := range results {
 		m, err := app.DB.Medium.FindByID(d.MediumId)
 		if err != nil {
 			app.Log.Errorf("could not find medium: %s", d.MediumId)
 			continue
 		}
 		app.Log.Infof("found %s: %s", m.ID, m.Title)
+		results[i].Medium = *m
 	}
 
 	c.JSON(http.StatusOK, results)

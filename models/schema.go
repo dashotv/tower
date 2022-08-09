@@ -9,6 +9,7 @@ type GolemSchema struct {
 
 type DownloadSchema struct {
     MediumId *FieldSchema
+    Medium *FieldSchema
     Auto *FieldSchema
     Multi *FieldSchema
     Force *FieldSchema
@@ -82,6 +83,10 @@ var Schema = &GolemSchema {
         MediumId: &FieldSchema{
             Name: "medium_id",
             Type: "primitive.ObjectID",
+        },
+        Medium: &FieldSchema{
+            Name: "medium",
+            Type: "Medium",
         },
         Auto: &FieldSchema{
             Name: "auto",

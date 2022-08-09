@@ -12,7 +12,7 @@ build: generate
 install: build
 	go install
 
-server:
+server: generate
 	go run main.go server
 
 deps:

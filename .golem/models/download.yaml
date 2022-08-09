@@ -5,6 +5,8 @@ imports:
 fields:
   - name: medium_id
     type: primitive.ObjectID
+  - name: medium
+    type: Medium
   - name: auto
     type: bool
   - name: multi

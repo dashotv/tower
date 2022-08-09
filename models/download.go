@@ -17,6 +17,7 @@ type Download struct {
 	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
 	MediumId   primitive.ObjectID `json:"medium_id" bson:"medium_id"`
+	Medium     Medium             `json:"medium" bson:"medium"`
 	Auto       bool               `json:"auto" bson:"auto"`
 	Multi      bool               `json:"multi" bson:"multi"`
 	Force      bool               `json:"force" bson:"force"`
