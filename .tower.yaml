@@ -1,4 +1,4 @@
-mode: dev
+mode: release
 port: 9000
 connections:
   default:
