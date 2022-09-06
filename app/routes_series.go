@@ -1,4 +1,4 @@
-package series
+package app
 
 import (
 	"net/http"
@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Index(c *gin.Context) {
-	q := app.DB.Medium.Query()
+func SeriesIndex(c *gin.Context) {
+	q := App().DB.Medium.Query()
 	results, err := q.
 		Where("_type", "Series").
 		Desc("created_at").Run()
@@ -19,24 +19,25 @@ func Index(c *gin.Context) {
 	c.JSON(http.StatusOK, results)
 }
 
-func Create(c *gin.Context) {
+func SeriesCreate(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func Show(c *gin.Context, id string) {
-	results, err := app.DB.Medium.Find(id)
+func SeriesShow(c *gin.Context, id string) {
+	result := &Medium{}
+	err := App().DB.Medium.Find(id, result)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, results)
+	c.JSON(http.StatusOK, result)
 }
 
-func Update(c *gin.Context, id string) {
+func SeriesUpdate(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func Delete(c *gin.Context, id string) {
+func SeriesDelete(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }

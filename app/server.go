@@ -1,4 +1,4 @@
-package server
+package app
 
 import (
 	"fmt"
@@ -6,13 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-
-	"github.com/dashotv/tower/application"
-	"github.com/dashotv/tower/config"
 )
 
-var cfg *config.Config
-var app *application.App
+var app *Application
 
 type Server struct {
 	Router *gin.Engine
@@ -20,10 +16,9 @@ type Server struct {
 }
 
 func New() (*Server, error) {
-	cfg = config.Instance()
-	app = application.Instance()
-	log := app.Log.WithField("prefix", "server")
-	s := &Server{Log: log, Router: app.Router}
+	app = App()
+	log := App().Log.WithField("prefix", "server")
+	s := &Server{Log: log, Router: App().Router}
 
 	return s, nil
 }

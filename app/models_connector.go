@@ -1,22 +1,22 @@
-package models
+package app
 
 import (
 	"fmt"
 
-	"github.com/dashotv/tower/config"
+	"github.com/dashotv/grimoire"
 )
 
+var cfg *Config
+
 type Connector struct {
-	Download *DownloadStore
-	Medium   *MediumStore
-	Release  *ReleaseStore
+	Download *grimoire.Store[*Download]
+	Medium   *grimoire.Store[*Medium]
+	Release  *grimoire.Store[*Release]
 }
 
-var cfg *config.Config
-
 func NewConnector() (*Connector, error) {
-	cfg = config.Instance()
-	var s *config.Connection
+	cfg = ConfigInstance()
+	var s *Connection
 	var err error
 
 	s, err = settingsFor("download")
@@ -24,7 +24,7 @@ func NewConnector() (*Connector, error) {
 		return nil, err
 	}
 
-	download, err := NewDownloadStore(s.URI, s.Database, s.Collection)
+	download, err := grimoire.New[*Download](s.URI, s.Database, s.Collection)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +34,7 @@ func NewConnector() (*Connector, error) {
 		return nil, err
 	}
 
-	medium, err := NewMediumStore(s.URI, s.Database, s.Collection)
+	medium, err := grimoire.New[*Medium](s.URI, s.Database, s.Collection)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func NewConnector() (*Connector, error) {
 		return nil, err
 	}
 
-	release, err := NewReleaseStore(s.URI, s.Database, s.Collection)
+	release, err := grimoire.New[*Release](s.URI, s.Database, s.Collection)
 	if err != nil {
 		return nil, err
 	}
@@ -58,9 +58,9 @@ func NewConnector() (*Connector, error) {
 	return c, nil
 }
 
-func settingsFor(name string) (*config.Connection, error) {
+func settingsFor(name string) (*Connection, error) {
 	if cfg.Connections["default"] == nil {
-		return nil, fmt.Errorf("no connection configuration for %s", name)
+		return nil, fmt.Errorf("no default config while configuring %s", name)
 	}
 
 	if _, ok := cfg.Connections[name]; !ok {

@@ -2,14 +2,14 @@ name: tower
 repo: github.com/dashotv/tower
 models:
   enabled: true
-  package: models
-  output: models
+  package: app
+  output: app
   definitions: .golem/models
 routes:
   enabled: true
   name: tower
   definition: .golem/routes.yaml
-  output: server
+  output: app
   repo: github.com/dashotv/tower
 jobs:
   enabled: false

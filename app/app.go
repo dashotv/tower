@@ -1,4 +1,4 @@
-package application
+package app
 
 import (
 	"os"
@@ -8,18 +8,15 @@ import (
 	"github.com/sirupsen/logrus"
 	ginlogrus "github.com/toorop/gin-logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
-
-	"github.com/dashotv/tower/config"
-	"github.com/dashotv/tower/models"
 )
 
 var once sync.Once
-var instance *App
+var instance *Application
 
-type App struct {
-	Config *config.Config
+type Application struct {
+	Config *Config
 	Router *gin.Engine
-	DB     *models.Connector
+	DB     *Connector
 	// Cache  *redis.Client
 	Log *logrus.Entry
 	// Add additional clients and connections
@@ -32,11 +29,11 @@ func logger() *logrus.Entry {
 	return logrus.WithField("prefix", host)
 }
 
-func initialize() *App {
-	cfg := config.Instance()
+func initialize() *Application {
+	cfg := ConfigInstance()
 	log := logger()
 
-	db, err := models.NewConnector()
+	db, err := NewConnector()
 	if err != nil {
 		log.Errorf("database connection failed: %s", err)
 	}
@@ -60,7 +57,7 @@ func initialize() *App {
 
 	// Add additional clients and connections
 
-	return &App{
+	return &Application{
 		Config: cfg,
 		Router: router,
 		DB:     db,
@@ -69,7 +66,7 @@ func initialize() *App {
 	}
 }
 
-func Instance() *App {
+func App() *Application {
 	once.Do(func() {
 		instance = initialize()
 	})

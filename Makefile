@@ -3,7 +3,7 @@ all: test
 test:
 	go test -v ./...
 
-generate: deps
+generate:
 	golem generate
 
 build: generate
