@@ -8,6 +8,12 @@ connections:
   medium:
     database: seer_development
     collection: media
+  series:
+    database: seer_development
+    collection: media
+  episode:
+    database: seer_development
+    collection: media
   download:
     database: seer_development
     collection: downloads

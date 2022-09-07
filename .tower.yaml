@@ -1,5 +1,6 @@
 mode: release
 port: 9000
+cron: true
 connections:
   default:
     uri: mongodb://dashotv-db-1:27017
@@ -10,6 +11,12 @@ connections:
   download:
     database: seer_development
     collection: downloads
+  series:
+    database: seer_development
+    collection: media
+  episode:
+    database: seer_development
+    collection: media
   release:
     database: torch_development
     collection: torrents

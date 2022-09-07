@@ -26,6 +26,10 @@ func New() (*Server, error) {
 func (s *Server) Start() error {
 	s.Log.Info("starting tower...")
 
+	if err := s.Cron(); err != nil {
+		return err
+	}
+
 	s.Routes()
 
 	//s.Jobs configuration
