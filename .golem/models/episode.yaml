@@ -27,6 +27,12 @@ fields:
     type: string
   - name: search
     type: string
+  - name: season_number
+    type: int
+  - name: episode_number
+    type: int
+  - name: absolute_number
+    type: int
   #  - name: search_params
   #    type: SearchParam
   - name: search_params

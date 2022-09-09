@@ -20,4 +20,7 @@ connections:
   release:
     database: torch_development
     collection: torrents
+  watch:
+    database: seer_development
+    collection: watches
 

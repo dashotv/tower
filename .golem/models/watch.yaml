@@ -1,0 +1,14 @@
+name: watch
+type: model
+imports:
+fields:
+  - name: username
+    type: string
+  - name: player
+    type: string
+  - name: watched_at
+    type: time.Time
+  - name: medium_id
+    type: primitive.ObjectID
+
+
