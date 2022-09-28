@@ -12,20 +12,21 @@ type Episode struct {
 	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
-	Type           string           `json:"type" bson:"_type"`
-	Kind           primitive.Symbol `json:"kind" bson:"kind"`
-	Source         string           `json:"source" bson:"source"`
-	SourceId       string           `json:"source_id" bson:"source_id"`
-	Title          string           `json:"title" bson:"title"`
-	Description    string           `json:"description" bson:"description"`
-	Slug           string           `json:"slug" bson:"slug"`
-	Text           []string         `json:"text" bson:"text"`
-	Display        string           `json:"display" bson:"display"`
-	Directory      string           `json:"directory" bson:"directory"`
-	Search         string           `json:"search" bson:"search"`
-	SeasonNumber   int              `json:"season_number" bson:"season_number"`
-	EpisodeNumber  int              `json:"episode_number" bson:"episode_number"`
-	AbsoluteNumber int              `json:"absolute_number" bson:"absolute_number"`
+	Type           string             `json:"type" bson:"_type"`
+	SeriesId       primitive.ObjectID `json:"series_id" bson:"series_id"`
+	Kind           primitive.Symbol   `json:"kind" bson:"kind"`
+	Source         string             `json:"source" bson:"source"`
+	SourceId       string             `json:"source_id" bson:"source_id"`
+	Title          string             `json:"title" bson:"title"`
+	Description    string             `json:"description" bson:"description"`
+	Slug           string             `json:"slug" bson:"slug"`
+	Text           []string           `json:"text" bson:"text"`
+	Display        string             `json:"display" bson:"display"`
+	Directory      string             `json:"directory" bson:"directory"`
+	Search         string             `json:"search" bson:"search"`
+	SeasonNumber   int                `json:"season_number" bson:"season_number"`
+	EpisodeNumber  int                `json:"episode_number" bson:"episode_number"`
+	AbsoluteNumber int                `json:"absolute_number" bson:"absolute_number"`
 	SearchParams   struct {
 		Type       string `json:"type" bson:"type"`
 		Verified   bool   `json:"verified" bson:"verified"`

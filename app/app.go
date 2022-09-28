@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
+	"github.com/philippgille/gokv/redis"
 	"github.com/sirupsen/logrus"
 	ginlogrus "github.com/toorop/gin-logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
@@ -17,8 +18,8 @@ type Application struct {
 	Config *Config
 	Router *gin.Engine
 	DB     *Connector
-	// Cache  *redis.Client
-	Log *logrus.Entry
+	Cache  *Cache
+	Log    *logrus.Entry
 	// Add additional clients and connections
 }
 
@@ -49,11 +50,10 @@ func initialize() *Application {
 	router := gin.New()
 	router.Use(ginlogrus.Logger(log), gin.Recovery())
 
-	// TODO: add this to config
-	// cache := redis.NewClient(&redis.Options{
-	//	Addr: "localhost:6379",
-	//	DB:   15, // use default DB
-	// })
+	cache, err := NewCache(redis.Options{Address: cfg.Redis.Address})
+	if err != nil {
+		log.Fatalf("cache: %s", err)
+	}
 
 	// Add additional clients and connections
 
@@ -61,8 +61,8 @@ func initialize() *Application {
 		Config: cfg,
 		Router: router,
 		DB:     db,
-		// Cache:    cache,
-		Log: log,
+		Cache:  cache,
+		Log:    log,
 	}
 }
 

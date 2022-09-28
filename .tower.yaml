@@ -1,6 +1,18 @@
 mode: release
 port: 9000
 cron: true
+filesystems:
+  enabled: false
+  directories:
+    - /media/anime
+    - /media/ecchi
+    - /media/kids
+    - /media/movies
+    - /media/movies3d
+    - /media/movies4k
+    - /media/tv
+redis:
+  address: redis:6379
 connections:
   default:
     uri: mongodb://dashotv-db-1:27017
@@ -23,4 +35,3 @@ connections:
   watch:
     database: seer_development
     collection: watches
-

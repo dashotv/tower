@@ -7,6 +7,8 @@ fields:
   - name: type
     type: string
     bson: _type
+  - name: series_id
+    type: primitive.ObjectID
   - name: kind
     type: primitive.Symbol
   - name: source

@@ -13,6 +13,13 @@ type Config struct {
 	Port        int                    `yaml:"port"`
 	Connections map[string]*Connection `yaml:"connections"`
 	Cron        bool                   `yaml:"cron"`
+	Redis       struct {
+		Address string `yaml:"address"`
+	} `yaml:"redis"`
+	Filesystems struct {
+		Enabled     bool     `yaml:"enabled"`
+		Directories []string `yaml:"directories"`
+	} `yaml:"filesystems"`
 }
 
 type Connection struct {

@@ -3,9 +3,8 @@ package app
 import (
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
 	"github.com/dashotv/grimoire"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Watch struct {

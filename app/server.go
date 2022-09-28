@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -11,8 +12,9 @@ import (
 var app *Application
 
 type Server struct {
-	Router *gin.Engine
-	Log    *logrus.Entry
+	Router  *gin.Engine
+	Log     *logrus.Entry
+	watcher *fsnotify.Watcher
 }
 
 func New() (*Server, error) {
@@ -31,8 +33,10 @@ func (s *Server) Start() error {
 	}
 
 	s.Routes()
-
-	//s.Jobs configuration
+	if ConfigInstance().Filesystems.Enabled {
+		s.Watcher()
+		defer s.watcher.Close()
+	}
 
 	s.Log.Info("starting web...")
 	if err := s.Router.Run(fmt.Sprintf(":%d", cfg.Port)); err != nil {
