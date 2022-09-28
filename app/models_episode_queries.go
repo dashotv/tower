@@ -52,7 +52,17 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 	for _, e := range list {
 		sid := e.SeriesId.Hex()
 		if seriesMap[sid] != nil {
-			e.Paths = seriesMap[sid].Paths
+			//e.Paths = seriesMap[sid].Paths
+			for _, p := range seriesMap[sid].Paths {
+				if p.Type == "cover" {
+					e.Cover = p.Remote
+					continue
+				}
+				if p.Type == "background" {
+					e.Background = p.Remote
+					continue
+				}
+			}
 		}
 	}
 
