@@ -11,7 +11,41 @@ groups:
         path: /
   series:
     path: /series
-    rest: true
+    routes:
+      index:
+        path: /
+      create:
+        method: POST
+        path: /
+      show:
+        path: /:id
+        params:
+          - name: id
+            type: string
+      update:
+        method: PUT
+        path: /:id
+        params:
+          - name: id
+            type: string
+      delete:
+        method: DELETE
+        path: /:id
+        params:
+          - name: id
+            type: string
+      seasons:
+        path: /:id/seasons
+        params:
+          - name: id
+            type: string
+      season_episodes:
+        path: /:id/seasons/:season
+        params:
+          - name: id
+            type: string
+          - name: season
+            type: string
   movies:
     path: /movies
     rest: true

@@ -1,10 +1,13 @@
 package app
 
 import (
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+const imagesBaseURL = "http://seer.dasho.net/media-images"
 
 func (c *Connector) Upcoming() ([]*Episode, error) {
 	// TODO: add series counts check
@@ -27,7 +30,7 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 	// Get upcoming episodes
 	q2 := c.Episode.Query()
 	now := time.Now()
-	since := time.Now().Add(-time.Hour * 24 * 7)
+	since := time.Now().Add(-time.Hour * 24)
 	//App().Log.Println("ids count ", len(ids))
 	//App().Log.Println("time between ", since, " and ", now)
 	list, err := q2.
@@ -42,7 +45,7 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 		LessThanEqual("release_date", now).
 		GreaterThanEqual("release_date", since).
 		Asc("release_date").Asc("season_number").Asc("episode_number").
-		Limit(25).
+		Limit(40).
 		Run()
 	if err != nil {
 		return nil, err
@@ -52,14 +55,18 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 	for _, e := range list {
 		sid := e.SeriesId.Hex()
 		if seriesMap[sid] != nil {
-			//e.Paths = seriesMap[sid].Paths
+			//if seriesMap[sid].Type == "Anime" {
+			//	e.Display = fmt.Sprintf("#%d %s", e.AbsoluteNumber, e.Title)
+			//} else {
+			e.Display = fmt.Sprintf("%dx%d %s", e.SeasonNumber, e.EpisodeNumber, e.Title)
+			e.Title = seriesMap[sid].Title
 			for _, p := range seriesMap[sid].Paths {
 				if p.Type == "cover" {
-					e.Cover = p.Remote
+					e.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
 					continue
 				}
 				if p.Type == "background" {
-					e.Background = p.Remote
+					e.Background = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
 					continue
 				}
 			}

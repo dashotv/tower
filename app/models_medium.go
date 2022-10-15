@@ -49,6 +49,8 @@ type Medium struct {
 		Size      int                `json:"size" bson:"size"`
 		UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
 	} `json:"paths" bson:"paths"`
+	Cover      string `json:"cover" bson:"cover"`
+	Background string `json:"background" bson:"background"`
 }
 
 func NewMedium() *Medium {

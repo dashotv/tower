@@ -1,12 +1,28 @@
 package app
 
-import "github.com/samber/lo"
+import (
+	"context"
+	"fmt"
+	"strconv"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/samber/lo"
+	"go.mongodb.org/mongo-driver/bson"
+)
 
 func (c *Connector) SeriesActive() ([]*Series, error) {
 	return c.Series.Query().
 		Where("_type", "Series").
 		Where("active", true).
 		Limit(1000).
+		Run()
+}
+
+func (c *Connector) SeriesAll() ([]*Series, error) {
+	return c.Series.Query().
+		Where("_type", "Series").
+		Limit(5000).
 		Run()
 }
 
@@ -32,4 +48,44 @@ func (c *Connector) SeriesAllUnwatched(s *Series) (int, error) {
 
 	// return total episodes - total watches
 	return len(ids) - len(watches), nil
+}
+
+func (c *Connector) SeriesSeasons(id string) ([]string, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	App().Log.Infof("seasons: oid=%s", oid)
+
+	col := c.Episode.Collection
+	results, err := col.Distinct(context.TODO(), "season_number", bson.D{{"series_id", oid}})
+	if err != nil {
+		return nil, err
+	}
+	App().Log.Infof("seasons: collection=%s", col)
+
+	var out []string
+	for _, r := range results {
+		App().Log.Infof("seasons: result=%v", r)
+		out = append(out, fmt.Sprintf("%v", r))
+	}
+
+	return out, nil
+}
+
+func (c *Connector) SeriesSeasonEpisodes(id string, season string) ([]*Episode, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	s, err := strconv.Atoi(season)
+
+	q := c.Episode.Query()
+	return q.
+		Where("series_id", oid).
+		Where("season_number", s).
+		Asc("episode_number").
+		Limit(1000).
+		Run()
 }

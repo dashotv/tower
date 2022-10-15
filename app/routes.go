@@ -5,7 +5,6 @@ package app
 import (
 	"net/http"
 
-	"github.com/dashotv/golem/web"
 	"github.com/gin-gonic/gin"
 )
 
@@ -37,6 +36,8 @@ func (s *Server) Routes() {
 	series.POST("/", seriesCreateHandler)
 	series.DELETE("/:id", seriesDeleteHandler)
 	series.GET("/", seriesIndexHandler)
+	series.GET("/:id/seasons/:season", seriesSeason_episodesHandler)
+	series.GET("/:id/seasons", seriesSeasonsHandler)
 	series.GET("/:id", seriesShowHandler)
 	series.PUT("/:id", seriesUpdateHandler)
 
@@ -60,7 +61,7 @@ func downloadsCreateHandler(c *gin.Context) {
 }
 
 func downloadsDeleteHandler(c *gin.Context) {
-	id := web.QueryString(c, "id")
+	id := c.Param("id")
 
 	DownloadsDelete(c, id)
 }
@@ -71,13 +72,13 @@ func downloadsIndexHandler(c *gin.Context) {
 }
 
 func downloadsShowHandler(c *gin.Context) {
-	id := web.QueryString(c, "id")
+	id := c.Param("id")
 
 	DownloadsShow(c, id)
 }
 
 func downloadsUpdateHandler(c *gin.Context) {
-	id := web.QueryString(c, "id")
+	id := c.Param("id")
 
 	DownloadsUpdate(c, id)
 }
@@ -89,7 +90,7 @@ func moviesCreateHandler(c *gin.Context) {
 }
 
 func moviesDeleteHandler(c *gin.Context) {
-	id := web.QueryString(c, "id")
+	id := c.Param("id")
 
 	MoviesDelete(c, id)
 }
@@ -100,13 +101,13 @@ func moviesIndexHandler(c *gin.Context) {
 }
 
 func moviesShowHandler(c *gin.Context) {
-	id := web.QueryString(c, "id")
+	id := c.Param("id")
 
 	MoviesShow(c, id)
 }
 
 func moviesUpdateHandler(c *gin.Context) {
-	id := web.QueryString(c, "id")
+	id := c.Param("id")
 
 	MoviesUpdate(c, id)
 }
@@ -118,7 +119,7 @@ func releasesCreateHandler(c *gin.Context) {
 }
 
 func releasesDeleteHandler(c *gin.Context) {
-	id := web.QueryString(c, "id")
+	id := c.Param("id")
 
 	ReleasesDelete(c, id)
 }
@@ -129,13 +130,13 @@ func releasesIndexHandler(c *gin.Context) {
 }
 
 func releasesShowHandler(c *gin.Context) {
-	id := web.QueryString(c, "id")
+	id := c.Param("id")
 
 	ReleasesShow(c, id)
 }
 
 func releasesUpdateHandler(c *gin.Context) {
-	id := web.QueryString(c, "id")
+	id := c.Param("id")
 
 	ReleasesUpdate(c, id)
 }
@@ -147,7 +148,7 @@ func seriesCreateHandler(c *gin.Context) {
 }
 
 func seriesDeleteHandler(c *gin.Context) {
-	id := web.QueryString(c, "id")
+	id := c.Param("id")
 
 	SeriesDelete(c, id)
 }
@@ -157,14 +158,27 @@ func seriesIndexHandler(c *gin.Context) {
 	SeriesIndex(c)
 }
 
+func seriesSeason_episodesHandler(c *gin.Context) {
+	id := c.Param("id")
+	season := c.Param("season")
+
+	SeriesSeasonEpisodes(c, id, season)
+}
+
+func seriesSeasonsHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	SeriesSeasons(c, id)
+}
+
 func seriesShowHandler(c *gin.Context) {
-	id := web.QueryString(c, "id")
+	id := c.Param("id")
 
 	SeriesShow(c, id)
 }
 
 func seriesUpdateHandler(c *gin.Context) {
-	id := web.QueryString(c, "id")
+	id := c.Param("id")
 
 	SeriesUpdate(c, id)
 }

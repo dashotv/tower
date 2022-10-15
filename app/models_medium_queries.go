@@ -1,6 +1,6 @@
 package app
 
-func (m *Medium) Background() string {
+func Background(m Medium) string {
 	for _, p := range m.Paths {
 		if p.Type == "background" {
 			return p.Local
@@ -9,7 +9,7 @@ func (m *Medium) Background() string {
 	return ""
 }
 
-func (m *Medium) Cover() string {
+func Cover(m Medium) string {
 	for _, p := range m.Paths {
 		if p.Type == "cover" {
 			return p.Local
