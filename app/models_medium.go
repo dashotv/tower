@@ -49,8 +49,11 @@ type Medium struct {
 		Size      int                `json:"size" bson:"size"`
 		UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
 	} `json:"paths" bson:"paths"`
-	Cover      string `json:"cover" bson:"cover"`
-	Background string `json:"background" bson:"background"`
+	Cover         string             `json:"cover" bson:"cover"`
+	Background    string             `json:"background" bson:"background"`
+	SeriesId      primitive.ObjectID `json:"series_id" bson:"series_id"`
+	SeasonNumber  int                `json:"season_number" bson:"season_number"`
+	EpisodeNumber int                `json:"episode_number" bson:"episode_number"`
 }
 
 func NewMedium() *Medium {

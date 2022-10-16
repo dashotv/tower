@@ -85,3 +85,10 @@ fields:
     type: string
   - name: background
     type: string
+
+  - name: series_id
+    type: primitive.ObjectID
+  - name: season_number
+    type: int
+  - name: episode_number
+    type: int

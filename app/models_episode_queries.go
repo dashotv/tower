@@ -13,7 +13,7 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 	// TODO: add series counts check
 	seriesMap := map[string]*Series{}
 	// Get Active Series
-	series, err := c.SeriesActive()
+	series, err := c.SeriesAll()
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 		LessThanEqual("release_date", now).
 		GreaterThanEqual("release_date", since).
 		Asc("release_date").Asc("season_number").Asc("episode_number").
-		Limit(40).
+		Limit(105).
 		Run()
 	if err != nil {
 		return nil, err
@@ -58,6 +58,7 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 			//if seriesMap[sid].Type == "Anime" {
 			//	e.Display = fmt.Sprintf("#%d %s", e.AbsoluteNumber, e.Title)
 			//} else {
+			e.Active = seriesMap[sid].Active
 			e.Display = fmt.Sprintf("%dx%d %s", e.SeasonNumber, e.EpisodeNumber, e.Title)
 			e.Title = seriesMap[sid].Title
 			for _, p := range seriesMap[sid].Paths {

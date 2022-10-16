@@ -64,6 +64,10 @@ func (c *Connector) SeriesSeasons(id string) ([]string, error) {
 	}
 	App().Log.Infof("seasons: collection=%s", col)
 
+	if len(results) == 0 {
+		return []string{"1"}, nil
+	}
+
 	var out []string
 	for _, r := range results {
 		App().Log.Infof("seasons: result=%v", r)

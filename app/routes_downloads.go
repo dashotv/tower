@@ -13,17 +13,6 @@ func DownloadsIndex(c *gin.Context) {
 		return
 	}
 
-	for i, d := range results {
-		m := &Medium{}
-		err := App().DB.Medium.FindByID(d.MediumId, m)
-		if err != nil {
-			App().Log.Errorf("could not find medium: %s", d.MediumId)
-			continue
-		}
-		App().Log.Infof("found %s: %s", m.ID, m.Title)
-		results[i].Medium = *m
-	}
-
 	c.JSON(http.StatusOK, results)
 }
 
