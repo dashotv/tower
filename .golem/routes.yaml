@@ -9,6 +9,15 @@ groups:
     routes:
       index:
         path: /
+  episodes:
+    path: /episodes
+    routes:
+      update:
+        path: /:id
+        method: PUT
+        params:
+          - name: id
+            type: string
   series:
     path: /series
     routes:
@@ -39,7 +48,7 @@ groups:
         params:
           - name: id
             type: string
-      season_episodes:
+      seasonEpisodes:
         path: /:id/seasons/:season
         params:
           - name: id

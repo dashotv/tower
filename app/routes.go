@@ -18,6 +18,9 @@ func (s *Server) Routes() {
 	downloads.GET("/:id", downloadsShowHandler)
 	downloads.PUT("/:id", downloadsUpdateHandler)
 
+	episodes := s.Router.Group("/episodes")
+	episodes.PUT("/:id", episodesUpdateHandler)
+
 	movies := s.Router.Group("/movies")
 	movies.POST("/", moviesCreateHandler)
 	movies.DELETE("/:id", moviesDeleteHandler)
@@ -36,7 +39,7 @@ func (s *Server) Routes() {
 	series.POST("/", seriesCreateHandler)
 	series.DELETE("/:id", seriesDeleteHandler)
 	series.GET("/", seriesIndexHandler)
-	series.GET("/:id/seasons/:season", seriesSeason_episodesHandler)
+	series.GET("/:id/seasons/:season", seriesSeasonEpisodesHandler)
 	series.GET("/:id/seasons", seriesSeasonsHandler)
 	series.GET("/:id", seriesShowHandler)
 	series.PUT("/:id", seriesUpdateHandler)
@@ -81,6 +84,13 @@ func downloadsUpdateHandler(c *gin.Context) {
 	id := c.Param("id")
 
 	DownloadsUpdate(c, id)
+}
+
+// /episodes
+func episodesUpdateHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	EpisodesUpdate(c, id)
 }
 
 // /movies
@@ -158,7 +168,7 @@ func seriesIndexHandler(c *gin.Context) {
 	SeriesIndex(c)
 }
 
-func seriesSeason_episodesHandler(c *gin.Context) {
+func seriesSeasonEpisodesHandler(c *gin.Context) {
 	id := c.Param("id")
 	season := c.Param("season")
 

@@ -76,3 +76,19 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 
 	return list, nil
 }
+
+func (c *Connector) EpisodeSetting(id, setting string, value bool) error {
+	e := &Episode{}
+	err := c.Episode.Find(id, e)
+	if err != nil {
+		return err
+	}
+
+	//switch setting {
+	//case "downloaded":
+	//	e.Downloaded = value
+	//	return c.Episode.Save(e)
+	//}
+
+	return nil
+}
