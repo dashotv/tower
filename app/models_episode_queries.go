@@ -84,11 +84,16 @@ func (c *Connector) EpisodeSetting(id, setting string, value bool) error {
 		return err
 	}
 
-	//switch setting {
-	//case "downloaded":
-	//	e.Downloaded = value
-	//	return c.Episode.Save(e)
-	//}
+	switch setting {
+	case "downloaded":
+		e.Downloaded = value
+	case "skipped":
+		e.Skipped = value
+	case "completed":
+		e.Completed = value
+	case "watched":
+		e.Watched = value
+	}
 
-	return nil
+	return c.Episode.Update(e)
 }
