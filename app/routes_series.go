@@ -57,9 +57,9 @@ func SeriesCreate(c *gin.Context) {
 }
 
 func SeriesShow(c *gin.Context, id string) {
-	result := &Medium{}
+	result := &Series{}
 	App().Log.Infof("series.show id=%s", id)
-	err := App().DB.Medium.Find(id, result)
+	err := App().DB.Series.Find(id, result)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -80,7 +80,20 @@ func SeriesShow(c *gin.Context, id string) {
 }
 
 func SeriesUpdate(c *gin.Context, id string) {
-	c.JSON(http.StatusOK, gin.H{"error": false})
+	data := &Setting{}
+	err := c.BindJSON(&data)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = App().DB.SeriesSetting(id, data.Setting, data.Value)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
 }
 
 func SeriesDelete(c *gin.Context, id string) {

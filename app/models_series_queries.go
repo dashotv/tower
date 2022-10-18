@@ -93,3 +93,23 @@ func (c *Connector) SeriesSeasonEpisodes(id string, season string) ([]*Episode, 
 		Limit(1000).
 		Run()
 }
+
+func (c *Connector) SeriesSetting(id, setting string, value bool) error {
+	s := &Series{}
+	err := c.Series.Find(id, s)
+	if err != nil {
+		return err
+	}
+
+	App().Log.Infof("series setting: %s %t", setting, value)
+	switch setting {
+	case "active":
+		s.Active = value
+	case "favorite":
+		s.Favorite = value
+	case "broken":
+		s.Broken = value
+	}
+
+	return c.Series.Update(s)
+}
