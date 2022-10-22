@@ -3,12 +3,12 @@ package app
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strconv"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (c *Connector) SeriesActive() ([]*Series, error) {
@@ -73,6 +73,7 @@ func (c *Connector) SeriesSeasons(id string) ([]string, error) {
 		App().Log.Infof("seasons: result=%v", r)
 		out = append(out, fmt.Sprintf("%v", r))
 	}
+	sort.Strings(out)
 
 	return out, nil
 }
