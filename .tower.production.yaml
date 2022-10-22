@@ -12,7 +12,7 @@ filesystems:
     - /media/movies4k
     - /media/tv
 redis:
-  address: redis:6379
+  address: localhost:6379
 connections:
   default:
     uri: mongodb://localhost:27017
