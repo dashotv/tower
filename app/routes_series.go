@@ -10,7 +10,7 @@ import (
 	"github.com/dashotv/golem/web"
 )
 
-const pagesize = 25
+const pagesize = 42
 
 func SeriesIndex(c *gin.Context) {
 	page, err := web.QueryDefaultInteger(c, "page", 1)
@@ -28,10 +28,13 @@ func SeriesIndex(c *gin.Context) {
 	q := App().DB.Series.Query()
 	results, err := q.
 		Where("_type", "Series").
+		Limit(pagesize).
 		Skip((page - 1) * pagesize).
 		Desc("created_at").Run()
 
 	for _, s := range results {
+		s.Title = s.Display
+		s.Display = fmt.Sprintf("%s (%s)", s.Source, s.SourceId)
 		for _, p := range s.Paths {
 			if p.Type == "cover" {
 				s.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
