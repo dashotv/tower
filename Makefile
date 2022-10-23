@@ -16,15 +16,7 @@ server: generate
 	go run main.go server
 
 deps:
-	go install golang.org/x/tools/cmd/goimports@latest
 	go install github.com/dashotv/golem@latest
-	go install github.com/codegangsta/gin@latest
-
-production:
-	sed -i \
-		-e 's/seer_development/seer_production/g' \
-		-e 's/torch_development/torch_production/g' \
-		.golem/.golem.yaml
 
 docker:
 	docker build -t tower .

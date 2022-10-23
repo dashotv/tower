@@ -1,0 +1,37 @@
+mode: release
+port: 9000
+cron: true
+filesystems:
+  enabled: false
+  directories:
+    - /media/anime
+    - /media/ecchi
+    - /media/kids
+    - /media/movies
+    - /media/movies3d
+    - /media/movies4k
+    - /media/tv
+redis:
+  address: host.docker.internal:6379
+connections:
+  default:
+    uri: mongodb://host.docker.internal:27017
+    database: database
+  medium:
+    database: seer_production
+    collection: media
+  download:
+    database: seer_production
+    collection: downloads
+  series:
+    database: seer_production
+    collection: media
+  episode:
+    database: seer_production
+    collection: media
+  release:
+    database: torch_production
+    collection: torrents
+  watch:
+    database: seer_production
+    collection: watches
