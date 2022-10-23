@@ -39,6 +39,18 @@ func (c *Connector) ActiveDownloads() ([]*Download, error) {
 					continue
 				}
 			}
+		} else {
+			m.Display = m.ReleaseDate.String()
+			for _, p := range m.Paths {
+				if p.Type == "cover" {
+					m.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+					continue
+				}
+				if p.Type == "background" {
+					m.Background = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+					continue
+				}
+			}
 		}
 
 		list[i].Medium = *m

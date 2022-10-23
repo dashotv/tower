@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-const imagesBaseURL = "http://seer.dasho.net/media-images"
+const imagesBaseURL = "/media-images" // proxy this instead of dealing with CORS
 
 func (c *Connector) Upcoming() ([]*Episode, error) {
 	// TODO: add series counts check
