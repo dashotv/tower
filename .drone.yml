@@ -18,7 +18,7 @@ steps:
       repo: dashotv/tower
       tags:
         - latest
-  - name: ssh
+  - name: deploy
     image: appleboy/drone-ssh
     settings:
       host:
@@ -29,7 +29,7 @@ steps:
         from_secret: ssh_key
       command_timeout: 2m
       script:
-        - sudo echo "Hello World"
+        - sudo service tower restart
 
 trigger:
   branch:
