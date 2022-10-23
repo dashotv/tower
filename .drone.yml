@@ -29,7 +29,7 @@ steps:
         from_secret: ssh_key
       command_timeout: 2m
       script:
-        - echo "Hello World"
+        - sudo echo "Hello World"
 
 trigger:
   branch:
