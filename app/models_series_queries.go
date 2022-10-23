@@ -62,7 +62,6 @@ func (c *Connector) SeriesSeasons(id string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	App().Log.Infof("seasons: collection=%s", col)
 
 	if len(results) == 0 {
 		return []string{"1"}, nil
