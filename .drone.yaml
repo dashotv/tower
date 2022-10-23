@@ -1,5 +1,8 @@
 kind: pipeline
 name: default
+when:               # Only run the pipeline when it's a push to master
+  event: [ push ]
+  branch: [ main ]
 
 steps:
   - name: build
