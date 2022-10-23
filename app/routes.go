@@ -54,7 +54,7 @@ func homeHandler(c *gin.Context) {
 }
 
 func Index(c *gin.Context) {
-	c.String(http.StatusOK, "home")
+	c.String(http.StatusOK, "woo!")
 }
 
 // /downloads

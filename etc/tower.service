@@ -1,10 +1,15 @@
 [Unit]
-Description=Job that runs the tower daemon
+Description=Tower Container
+After=docker.service
+Requires=docker.service
 
 [Service]
-Type=exec
-ExecStartPre=/snap/bin/go get -u github.com/dashotv/tower
-ExecStart=/home/shawn/go/bin/tower --config /home/shawn/.tower.yaml server
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker stop dashotv/tower
+ExecStartPre=-/usr/bin/docker rm dashotv/tower
+ExecStartPre=/usr/bin/docker pull dashotv/tower
+ExecStart=/usr/bin/docker run --rm --name %n --add-host=host.docker.internal:host-gateway -p 9080:80 dashotv/tower
 
 [Install]
 WantedBy=multi-user.target
