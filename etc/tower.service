@@ -9,7 +9,7 @@ Restart=always
 ExecStartPre=-/usr/bin/docker stop dashotv/tower
 ExecStartPre=-/usr/bin/docker rm dashotv/tower
 ExecStartPre=/usr/bin/docker pull dashotv/tower
-ExecStart=/usr/bin/docker run --rm --name %n --add-host=host.docker.internal:host-gateway -p 9080:80 dashotv/tower
+ExecStart=/usr/bin/docker run --rm --name %n --add-host=host.docker.internal:host-gateway -p 9000:9000 dashotv/tower
 
 [Install]
 WantedBy=multi-user.target
