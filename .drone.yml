@@ -6,9 +6,18 @@ steps:
   - name: build
     image: golang
     commands:
-      - go test
+      - go test -v ./...
       - go build
-
+  - name: publish
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: dockerhub_username
+      password:
+        from_secret: dockerhub_password
+      repo: dashotv/tower
+      tags:
+        - latest
 trigger:
   branch:
     - main
