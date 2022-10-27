@@ -12,6 +12,7 @@ type Connector struct {
 	Download *grimoire.Store[*Download]
 	Episode  *grimoire.Store[*Episode]
 	Medium   *grimoire.Store[*Medium]
+	Movie    *grimoire.Store[*Movie]
 	Release  *grimoire.Store[*Release]
 	Series   *grimoire.Store[*Series]
 	Watch    *grimoire.Store[*Watch]
@@ -52,6 +53,16 @@ func NewConnector() (*Connector, error) {
 		return nil, err
 	}
 
+	s, err = settingsFor("movie")
+	if err != nil {
+		return nil, err
+	}
+
+	movie, err := grimoire.New[*Movie](s.URI, s.Database, s.Collection)
+	if err != nil {
+		return nil, err
+	}
+
 	s, err = settingsFor("release")
 	if err != nil {
 		return nil, err
@@ -86,6 +97,7 @@ func NewConnector() (*Connector, error) {
 		Download: download,
 		Episode:  episode,
 		Medium:   medium,
+		Movie:    movie,
 		Release:  release,
 		Series:   series,
 		Watch:    watch,

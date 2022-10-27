@@ -23,9 +23,10 @@ func MoviesIndex(c *gin.Context) {
 		return
 	}
 
-	q := App().DB.Medium.Query()
+	q := App().DB.Movie.Query()
 	results, err := q.
 		Where("_type", "Movie").
+		Limit(pagesize).
 		Skip((page - 1) * pagesize).
 		Desc("created_at").Run()
 	if err != nil {
@@ -34,6 +35,7 @@ func MoviesIndex(c *gin.Context) {
 	}
 
 	for _, m := range results {
+		m.Display = fmt.Sprintf("%s (%s)", m.Source, m.SourceId)
 		for _, p := range m.Paths {
 			if p.Type == "cover" {
 				m.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)

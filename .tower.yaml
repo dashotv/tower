@@ -29,6 +29,9 @@ connections:
   episode:
     database: seer_development
     collection: media
+  movie:
+    database: seer_development
+    collection: media
   release:
     database: torch_development
     collection: torrents
