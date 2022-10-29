@@ -97,3 +97,13 @@ func MoviesUpdate(c *gin.Context, id string) {
 func MoviesDelete(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }
+
+func MoviesPaths(c *gin.Context, id string) {
+	results, err := App().DB.MoviePaths(id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, results)
+}

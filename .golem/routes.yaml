@@ -60,9 +60,41 @@ groups:
         params:
           - name: id
             type: string
+      paths:
+        path: /:id/paths
+        params:
+          - name: id
+            type: string
   movies:
     path: /movies
-    rest: true
+    routes:
+      index:
+        path: /
+      create:
+        method: POST
+        path: /
+      show:
+        path: /:id
+        params:
+          - name: id
+            type: string
+      update:
+        method: PUT
+        path: /:id
+        params:
+          - name: id
+            type: string
+      delete:
+        method: DELETE
+        path: /:id
+        params:
+          - name: id
+            type: string
+      paths:
+        path: /:id/paths
+        params:
+          - name: id
+            type: string
   releases:
     path: /releases
     rest: true

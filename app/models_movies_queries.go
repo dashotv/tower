@@ -20,6 +20,12 @@ func (c *Connector) MovieSetting(id, setting string, value bool) error {
 	return c.Movie.Update(m)
 }
 
-func (c *Connector) MoviePaths(id string) {
+func (c *Connector) MoviePaths(id string) ([]Path, error) {
+	m := &Movie{}
+	err := App().DB.Movie.Find(id, m)
+	if err != nil {
+		return nil, err
+	}
 
+	return m.Paths, nil
 }

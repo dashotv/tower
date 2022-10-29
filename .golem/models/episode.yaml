@@ -71,24 +71,7 @@ fields:
   - name: release_date
     type: time.Time
   - name: paths
-    type: '[]struct'
-    fields:
-      - name: ID
-        type: primitive.ObjectID
-        json: id
-        bson: _id
-      - name: type
-        type: primitive.Symbol
-      - name: remote
-        type: string
-      - name: local
-        type: string
-      - name: extension
-        type: string
-      - name: size
-        type: int
-      - name: updated_at
-        type: time.Time
+    type: '[]Path'
   - name: cover
     type: string
   - name: background

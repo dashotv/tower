@@ -33,23 +33,15 @@ type Medium struct {
 		Uncensored bool   `json:"uncensored" bson:"uncensored"`
 		Bluray     bool   `json:"bluray" bson:"bluray"`
 	} `json:"search_params" bson:"search_params"`
-	Active      bool      `json:"active" bson:"active"`
-	Downloaded  bool      `json:"downloaded" bson:"downloaded"`
-	Completed   bool      `json:"completed" bson:"completed"`
-	Skipped     bool      `json:"skipped" bson:"skipped"`
-	Watched     bool      `json:"watched" bson:"watched"`
-	Broken      bool      `json:"broken" bson:"broken"`
-	Favorite    bool      `json:"favorite" bson:"favorite"`
-	ReleaseDate time.Time `json:"release_date" bson:"release_date"`
-	Paths       []struct {
-		Id        primitive.ObjectID `json:"id" bson:"_id"`
-		Type      primitive.Symbol   `json:"type" bson:"type"`
-		Remote    string             `json:"remote" bson:"remote"`
-		Local     string             `json:"local" bson:"local"`
-		Extension string             `json:"extension" bson:"extension"`
-		Size      int                `json:"size" bson:"size"`
-		UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
-	} `json:"paths" bson:"paths"`
+	Active        bool               `json:"active" bson:"active"`
+	Downloaded    bool               `json:"downloaded" bson:"downloaded"`
+	Completed     bool               `json:"completed" bson:"completed"`
+	Skipped       bool               `json:"skipped" bson:"skipped"`
+	Watched       bool               `json:"watched" bson:"watched"`
+	Broken        bool               `json:"broken" bson:"broken"`
+	Favorite      bool               `json:"favorite" bson:"favorite"`
+	ReleaseDate   time.Time          `json:"release_date" bson:"release_date"`
+	Paths         []Path             `json:"paths" bson:"paths"`
 	Cover         string             `json:"cover" bson:"cover"`
 	Background    string             `json:"background" bson:"background"`
 	SeriesId      primitive.ObjectID `json:"series_id" bson:"series_id"`

@@ -44,17 +44,9 @@ type Episode struct {
 	Watched     bool      `json:"watched" bson:"watched"`
 	Broken      bool      `json:"broken" bson:"broken"`
 	ReleaseDate time.Time `json:"release_date" bson:"release_date"`
-	Paths       []struct {
-		Id        primitive.ObjectID `json:"id" bson:"_id"`
-		Type      primitive.Symbol   `json:"type" bson:"type"`
-		Remote    string             `json:"remote" bson:"remote"`
-		Local     string             `json:"local" bson:"local"`
-		Extension string             `json:"extension" bson:"extension"`
-		Size      int                `json:"size" bson:"size"`
-		UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
-	} `json:"paths" bson:"paths"`
-	Cover      string `json:"cover" bson:"cover"`
-	Background string `json:"background" bson:"background"`
+	Paths       []Path    `json:"paths" bson:"paths"`
+	Cover       string    `json:"cover" bson:"cover"`
+	Background  string    `json:"background" bson:"background"`
 }
 
 func NewEpisode() *Episode {

@@ -149,3 +149,13 @@ func (c *Connector) SeriesCurrentSeason(id string) (int, error) {
 
 	return i, nil
 }
+
+func (c *Connector) SeriesPaths(id string) ([]Path, error) {
+	s := &Series{}
+	err := App().DB.Series.Find(id, s)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.Paths, nil
+}
