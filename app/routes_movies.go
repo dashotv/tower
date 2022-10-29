@@ -56,18 +56,42 @@ func MoviesCreate(c *gin.Context) {
 }
 
 func MoviesShow(c *gin.Context, id string) {
-	result := &Medium{}
-	err := App().DB.Medium.Find(id, result)
+	m := &Movie{}
+	err := App().DB.Movie.Find(id, m)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	for _, p := range m.Paths {
+		if p.Type == "cover" {
+			m.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+			continue
+		}
+		if p.Type == "background" {
+			m.Background = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+			continue
+		}
+	}
+
+	c.JSON(http.StatusOK, m)
 }
 
 func MoviesUpdate(c *gin.Context, id string) {
-	c.JSON(http.StatusOK, gin.H{"error": false})
+	data := &Setting{}
+	err := c.BindJSON(&data)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = App().DB.MovieSetting(id, data.Setting, data.Value)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
 }
 
 func MoviesDelete(c *gin.Context, id string) {
