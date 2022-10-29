@@ -3,7 +3,31 @@ repo: github.com/dashotv/tower
 groups:
   downloads:
     path: /downloads
-    rest: true
+    routes:
+      index:
+        path: /
+      create:
+        method: POST
+        path: /
+      show:
+        path: /:id
+        params:
+          - name: id
+            type: string
+      update:
+        method: PUT
+        path: /:id
+        params:
+          - name: id
+            type: string
+      delete:
+        method: DELETE
+        path: /:id
+        params:
+          - name: id
+            type: string
+      recent:
+        path: /recent
   upcoming:
     path: /upcoming
     routes:
