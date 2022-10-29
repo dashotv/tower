@@ -151,11 +151,34 @@ func (c *Connector) SeriesCurrentSeason(id string) (int, error) {
 }
 
 func (c *Connector) SeriesPaths(id string) ([]Path, error) {
-	s := &Series{}
-	err := App().DB.Series.Find(id, s)
+	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
 
-	return s.Paths, nil
+	s := &Series{}
+	err = App().DB.Series.FindByID(oid, s)
+	if err != nil {
+		return nil, err
+	}
+
+	var out []Path
+	out = append(out, s.Paths...)
+
+	eps, err := App().DB.Episode.Query().Where("_type", "Episode").
+		Where("series_id", oid).
+		Desc("season_number").Desc("episode_number").Desc("absolute_number").
+		Limit(5000).
+		Run()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, e := range eps {
+		if len(e.Paths) > 0 {
+			out = append(out, e.Paths...)
+		}
+	}
+
+	return out, nil
 }
