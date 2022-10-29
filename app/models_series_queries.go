@@ -82,15 +82,24 @@ func (c *Connector) SeriesSeasonEpisodes(id string, season string) ([]*Episode, 
 	}
 
 	s, err := strconv.Atoi(season)
+	if err != nil {
+		return nil, err
+	}
 
 	q := c.Episode.Query()
-	return q.
+	eps, err := q.
 		Where("_type", "Episode").
 		Where("series_id", oid).
 		Where("season_number", s).
 		Asc("episode_number").
 		Limit(1000).
 		Run()
+
+	for _, e := range eps {
+		e.Watched = c.MediumWatched(e.ID)
+	}
+
+	return eps, nil
 }
 
 func (c *Connector) SeriesSetting(id, setting string, value bool) error {
