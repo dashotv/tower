@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"sort"
 	"strconv"
 
@@ -50,7 +49,7 @@ func (c *Connector) SeriesAllUnwatched(s *Series) (int, error) {
 	return len(ids) - len(watches), nil
 }
 
-func (c *Connector) SeriesSeasons(id string) ([]string, error) {
+func (c *Connector) SeriesSeasons(id string) ([]int, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -64,15 +63,14 @@ func (c *Connector) SeriesSeasons(id string) ([]string, error) {
 	}
 
 	if len(results) == 0 {
-		return []string{"1"}, nil
+		return []int{1}, nil
 	}
 
-	var out []string
+	var out []int
 	for _, r := range results {
-		App().Log.Infof("seasons: result=%v", r)
-		out = append(out, fmt.Sprintf("%v", r))
+		out = append(out, int(r.(int32)))
 	}
-	sort.Strings(out)
+	sort.Ints(out)
 
 	return out, nil
 }
@@ -142,12 +140,7 @@ func (c *Connector) SeriesCurrentSeason(id string) (int, error) {
 		return -1, err
 	}
 
-	i, err := strconv.Atoi(seasons[len(seasons)-1])
-	if err != nil {
-		return -1, err
-	}
-
-	return i, nil
+	return seasons[len(seasons)-1], nil
 }
 
 func (c *Connector) SeriesPaths(id string) ([]Path, error) {
