@@ -87,6 +87,7 @@ func (c *Connector) SeriesSeasonEpisodes(id string, season string) ([]*Episode, 
 
 	q := c.Episode.Query()
 	return q.
+		Where("_type", "Episode").
 		Where("series_id", oid).
 		Where("season_number", s).
 		Asc("episode_number").
@@ -112,4 +113,39 @@ func (c *Connector) SeriesSetting(id, setting string, value bool) error {
 	}
 
 	return c.Series.Update(s)
+}
+
+func (c *Connector) SeriesCurrentSeason(id string) (int, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return -1, err
+	}
+
+	eps, err := c.Episode.Query().
+		Where("_type", "Episode").
+		Where("series_id", oid).
+		GreaterThan("season_number", 0).
+		Asc("season_number").Asc("episode_number").Asc("absolute_number").
+		Where("completed", false).Where("skipped", false).
+		Limit(1).
+		Run()
+	if err != nil {
+		return -1, err
+	}
+
+	if len(eps) > 0 && eps[0].SeasonNumber != 0 {
+		return eps[0].SeasonNumber, nil
+	}
+
+	seasons, err := c.SeriesSeasons(id)
+	if err != nil {
+		return -1, err
+	}
+
+	i, err := strconv.Atoi(seasons[len(seasons)-1])
+	if err != nil {
+		return -1, err
+	}
+
+	return i, nil
 }

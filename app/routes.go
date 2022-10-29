@@ -37,6 +37,7 @@ func (s *Server) Routes() {
 
 	series := s.Router.Group("/series")
 	series.POST("/", seriesCreateHandler)
+	series.GET("/:id/currentseason", seriesCurrentSeasonHandler)
 	series.DELETE("/:id", seriesDeleteHandler)
 	series.GET("/", seriesIndexHandler)
 	series.GET("/:id/seasons/:season", seriesSeasonEpisodesHandler)
@@ -155,6 +156,12 @@ func releasesUpdateHandler(c *gin.Context) {
 func seriesCreateHandler(c *gin.Context) {
 
 	SeriesCreate(c)
+}
+
+func seriesCurrentSeasonHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	SeriesCurrentSeason(c, id)
 }
 
 func seriesDeleteHandler(c *gin.Context) {

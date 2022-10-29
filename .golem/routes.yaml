@@ -55,6 +55,11 @@ groups:
             type: string
           - name: season
             type: string
+      currentSeason:
+        path: /:id/currentseason
+        params:
+          - name: id
+            type: string
   movies:
     path: /movies
     rest: true

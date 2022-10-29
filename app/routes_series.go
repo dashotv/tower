@@ -103,6 +103,15 @@ func SeriesDelete(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
+func SeriesCurrentSeason(c *gin.Context, id string) {
+	i, err := App().DB.SeriesCurrentSeason(id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"current": i})
+}
+
 func SeriesSeasons(c *gin.Context, id string) {
 	results, err := App().DB.SeriesSeasons(id)
 	if err != nil {
