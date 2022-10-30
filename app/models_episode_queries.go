@@ -74,7 +74,7 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 		}
 	}
 
-	return list, nil
+	return groupEpisodes(list), nil
 }
 
 func (c *Connector) EpisodeSetting(id, setting string, value bool) error {
@@ -106,4 +106,19 @@ func (c *Connector) EpisodePaths(id string) ([]Path, error) {
 	}
 
 	return e.Paths, nil
+}
+
+func groupEpisodes(list []*Episode) []*Episode {
+	track := map[string]bool{}
+	out := []*Episode{}
+
+	for _, e := range list {
+		sid := e.SeriesId.Hex()
+		if !track[sid] {
+			out = append(out, e)
+			track[sid] = true
+		}
+	}
+
+	return out
 }
