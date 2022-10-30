@@ -17,7 +17,10 @@ func (c *Connector) ActiveDownloads() ([]*Download, error) {
 
 func (c *Connector) RecentDownloads() ([]*Download, error) {
 	q := c.Download.Query()
-	list, err := q.Where("status", "done").Desc("updated_at").Desc("created_at").Run()
+	list, err := q.Where("status", "done").
+		Desc("updated_at").Desc("created_at").
+		Limit(pagesize).
+		Run()
 	if err != nil {
 		return nil, err
 	}

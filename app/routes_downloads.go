@@ -51,7 +51,7 @@ func DownloadsDelete(c *gin.Context, id string) {
 }
 
 func DownloadsRecent(c *gin.Context) {
-	results, err := App().DB.ActiveDownloads()
+	results, err := App().DB.RecentDownloads()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
