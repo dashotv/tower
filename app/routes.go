@@ -22,6 +22,13 @@ func (s *Server) Routes() {
 	episodes := s.Router.Group("/episodes")
 	episodes.PUT("/:id", episodesUpdateHandler)
 
+	feeds := s.Router.Group("/feeds")
+	feeds.POST("/", feedsCreateHandler)
+	feeds.DELETE("/:id", feedsDeleteHandler)
+	feeds.GET("/", feedsIndexHandler)
+	feeds.GET("/:id", feedsShowHandler)
+	feeds.PUT("/:id", feedsUpdateHandler)
+
 	movies := s.Router.Group("/movies")
 	movies.POST("/", moviesCreateHandler)
 	movies.DELETE("/:id", moviesDeleteHandler)
@@ -100,6 +107,35 @@ func episodesUpdateHandler(c *gin.Context) {
 	id := c.Param("id")
 
 	EpisodesUpdate(c, id)
+}
+
+// /feeds
+func feedsCreateHandler(c *gin.Context) {
+
+	FeedsCreate(c)
+}
+
+func feedsDeleteHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	FeedsDelete(c, id)
+}
+
+func feedsIndexHandler(c *gin.Context) {
+
+	FeedsIndex(c)
+}
+
+func feedsShowHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	FeedsShow(c, id)
+}
+
+func feedsUpdateHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	FeedsUpdate(c, id)
 }
 
 // /movies

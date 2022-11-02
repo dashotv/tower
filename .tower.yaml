@@ -35,6 +35,9 @@ connections:
   release:
     database: torch_development
     collection: torrents
+  feed:
+    database: torch_development
+    collection: feeds
   watch:
     database: seer_development
     collection: watches

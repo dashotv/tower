@@ -122,3 +122,6 @@ groups:
   releases:
     path: /releases
     rest: true
+  feeds:
+    path: /feeds
+    rest: true

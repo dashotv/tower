@@ -11,6 +11,7 @@ var cfg *Config
 type Connector struct {
 	Download *grimoire.Store[*Download]
 	Episode  *grimoire.Store[*Episode]
+	Feed     *grimoire.Store[*Feed]
 	Medium   *grimoire.Store[*Medium]
 	Movie    *grimoire.Store[*Movie]
 	Release  *grimoire.Store[*Release]
@@ -39,6 +40,16 @@ func NewConnector() (*Connector, error) {
 	}
 
 	episode, err := grimoire.New[*Episode](s.URI, s.Database, s.Collection)
+	if err != nil {
+		return nil, err
+	}
+
+	s, err = settingsFor("feed")
+	if err != nil {
+		return nil, err
+	}
+
+	feed, err := grimoire.New[*Feed](s.URI, s.Database, s.Collection)
 	if err != nil {
 		return nil, err
 	}
@@ -96,6 +107,7 @@ func NewConnector() (*Connector, error) {
 	c := &Connector{
 		Download: download,
 		Episode:  episode,
+		Feed:     feed,
 		Medium:   medium,
 		Movie:    movie,
 		Release:  release,

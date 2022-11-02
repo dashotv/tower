@@ -1,0 +1,18 @@
+name: feed
+type: model
+imports:
+fields:
+  - name: name
+    type: string
+  - name: url
+    type: string
+  - name: source
+    type: string
+  - name: type
+    type: string
+  - name: active
+    type: bool
+  - name: processed
+    type: time.Time
+
+
