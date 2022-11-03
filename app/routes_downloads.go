@@ -4,6 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
+
+	"github.com/dashotv/golem/web"
 )
 
 func DownloadsIndex(c *gin.Context) {
@@ -51,12 +54,30 @@ func DownloadsDelete(c *gin.Context, id string) {
 }
 
 func DownloadsRecent(c *gin.Context) {
-	// TODO: add pagination
-	results, err := App().DB.RecentDownloads()
+	page, err := web.QueryDefaultInteger(c, "page", 1)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, results)
+	count, err := App().DB.Series.Count(bson.M{})
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	q := App().DB.Download.Query()
+	results, err := q.Where("status", "done").
+		Desc("updated_at").Desc("created_at").
+		Skip((page - 1) * pagesize).
+		Limit(pagesize).
+		Run()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	processDownloads(results)
+
+	c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
 }
