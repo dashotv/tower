@@ -32,7 +32,7 @@ func (c *Cache) Fetch(k string, v interface{}, f func() (interface{}, error)) (b
 	if err != nil {
 		return ok, err
 	}
-	// the item wasn't found
+	// the item was found
 	if ok {
 		return ok, nil
 	}

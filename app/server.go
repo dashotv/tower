@@ -9,8 +9,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var app *Application
-
 type Server struct {
 	Router  *gin.Engine
 	Log     *logrus.Entry
@@ -18,7 +16,6 @@ type Server struct {
 }
 
 func New() (*Server, error) {
-	app = App()
 	log := App().Log.WithField("prefix", "server")
 	s := &Server{Log: log, Router: App().Router}
 
