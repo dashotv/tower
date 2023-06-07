@@ -31,16 +31,8 @@ func DownloadsShow(c *gin.Context, id string) {
 		return
 	}
 
-	m := &Medium{}
-	err = App().DB.Medium.FindByID(result.MediumId, m)
-	if err != nil {
-		App().Log.Errorf("could not find medium: %s", result.MediumId)
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	App().Log.Infof("found %s: %s", m.ID, m.Title)
-	result.Medium = *m
+	list := []*Download{result}
+	processDownloads(list)
 
 	c.JSON(http.StatusOK, result)
 }
