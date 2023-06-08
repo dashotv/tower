@@ -45,10 +45,16 @@ func processDownloads(list []*Download) {
 			s := &Series{}
 			err := App().DB.Series.FindByID(m.SeriesId, s)
 			if err != nil {
-				App().Log.Errorf("could not find series: %s", d.MediumId)
+				App().Log.Errorf("could not find series: %s: %s", d.MediumId, err)
 				continue
 			}
 
+			unwatched, err := App().DB.SeriesAllUnwatched(s)
+			if err != nil {
+				App().Log.Errorf("could not get unwatched count: %s: %s", s.ID.Hex(), err)
+			}
+
+			m.Unwatched = unwatched
 			m.Display = fmt.Sprintf("%dx%d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)
 			m.Title = s.Title
 			paths = s.Paths

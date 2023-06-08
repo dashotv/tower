@@ -40,6 +40,7 @@ type Medium struct {
 	Watched       bool               `json:"watched" bson:"watched"`
 	Broken        bool               `json:"broken" bson:"broken"`
 	Favorite      bool               `json:"favorite" bson:"favorite"`
+	Unwatched     int                `json:"unwatched" bson:"unwatched"`
 	ReleaseDate   time.Time          `json:"release_date" bson:"release_date"`
 	Paths         []Path             `json:"paths" bson:"paths"`
 	Cover         string             `json:"cover" bson:"cover"`

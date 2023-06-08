@@ -34,6 +34,7 @@ func (c *Cache) Fetch(k string, v interface{}, f func() (interface{}, error)) (b
 	}
 	// the item was found
 	if ok {
+		App().Log.Infof("cache: hit: %s", k)
 		return ok, nil
 	}
 
@@ -42,6 +43,7 @@ func (c *Cache) Fetch(k string, v interface{}, f func() (interface{}, error)) (b
 	if err != nil {
 		return false, err
 	}
+	App().Log.Infof("cache: miss: %s", k)
 	return false, c.client.Set(k, v)
 }
 

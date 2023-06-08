@@ -62,6 +62,8 @@ fields:
     type: bool
   - name: favorite
     type: bool
+  - name: unwatched
+    type: int
   - name: release_date
     type: time.Time
   - name: paths

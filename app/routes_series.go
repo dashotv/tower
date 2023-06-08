@@ -33,6 +33,13 @@ func SeriesIndex(c *gin.Context) {
 		Desc("created_at").Run()
 
 	for _, s := range results {
+		unwatched, err := App().DB.SeriesAllUnwatched(s)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		s.Unwatched = unwatched
+
 		s.Title = s.Display
 		s.Display = fmt.Sprintf("%s (%s)", s.Source, s.SourceId)
 		for _, p := range s.Paths {
@@ -67,6 +74,13 @@ func SeriesShow(c *gin.Context, id string) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	unwatched, err := App().DB.SeriesAllUnwatched(result)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	result.Unwatched = unwatched
 
 	for _, p := range result.Paths {
 		if p.Type == "cover" {

@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strconv"
 
@@ -26,7 +27,7 @@ func (c *Connector) SeriesAll() ([]*Series, error) {
 }
 
 func (c *Connector) SeriesAllUnwatched(s *Series) (int, error) {
-	list, err := c.Episode.Query().GreaterThan("season_number", 0).Where("completed", true).Run()
+	list, err := c.Episode.Query().Where("series_id", s.ID).GreaterThan("season_number", 0).Where("completed", true).Limit(10).Run()
 	if err != nil {
 		return 0, err
 	}
@@ -47,6 +48,18 @@ func (c *Connector) SeriesAllUnwatched(s *Series) (int, error) {
 
 	// return total episodes - total watches
 	return len(ids) - len(watches), nil
+}
+
+func (c *Connector) SeriesAllUnwatchedCached(s *Series) (int, error) {
+	unwatched := 0
+	_, err := App().Cache.Fetch(fmt.Sprintf("series-unwatched-%s", s.ID.Hex()), &unwatched, func() (interface{}, error) {
+		return c.SeriesAllUnwatched(s)
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return unwatched, nil
 }
 
 func (c *Connector) SeriesSeasons(id string) ([]int, error) {

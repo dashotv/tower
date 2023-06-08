@@ -58,6 +58,11 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 			//if seriesMap[sid].Type == "Anime" {
 			//	e.Display = fmt.Sprintf("#%d %s", e.AbsoluteNumber, e.Title)
 			//} else {
+			unwatched, err := c.SeriesAllUnwatched(seriesMap[sid])
+			if err != nil {
+				App().Log.Errorf("getting unwatched %s: %s", sid, err)
+			}
+			e.Unwatched = unwatched
 			e.Active = seriesMap[sid].Active
 			e.Display = fmt.Sprintf("%dx%d %s", e.SeasonNumber, e.EpisodeNumber, e.Title)
 			e.Title = seriesMap[sid].Title
