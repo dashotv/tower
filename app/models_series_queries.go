@@ -33,15 +33,15 @@ func (c *Connector) SeriesAllUnwatched(s *Series) (int, error) {
 	}
 
 	// get ids of all episodes from query above
-	ids := []string{}
+	ids := []primitive.ObjectID{}
 	for _, e := range list {
-		ids = append(ids, e.ID.Hex())
+		ids = append(ids, e.ID)
 	}
 	// get distinct list of ids
-	ids = lo.Uniq[string](ids)
+	ids = lo.Uniq[primitive.ObjectID](ids)
 
 	// get watches for those ids
-	watches, err := c.Watch.Query().In("medium_id", ids).Run()
+	watches, err := c.Watch.Query().Where("username", "xenonsoul").In("medium_id", ids).Run()
 	if err != nil {
 		return 0, err
 	}
@@ -196,4 +196,34 @@ func (c *Connector) SeriesPaths(id string) ([]Path, error) {
 	}
 
 	return out, nil
+}
+
+func (c *Connector) SeriesWatches(id string) ([]*Watch, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	s := &Series{}
+	err = App().DB.Series.FindByID(oid, s)
+	if err != nil {
+		return nil, err
+	}
+
+	eps, err := App().DB.Episode.Query().Where("_type", "Episode").
+		Where("series_id", oid).
+		Desc("season_number").Desc("episode_number").Desc("absolute_number").
+		Limit(5000).
+		Run()
+
+	// get ids of all episodes from query above
+	ids := []primitive.ObjectID{}
+	for _, e := range eps {
+		ids = append(ids, e.ID)
+	}
+	// get distinct list of ids
+	ids = lo.Uniq[primitive.ObjectID](ids)
+
+	// get watches for those ids
+	return c.Watch.Query().In("medium_id", ids).Run()
 }

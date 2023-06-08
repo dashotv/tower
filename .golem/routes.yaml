@@ -89,6 +89,11 @@ groups:
         params:
           - name: id
             type: string
+      watches:
+        path: /:id/watches
+        params:
+          - name: id
+            type: string
   movies:
     path: /movies
     routes:

@@ -155,3 +155,13 @@ func SeriesPaths(c *gin.Context, id string) {
 
 	c.JSON(http.StatusOK, results)
 }
+
+func SeriesWatches(c *gin.Context, id string) {
+	results, err := App().DB.SeriesWatches(id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, results)
+}

@@ -54,6 +54,7 @@ func (s *Server) Routes() {
 	series.GET("/:id/seasons", seriesSeasonsHandler)
 	series.GET("/:id", seriesShowHandler)
 	series.PUT("/:id", seriesUpdateHandler)
+	series.GET("/:id/watches", seriesWatchesHandler)
 
 	upcoming := s.Router.Group("/upcoming")
 	upcoming.GET("/", upcomingIndexHandler)
@@ -254,6 +255,12 @@ func seriesUpdateHandler(c *gin.Context) {
 	id := c.Param("id")
 
 	SeriesUpdate(c, id)
+}
+
+func seriesWatchesHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	SeriesWatches(c, id)
 }
 
 // /upcoming
