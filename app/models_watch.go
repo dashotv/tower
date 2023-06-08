@@ -16,6 +16,7 @@ type Watch struct {
 	Player    string             `json:"player" bson:"player"`
 	WatchedAt time.Time          `json:"watched_at" bson:"watched_at"`
 	MediumId  primitive.ObjectID `json:"medium_id" bson:"medium_id"`
+	Medium    *Medium            `json:"medium" bson:"medium"`
 }
 
 func NewWatch() *Watch {

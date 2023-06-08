@@ -10,5 +10,7 @@ fields:
     type: time.Time
   - name: medium_id
     type: primitive.ObjectID
+  - name: medium
+    type: "*Medium"
 
 

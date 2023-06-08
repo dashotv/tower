@@ -225,5 +225,26 @@ func (c *Connector) SeriesWatches(id string) ([]*Watch, error) {
 	ids = lo.Uniq[primitive.ObjectID](ids)
 
 	// get watches for those ids
-	return c.Watch.Query().In("medium_id", ids).Run()
+	watches, err := c.Watch.Query().Desc("watched_at").In("medium_id", ids).Limit(len(ids)).Run()
+	if err != nil {
+		return nil, err
+	}
+
+	media, err := c.Medium.Query().In("_id", ids).Limit(len(ids)).Run()
+	if err != nil {
+		return nil, err
+	}
+
+	mmap := map[primitive.ObjectID]*Medium{}
+	for _, m := range media {
+		App().Log.Infof("medium %s: %#v", m.ID.Hex(), m)
+		mmap[m.ID] = m
+	}
+
+	for _, w := range watches {
+		App().Log.Infof("watch %s: %#v", w.MediumId.Hex(), w.MediumId)
+		w.Medium = mmap[w.MediumId]
+	}
+
+	return watches, nil
 }
