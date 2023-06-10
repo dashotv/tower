@@ -5,37 +5,17 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/exp/maps"
 )
 
 const imagesBaseURL = "/media-images" // proxy this instead of dealing with CORS
 
 func (c *Connector) Upcoming() ([]*Episode, error) {
-	// TODO: add series counts check
-	seriesMap := map[string]*Series{}
-	// Get Active Series
-	series, err := c.SeriesAll()
-	if err != nil {
-		return nil, err
-	}
-
-	// Create a slice of ids
-	ids := make([]primitive.ObjectID, len(series))
-	for _, s := range series {
-		ids = append(ids, s.ID)
-		if seriesMap[s.ID.Hex()] == nil {
-			seriesMap[s.ID.Hex()] = s
-		}
-	}
-
-	// Get upcoming episodes
-	q2 := c.Episode.Query()
-	now := time.Now()
+	seriesMap := map[primitive.ObjectID]*Series{}
+	now := time.Now().Add(-time.Hour * 24 * 60)
 	since := time.Now().Add(-time.Hour * 24)
-	//App().Log.Println("ids count ", len(ids))
-	//App().Log.Println("time between ", since, " and ", now)
-	list, err := q2.
+	list, err := c.Episode.Query().
 		Where("_type", "Episode").
-		In("series_id", ids).
 		Where("downloaded", false).
 		Where("completed", false).
 		Where("skipped", false).
@@ -45,15 +25,34 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 		LessThanEqual("release_date", now).
 		GreaterThanEqual("release_date", since).
 		Asc("release_date").Asc("season_number").Asc("episode_number").
-		Limit(105).
+		Limit(1000).
 		Run()
 	if err != nil {
 		return nil, err
 	}
 
+	list = groupEpisodes(list)
+
+	// Create a slice of ids
+	sids := make([]primitive.ObjectID, 0)
+	for _, e := range list {
+		sids = append(sids, e.SeriesId)
+	}
+
+	series, err := c.Series.Query().Where("_type", "Series").In("_id", sids).Limit(5000).Run()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, s := range series {
+		if seriesMap[s.ID] == nil {
+			seriesMap[s.ID] = s
+		}
+	}
+
 	// Copy the paths (images) from Series to Episode
 	for _, e := range list {
-		sid := e.SeriesId.Hex()
+		sid := e.SeriesId
 		if seriesMap[sid] != nil {
 			//if seriesMap[sid].Type == "Anime" {
 			//	e.Display = fmt.Sprintf("#%d %s", e.AbsoluteNumber, e.Title)
@@ -76,10 +75,13 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 					continue
 				}
 			}
+		} else {
+			App().Log.Infof("seriesmap missing: %s", sid)
 		}
 	}
 
-	return groupEpisodes(list), nil
+	App().Log.Infof("episodes %d sids %d series %d seriesmap %d", len(list), len(sids), len(series), len(maps.Keys(seriesMap)))
+	return list, nil
 }
 
 func (c *Connector) EpisodeSetting(id, setting string, value bool) error {
