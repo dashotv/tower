@@ -237,12 +237,12 @@ func (c *Connector) SeriesWatches(id string) ([]*Watch, error) {
 
 	mmap := map[primitive.ObjectID]*Medium{}
 	for _, m := range media {
-		App().Log.Infof("medium %s: %#v", m.ID.Hex(), m)
+		//App().Log.Infof("medium %s: %#v", m.ID.Hex(), m)
 		mmap[m.ID] = m
 	}
 
 	for _, w := range watches {
-		App().Log.Infof("watch %s: %#v", w.MediumId.Hex(), w.MediumId)
+		//App().Log.Infof("watch %s: %#v", w.MediumId.Hex(), w.MediumId)
 		w.Medium = mmap[w.MediumId]
 	}
 

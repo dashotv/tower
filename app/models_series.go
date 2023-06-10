@@ -33,18 +33,22 @@ type Series struct {
 		Uncensored bool   `json:"uncensored" bson:"uncensored"`
 		Bluray     bool   `json:"bluray" bson:"bluray"`
 	} `json:"search_params" bson:"search_params"`
-	Active      bool      `json:"active" bson:"active"`
-	Downloaded  bool      `json:"downloaded" bson:"downloaded"`
-	Completed   bool      `json:"completed" bson:"completed"`
-	Skipped     bool      `json:"skipped" bson:"skipped"`
-	Watched     bool      `json:"watched" bson:"watched"`
-	Broken      bool      `json:"broken" bson:"broken"`
-	Favorite    bool      `json:"favorite" bson:"favorite"`
-	Unwatched   int       `json:"unwatched" bson:"unwatched"`
-	ReleaseDate time.Time `json:"release_date" bson:"release_date"`
-	Paths       []Path    `json:"paths" bson:"paths"`
-	Cover       string    `json:"cover" bson:"cover"`
-	Background  string    `json:"background" bson:"background"`
+	Active        bool       `json:"active" bson:"active"`
+	Downloaded    bool       `json:"downloaded" bson:"downloaded"`
+	Completed     bool       `json:"completed" bson:"completed"`
+	Skipped       bool       `json:"skipped" bson:"skipped"`
+	Watched       bool       `json:"watched" bson:"watched"`
+	Broken        bool       `json:"broken" bson:"broken"`
+	Favorite      bool       `json:"favorite" bson:"favorite"`
+	Unwatched     int        `json:"unwatched" bson:"unwatched"`
+	ReleaseDate   time.Time  `json:"release_date" bson:"release_date"`
+	Paths         []Path     `json:"paths" bson:"paths"`
+	Cover         string     `json:"cover" bson:"cover"`
+	Background    string     `json:"background" bson:"background"`
+	CurrentSeason int        `json:"currentSeason" bson:"currentSeason"`
+	Seasons       []int      `json:"seasons" bson:"seasons"`
+	Episodes      []*Episode `json:"episodes" bson:"episodes"`
+	Watches       []*Watch   `json:"watches" bson:"watches"`
 }
 
 func NewSeries() *Series {

@@ -69,6 +69,7 @@ func SeriesCreate(c *gin.Context) {
 func SeriesShow(c *gin.Context, id string) {
 	result := &Series{}
 	App().Log.Infof("series.show id=%s", id)
+	// cache this? have to figure out how to handle breaking cache
 	err := App().DB.Series.Find(id, result)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -91,6 +92,34 @@ func SeriesShow(c *gin.Context, id string) {
 			result.Background = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
 			continue
 		}
+	}
+
+	//Paths
+	result.Paths, err = App().DB.SeriesPaths(id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	//Seasons
+	result.Seasons, err = App().DB.SeriesSeasons(id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	//CurrentSeason
+	result.CurrentSeason, err = App().DB.SeriesCurrentSeason(id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	//Watches
+	result.Watches, err = App().DB.SeriesWatches(id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, result)

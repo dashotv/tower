@@ -72,4 +72,11 @@ fields:
     type: string
   - name: background
     type: string
-
+  - name: currentSeason
+    type: int
+  - name: seasons
+    type: '[]int'
+  - name: episodes
+    type: '[]*Episode'
+  - name: watches
+    type: '[]*Watch'
