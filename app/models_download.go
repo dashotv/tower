@@ -3,8 +3,9 @@ package app
 import (
 	"time"
 
-	"github.com/dashotv/grimoire"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/dashotv/grimoire"
 )
 
 type Download struct {
@@ -32,6 +33,7 @@ type Download struct {
 	Files    []struct {
 		Id       primitive.ObjectID `json:"id" bson:"_id"`
 		MediumId primitive.ObjectID `json:"medium_id" bson:"medium_id"`
+		Medium   *Medium            `json:"medium" bson:"medium"`
 		Num      int                `json:"num" bson:"num"`
 	} `json:"download_files" bson:"download_files"`
 }

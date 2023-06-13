@@ -1,6 +1,8 @@
 package app
 
-import "fmt"
+import (
+	"fmt"
+)
 
 var activeStates = []string{"searching", "loading", "managing", "downloading", "reviewing"}
 
@@ -41,7 +43,7 @@ func processDownloads(list []*Download) {
 
 		paths := m.Paths
 		m.Display = m.Type
-		if m.Type == "Episode" && m.SeriesId.Hex() != "" {
+		if m.Type == "Episode" && !m.SeriesId.IsZero() {
 			s := &Series{}
 			err := App().DB.Series.FindByID(m.SeriesId, s)
 			if err != nil {
@@ -68,6 +70,19 @@ func processDownloads(list []*Download) {
 			if p.Type == "background" {
 				m.Background = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
 				continue
+			}
+		}
+
+		for j, f := range d.Files {
+			if !f.MediumId.IsZero() {
+				fm := &Medium{}
+				err := App().DB.Medium.FindByID(f.MediumId, fm)
+				if err != nil {
+					App().Log.Errorf("could not find medium: %s", d.MediumId)
+					continue
+				}
+
+				list[i].Files[j].Medium = fm
 			}
 		}
 

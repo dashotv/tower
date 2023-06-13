@@ -47,5 +47,7 @@ fields:
         bson: _id
       - name: medium_id
         type: primitive.ObjectID
+      - name: medium
+        type: '*Medium'
       - name: num
         type: int
