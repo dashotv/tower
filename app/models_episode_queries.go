@@ -12,7 +12,7 @@ const imagesBaseURL = "/media-images" // proxy this instead of dealing with CORS
 
 func (c *Connector) Upcoming() ([]*Episode, error) {
 	seriesMap := map[primitive.ObjectID]*Series{}
-	now := time.Now().Add(time.Hour * 24 * 30)
+	now := time.Now().Add(time.Hour * 24 * 90)
 	since := time.Now().Add(-time.Hour * 24)
 	list, err := c.Episode.Query().
 		Where("_type", "Episode").
