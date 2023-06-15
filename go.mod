@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/dashotv/golem v0.6.2
-	github.com/dashotv/grimoire v0.2.3
+	github.com/dashotv/grimoire v0.2.4
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/gin-gonic/gin v1.8.1
 	github.com/mitchellh/go-homedir v1.1.0
