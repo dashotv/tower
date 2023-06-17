@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-var activeStates = []string{"searching", "loading", "managing", "downloading", "reviewing"}
+var activeStates = []string{"searching", "loading", "managing", "downloading", "reviewing", "paused"}
 
 func (c *Connector) ActiveDownloads() ([]*Download, error) {
 	q := c.Download.Query()
