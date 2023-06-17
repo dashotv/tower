@@ -89,3 +89,22 @@ func processDownloads(list []*Download) {
 		list[i].Medium = *m
 	}
 }
+
+func (c *Connector) DownloadSetting(id, setting string, value bool) error {
+	d := &Download{}
+	err := c.Download.Find(id, d)
+	if err != nil {
+		return err
+	}
+
+	switch setting {
+	case "auto":
+		d.Auto = value
+	case "multi":
+		d.Multi = value
+	case "force":
+		d.Force = value
+	}
+
+	return c.Download.Update(d)
+}
