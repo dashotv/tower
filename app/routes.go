@@ -51,6 +51,7 @@ func (s *Server) Routes() {
 	series.GET("/", seriesIndexHandler)
 	series.GET("/:id/paths", seriesPathsHandler)
 	series.GET("/:id/seasons/:season", seriesSeasonEpisodesHandler)
+	series.GET("/:id/seasons/all", seriesSeasonEpisodesAllHandler)
 	series.GET("/:id/seasons", seriesSeasonsHandler)
 	series.GET("/:id", seriesShowHandler)
 	series.PUT("/:id", seriesUpdateHandler)
@@ -237,6 +238,12 @@ func seriesSeasonEpisodesHandler(c *gin.Context) {
 	season := c.Param("season")
 
 	SeriesSeasonEpisodes(c, id, season)
+}
+
+func seriesSeasonEpisodesAllHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	SeriesSeasonEpisodesAll(c, id)
 }
 
 func seriesSeasonsHandler(c *gin.Context) {

@@ -72,6 +72,11 @@ groups:
         params:
           - name: id
             type: string
+      seasonEpisodesAll:
+        path: /:id/seasons/all
+        params:
+          - name: id
+            type: string
       seasonEpisodes:
         path: /:id/seasons/:season
         params:
