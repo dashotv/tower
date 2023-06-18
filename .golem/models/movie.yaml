@@ -68,5 +68,7 @@ fields:
     type: '[]Path'
   - name: cover
     type: string
+    bson: '-'
   - name: background
     type: string
+    bson: '-'

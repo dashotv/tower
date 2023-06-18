@@ -7,6 +7,7 @@ fields:
     type: primitive.ObjectID
   - name: medium
     type: Medium
+    bson: '-'
   - name: auto
     type: bool
   - name: multi

@@ -12,5 +12,6 @@ fields:
     type: primitive.ObjectID
   - name: medium
     type: "*Medium"
+    bson: '-'
 
 

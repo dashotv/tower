@@ -41,15 +41,15 @@ type Series struct {
 	Watched       bool       `json:"watched" bson:"watched"`
 	Broken        bool       `json:"broken" bson:"broken"`
 	Favorite      bool       `json:"favorite" bson:"favorite"`
-	Unwatched     int        `json:"unwatched" bson:"unwatched"`
+	Unwatched     int        `json:"unwatched" bson:"-"`
 	ReleaseDate   time.Time  `json:"release_date" bson:"release_date"`
 	Paths         []Path     `json:"paths" bson:"paths"`
-	Cover         string     `json:"cover" bson:"cover"`
-	Background    string     `json:"background" bson:"background"`
-	CurrentSeason int        `json:"currentSeason" bson:"currentSeason"`
-	Seasons       []int      `json:"seasons" bson:"seasons"`
-	Episodes      []*Episode `json:"episodes" bson:"episodes"`
-	Watches       []*Watch   `json:"watches" bson:"watches"`
+	Cover         string     `json:"cover" bson:"-"`
+	Background    string     `json:"background" bson:"-"`
+	CurrentSeason int        `json:"currentSeason" bson:"-"`
+	Seasons       []int      `json:"seasons" bson:"-"`
+	Episodes      []*Episode `json:"episodes" bson:"-"`
+	Watches       []*Watch   `json:"watches" bson:"-"`
 }
 
 func NewSeries() *Series {

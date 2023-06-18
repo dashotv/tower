@@ -70,8 +70,10 @@ fields:
     type: '[]Path'
   - name: cover
     type: string
+    bson: '-'
   - name: background
     type: string
+    bson: '-'
 
   - name: series_id
     type: primitive.ObjectID

@@ -44,11 +44,11 @@ type Episode struct {
 	Skipped     bool      `json:"skipped" bson:"skipped"`
 	Watched     bool      `json:"watched" bson:"watched"`
 	Broken      bool      `json:"broken" bson:"broken"`
-	Unwatched   int       `json:"unwatched" bson:"unwatched"`
+	Unwatched   int       `json:"unwatched" bson:"-"`
 	ReleaseDate time.Time `json:"release_date" bson:"release_date"`
 	Paths       []Path    `json:"paths" bson:"paths"`
-	Cover       string    `json:"cover" bson:"cover"`
-	Background  string    `json:"background" bson:"background"`
+	Cover       string    `json:"cover" bson:"-"`
+	Background  string    `json:"background" bson:"-"`
 }
 
 func NewEpisode() *Episode {

@@ -43,8 +43,8 @@ type Movie struct {
 	Favorite    bool      `json:"favorite" bson:"favorite"`
 	ReleaseDate time.Time `json:"release_date" bson:"release_date"`
 	Paths       []Path    `json:"paths" bson:"paths"`
-	Cover       string    `json:"cover" bson:"cover"`
-	Background  string    `json:"background" bson:"background"`
+	Cover       string    `json:"cover" bson:"-"`
+	Background  string    `json:"background" bson:"-"`
 }
 
 func NewMovie() *Movie {

@@ -44,8 +44,8 @@ type Medium struct {
 	Unwatched     int                `json:"unwatched" bson:"unwatched"`
 	ReleaseDate   time.Time          `json:"release_date" bson:"release_date"`
 	Paths         []Path             `json:"paths" bson:"paths"`
-	Cover         string             `json:"cover" bson:"cover"`
-	Background    string             `json:"background" bson:"background"`
+	Cover         string             `json:"cover" bson:"-"`
+	Background    string             `json:"background" bson:"-"`
 	SeriesId      primitive.ObjectID `json:"series_id" bson:"series_id"`
 	SeasonNumber  int                `json:"season_number" bson:"season_number"`
 	EpisodeNumber int                `json:"episode_number" bson:"episode_number"`

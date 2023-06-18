@@ -64,19 +64,26 @@ fields:
     type: bool
   - name: unwatched
     type: int
+    bson: '-'
   - name: release_date
     type: time.Time
   - name: paths
     type: '[]Path'
   - name: cover
     type: string
+    bson: '-'
   - name: background
     type: string
+    bson: '-'
   - name: currentSeason
     type: int
+    bson: '-'
   - name: seasons
     type: '[]int'
+    bson: '-'
   - name: episodes
     type: '[]*Episode'
+    bson: '-'
   - name: watches
     type: '[]*Watch'
+    bson: '-'
