@@ -9,15 +9,14 @@ import (
 var cfg *Config
 
 type Connector struct {
-	Download     *grimoire.Store[*Download]
-	DownloadFile *grimoire.Store[*DownloadFile]
-	Episode      *grimoire.Store[*Episode]
-	Feed         *grimoire.Store[*Feed]
-	Medium       *grimoire.Store[*Medium]
-	Movie        *grimoire.Store[*Movie]
-	Release      *grimoire.Store[*Release]
-	Series       *grimoire.Store[*Series]
-	Watch        *grimoire.Store[*Watch]
+	Download *grimoire.Store[*Download]
+	Episode  *grimoire.Store[*Episode]
+	Feed     *grimoire.Store[*Feed]
+	Medium   *grimoire.Store[*Medium]
+	Movie    *grimoire.Store[*Movie]
+	Release  *grimoire.Store[*Release]
+	Series   *grimoire.Store[*Series]
+	Watch    *grimoire.Store[*Watch]
 }
 
 func NewConnector() (*Connector, error) {
@@ -34,17 +33,6 @@ func NewConnector() (*Connector, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	s, err = settingsFor("downloadFile")
-	if err != nil {
-		return nil, err
-	}
-
-	downloadFile, err := grimoire.New[*DownloadFile](s.URI, s.Database, s.Collection)
-	if err != nil {
-		return nil, err
-	}
-
 	s, err = settingsFor("episode")
 	if err != nil {
 		return nil, err
@@ -54,7 +42,6 @@ func NewConnector() (*Connector, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	s, err = settingsFor("feed")
 	if err != nil {
 		return nil, err
@@ -64,7 +51,6 @@ func NewConnector() (*Connector, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	s, err = settingsFor("medium")
 	if err != nil {
 		return nil, err
@@ -74,7 +60,6 @@ func NewConnector() (*Connector, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	s, err = settingsFor("movie")
 	if err != nil {
 		return nil, err
@@ -84,7 +69,6 @@ func NewConnector() (*Connector, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	s, err = settingsFor("release")
 	if err != nil {
 		return nil, err
@@ -94,7 +78,6 @@ func NewConnector() (*Connector, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	s, err = settingsFor("series")
 	if err != nil {
 		return nil, err
@@ -104,7 +87,6 @@ func NewConnector() (*Connector, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	s, err = settingsFor("watch")
 	if err != nil {
 		return nil, err
@@ -116,15 +98,14 @@ func NewConnector() (*Connector, error) {
 	}
 
 	c := &Connector{
-		Download:     download,
-		DownloadFile: downloadFile,
-		Episode:      episode,
-		Feed:         feed,
-		Medium:       medium,
-		Movie:        movie,
-		Release:      release,
-		Series:       series,
-		Watch:        watch,
+		Download: download,
+		Episode:  episode,
+		Feed:     feed,
+		Medium:   medium,
+		Movie:    movie,
+		Release:  release,
+		Series:   series,
+		Watch:    watch,
 	}
 
 	return c, nil

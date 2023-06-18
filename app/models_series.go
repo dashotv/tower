@@ -3,8 +3,9 @@ package app
 import (
 	"time"
 
-	"github.com/dashotv/grimoire"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/dashotv/grimoire"
 )
 
 type Series struct {
