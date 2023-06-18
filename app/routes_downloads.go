@@ -86,3 +86,25 @@ func DownloadsRecent(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
 }
+
+type DownloadSelector struct {
+	MediumId string
+	Num      int
+}
+
+func DownloadsSelect(c *gin.Context, id string) {
+	data := &DownloadSelector{}
+	err := c.BindJSON(&data)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = App().DB.DownloadSelect(id, data.MediumId, data.Num)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
+}

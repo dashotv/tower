@@ -1,7 +1,10 @@
 package app
 
 import (
+	"errors"
 	"fmt"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var activeStates = []string{"searching", "loading", "managing", "downloading", "reviewing", "paused"}
@@ -107,4 +110,28 @@ func (c *Connector) DownloadSetting(id, setting string, value bool) error {
 	}
 
 	return c.Download.Update(d)
+}
+
+func (c *Connector) DownloadSelect(id, mediumId string, num int) error {
+	download := &Download{}
+	err := App().DB.Download.Find(id, download)
+	if err != nil {
+		return err
+	}
+
+	for _, f := range download.Files {
+		if f.Num == num {
+			mid, err := primitive.ObjectIDFromHex(mediumId)
+			if err != nil {
+				return err
+			}
+			App().Log.Infof("setting file %d with id %s", f.Num, mid)
+			f.MediumId = mid
+
+			App().Log.Infof("download: %#v", download)
+			return c.Download.Update(download)
+		}
+	}
+
+	return errors.New("could not match num with download file")
 }

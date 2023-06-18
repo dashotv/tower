@@ -1,0 +1,12 @@
+name: downloadFile
+type: struct
+fields:
+  - name: id
+    type: primitive.ObjectID
+    bson: _id
+  - name: medium_id
+    type: primitive.ObjectID
+  - name: medium
+    type: '*Medium'
+  - name: num
+    type: int

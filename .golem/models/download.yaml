@@ -38,16 +38,6 @@ fields:
   - name: status
     type: string
   - name: files
-    type: '[]struct'
+    type: '[]*DownloadFile'
     json: download_files
     bson: download_files
-    fields:
-      - name: id
-        type: primitive.ObjectID
-        bson: _id
-      - name: medium_id
-        type: primitive.ObjectID
-      - name: medium
-        type: '*Medium'
-      - name: num
-        type: int

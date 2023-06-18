@@ -28,14 +28,9 @@ type Download struct {
 		Completed  time.Time `json:"completed" bson:"completed"`
 		Deleted    time.Time `json:"deleted" bson:"deleted"`
 	} `json:"timestamps" bson:"timestamps"`
-	Selected string `json:"selected" bson:"selected"`
-	Status   string `json:"status" bson:"status"`
-	Files    []struct {
-		Id       primitive.ObjectID `json:"id" bson:"_id"`
-		MediumId primitive.ObjectID `json:"medium_id" bson:"medium_id"`
-		Medium   *Medium            `json:"medium" bson:"medium"`
-		Num      int                `json:"num" bson:"num"`
-	} `json:"download_files" bson:"download_files"`
+	Selected string          `json:"selected" bson:"selected"`
+	Status   string          `json:"status" bson:"status"`
+	Files    []*DownloadFile `json:"download_files" bson:"download_files"`
 }
 
 func NewDownload() *Download {

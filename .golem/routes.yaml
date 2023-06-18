@@ -28,6 +28,12 @@ groups:
             type: string
       recent:
         path: /recent
+      select:
+        method: PUT
+        path: /:id/select
+        params:
+          - name: id
+            type: string
   upcoming:
     path: /upcoming
     routes:
