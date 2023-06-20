@@ -90,7 +90,7 @@ func processDownloads(list []*Download) {
 			}
 		}
 
-		list[i].Medium = *m
+		list[i].Medium = m
 	}
 }
 

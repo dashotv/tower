@@ -27,27 +27,8 @@ fields:
     type: string
   - name: search
     type: string
-  #  - name: search_params
-  #    type: SearchParam
   - name: search_params
-    type: struct
-    fields:
-      - name: type
-        type: string
-      - name: verified
-        type: bool
-      - name: group
-        type: string
-      - name: author
-        type: string
-      - name: resolution
-        type: int
-      - name: source
-        type: string
-      - name: uncensored
-        type: bool
-      - name: bluray
-        type: bool
+    type: '*SearchParams'
   - name: active
     type: bool
   - name: downloaded

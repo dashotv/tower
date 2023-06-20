@@ -1,0 +1,19 @@
+name: searchParams
+type: struct
+fields:
+  - name: type
+    type: string
+  - name: verified
+    type: bool
+  - name: group
+    type: string
+  - name: author
+    type: string
+  - name: resolution
+    type: int
+  - name: source
+    type: string
+  - name: uncensored
+    type: bool
+  - name: bluray
+    type: bool

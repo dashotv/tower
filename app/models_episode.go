@@ -28,27 +28,18 @@ type Episode struct {
 	SeasonNumber   int                `json:"season_number" bson:"season_number"`
 	EpisodeNumber  int                `json:"episode_number" bson:"episode_number"`
 	AbsoluteNumber int                `json:"absolute_number" bson:"absolute_number"`
-	SearchParams   struct {
-		Type       string `json:"type" bson:"type"`
-		Verified   bool   `json:"verified" bson:"verified"`
-		Group      string `json:"group" bson:"group"`
-		Author     string `json:"author" bson:"author"`
-		Resolution int    `json:"resolution" bson:"resolution"`
-		Source     string `json:"source" bson:"source"`
-		Uncensored bool   `json:"uncensored" bson:"uncensored"`
-		Bluray     bool   `json:"bluray" bson:"bluray"`
-	} `json:"search_params" bson:"search_params"`
-	Active      bool      `json:"active" bson:"active"`
-	Downloaded  bool      `json:"downloaded" bson:"downloaded"`
-	Completed   bool      `json:"completed" bson:"completed"`
-	Skipped     bool      `json:"skipped" bson:"skipped"`
-	Watched     bool      `json:"watched" bson:"watched"`
-	Broken      bool      `json:"broken" bson:"broken"`
-	Unwatched   int       `json:"unwatched" bson:"-"`
-	ReleaseDate time.Time `json:"release_date" bson:"release_date"`
-	Paths       []Path    `json:"paths" bson:"paths"`
-	Cover       string    `json:"cover" bson:"-"`
-	Background  string    `json:"background" bson:"-"`
+	SearchParams   *SearchParams      `json:"search_params" bson:"search_params"`
+	Active         bool               `json:"active" bson:"active"`
+	Downloaded     bool               `json:"downloaded" bson:"downloaded"`
+	Completed      bool               `json:"completed" bson:"completed"`
+	Skipped        bool               `json:"skipped" bson:"skipped"`
+	Watched        bool               `json:"watched" bson:"watched"`
+	Broken         bool               `json:"broken" bson:"broken"`
+	Unwatched      int                `json:"unwatched" bson:"-"`
+	ReleaseDate    time.Time          `json:"release_date" bson:"release_date"`
+	Paths          []Path             `json:"paths" bson:"paths"`
+	Cover          string             `json:"cover" bson:"-"`
+	Background     string             `json:"background" bson:"-"`
 }
 
 func NewEpisode() *Episode {
