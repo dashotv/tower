@@ -59,6 +59,7 @@ func processDownloads(list []*Download) {
 				App().Log.Errorf("could not get unwatched count: %s: %s", s.ID.Hex(), err)
 			}
 
+			m.SearchParams = s.SearchParams
 			m.Kind = s.Kind
 			m.Unwatched = unwatched
 			m.Display = fmt.Sprintf("%dx%d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)
