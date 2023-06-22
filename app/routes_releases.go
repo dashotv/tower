@@ -37,7 +37,11 @@ func ReleasesShow(c *gin.Context, id string) {
 	result := &Release{}
 	err := App().DB.Release.Find(id, result)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		if err.Error() == "mongo: no documents in result" {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		} else {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
