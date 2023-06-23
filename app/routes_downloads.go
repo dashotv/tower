@@ -108,3 +108,27 @@ func DownloadsSelect(c *gin.Context, id string) {
 
 	c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
 }
+
+func DownloadsMedium(c *gin.Context, id string) {
+	download := &Download{}
+	err := App().DB.Download.Find(id, download)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	list := []*Download{download}
+	processDownloads(list)
+
+	if download.Medium == nil {
+		c.JSON(http.StatusOK, gin.H{"errors": false})
+		return
+	}
+
+	if download.Medium.Type == "Series" {
+		SeriesSeasonEpisodesAll(c, download.MediumId.Hex())
+		return
+	}
+
+	c.JSON(http.StatusOK, []*Medium{download.Medium})
+}

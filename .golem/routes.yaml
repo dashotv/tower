@@ -28,6 +28,11 @@ groups:
             type: string
       recent:
         path: /recent
+      medium:
+        path: /:id/medium
+        params:
+          - name: id
+            type: string
       select:
         method: PUT
         path: /:id/select
