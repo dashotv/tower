@@ -18,6 +18,7 @@ func (s *Server) Routes() {
 	downloads.GET("/:id/medium", downloadsMediumHandler)
 	downloads.GET("/recent", downloadsRecentHandler)
 	downloads.PUT("/:id/select", downloadsSelectHandler)
+	downloads.PATCH("/:id", downloadsSettingHandler)
 	downloads.GET("/:id", downloadsShowHandler)
 	downloads.PUT("/:id", downloadsUpdateHandler)
 
@@ -104,6 +105,12 @@ func downloadsSelectHandler(c *gin.Context) {
 	id := c.Param("id")
 
 	DownloadsSelect(c, id)
+}
+
+func downloadsSettingHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	DownloadsSetting(c, id)
 }
 
 func downloadsShowHandler(c *gin.Context) {

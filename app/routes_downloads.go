@@ -38,8 +38,25 @@ func DownloadsShow(c *gin.Context, id string) {
 }
 
 func DownloadsUpdate(c *gin.Context, id string) {
+	data := &Download{}
+	err := c.BindJSON(data)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = App().DB.Download.Update(data)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, data)
+}
+
+func DownloadsSetting(c *gin.Context, id string) {
 	data := &Setting{}
-	err := c.BindJSON(&data)
+	err := c.BindJSON(data)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
