@@ -37,6 +37,7 @@ func (s *Server) Routes() {
 	movies.DELETE("/:id", moviesDeleteHandler)
 	movies.GET("/", moviesIndexHandler)
 	movies.GET("/:id/paths", moviesPathsHandler)
+	movies.PATCH("/:id", moviesSettingHandler)
 	movies.GET("/:id", moviesShowHandler)
 	movies.PUT("/:id", moviesUpdateHandler)
 
@@ -56,6 +57,7 @@ func (s *Server) Routes() {
 	series.GET("/:id/seasons/:season", seriesSeasonEpisodesHandler)
 	series.GET("/:id/seasons/all", seriesSeasonEpisodesAllHandler)
 	series.GET("/:id/seasons", seriesSeasonsHandler)
+	series.PATCH("/:id", seriesSettingHandler)
 	series.GET("/:id", seriesShowHandler)
 	series.PUT("/:id", seriesUpdateHandler)
 	series.GET("/:id/watches", seriesWatchesHandler)
@@ -184,6 +186,12 @@ func moviesPathsHandler(c *gin.Context) {
 	MoviesPaths(c, id)
 }
 
+func moviesSettingHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	MoviesSetting(c, id)
+}
+
 func moviesShowHandler(c *gin.Context) {
 	id := c.Param("id")
 
@@ -271,6 +279,12 @@ func seriesSeasonsHandler(c *gin.Context) {
 	id := c.Param("id")
 
 	SeriesSeasons(c, id)
+}
+
+func seriesSettingHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	SeriesSetting(c, id)
 }
 
 func seriesShowHandler(c *gin.Context) {

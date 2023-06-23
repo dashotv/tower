@@ -78,6 +78,12 @@ groups:
         params:
           - name: id
             type: string
+      setting:
+        method: PATCH
+        path: /:id
+        params:
+          - name: id
+            type: string
       delete:
         method: DELETE
         path: /:id
@@ -131,6 +137,12 @@ groups:
             type: string
       update:
         method: PUT
+        path: /:id
+        params:
+          - name: id
+            type: string
+      setting:
+        method: PATCH
         path: /:id
         params:
           - name: id
