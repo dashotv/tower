@@ -59,6 +59,12 @@ groups:
         params:
           - name: id
             type: string
+      setting:
+        path: /:id
+        method: PATCH
+        params:
+          - name: id
+            type: string
   series:
     path: /series
     routes:

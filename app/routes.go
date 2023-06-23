@@ -23,6 +23,7 @@ func (s *Server) Routes() {
 	downloads.PUT("/:id", downloadsUpdateHandler)
 
 	episodes := s.Router.Group("/episodes")
+	episodes.PATCH("/:id", episodesSettingHandler)
 	episodes.PUT("/:id", episodesUpdateHandler)
 
 	feeds := s.Router.Group("/feeds")
@@ -128,6 +129,12 @@ func downloadsUpdateHandler(c *gin.Context) {
 }
 
 // /episodes
+func episodesSettingHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	EpisodesSetting(c, id)
+}
+
 func episodesUpdateHandler(c *gin.Context) {
 	id := c.Param("id")
 
