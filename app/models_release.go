@@ -34,7 +34,7 @@ type Release struct {
 	Resolution  string    `json:"resolution" bson:"resolution"`
 	Encoding    string    `json:"encoding" bson:"encoding"`
 	Quality     string    `json:"quality" bson:"quality"`
-	Published   time.Time `json:"published" bson:"published_at"`
+	PublishedAt time.Time `json:"published_at" bson:"published_at"`
 }
 
 func NewRelease() *Release {

@@ -49,9 +49,8 @@ fields:
     type: string
   - name: quality
     type: string
-  - name: published
+  - name: published_at
     type: time.Time
-    bson: published_at
 #  - name: created
 #    type: time.Time
 #    bson: created_at
