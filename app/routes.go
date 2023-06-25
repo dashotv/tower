@@ -46,6 +46,7 @@ func (s *Server) Routes() {
 	releases.POST("/", releasesCreateHandler)
 	releases.DELETE("/:id", releasesDeleteHandler)
 	releases.GET("/", releasesIndexHandler)
+	releases.PATCH("/:id", releasesSettingHandler)
 	releases.GET("/:id", releasesShowHandler)
 	releases.PUT("/:id", releasesUpdateHandler)
 
@@ -226,6 +227,12 @@ func releasesDeleteHandler(c *gin.Context) {
 func releasesIndexHandler(c *gin.Context) {
 
 	ReleasesIndex(c)
+}
+
+func releasesSettingHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	ReleasesSetting(c, id)
 }
 
 func releasesShowHandler(c *gin.Context) {

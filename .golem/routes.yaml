@@ -166,7 +166,35 @@ groups:
             type: string
   releases:
     path: /releases
-    rest: true
+    routes:
+      index:
+        path: /
+      create:
+        method: POST
+        path: /
+      show:
+        path: /:id
+        params:
+          - name: id
+            type: string
+      update:
+        method: PUT
+        path: /:id
+        params:
+          - name: id
+            type: string
+      setting:
+        method: PATCH
+        path: /:id
+        params:
+          - name: id
+            type: string
+      delete:
+        method: DELETE
+        path: /:id
+        params:
+          - name: id
+            type: string
   feeds:
     path: /feeds
     rest: true

@@ -55,3 +55,20 @@ func ReleasesUpdate(c *gin.Context, id string) {
 func ReleasesDelete(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }
+
+func ReleasesSetting(c *gin.Context, id string) {
+	s := &Setting{}
+	err := c.BindJSON(s)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = App().DB.ReleaseSetting(id, s.Setting, s.Value)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"errors": false, "data": s})
+}
