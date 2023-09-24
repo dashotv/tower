@@ -107,6 +107,9 @@ func (c *Connector) SeriesSeasonEpisodes(id string, season string) ([]*Episode, 
 		Asc("episode_number").
 		Limit(1000).
 		Run()
+	if err != nil {
+		return nil, err
+	}
 
 	for _, e := range eps {
 		e.Watched = c.MediumWatched(e.ID)
@@ -130,6 +133,9 @@ func (c *Connector) SeriesSeasonEpisodesAll(id string) ([]*Episode, error) {
 		Asc("absolute_number").
 		Limit(1000).
 		Run()
+	if err != nil {
+		return nil, err
+	}
 
 	return eps, nil
 }
@@ -234,6 +240,9 @@ func (c *Connector) SeriesWatches(id string) ([]*Watch, error) {
 		Desc("season_number").Desc("episode_number").Desc("absolute_number").
 		Limit(5000).
 		Run()
+	if err != nil {
+		return nil, err
+	}
 
 	// get ids of all episodes from query above
 	ids := []primitive.ObjectID{}
