@@ -24,8 +24,8 @@ func (c *Connector) ReleaseSetting(id, setting string, value bool) error {
 	return c.Release.Update(release)
 }
 
-func (c *Connector) ReleasesPopular(date time.Time, count int) ([]*Popular, error) {
-	return ReleasesPopular(c.Release.Collection, date, count)
+func (c *Connector) ReleasesPopular(t string, date time.Time, count int) ([]*Popular, error) {
+	return ReleasesPopular(c.Release.Collection, t, date, count)
 }
 
 type Popular struct {
@@ -34,7 +34,7 @@ type Popular struct {
 	Count int    `json:"count" bson:"count"`
 }
 
-func ReleasesPopular(coll *mgm.Collection, date time.Time, count int) ([]*Popular, error) {
+func ReleasesPopular(coll *mgm.Collection, t string, date time.Time, count int) ([]*Popular, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
@@ -43,7 +43,7 @@ func ReleasesPopular(coll *mgm.Collection, date time.Time, count int) ([]*Popula
 			"$project": bson.M{"name": 1, "type": 1, "published": "$published_at"},
 		},
 		bson.M{
-			"$match": bson.M{"type": "tv", "published": bson.M{"$gte": date}},
+			"$match": bson.M{"type": t, "published": bson.M{"$gte": date}},
 		},
 		bson.M{
 			"$group": bson.M{"_id": "$name", "type": bson.M{"$first": "$type"}, "count": bson.M{"$sum": 1}},

@@ -17,8 +17,8 @@ func (s *Server) Cron() error {
 		//	}
 
 		// every day at 1am PopularReleasesToday
-		if _, err := c.AddFunc("0 0 1 * * *", s.PopularReleasesToday); err != nil {
-			return errors.Wrap(err, "adding cron function: PopularReleasesToday")
+		if _, err := c.AddFunc("0 0 1 * * *", s.PopularReleasesDaily); err != nil {
+			return errors.Wrap(err, "adding cron function: PopularReleasesDaily")
 		}
 
 		go func() {
@@ -34,18 +34,21 @@ func (s *Server) DownloadsProcess() {
 	s.Log.Info("processing downloads")
 }
 
-func (s *Server) PopularReleasesToday() {
+func (s *Server) PopularReleasesDaily() {
 	App().Log.Info("processing popular releases")
 
-	date := time.Now().AddDate(0, 0, -1)
-	limit := 25
+	types := []string{"tv", "anime", "movie"}
+	for _, t := range types {
+		date := time.Now().AddDate(0, 0, -1)
+		limit := 25
 
-	results, err := App().DB.ReleasesPopular(date, limit)
-	if err != nil {
-		s.Log.Error(errors.Wrap(err, "popular releases today"))
-		return
+		results, err := App().DB.ReleasesPopular("tv", date, limit)
+		if err != nil {
+			s.Log.Error(errors.Wrap(err, "popular releases today"))
+			return
+		}
+
+		cache := App().Cache
+		cache.Set("releases_popular_daily_"+t, results)
 	}
-
-	cache := App().Cache
-	cache.Set("popular_releases_today", results)
 }
