@@ -63,19 +63,11 @@ func ReleasesPopular(coll *mgm.Collection, t string, date time.Time, count int) 
 	defer cancel()
 
 	p := []bson.M{
-		bson.M{
-			"$project": bson.M{"name": 1, "type": 1, "published": "$published_at"},
-		},
-		bson.M{
-			"$match": bson.M{"type": t, "published": bson.M{"$gte": date}},
-		},
-		bson.M{
-			"$group": bson.M{"_id": "$name", "type": bson.M{"$first": "$type"}, "count": bson.M{"$sum": 1}},
-		},
-		bson.M{
-			"$sort": bson.M{"count": -1},
-		},
-		bson.M{"$limit": count},
+		{"$project": bson.M{"name": 1, "type": 1, "published": "$published_at"}},
+		{"$match": bson.M{"type": t, "published": bson.M{"$gte": date}}},
+		{"$group": bson.M{"_id": "$name", "type": bson.M{"$first": "$type"}, "count": bson.M{"$sum": 1}}},
+		{"$sort": bson.M{"count": -1}},
+		{"$limit": count},
 	}
 
 	cursor, err := coll.Aggregate(ctx, p)
