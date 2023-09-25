@@ -34,6 +34,30 @@ type Popular struct {
 	Count int    `json:"count" bson:"count"`
 }
 
+/*
+ReleasesPopular returns the most popular releases for a given type and date.
+
+Equivalent to the following MongoDB query:
+db.torrents.aggregate([
+
+	{
+	    $project: {name: 1, type: 1, published: "$published_at"}
+	},
+	{
+	    $match: { type: "tv", published: { $gte: new Date("2023-09-24 12:25:00") } }
+	},
+	{
+	    $group: {_id: "$name", count: {$sum: 1}}
+	},
+	{
+	    $sort: {count: -1}
+	},
+	{
+	    $limit: 25
+	}
+
+])
+*/
 func ReleasesPopular(coll *mgm.Collection, t string, date time.Time, count int) ([]*Popular, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
