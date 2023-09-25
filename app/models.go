@@ -144,24 +144,24 @@ type Download struct { // model
 	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
-	MediumId  primitive.ObjectID `json:&#34;medium_id&#34; bson:&#34;medium_id&#34;`
-	Medium    *Medium            `json:&#34;medium&#34; bson:&#34;-&#34;`
-	Auto      bool               `json:&#34;auto&#34; bson:&#34;auto&#34;`
-	Multi     bool               `json:&#34;multi&#34; bson:&#34;multi&#34;`
-	Force     bool               `json:&#34;force&#34; bson:&#34;force&#34;`
-	Url       string             `json:&#34;url&#34; bson:&#34;url&#34;`
-	ReleaseId string             `json:&#34;release_id&#34; bson:&#34;tdo_id&#34;`
-	Thash     string             `json:&#34;thash&#34; bson:&#34;thash&#34;`
-	Selected  string             `json:&#34;selected&#34; bson:&#34;selected&#34;`
-	Status    string             `json:&#34;status&#34; bson:&#34;status&#34;`
-	Files     []*DownloadFile    `json:&#34;download_files&#34; bson:&#34;download_files&#34;`
+	MediumId  primitive.ObjectID `json:"medium_id" bson:"medium_id"`
+	Medium    *Medium            `json:"medium" bson:"-"`
+	Auto      bool               `json:"auto" bson:"auto"`
+	Multi     bool               `json:"multi" bson:"multi"`
+	Force     bool               `json:"force" bson:"force"`
+	Url       string             `json:"url" bson:"url"`
+	ReleaseId string             `json:"release_id" bson:"tdo_id"`
+	Thash     string             `json:"thash" bson:"thash"`
+	Selected  string             `json:"selected" bson:"selected"`
+	Status    string             `json:"status" bson:"status"`
+	Files     []*DownloadFile    `json:"download_files" bson:"download_files"`
 }
 
 type DownloadFile struct { // struct
-	Id       primitive.ObjectID `json:&#34;id&#34; bson:&#34;_id&#34;`
-	MediumId primitive.ObjectID `json:&#34;medium_id&#34; bson:&#34;medium_id&#34;`
-	Medium   *Medium            `json:&#34;medium&#34; bson:&#34;medium&#34;`
-	Num      int                `json:&#34;num&#34; bson:&#34;num&#34;`
+	Id       primitive.ObjectID `json:"id" bson:"_id"`
+	MediumId primitive.ObjectID `json:"medium_id" bson:"medium_id"`
+	Medium   *Medium            `json:"medium" bson:"medium"`
+	Num      int                `json:"num" bson:"num"`
 }
 
 type Episode struct { // model
@@ -169,33 +169,33 @@ type Episode struct { // model
 	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
-	Type           string             `json:&#34;type&#34; bson:&#34;_type&#34;`
-	SeriesId       primitive.ObjectID `json:&#34;series_id&#34; bson:&#34;series_id&#34;`
-	Kind           primitive.Symbol   `json:&#34;kind&#34; bson:&#34;kind&#34;`
-	Source         string             `json:&#34;source&#34; bson:&#34;source&#34;`
-	SourceId       string             `json:&#34;source_id&#34; bson:&#34;source_id&#34;`
-	Title          string             `json:&#34;title&#34; bson:&#34;title&#34;`
-	Description    string             `json:&#34;description&#34; bson:&#34;description&#34;`
-	Slug           string             `json:&#34;slug&#34; bson:&#34;slug&#34;`
-	Text           []string           `json:&#34;text&#34; bson:&#34;text&#34;`
-	Display        string             `json:&#34;display&#34; bson:&#34;display&#34;`
-	Directory      string             `json:&#34;directory&#34; bson:&#34;directory&#34;`
-	Search         string             `json:&#34;search&#34; bson:&#34;search&#34;`
-	SeasonNumber   int                `json:&#34;season_number&#34; bson:&#34;season_number&#34;`
-	EpisodeNumber  int                `json:&#34;episode_number&#34; bson:&#34;episode_number&#34;`
-	AbsoluteNumber int                `json:&#34;absolute_number&#34; bson:&#34;absolute_number&#34;`
-	SearchParams   *SearchParams      `json:&#34;search_params&#34; bson:&#34;search_params&#34;`
-	Active         bool               `json:&#34;active&#34; bson:&#34;active&#34;`
-	Downloaded     bool               `json:&#34;downloaded&#34; bson:&#34;downloaded&#34;`
-	Completed      bool               `json:&#34;completed&#34; bson:&#34;completed&#34;`
-	Skipped        bool               `json:&#34;skipped&#34; bson:&#34;skipped&#34;`
-	Watched        bool               `json:&#34;watched&#34; bson:&#34;watched&#34;`
-	Broken         bool               `json:&#34;broken&#34; bson:&#34;broken&#34;`
-	Unwatched      int                `json:&#34;unwatched&#34; bson:&#34;-&#34;`
-	ReleaseDate    time.Time          `json:&#34;release_date&#34; bson:&#34;release_date&#34;`
-	Paths          []Path             `json:&#34;paths&#34; bson:&#34;paths&#34;`
-	Cover          string             `json:&#34;cover&#34; bson:&#34;-&#34;`
-	Background     string             `json:&#34;background&#34; bson:&#34;-&#34;`
+	Type           string             `json:"type" bson:"_type"`
+	SeriesId       primitive.ObjectID `json:"series_id" bson:"series_id"`
+	Kind           primitive.Symbol   `json:"kind" bson:"kind"`
+	Source         string             `json:"source" bson:"source"`
+	SourceId       string             `json:"source_id" bson:"source_id"`
+	Title          string             `json:"title" bson:"title"`
+	Description    string             `json:"description" bson:"description"`
+	Slug           string             `json:"slug" bson:"slug"`
+	Text           []string           `json:"text" bson:"text"`
+	Display        string             `json:"display" bson:"display"`
+	Directory      string             `json:"directory" bson:"directory"`
+	Search         string             `json:"search" bson:"search"`
+	SeasonNumber   int                `json:"season_number" bson:"season_number"`
+	EpisodeNumber  int                `json:"episode_number" bson:"episode_number"`
+	AbsoluteNumber int                `json:"absolute_number" bson:"absolute_number"`
+	SearchParams   *SearchParams      `json:"search_params" bson:"search_params"`
+	Active         bool               `json:"active" bson:"active"`
+	Downloaded     bool               `json:"downloaded" bson:"downloaded"`
+	Completed      bool               `json:"completed" bson:"completed"`
+	Skipped        bool               `json:"skipped" bson:"skipped"`
+	Watched        bool               `json:"watched" bson:"watched"`
+	Broken         bool               `json:"broken" bson:"broken"`
+	Unwatched      int                `json:"unwatched" bson:"-"`
+	ReleaseDate    time.Time          `json:"release_date" bson:"release_date"`
+	Paths          []Path             `json:"paths" bson:"paths"`
+	Cover          string             `json:"cover" bson:"-"`
+	Background     string             `json:"background" bson:"-"`
 }
 
 type Feed struct { // model
@@ -203,12 +203,12 @@ type Feed struct { // model
 	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
-	Name      string    `json:&#34;name&#34; bson:&#34;name&#34;`
-	Url       string    `json:&#34;url&#34; bson:&#34;url&#34;`
-	Source    string    `json:&#34;source&#34; bson:&#34;source&#34;`
-	Type      string    `json:&#34;type&#34; bson:&#34;type&#34;`
-	Active    bool      `json:&#34;active&#34; bson:&#34;active&#34;`
-	Processed time.Time `json:&#34;processed&#34; bson:&#34;processed&#34;`
+	Name      string    `json:"name" bson:"name"`
+	Url       string    `json:"url" bson:"url"`
+	Source    string    `json:"source" bson:"source"`
+	Type      string    `json:"type" bson:"type"`
+	Active    bool      `json:"active" bson:"active"`
+	Processed time.Time `json:"processed" bson:"processed"`
 }
 
 type Medium struct { // model
@@ -216,34 +216,34 @@ type Medium struct { // model
 	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
-	Type           string             `json:&#34;type&#34; bson:&#34;_type&#34;`
-	Kind           primitive.Symbol   `json:&#34;kind&#34; bson:&#34;kind&#34;`
-	Source         string             `json:&#34;source&#34; bson:&#34;source&#34;`
-	SourceId       string             `json:&#34;source_id&#34; bson:&#34;source_id&#34;`
-	Title          string             `json:&#34;title&#34; bson:&#34;title&#34;`
-	Description    string             `json:&#34;description&#34; bson:&#34;description&#34;`
-	Slug           string             `json:&#34;slug&#34; bson:&#34;slug&#34;`
-	Text           []string           `json:&#34;text&#34; bson:&#34;text&#34;`
-	Display        string             `json:&#34;display&#34; bson:&#34;display&#34;`
-	Directory      string             `json:&#34;directory&#34; bson:&#34;directory&#34;`
-	Search         string             `json:&#34;search&#34; bson:&#34;search&#34;`
-	SearchParams   *SearchParams      `json:&#34;search_params&#34; bson:&#34;search_params&#34;`
-	Active         bool               `json:&#34;active&#34; bson:&#34;active&#34;`
-	Downloaded     bool               `json:&#34;downloaded&#34; bson:&#34;downloaded&#34;`
-	Completed      bool               `json:&#34;completed&#34; bson:&#34;completed&#34;`
-	Skipped        bool               `json:&#34;skipped&#34; bson:&#34;skipped&#34;`
-	Watched        bool               `json:&#34;watched&#34; bson:&#34;watched&#34;`
-	Broken         bool               `json:&#34;broken&#34; bson:&#34;broken&#34;`
-	Favorite       bool               `json:&#34;favorite&#34; bson:&#34;favorite&#34;`
-	Unwatched      int                `json:&#34;unwatched&#34; bson:&#34;unwatched&#34;`
-	ReleaseDate    time.Time          `json:&#34;release_date&#34; bson:&#34;release_date&#34;`
-	Paths          []Path             `json:&#34;paths&#34; bson:&#34;paths&#34;`
-	Cover          string             `json:&#34;cover&#34; bson:&#34;-&#34;`
-	Background     string             `json:&#34;background&#34; bson:&#34;-&#34;`
-	SeriesId       primitive.ObjectID `json:&#34;series_id&#34; bson:&#34;series_id&#34;`
-	SeasonNumber   int                `json:&#34;season_number&#34; bson:&#34;season_number&#34;`
-	EpisodeNumber  int                `json:&#34;episode_number&#34; bson:&#34;episode_number&#34;`
-	AbsoluteNumber int                `json:&#34;absolute_number&#34; bson:&#34;absolute_number&#34;`
+	Type           string             `json:"type" bson:"_type"`
+	Kind           primitive.Symbol   `json:"kind" bson:"kind"`
+	Source         string             `json:"source" bson:"source"`
+	SourceId       string             `json:"source_id" bson:"source_id"`
+	Title          string             `json:"title" bson:"title"`
+	Description    string             `json:"description" bson:"description"`
+	Slug           string             `json:"slug" bson:"slug"`
+	Text           []string           `json:"text" bson:"text"`
+	Display        string             `json:"display" bson:"display"`
+	Directory      string             `json:"directory" bson:"directory"`
+	Search         string             `json:"search" bson:"search"`
+	SearchParams   *SearchParams      `json:"search_params" bson:"search_params"`
+	Active         bool               `json:"active" bson:"active"`
+	Downloaded     bool               `json:"downloaded" bson:"downloaded"`
+	Completed      bool               `json:"completed" bson:"completed"`
+	Skipped        bool               `json:"skipped" bson:"skipped"`
+	Watched        bool               `json:"watched" bson:"watched"`
+	Broken         bool               `json:"broken" bson:"broken"`
+	Favorite       bool               `json:"favorite" bson:"favorite"`
+	Unwatched      int                `json:"unwatched" bson:"unwatched"`
+	ReleaseDate    time.Time          `json:"release_date" bson:"release_date"`
+	Paths          []Path             `json:"paths" bson:"paths"`
+	Cover          string             `json:"cover" bson:"-"`
+	Background     string             `json:"background" bson:"-"`
+	SeriesId       primitive.ObjectID `json:"series_id" bson:"series_id"`
+	SeasonNumber   int                `json:"season_number" bson:"season_number"`
+	EpisodeNumber  int                `json:"episode_number" bson:"episode_number"`
+	AbsoluteNumber int                `json:"absolute_number" bson:"absolute_number"`
 }
 
 type Movie struct { // model
@@ -251,29 +251,29 @@ type Movie struct { // model
 	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
-	Type         string           `json:&#34;type&#34; bson:&#34;_type&#34;`
-	Kind         primitive.Symbol `json:&#34;kind&#34; bson:&#34;kind&#34;`
-	Source       string           `json:&#34;source&#34; bson:&#34;source&#34;`
-	SourceId     string           `json:&#34;source_id&#34; bson:&#34;source_id&#34;`
-	Title        string           `json:&#34;title&#34; bson:&#34;title&#34;`
-	Description  string           `json:&#34;description&#34; bson:&#34;description&#34;`
-	Slug         string           `json:&#34;slug&#34; bson:&#34;slug&#34;`
-	Text         []string         `json:&#34;text&#34; bson:&#34;text&#34;`
-	Display      string           `json:&#34;display&#34; bson:&#34;display&#34;`
-	Directory    string           `json:&#34;directory&#34; bson:&#34;directory&#34;`
-	Search       string           `json:&#34;search&#34; bson:&#34;search&#34;`
-	SearchParams *SearchParams    `json:&#34;search_params&#34; bson:&#34;search_params&#34;`
-	Active       bool             `json:&#34;active&#34; bson:&#34;active&#34;`
-	Downloaded   bool             `json:&#34;downloaded&#34; bson:&#34;downloaded&#34;`
-	Completed    bool             `json:&#34;completed&#34; bson:&#34;completed&#34;`
-	Skipped      bool             `json:&#34;skipped&#34; bson:&#34;skipped&#34;`
-	Watched      bool             `json:&#34;watched&#34; bson:&#34;watched&#34;`
-	Broken       bool             `json:&#34;broken&#34; bson:&#34;broken&#34;`
-	Favorite     bool             `json:&#34;favorite&#34; bson:&#34;favorite&#34;`
-	ReleaseDate  time.Time        `json:&#34;release_date&#34; bson:&#34;release_date&#34;`
-	Paths        []Path           `json:&#34;paths&#34; bson:&#34;paths&#34;`
-	Cover        string           `json:&#34;cover&#34; bson:&#34;-&#34;`
-	Background   string           `json:&#34;background&#34; bson:&#34;-&#34;`
+	Type         string           `json:"type" bson:"_type"`
+	Kind         primitive.Symbol `json:"kind" bson:"kind"`
+	Source       string           `json:"source" bson:"source"`
+	SourceId     string           `json:"source_id" bson:"source_id"`
+	Title        string           `json:"title" bson:"title"`
+	Description  string           `json:"description" bson:"description"`
+	Slug         string           `json:"slug" bson:"slug"`
+	Text         []string         `json:"text" bson:"text"`
+	Display      string           `json:"display" bson:"display"`
+	Directory    string           `json:"directory" bson:"directory"`
+	Search       string           `json:"search" bson:"search"`
+	SearchParams *SearchParams    `json:"search_params" bson:"search_params"`
+	Active       bool             `json:"active" bson:"active"`
+	Downloaded   bool             `json:"downloaded" bson:"downloaded"`
+	Completed    bool             `json:"completed" bson:"completed"`
+	Skipped      bool             `json:"skipped" bson:"skipped"`
+	Watched      bool             `json:"watched" bson:"watched"`
+	Broken       bool             `json:"broken" bson:"broken"`
+	Favorite     bool             `json:"favorite" bson:"favorite"`
+	ReleaseDate  time.Time        `json:"release_date" bson:"release_date"`
+	Paths        []Path           `json:"paths" bson:"paths"`
+	Cover        string           `json:"cover" bson:"-"`
+	Background   string           `json:"background" bson:"-"`
 }
 
 type Release struct { // model
@@ -281,41 +281,41 @@ type Release struct { // model
 	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
-	Type        string    `json:&#34;type&#34; bson:&#34;type&#34;`
-	Source      string    `json:&#34;source&#34; bson:&#34;source&#34;`
-	Raw         string    `json:&#34;raw&#34; bson:&#34;raw&#34;`
-	Title       string    `json:&#34;title&#34; bson:&#34;title&#34;`
-	Description string    `json:&#34;description&#34; bson:&#34;description&#34;`
-	Size        string    `json:&#34;size&#34; bson:&#34;size&#34;`
-	View        string    `json:&#34;view&#34; bson:&#34;view&#34;`
-	Download    string    `json:&#34;download&#34; bson:&#34;download&#34;`
-	Infohash    string    `json:&#34;infohash&#34; bson:&#34;infohash&#34;`
-	Name        string    `json:&#34;name&#34; bson:&#34;name&#34;`
-	Season      int       `json:&#34;season&#34; bson:&#34;season&#34;`
-	Episode     int       `json:&#34;episode&#34; bson:&#34;episode&#34;`
-	Volume      int       `json:&#34;volume&#34; bson:&#34;volume&#34;`
-	Checksum    string    `json:&#34;checksum&#34; bson:&#34;checksum&#34;`
-	Group       string    `json:&#34;group&#34; bson:&#34;group&#34;`
-	Author      string    `json:&#34;author&#34; bson:&#34;author&#34;`
-	Verified    bool      `json:&#34;verified&#34; bson:&#34;verified&#34;`
-	Widescreen  bool      `json:&#34;widescreen&#34; bson:&#34;widescreen&#34;`
-	Uncensored  bool      `json:&#34;uncensored&#34; bson:&#34;uncensored&#34;`
-	Bluray      bool      `json:&#34;bluray&#34; bson:&#34;bluray&#34;`
-	Resolution  string    `json:&#34;resolution&#34; bson:&#34;resolution&#34;`
-	Encoding    string    `json:&#34;encoding&#34; bson:&#34;encoding&#34;`
-	Quality     string    `json:&#34;quality&#34; bson:&#34;quality&#34;`
-	PublishedAt time.Time `json:&#34;published_at&#34; bson:&#34;published_at&#34;`
+	Type        string    `json:"type" bson:"type"`
+	Source      string    `json:"source" bson:"source"`
+	Raw         string    `json:"raw" bson:"raw"`
+	Title       string    `json:"title" bson:"title"`
+	Description string    `json:"description" bson:"description"`
+	Size        string    `json:"size" bson:"size"`
+	View        string    `json:"view" bson:"view"`
+	Download    string    `json:"download" bson:"download"`
+	Infohash    string    `json:"infohash" bson:"infohash"`
+	Name        string    `json:"name" bson:"name"`
+	Season      int       `json:"season" bson:"season"`
+	Episode     int       `json:"episode" bson:"episode"`
+	Volume      int       `json:"volume" bson:"volume"`
+	Checksum    string    `json:"checksum" bson:"checksum"`
+	Group       string    `json:"group" bson:"group"`
+	Author      string    `json:"author" bson:"author"`
+	Verified    bool      `json:"verified" bson:"verified"`
+	Widescreen  bool      `json:"widescreen" bson:"widescreen"`
+	Uncensored  bool      `json:"uncensored" bson:"uncensored"`
+	Bluray      bool      `json:"bluray" bson:"bluray"`
+	Resolution  string    `json:"resolution" bson:"resolution"`
+	Encoding    string    `json:"encoding" bson:"encoding"`
+	Quality     string    `json:"quality" bson:"quality"`
+	PublishedAt time.Time `json:"published_at" bson:"published_at"`
 }
 
 type SearchParams struct { // struct
-	Type       string `json:&#34;type&#34; bson:&#34;type&#34;`
-	Verified   bool   `json:&#34;verified&#34; bson:&#34;verified&#34;`
-	Group      string `json:&#34;group&#34; bson:&#34;group&#34;`
-	Author     string `json:&#34;author&#34; bson:&#34;author&#34;`
-	Resolution int    `json:&#34;resolution&#34; bson:&#34;resolution&#34;`
-	Source     string `json:&#34;source&#34; bson:&#34;source&#34;`
-	Uncensored bool   `json:&#34;uncensored&#34; bson:&#34;uncensored&#34;`
-	Bluray     bool   `json:&#34;bluray&#34; bson:&#34;bluray&#34;`
+	Type       string `json:"type" bson:"type"`
+	Verified   bool   `json:"verified" bson:"verified"`
+	Group      string `json:"group" bson:"group"`
+	Author     string `json:"author" bson:"author"`
+	Resolution int    `json:"resolution" bson:"resolution"`
+	Source     string `json:"source" bson:"source"`
+	Uncensored bool   `json:"uncensored" bson:"uncensored"`
+	Bluray     bool   `json:"bluray" bson:"bluray"`
 }
 
 type Series struct { // model
@@ -323,34 +323,34 @@ type Series struct { // model
 	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
-	Type          string           `json:&#34;type&#34; bson:&#34;_type&#34;`
-	Kind          primitive.Symbol `json:&#34;kind&#34; bson:&#34;kind&#34;`
-	Source        string           `json:&#34;source&#34; bson:&#34;source&#34;`
-	SourceId      string           `json:&#34;source_id&#34; bson:&#34;source_id&#34;`
-	Title         string           `json:&#34;title&#34; bson:&#34;title&#34;`
-	Description   string           `json:&#34;description&#34; bson:&#34;description&#34;`
-	Slug          string           `json:&#34;slug&#34; bson:&#34;slug&#34;`
-	Text          []string         `json:&#34;text&#34; bson:&#34;text&#34;`
-	Display       string           `json:&#34;display&#34; bson:&#34;display&#34;`
-	Directory     string           `json:&#34;directory&#34; bson:&#34;directory&#34;`
-	Search        string           `json:&#34;search&#34; bson:&#34;search&#34;`
-	SearchParams  *SearchParams    `json:&#34;search_params&#34; bson:&#34;search_params&#34;`
-	Active        bool             `json:&#34;active&#34; bson:&#34;active&#34;`
-	Downloaded    bool             `json:&#34;downloaded&#34; bson:&#34;downloaded&#34;`
-	Completed     bool             `json:&#34;completed&#34; bson:&#34;completed&#34;`
-	Skipped       bool             `json:&#34;skipped&#34; bson:&#34;skipped&#34;`
-	Watched       bool             `json:&#34;watched&#34; bson:&#34;watched&#34;`
-	Broken        bool             `json:&#34;broken&#34; bson:&#34;broken&#34;`
-	Favorite      bool             `json:&#34;favorite&#34; bson:&#34;favorite&#34;`
-	Unwatched     int              `json:&#34;unwatched&#34; bson:&#34;-&#34;`
-	ReleaseDate   time.Time        `json:&#34;release_date&#34; bson:&#34;release_date&#34;`
-	Paths         []Path           `json:&#34;paths&#34; bson:&#34;paths&#34;`
-	Cover         string           `json:&#34;cover&#34; bson:&#34;-&#34;`
-	Background    string           `json:&#34;background&#34; bson:&#34;-&#34;`
-	CurrentSeason int              `json:&#34;currentSeason&#34; bson:&#34;-&#34;`
-	Seasons       []int            `json:&#34;seasons&#34; bson:&#34;-&#34;`
-	Episodes      []*Episode       `json:&#34;episodes&#34; bson:&#34;-&#34;`
-	Watches       []*Watch         `json:&#34;watches&#34; bson:&#34;-&#34;`
+	Type          string           `json:"type" bson:"_type"`
+	Kind          primitive.Symbol `json:"kind" bson:"kind"`
+	Source        string           `json:"source" bson:"source"`
+	SourceId      string           `json:"source_id" bson:"source_id"`
+	Title         string           `json:"title" bson:"title"`
+	Description   string           `json:"description" bson:"description"`
+	Slug          string           `json:"slug" bson:"slug"`
+	Text          []string         `json:"text" bson:"text"`
+	Display       string           `json:"display" bson:"display"`
+	Directory     string           `json:"directory" bson:"directory"`
+	Search        string           `json:"search" bson:"search"`
+	SearchParams  *SearchParams    `json:"search_params" bson:"search_params"`
+	Active        bool             `json:"active" bson:"active"`
+	Downloaded    bool             `json:"downloaded" bson:"downloaded"`
+	Completed     bool             `json:"completed" bson:"completed"`
+	Skipped       bool             `json:"skipped" bson:"skipped"`
+	Watched       bool             `json:"watched" bson:"watched"`
+	Broken        bool             `json:"broken" bson:"broken"`
+	Favorite      bool             `json:"favorite" bson:"favorite"`
+	Unwatched     int              `json:"unwatched" bson:"-"`
+	ReleaseDate   time.Time        `json:"release_date" bson:"release_date"`
+	Paths         []Path           `json:"paths" bson:"paths"`
+	Cover         string           `json:"cover" bson:"-"`
+	Background    string           `json:"background" bson:"-"`
+	CurrentSeason int              `json:"currentSeason" bson:"-"`
+	Seasons       []int            `json:"seasons" bson:"-"`
+	Episodes      []*Episode       `json:"episodes" bson:"-"`
+	Watches       []*Watch         `json:"watches" bson:"-"`
 }
 
 type Watch struct { // model
@@ -358,9 +358,9 @@ type Watch struct { // model
 	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
-	Username  string             `json:&#34;username&#34; bson:&#34;username&#34;`
-	Player    string             `json:&#34;player&#34; bson:&#34;player&#34;`
-	WatchedAt time.Time          `json:&#34;watched_at&#34; bson:&#34;watched_at&#34;`
-	MediumId  primitive.ObjectID `json:&#34;medium_id&#34; bson:&#34;medium_id&#34;`
-	Medium    *Medium            `json:&#34;medium&#34; bson:&#34;-&#34;`
+	Username  string             `json:"username" bson:"username"`
+	Player    string             `json:"player" bson:"player"`
+	WatchedAt time.Time          `json:"watched_at" bson:"watched_at"`
+	MediumId  primitive.ObjectID `json:"medium_id" bson:"medium_id"`
+	Medium    *Medium            `json:"medium" bson:"-"`
 }
