@@ -2,15 +2,26 @@ package app
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/dashotv/grimoire"
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 )
 
+func dbUrl() string {
+	godotenv.Load("../.env")
+	return os.Getenv("TEST_MONGODB_URL")
+}
+
 func TestRelease(t *testing.T) {
-	g, err := grimoire.New[*Release]("mongodb://localhost:27017", "torch_development", "torrents")
+	url := dbUrl()
+	if url == "" {
+		t.Skip("TEST_MONGODB_URL not set")
+	}
+	g, err := grimoire.New[*Release](url, "torch_development", "torrents")
 	assert.NoError(t, err, "grimoire.New")
 
 	list, err := g.Query().Where("type", "tv").Limit(1).Run()
@@ -19,7 +30,11 @@ func TestRelease(t *testing.T) {
 }
 
 func TestReleasesPopular(t *testing.T) {
-	g, err := grimoire.New[*Release]("mongodb://localhost:27017", "torch_development", "torrents")
+	url := dbUrl()
+	if url == "" {
+		t.Skip("TEST_MONGODB_URL not set")
+	}
+	g, err := grimoire.New[*Release](url, "torch_development", "torrents")
 	assert.NoError(t, err, "grimoire.New")
 
 	date := time.Now().AddDate(0, 0, -1)

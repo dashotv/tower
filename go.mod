@@ -7,6 +7,7 @@ require (
 	github.com/dashotv/grimoire v0.2.5
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gin-gonic/gin v1.9.1
+	github.com/joho/godotenv v1.5.1
 	github.com/kamva/mgm/v3 v3.5.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/philippgille/gokv/redis v0.6.0
