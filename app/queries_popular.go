@@ -9,21 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (c *Connector) ReleaseSetting(id, setting string, value bool) error {
-	release := &Release{}
-	err := c.Release.Find(id, release)
-	if err != nil {
-		return err
-	}
-
-	switch setting {
-	case "verified":
-		release.Verified = value
-	}
-
-	return c.Release.Update(release)
-}
-
 func (c *Connector) ReleasesPopular(t string, date time.Time, count int) ([]*Popular, error) {
 	return ReleasesPopular(c.Release.Collection, t, date, count)
 }
@@ -40,21 +25,11 @@ ReleasesPopular returns the most popular releases for a given type and date.
 Equivalent to the following MongoDB query:
 db.torrents.aggregate([
 
-	{
-	    $project: {name: 1, type: 1, published: "$published_at"}
-	},
-	{
-	    $match: { type: "tv", published: { $gte: new Date("2023-09-24 12:25:00") } }
-	},
-	{
-	    $group: {_id: "$name", count: {$sum: 1}}
-	},
-	{
-	    $sort: {count: -1}
-	},
-	{
-	    $limit: 25
-	}
+	{ $project: {name: 1, type: 1, published: "$published_at"} },
+	{ $match: { type: "tv", published: { $gte: new Date("2023-09-24 12:25:00") } } },
+	{ $group: {_id: "$name", count: {$sum: 1}} },
+	{ $sort: {count: -1} },
+	{ $limit: 25 }
 
 ])
 */

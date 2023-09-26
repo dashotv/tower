@@ -1,0 +1,13 @@
+name: path
+type: model
+fields:
+  - name: type
+    type: primitive.Symbol
+  - name: remote
+    type: string
+  - name: local
+    type: string
+  - name: size
+    type: int
+  - name: extension
+    type: string

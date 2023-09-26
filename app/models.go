@@ -17,6 +17,7 @@ type Connector struct {
 	Feed     *grimoire.Store[*Feed]
 	Medium   *grimoire.Store[*Medium]
 	Movie    *grimoire.Store[*Movie]
+	Path     *grimoire.Store[*Path]
 	Release  *grimoire.Store[*Release]
 	Series   *grimoire.Store[*Series]
 	Watch    *grimoire.Store[*Watch]
@@ -72,6 +73,15 @@ func NewConnector() (*Connector, error) {
 	if err != nil {
 		return nil, err
 	}
+	s, err = settingsFor("path")
+	if err != nil {
+		return nil, err
+	}
+
+	path, err := grimoire.New[*Path](s.URI, s.Database, s.Collection)
+	if err != nil {
+		return nil, err
+	}
 	s, err = settingsFor("release")
 	if err != nil {
 		return nil, err
@@ -106,6 +116,7 @@ func NewConnector() (*Connector, error) {
 		Feed:     feed,
 		Medium:   medium,
 		Movie:    movie,
+		Path:     path,
 		Release:  release,
 		Series:   series,
 		Watch:    watch,
@@ -274,6 +285,18 @@ type Movie struct { // model
 	Paths        []Path           `json:"paths" bson:"paths"`
 	Cover        string           `json:"cover" bson:"-"`
 	Background   string           `json:"background" bson:"-"`
+}
+
+type Path struct { // model
+	grimoire.Document `bson:",inline"` // includes default model settings
+	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
+	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
+	Type      primitive.Symbol `json:"type" bson:"type"`
+	Remote    string           `json:"remote" bson:"remote"`
+	Local     string           `json:"local" bson:"local"`
+	Size      int              `json:"size" bson:"size"`
+	Extension string           `json:"extension" bson:"extension"`
 }
 
 type Release struct { // model
