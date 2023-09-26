@@ -17,7 +17,7 @@ func (s *Server) Cron() error {
 		// 	return errors.Wrap(err, "adding cron function")
 		// }
 
-		// every 15 minutes
+		// every 5 minutes
 		if _, err := c.AddFunc("0 */5 * * * *", s.PopularReleases); err != nil {
 			return errors.Wrap(err, "adding cron function: PopularReleases")
 		}
