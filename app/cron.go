@@ -36,7 +36,6 @@ func (s *Server) DownloadsProcess() {
 }
 
 func (s *Server) PopularReleases() {
-	s.Log.Info("PopularReleases: started")
 
 	limit := 25
 	intervals := map[string]int{
@@ -45,11 +44,11 @@ func (s *Server) PopularReleases() {
 		"monthly": 30,
 	}
 
+	start := time.Now()
 	for f, i := range intervals {
 		for _, t := range releaseTypes {
 			date := time.Now().AddDate(0, 0, -i)
 
-			s.Log.Infof("PopularReleases: %s %s", f, t)
 			results, err := App().DB.ReleasesPopularQuery(t, date, limit)
 			if err != nil {
 				s.Log.Error(errors.Wrap(err, fmt.Sprintf("popular releases %s %s", f, t)))
@@ -61,5 +60,6 @@ func (s *Server) PopularReleases() {
 		}
 	}
 
-	s.Log.Info("PopularReleases: finished")
+	diff := time.Since(start)
+	s.Log.Infof("PopularReleases: took %s", diff)
 }
