@@ -9,8 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (c *Connector) ReleasesPopular(t string, date time.Time, count int) ([]*Popular, error) {
-	return ReleasesPopular(c.Release.Collection, t, date, count)
+func (c *Connector) ReleasesPopularQuery(t string, date time.Time, count int) ([]*Popular, error) {
+	return ReleasesPopularQuery(c.Release.Collection, t, date, count)
 }
 
 type Popular struct {
@@ -33,7 +33,7 @@ db.torrents.aggregate([
 
 ])
 */
-func ReleasesPopular(coll *mgm.Collection, t string, date time.Time, count int) ([]*Popular, error) {
+func ReleasesPopularQuery(coll *mgm.Collection, t string, date time.Time, count int) ([]*Popular, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 

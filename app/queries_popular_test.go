@@ -28,7 +28,7 @@ func TestReleasesPopular(t *testing.T) {
 	fmt.Printf("date: %s\n", date)
 
 	start := time.Now()
-	list, err := ReleasesPopular(g.Collection, "anime", date, limit)
+	list, err := ReleasesPopularQuery(g.Collection, "movies", date, limit)
 	end := time.Now()
 	assert.NoError(t, err, "popular releases today")
 	assert.Len(t, list, limit, "popular releases today")
@@ -36,6 +36,6 @@ func TestReleasesPopular(t *testing.T) {
 	fmt.Printf("time: %s\n", end.Sub(start))
 	for _, r := range list {
 		// fmt.Printf("%35s %5s %s\n", r.PublishedAt, r.Type, r.Name)
-		fmt.Printf("%#v\n", r)
+		fmt.Printf("%-35.35s %d\n", r.Name, r.Count)
 	}
 }

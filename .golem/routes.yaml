@@ -195,6 +195,12 @@ groups:
         params:
           - name: id
             type: string
+      popular:
+        name: popular
+        path: /popular/:interval
+        params:
+          - name: interval
+            type: string
   feeds:
     path: /feeds
     rest: true

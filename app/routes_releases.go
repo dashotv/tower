@@ -1,11 +1,11 @@
 package app
 
 import (
+	"fmt"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-
 	"github.com/dashotv/golem/web"
+	"github.com/gin-gonic/gin"
 )
 
 const releasePageSize = 25
@@ -71,4 +71,25 @@ func ReleasesSetting(c *gin.Context, id string) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"errors": false, "data": s})
+}
+
+func ReleasesPopular(c *gin.Context, interval string) {
+	App().Log.Infof("ReleasesPopular: interval: %s", interval)
+	out := map[string][]*Popular{}
+
+	for _, t := range releaseTypes {
+		results := make([]*Popular, 25)
+		ok, err := App().Cache.Get(fmt.Sprintf("releases_popular_%s_%s", interval, t), &results)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "not found"})
+			return
+		}
+		out[t] = results
+	}
+
+	c.JSON(http.StatusOK, out)
 }
