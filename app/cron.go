@@ -21,6 +21,10 @@ func (s *Server) Cron() error {
 		if _, err := c.AddFunc("0 */5 * * * *", s.PopularReleases); err != nil {
 			return errors.Wrap(err, "adding cron function: PopularReleases")
 		}
+		// every 15 minutes
+		if _, err := c.AddFunc("0 */15 * * * *", s.ProcessFeeds); err != nil {
+			return errors.Wrap(err, "adding cron function: PopularReleases")
+		}
 
 		go func() {
 			s.Log.Info("starting cron...")
@@ -35,8 +39,12 @@ func (s *Server) DownloadsProcess() {
 	s.Log.Info("processing downloads")
 }
 
-func (s *Server) PopularReleases() {
+func (s *Server) ProcessFeeds() {
+	s.Log.Info("processing feeds")
+	App().DB.ProcessFeeds()
+}
 
+func (s *Server) PopularReleases() {
 	limit := 25
 	intervals := map[string]int{
 		"daily":   1,
