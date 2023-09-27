@@ -1,6 +1,9 @@
+include .env
+export $(shell sed 's/=.*//' .env)
+
 all: test
 
-test:
+test: check-env
 	go test -v ./...
 
 generate:
@@ -28,5 +31,10 @@ docker-run:
 # DOCKER_HOST := `/sbin/ifconfig docker0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`
 # to allow docker to talk to localhost mongo
 # $ docker run -it my_application --add-host 'DOCKER_HOST:$DOCKER_HOST'
+
+check-env:
+ifndef TEST_MONGODB_URL
+	$(error TEST_MONGODB_URL is undefined)
+endif
 
 .PHONY: server receiver test generate deps
