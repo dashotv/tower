@@ -3,7 +3,7 @@ export $(shell sed 's/=.*//' .env)
 
 all: test
 
-test: check-env
+test:
 	go test -v ./...
 
 generate:
@@ -37,4 +37,4 @@ ifndef TEST_MONGODB_URL
 	$(error TEST_MONGODB_URL is undefined)
 endif
 
-.PHONY: server receiver test generate deps
+.PHONY: test generate build install server deps docker docker-run check-env
