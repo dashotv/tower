@@ -2,7 +2,7 @@ package parser
 
 import "github.com/mmcdole/gofeed"
 
-func NewRSSParser(URL string) Parser {
+func NewRSSParser(URL string) *RSSParser {
 	return &RSSParser{
 		BaseParser: &BaseParser{URL: URL},
 		fp:         gofeed.NewParser(),

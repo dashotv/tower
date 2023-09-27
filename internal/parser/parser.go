@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 )
 
 func New(t, URL string) Parser {
 	switch t {
 	case "geek":
-		return &GeekParser{BaseParser: &BaseParser{URL: URL}}
-	case "piratebay":
-		return &PiratebayParser{BaseParser: &BaseParser{URL: URL}}
+		return NewGeekParser(os.Getenv("NZBGEEK_API_KEY"), URL)
 	default:
 		return NewRSSParser(URL)
 	}

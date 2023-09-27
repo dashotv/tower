@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRssParser_Parse(t *testing.T) {
-	p := New("rss", "https://nyaa.si/?page=rss&c=1_2&f=0")
+func TestGeekParser_Parse(t *testing.T) {
+	p := New("geek", "https://api.nzbgeek.info/api?t=tvsearch&cat=5020,5030,5040,5045,5050")
 	assert.NotNil(t, p, "instantiate parser")
 
 	err := p.Parse()
@@ -15,5 +15,5 @@ func TestRssParser_Parse(t *testing.T) {
 
 	items, err := p.Items()
 	assert.NoError(t, err, "get items")
-	assert.Len(t, items, 75, "items length")
+	assert.Len(t, items, 100, "items length")
 }
