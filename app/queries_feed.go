@@ -13,12 +13,11 @@ func (c *Connector) ProcessFeeds() error {
 			return err
 		}
 	}
+
+	return nil
 }
 
 func (c *Connector) ProcessFeed(feed *Feed) error {
 	p := parser.New(feed.Type, feed.Url)
-	err := p.Parse()
-	if err != nil {
-		return err
-	}
+	return p.Parse()
 }
