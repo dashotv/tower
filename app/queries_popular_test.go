@@ -7,20 +7,15 @@ import (
 	"time"
 
 	"github.com/dashotv/grimoire"
-	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 )
 
-func dbUrl() string {
-	godotenv.Load("../.env")
-	return os.Getenv("TEST_MONGODB_URL")
-}
-
 func TestRelease(t *testing.T) {
-	url := dbUrl()
+	url := os.Getenv("TEST_MONGODB_URL")
 	if url == "" {
 		t.Skip("TEST_MONGODB_URL not set")
 	}
+
 	g, err := grimoire.New[*Release](url, "torch_development", "torrents")
 	assert.NoError(t, err, "grimoire.New")
 
@@ -30,17 +25,23 @@ func TestRelease(t *testing.T) {
 }
 
 func TestReleasesPopular(t *testing.T) {
-	url := dbUrl()
+	url := os.Getenv("TEST_MONGODB_URL")
 	if url == "" {
 		t.Skip("TEST_MONGODB_URL not set")
 	}
+
+	limit := 25
+	date := time.Now().AddDate(0, 0, -1)
+
 	g, err := grimoire.New[*Release](url, "torch_development", "torrents")
 	assert.NoError(t, err, "grimoire.New")
 
-	date := time.Now().AddDate(0, 0, -1)
-	limit := 25
+	rels, err := g.Query().Where("type", "tv").Desc("created_at").Limit(1).Run()
+	assert.NoError(t, err, "query")
 
-	fmt.Printf("date: %s\n", date)
+	if rels[0].CreatedAt.Before(date) {
+		t.Skip("no releases yesterday")
+	}
 
 	start := time.Now()
 	list, err := ReleasesPopularQuery(g.Collection, "movies", date, limit)
