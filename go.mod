@@ -50,6 +50,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
+	github.com/middelink/go-parse-torrent-name v0.0.0-20190301154245-3ff4efacd4c4 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mmcdole/gofeed v1.2.1 // indirect
 	github.com/mmcdole/goxpp v1.1.0 // indirect

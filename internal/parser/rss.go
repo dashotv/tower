@@ -1,6 +1,11 @@
 package parser
 
-import "github.com/mmcdole/gofeed"
+import (
+	"fmt"
+
+	ptn "github.com/middelink/go-parse-torrent-name"
+	"github.com/mmcdole/gofeed"
+)
 
 func NewRSSParser(URL string) *RSSParser {
 	return &RSSParser{
@@ -31,6 +36,28 @@ func (p *RSSParser) Items() ([]Item, error) {
 		items = append(items, &RSSItem{item: item})
 	}
 	return items, nil
+}
+
+func (p *RSSParser) Process() error {
+	err := p.Parse()
+	if err != nil {
+		return err
+	}
+
+	items, err := p.Items()
+	if err != nil {
+		return err
+	}
+	for _, i := range items {
+		info, err := ptn.Parse(i.Title())
+		if err != nil {
+			return err
+		}
+		fmt.Println(i.Title())
+		fmt.Printf("%#v\n", info)
+		fmt.Print("\n\n")
+	}
+	return nil
 }
 
 type RSSItem struct {

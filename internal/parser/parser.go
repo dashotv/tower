@@ -19,6 +19,7 @@ func New(t, URL string) Parser {
 type Parser interface {
 	Parse() error
 	Items() ([]Item, error)
+	Process() error
 }
 
 type Item interface {
