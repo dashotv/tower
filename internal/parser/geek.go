@@ -36,3 +36,7 @@ func (p *GeekParser) Parse() error {
 func (p *GeekParser) Items() ([]Item, error) {
 	return p.p.Items()
 }
+
+func (p *GeekParser) Process() error {
+	return p.p.Process()
+}
