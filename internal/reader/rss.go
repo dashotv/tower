@@ -3,7 +3,6 @@ package reader
 import (
 	"fmt"
 
-	ptn "github.com/middelink/go-parse-torrent-name"
 	"github.com/mmcdole/gofeed"
 )
 
@@ -49,12 +48,11 @@ func (p *RSSReader) Process() error {
 		return err
 	}
 	for _, i := range items {
-		info, err := ptn.Parse(i.Title())
-		if err != nil {
-			return err
-		}
+		// info, err := ptn.Parse(i.Title())
+		// if err != nil {
+		// 	return err
+		// }
 		fmt.Println(i.Title())
-		fmt.Printf("%#v\n", info)
 		fmt.Print("\n\n")
 	}
 	return nil
@@ -65,7 +63,7 @@ type RSSItem struct {
 }
 
 func (i *RSSItem) Title() string {
-	return i.item.Title
+	return fmt.Sprintf("%s\n%#v\n", i.item.Title, i.item)
 }
 
 func (i *RSSItem) Link() string {
@@ -74,4 +72,31 @@ func (i *RSSItem) Link() string {
 
 func (i *RSSItem) Description() string {
 	return i.item.Description
+}
+
+func (i *RSSItem) Guid() string {
+	return i.item.GUID
+}
+
+func (i *RSSItem) Published() string {
+	return i.item.Published
+}
+
+func (i *RSSItem) Updated() string {
+	return i.item.Updated
+}
+
+//
+// func (i *RSSItem) Enclosure() *Enclosure {
+// 	if i.item.Enclosures == nil {
+// 		return nil
+// 	}
+// 	return &Enclosure{
+// 		URL:  i.item.Enclosures[0].URL,
+// 		Type: i.item.Enclosures[0].Type,
+// 	}
+// }
+
+func (i *RSSItem) Author() string {
+	return i.item.Author.Name
 }
