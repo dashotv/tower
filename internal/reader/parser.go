@@ -1,4 +1,4 @@
-package parser
+package reader
 
 import (
 	"fmt"
@@ -7,16 +7,16 @@ import (
 	"os"
 )
 
-func New(t, URL string) Parser {
+func New(t, URL string) Reader {
 	switch t {
 	case "geek":
-		return NewGeekParser(os.Getenv("NZBGEEK_API_KEY"), URL)
+		return NewGeekReader(os.Getenv("NZBGEEK_API_KEY"), URL)
 	default:
-		return NewRSSParser(URL)
+		return NewRSSReader(URL)
 	}
 }
 
-type Parser interface {
+type Reader interface {
 	Parse() error
 	Items() ([]Item, error)
 	Process() error
@@ -28,20 +28,20 @@ type Item interface {
 	Description() string
 }
 
-type BaseParser struct {
+type BaseReader struct {
 	URL  string
 	Data string
 }
 
-func (p *BaseParser) Parse() error {
+func (p *BaseReader) Parse() error {
 	return fmt.Errorf("not implemented")
 }
 
-func (p *BaseParser) Items() ([]Item, error) {
+func (p *BaseReader) Items() ([]Item, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (p *BaseParser) Read() error {
+func (p *BaseReader) Read() error {
 	resp, err := http.Get(p.URL)
 	if err != nil {
 		return err

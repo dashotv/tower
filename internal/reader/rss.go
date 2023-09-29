@@ -1,4 +1,4 @@
-package parser
+package reader
 
 import (
 	"fmt"
@@ -7,20 +7,20 @@ import (
 	"github.com/mmcdole/gofeed"
 )
 
-func NewRSSParser(URL string) *RSSParser {
-	return &RSSParser{
-		BaseParser: &BaseParser{URL: URL},
+func NewRSSReader(URL string) *RSSReader {
+	return &RSSReader{
+		BaseReader: &BaseReader{URL: URL},
 		fp:         gofeed.NewParser(),
 	}
 }
 
-type RSSParser struct {
-	*BaseParser
+type RSSReader struct {
+	*BaseReader
 	fp   *gofeed.Parser
 	feed *gofeed.Feed
 }
 
-func (p *RSSParser) Parse() error {
+func (p *RSSReader) Parse() error {
 	feed, err := p.fp.ParseURL(p.URL)
 	if err != nil {
 		return err
@@ -30,7 +30,7 @@ func (p *RSSParser) Parse() error {
 	return nil
 }
 
-func (p *RSSParser) Items() ([]Item, error) {
+func (p *RSSReader) Items() ([]Item, error) {
 	var items []Item
 	for _, item := range p.feed.Items {
 		items = append(items, &RSSItem{item: item})
@@ -38,7 +38,7 @@ func (p *RSSParser) Items() ([]Item, error) {
 	return items, nil
 }
 
-func (p *RSSParser) Process() error {
+func (p *RSSReader) Process() error {
 	err := p.Parse()
 	if err != nil {
 		return err

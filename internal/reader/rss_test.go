@@ -1,4 +1,4 @@
-package parser
+package reader
 
 import (
 	"testing"
@@ -6,9 +6,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRssParser_Parse(t *testing.T) {
+func TestRssReader_Parse(t *testing.T) {
 	p := New("rss", "https://nyaa.si/?page=rss&c=1_2&f=0")
-	assert.NotNil(t, p, "instantiate parser")
+	assert.NotNil(t, p, "instantiate reader")
 
 	err := p.Parse()
 	assert.NoError(t, err, "parse feed")
@@ -18,9 +18,9 @@ func TestRssParser_Parse(t *testing.T) {
 	assert.Len(t, items, 75, "items length")
 }
 
-func TestRssParser_Process(t *testing.T) {
+func TestRssReader_Process(t *testing.T) {
 	p := New("rss", "https://nyaa.si/?page=rss&c=1_2&f=0")
-	assert.NotNil(t, p, "instantiate parser")
+	assert.NotNil(t, p, "instantiate reader")
 
 	err := p.Process()
 	assert.NoError(t, err, "parse feed")
