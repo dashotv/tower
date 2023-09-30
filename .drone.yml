@@ -30,6 +30,13 @@ steps:
       command_timeout: 2m
       script:
         - sudo service tower restart
+  - name: slack
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: slack_webhook
+      channel: dev
+      icon_url: https://unsplash.it/256/256/?random
 
 trigger:
   branch:
