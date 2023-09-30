@@ -35,8 +35,6 @@ steps:
     settings:
       webhook:
         from_secret: slack_webhook
-      channel: dev
-      icon_url: https://unsplash.it/256/256/?random
 
 trigger:
   branch:
