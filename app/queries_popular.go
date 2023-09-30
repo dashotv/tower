@@ -15,6 +15,7 @@ func (c *Connector) ReleasesPopularQuery(t string, date time.Time, count int) ([
 
 type Popular struct {
 	Name  string `json:"name" bson:"_id"`
+	Year  int    `json:"year" bson:"year"`
 	Type  string `json:"type" bson:"type"`
 	Count int    `json:"count" bson:"count"`
 }
@@ -38,9 +39,9 @@ func ReleasesPopularQuery(coll *mgm.Collection, t string, date time.Time, count 
 	defer cancel()
 
 	p := []bson.M{
-		{"$project": bson.M{"name": 1, "type": 1, "published": "$published_at"}},
+		{"$project": bson.M{"name": 1, "type": 1, "year": 1, "published": "$published_at"}},
 		{"$match": bson.M{"type": t, "published": bson.M{"$gte": date}}},
-		{"$group": bson.M{"_id": "$name", "type": bson.M{"$first": "$type"}, "count": bson.M{"$sum": 1}}},
+		{"$group": bson.M{"_id": "$name", "type": bson.M{"$first": "$type"}, "year": bson.M{"$first": "$year"}, "count": bson.M{"$sum": 1}}},
 		{"$sort": bson.M{"count": -1}},
 		{"$limit": count},
 	}

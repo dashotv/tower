@@ -10,8 +10,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var url = os.Getenv("TEST_MONGODB_URL")
+
 func TestRelease(t *testing.T) {
-	url := os.Getenv("TEST_MONGODB_URL")
+	url = os.Getenv("TEST_MONGODB_URL")
 	if url == "" {
 		t.Skip("TEST_MONGODB_URL not set")
 	}
@@ -25,7 +27,7 @@ func TestRelease(t *testing.T) {
 }
 
 func TestReleasesPopular(t *testing.T) {
-	url := os.Getenv("TEST_MONGODB_URL")
+	url = os.Getenv("TEST_MONGODB_URL")
 	if url == "" {
 		t.Skip("TEST_MONGODB_URL not set")
 	}
@@ -52,6 +54,6 @@ func TestReleasesPopular(t *testing.T) {
 	fmt.Printf("time: %s\n", end.Sub(start))
 	for _, r := range list {
 		// fmt.Printf("%35s %5s %s\n", r.PublishedAt, r.Type, r.Name)
-		fmt.Printf("%-35.35s %d\n", r.Name, r.Count)
+		fmt.Printf("%-35.35s (%d) %d\n", r.Name, r.Year, r.Count)
 	}
 }

@@ -43,18 +43,18 @@ func (p *RSSReader) Process() error {
 		return err
 	}
 
-	items, err := p.Items()
-	if err != nil {
-		return err
-	}
-	for _, i := range items {
-		// info, err := ptn.Parse(i.Title())
-		// if err != nil {
-		// 	return err
-		// }
-		fmt.Println(i.Title())
-		fmt.Print("\n\n")
-	}
+	// items, err := p.Items()
+	// if err != nil {
+	// 	return err
+	// }
+	// for _, i := range items {
+	// 	// info, err := ptn.Parse(i.Title())
+	// 	// if err != nil {
+	// 	// 	return err
+	// 	// }
+	// 	fmt.Println(i.Title())
+	// 	fmt.Print("\n\n")
+	// }
 	return nil
 }
 
