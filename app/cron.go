@@ -22,9 +22,9 @@ func (s *Server) Cron() error {
 			return errors.Wrap(err, "adding cron function: PopularReleases")
 		}
 		// every 15 minutes
-		if _, err := c.AddFunc("0 */15 * * * *", s.ProcessFeeds); err != nil {
-			return errors.Wrap(err, "adding cron function: PopularReleases")
-		}
+		// if _, err := c.AddFunc("0 */15 * * * *", s.ProcessFeeds); err != nil {
+		// 	return errors.Wrap(err, "adding cron function: PopularReleases")
+		// }
 
 		go func() {
 			s.Log.Info("starting cron...")
