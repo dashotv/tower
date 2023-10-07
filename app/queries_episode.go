@@ -75,8 +75,6 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 					continue
 				}
 			}
-		} else {
-			App().Log.Infof("seriesmap missing: %s", sid)
 		}
 	}
 
