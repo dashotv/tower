@@ -8,6 +8,9 @@ import (
 
 func testConnector() *Connector {
 	url := os.Getenv("TEST_MONGODB_URL")
+	if url == "" {
+		return nil
+	}
 
 	download, err := grimoire.New[*Download](url, "seer_development", "downloads")
 	if err != nil {
