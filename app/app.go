@@ -1,14 +1,14 @@
 package app
 
 import (
-	"os"
+	"fmt"
 	"sync"
+	"time"
 
+	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"github.com/philippgille/gokv/redis"
-	"github.com/sirupsen/logrus"
-	ginlogrus "github.com/toorop/gin-logrus"
-	prefixed "github.com/x-cray/logrus-prefixed-formatter"
+	"go.uber.org/zap"
 )
 
 var once sync.Once
@@ -19,36 +19,42 @@ type Application struct {
 	Router *gin.Engine
 	DB     *Connector
 	Cache  *Cache
-	Log    *logrus.Entry
+	Log    *zap.SugaredLogger
 	// Add additional clients and connections
 }
 
-func logger() *logrus.Entry {
-	logrus.SetLevel(logrus.InfoLevel)
-	logrus.SetFormatter(&prefixed.TextFormatter{DisableTimestamp: false, FullTimestamp: true})
-	host, _ := os.Hostname()
-	return logrus.WithField("prefix", host)
+func logger() (*zap.Logger, error) {
+	return zap.NewProduction()
 }
 
 func initialize() *Application {
 	cfg := ConfigInstance()
-	log := logger()
+
+	zapcfg := zap.NewProductionConfig()
+
+	switch cfg.Mode {
+	case "dev":
+		zapcfg.Development = true
+		zapcfg.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
+	case "release":
+		gin.SetMode(cfg.Mode)
+		zapcfg.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
+	}
+
+	logger, err := logger()
+	if err != nil {
+		fmt.Printf("logger: %s", err)
+		return nil
+	}
+	log := logger.Sugar()
 
 	db, err := NewConnector()
 	if err != nil {
 		log.Errorf("database connection failed: %s", err)
 	}
 
-	if cfg.Mode == "dev" {
-		logrus.SetLevel(logrus.DebugLevel)
-	}
-
-	if cfg.Mode == "release" {
-		gin.SetMode(cfg.Mode)
-	}
-
 	router := gin.New()
-	router.Use(ginlogrus.Logger(log), gin.Recovery())
+	router.Use(ginzap.Ginzap(logger, time.RFC3339, true), ginzap.RecoveryWithZap(logger, true))
 
 	cache, err := NewCache(redis.Options{Address: cfg.Redis.Address})
 	if err != nil {

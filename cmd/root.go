@@ -20,7 +20,6 @@ import (
 	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -91,16 +90,18 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
-		logrus.Warnf("unable to read config: %s\n", err)
+		fmt.Printf("WARN: unable to read config: %s\n", err)
 		return
 	}
 
 	cfg = app.ConfigInstance()
 	if err := viper.Unmarshal(cfg); err != nil {
-		logrus.Fatalf("failed to unmarshal configuration file: %s", err)
+		fmt.Printf("FATAL: failed to unmarshal configuration file: %s", err)
+		os.Exit(1)
 	}
 
 	if err := cfg.Validate(); err != nil {
-		logrus.Fatalf("failed to validate config: %s", err)
+		fmt.Printf("FATAL: failed to validate config: %s", err)
+		os.Exit(1)
 	}
 }

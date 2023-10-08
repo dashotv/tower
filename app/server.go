@@ -6,18 +6,17 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 type Server struct {
 	Router  *gin.Engine
-	Log     *logrus.Entry
+	Log     *zap.SugaredLogger
 	watcher *fsnotify.Watcher
 }
 
 func New() (*Server, error) {
-	log := App().Log.WithField("prefix", "server")
-	s := &Server{Log: log, Router: App().Router}
+	s := &Server{Log: App().Log, Router: App().Router}
 
 	return s, nil
 }

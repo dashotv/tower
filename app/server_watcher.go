@@ -46,16 +46,16 @@ func (s *Server) Watcher() {
 			select {
 			case event, ok := <-s.watcher.Events:
 				if !ok {
-					s.Log.Printf("filesystem watcher: event not ok")
+					s.Log.Infof("filesystem watcher: event not ok")
 					return
 				}
-				s.Log.Printf("%s %s", event.Name, event.Op)
+				s.Log.Infof("%s %s", event.Name, event.Op)
 			case err, ok := <-s.watcher.Errors:
 				if !ok {
-					s.Log.Printf("filesystem watcher: error not ok")
+					s.Log.Infof("filesystem watcher: error not ok")
 					return
 				}
-				s.Log.Printf("error watching files: %s", err)
+				s.Log.Infof("error watching files: %s", err)
 			}
 		}
 	}()
