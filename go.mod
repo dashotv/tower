@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/dashotv/golem v0.8.1
-	github.com/dashotv/grimoire v0.2.7
+	github.com/dashotv/grimoire v0.2.8
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/kamva/mgm/v3 v3.5.0

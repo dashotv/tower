@@ -63,6 +63,8 @@ github.com/dashotv/grimoire v0.2.5 h1:OJTiEEogvAiopvjByRmUmoBDfqZNL3MAUWn5OexL1O
 github.com/dashotv/grimoire v0.2.5/go.mod h1:TO6prTpW5F0719t4F8ImRrqiWpj8qd9FwtpcjVQ3+kE=
 github.com/dashotv/grimoire v0.2.7 h1:BErpW5LP9u0Sz4nlr55AEs3m5pS2Xed4u+9O33bLg8I=
 github.com/dashotv/grimoire v0.2.7/go.mod h1:q76AxToGXZ4acrFIt+ZyCrupxeymiamJzlXO6qtSHzM=
+github.com/dashotv/grimoire v0.2.8 h1:t8NWHZGdzH7W1oMGvCxDZ/aVWRj34iVlIEjSGLfJ9/0=
+github.com/dashotv/grimoire v0.2.8/go.mod h1:q76AxToGXZ4acrFIt+ZyCrupxeymiamJzlXO6qtSHzM=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
