@@ -27,7 +27,7 @@ func (c *Connector) SeriesAll() ([]*Series, error) {
 }
 
 func (c *Connector) SeriesAllUnwatched(s *Series) (int, error) {
-	list, err := c.Episode.Query().Where("series_id", s.ID).GreaterThan("season_number", 0).Where("completed", true).Limit(999).Run()
+	list, err := c.Episode.Query().Where("series_id", s.ID).GreaterThan("season_number", 0).Where("completed", true).Limit(-1).Run()
 	if err != nil {
 		return 0, err
 	}
