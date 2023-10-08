@@ -3,11 +3,13 @@ module github.com/dashotv/tower
 go 1.18
 
 require (
+	github.com/clerkinc/clerk-sdk-go v1.48.3
 	github.com/dashotv/golem v0.8.1
 	github.com/dashotv/grimoire v0.2.8
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gin-contrib/zap v0.2.0
 	github.com/gin-gonic/gin v1.9.1
+	github.com/joho/godotenv v1.5.1
 	github.com/kamva/mgm/v3 v3.5.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/philippgille/gokv/redis v0.6.0
@@ -29,6 +31,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
+	github.com/go-jose/go-jose/v3 v3.0.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.15.4 // indirect
