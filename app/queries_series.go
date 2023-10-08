@@ -70,7 +70,7 @@ func (c *Connector) SeriesSeasons(id string) ([]int, error) {
 	App().Log.Infof("seasons: oid=%s", oid)
 
 	col := c.Episode.Collection
-	results, err := col.Distinct(context.TODO(), "season_number", bson.D{{"series_id", oid}})
+	results, err := col.Distinct(context.TODO(), "season_number", bson.D{{Key: "series_id", Value: oid}})
 	if err != nil {
 		return nil, err
 	}
