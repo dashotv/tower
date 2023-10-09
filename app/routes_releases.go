@@ -17,7 +17,7 @@ func ReleasesIndex(c *gin.Context) {
 		return
 	}
 
-	results, err := App().DB.Release.Query().
+	results, err := db.Release.Query().
 		Desc("created_at").
 		Limit(releasePageSize).Skip((page - 1) * releasePageSize).
 		Run()
@@ -35,7 +35,7 @@ func ReleasesCreate(c *gin.Context) {
 
 func ReleasesShow(c *gin.Context, id string) {
 	result := &Release{}
-	err := App().DB.Release.Find(id, result)
+	err := db.Release.Find(id, result)
 	if err != nil {
 		if err.Error() == "mongo: no documents in result" {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -64,7 +64,7 @@ func ReleasesSetting(c *gin.Context, id string) {
 		return
 	}
 
-	err = App().DB.ReleaseSetting(id, s.Setting, s.Value)
+	err = db.ReleaseSetting(id, s.Setting, s.Value)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -74,12 +74,12 @@ func ReleasesSetting(c *gin.Context, id string) {
 }
 
 func ReleasesPopular(c *gin.Context, interval string) {
-	App().Log.Infof("ReleasesPopular: interval: %s", interval)
+	log.Infof("ReleasesPopular: interval: %s", interval)
 	out := map[string][]*Popular{}
 
 	for _, t := range releaseTypes {
 		results := make([]*Popular, 25)
-		ok, err := App().Cache.Get(fmt.Sprintf("releases_popular_%s_%s", interval, t), &results)
+		ok, err := cache.Get(fmt.Sprintf("releases_popular_%s_%s", interval, t), &results)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

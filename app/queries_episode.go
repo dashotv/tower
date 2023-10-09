@@ -59,7 +59,7 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 			//} else {
 			unwatched, err := c.SeriesAllUnwatched(seriesMap[sid])
 			if err != nil {
-				App().Log.Errorf("getting unwatched %s: %s", sid, err)
+				c.log.Errorf("getting unwatched %s: %s", sid, err)
 			}
 			e.Unwatched = unwatched
 			e.Active = seriesMap[sid].Active
@@ -78,7 +78,7 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 		}
 	}
 
-	App().Log.Infof("episodes %d sids %d series %d seriesmap %d", len(list), len(sids), len(series), len(maps.Keys(seriesMap)))
+	c.log.Infof("episodes %d sids %d series %d seriesmap %d", len(list), len(sids), len(series), len(maps.Keys(seriesMap)))
 	return list, nil
 }
 
@@ -105,7 +105,7 @@ func (c *Connector) EpisodeSetting(id, setting string, value bool) error {
 
 func (c *Connector) EpisodePaths(id string) ([]Path, error) {
 	e := &Episode{}
-	err := App().DB.Episode.Find(id, e)
+	err := db.Episode.Find(id, e)
 	if err != nil {
 		return nil, err
 	}

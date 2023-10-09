@@ -17,13 +17,13 @@ func MoviesIndex(c *gin.Context) {
 		return
 	}
 
-	count, err := App().DB.Series.Count(bson.M{"_type": "Movie"})
+	count, err := db.Series.Count(bson.M{"_type": "Movie"})
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	q := App().DB.Movie.Query()
+	q := db.Movie.Query()
 	results, err := q.
 		Where("_type", "Movie").
 		Limit(pagesize).
@@ -57,7 +57,7 @@ func MoviesCreate(c *gin.Context) {
 
 func MoviesShow(c *gin.Context, id string) {
 	m := &Movie{}
-	err := App().DB.Movie.Find(id, m)
+	err := db.Movie.Find(id, m)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -85,7 +85,7 @@ func MoviesUpdate(c *gin.Context, id string) {
 		return
 	}
 
-	err = App().DB.MovieSetting(id, data.Setting, data.Value)
+	err = db.MovieSetting(id, data.Setting, data.Value)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -102,7 +102,7 @@ func MoviesSetting(c *gin.Context, id string) {
 		return
 	}
 
-	err = App().DB.MovieSetting(id, data.Setting, data.Value)
+	err = db.MovieSetting(id, data.Setting, data.Value)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -116,7 +116,7 @@ func MoviesDelete(c *gin.Context, id string) {
 }
 
 func MoviesPaths(c *gin.Context, id string) {
-	results, err := App().DB.MoviePaths(id)
+	results, err := db.MoviePaths(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

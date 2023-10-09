@@ -85,23 +85,4 @@ func initConfig() {
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".tower")
 	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Printf("WARN: unable to read config: %s\n", err)
-		return
-	}
-
-	cfg = app.ConfigInstance()
-	if err := viper.Unmarshal(cfg); err != nil {
-		fmt.Printf("FATAL: failed to unmarshal configuration file: %s", err)
-		os.Exit(1)
-	}
-
-	if err := cfg.Validate(); err != nil {
-		fmt.Printf("FATAL: failed to validate config: %s", err)
-		os.Exit(1)
-	}
 }

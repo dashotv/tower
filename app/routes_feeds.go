@@ -7,7 +7,7 @@ import (
 )
 
 func FeedsIndex(c *gin.Context) {
-	results, err := App().DB.Feed.Query().
+	results, err := db.Feed.Query().
 		Desc("processed").
 		Limit(1000).
 		Run()
@@ -25,7 +25,7 @@ func FeedsCreate(c *gin.Context) {
 
 func FeedsShow(c *gin.Context, id string) {
 	result := &Feed{}
-	err := App().DB.Feed.Find(id, result)
+	err := db.Feed.Find(id, result)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

@@ -16,7 +16,7 @@ func (c *Connector) ActiveDownloads() ([]*Download, error) {
 		return nil, err
 	}
 
-	processDownloads(list)
+	c.processDownloads(list)
 	return list, nil
 }
 
@@ -31,16 +31,16 @@ func (c *Connector) RecentDownloads(page int) ([]*Download, error) {
 		return nil, err
 	}
 
-	processDownloads(list)
+	c.processDownloads(list)
 	return list, nil
 }
 
-func processDownloads(list []*Download) {
+func (c *Connector) processDownloads(list []*Download) {
 	for i, d := range list {
 		m := &Medium{}
-		err := App().DB.Medium.FindByID(d.MediumId, m)
+		err := db.Medium.FindByID(d.MediumId, m)
 		if err != nil {
-			App().Log.Errorf("could not find medium: %s", d.MediumId)
+			c.log.Errorf("could not find medium: %s", d.MediumId)
 			continue
 		}
 
@@ -48,15 +48,15 @@ func processDownloads(list []*Download) {
 		m.Display = m.Type
 		if m.Type == "Episode" && !m.SeriesId.IsZero() {
 			s := &Series{}
-			err := App().DB.Series.FindByID(m.SeriesId, s)
+			err := db.Series.FindByID(m.SeriesId, s)
 			if err != nil {
-				App().Log.Errorf("could not find series: %s: %s", d.MediumId, err)
+				c.log.Errorf("could not find series: %s: %s", d.MediumId, err)
 				continue
 			}
 
-			unwatched, err := App().DB.SeriesAllUnwatched(s)
+			unwatched, err := db.SeriesAllUnwatched(s)
 			if err != nil {
-				App().Log.Errorf("could not get unwatched count: %s: %s", s.ID.Hex(), err)
+				c.log.Errorf("could not get unwatched count: %s: %s", s.ID.Hex(), err)
 			}
 
 			if s.Source == "tvdb" {
@@ -84,9 +84,9 @@ func processDownloads(list []*Download) {
 		for j, f := range d.Files {
 			if !f.MediumId.IsZero() {
 				fm := &Medium{}
-				err := App().DB.Medium.FindByID(f.MediumId, fm)
+				err := db.Medium.FindByID(f.MediumId, fm)
 				if err != nil {
-					App().Log.Errorf("could not find medium: %s", d.MediumId)
+					c.log.Errorf("could not find medium: %s", d.MediumId)
 					continue
 				}
 
@@ -119,7 +119,7 @@ func (c *Connector) DownloadSetting(id, setting string, value bool) error {
 
 func (c *Connector) DownloadSelect(id, mediumId string, num int) error {
 	download := &Download{}
-	err := App().DB.Download.Find(id, download)
+	err := db.Download.Find(id, download)
 	if err != nil {
 		return err
 	}

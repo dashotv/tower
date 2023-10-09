@@ -1,6 +1,7 @@
 mode: release
 port: 9000
 cron: true
+auth: true
 filesystems:
   enabled: false
   directories:

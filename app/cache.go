@@ -1,8 +1,11 @@
 package app
 
-import "github.com/philippgille/gokv/redis"
+import (
+	"github.com/philippgille/gokv/redis"
+	"go.uber.org/zap"
+)
 
-func NewCache(options redis.Options) (*Cache, error) {
+func NewCache(log *zap.SugaredLogger, options redis.Options) (*Cache, error) {
 	client, err := redis.NewClient(options)
 	if err != nil {
 		return nil, err
@@ -12,6 +15,7 @@ func NewCache(options redis.Options) (*Cache, error) {
 
 type Cache struct {
 	client *redis.Client
+	log    *zap.SugaredLogger
 }
 
 func (c *Cache) Set(k string, v interface{}) error {
@@ -34,7 +38,7 @@ func (c *Cache) Fetch(k string, v interface{}, f func() (interface{}, error)) (b
 	}
 	// the item was found
 	if ok {
-		App().Log.Infof("cache: hit: %s", k)
+		c.log.Infof("cache: hit: %s", k)
 		return ok, nil
 	}
 
@@ -43,7 +47,7 @@ func (c *Cache) Fetch(k string, v interface{}, f func() (interface{}, error)) (b
 	if err != nil {
 		return false, err
 	}
-	App().Log.Infof("cache: miss: %s", k)
+	c.log.Infof("cache: miss: %s", k)
 	return false, c.client.Set(k, v)
 }
 

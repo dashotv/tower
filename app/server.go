@@ -15,12 +15,6 @@ type Server struct {
 	watcher *fsnotify.Watcher
 }
 
-func New() (*Server, error) {
-	s := &Server{Log: App().Log, Router: App().Router}
-
-	return s, nil
-}
-
 func (s *Server) Start() error {
 	s.Log.Info("starting tower...")
 
@@ -29,7 +23,7 @@ func (s *Server) Start() error {
 	}
 
 	s.Routes()
-	if ConfigInstance().Filesystems.Enabled {
+	if cfg.Filesystems.Enabled {
 		s.Watcher()
 		defer s.watcher.Close()
 	}

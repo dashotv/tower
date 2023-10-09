@@ -2,17 +2,14 @@ package app
 
 import (
 	"errors"
-	"sync"
 )
-
-var configOnce sync.Once
-var configInstance *Config
 
 type Config struct {
 	Mode        string                 `yaml:"mode"`
 	Port        int                    `yaml:"port"`
 	Connections map[string]*Connection `yaml:"connections"`
 	Cron        bool                   `yaml:"cron"`
+	Auth        bool                   `yaml:"auth"`
 	Redis       struct {
 		Address string `yaml:"address"`
 	} `yaml:"redis"`
@@ -26,13 +23,6 @@ type Connection struct {
 	URI        string `yaml:"uri,omitempty"`
 	Database   string `yaml:"database,omitempty"`
 	Collection string `yaml:"collection,omitempty"`
-}
-
-func ConfigInstance() *Config {
-	configOnce.Do(func() {
-		configInstance = &Config{}
-	})
-	return configInstance
 }
 
 func (c *Config) Validate() error {

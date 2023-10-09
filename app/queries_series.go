@@ -52,7 +52,7 @@ func (c *Connector) SeriesAllUnwatched(s *Series) (int, error) {
 
 func (c *Connector) SeriesAllUnwatchedCached(s *Series) (int, error) {
 	unwatched := 0
-	_, err := App().Cache.Fetch(fmt.Sprintf("series-unwatched-%s", s.ID.Hex()), &unwatched, func() (interface{}, error) {
+	_, err := cache.Fetch(fmt.Sprintf("series-unwatched-%s", s.ID.Hex()), &unwatched, func() (interface{}, error) {
 		return c.SeriesAllUnwatched(s)
 	})
 	if err != nil {
@@ -67,7 +67,7 @@ func (c *Connector) SeriesSeasons(id string) ([]int, error) {
 	if err != nil {
 		return nil, err
 	}
-	App().Log.Infof("seasons: oid=%s", oid)
+	c.log.Infof("seasons: oid=%s", oid)
 
 	col := c.Episode.Collection
 	results, err := col.Distinct(context.TODO(), "season_number", bson.D{{Key: "series_id", Value: oid}})
@@ -147,7 +147,7 @@ func (c *Connector) SeriesSetting(id, setting string, value bool) error {
 		return err
 	}
 
-	App().Log.Infof("series setting: %s %t", setting, value)
+	c.log.Infof("series setting: %s %t", setting, value)
 	switch setting {
 	case "active":
 		s.Active = value
@@ -197,7 +197,7 @@ func (c *Connector) SeriesPaths(id string) ([]Path, error) {
 	}
 
 	s := &Series{}
-	err = App().DB.Series.FindByID(oid, s)
+	err = db.Series.FindByID(oid, s)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func (c *Connector) SeriesPaths(id string) ([]Path, error) {
 	var out []Path
 	out = append(out, s.Paths...)
 
-	eps, err := App().DB.Episode.Query().Where("_type", "Episode").
+	eps, err := db.Episode.Query().Where("_type", "Episode").
 		Where("series_id", oid).
 		Desc("season_number").Desc("episode_number").Desc("absolute_number").
 		Limit(5000).
@@ -230,12 +230,12 @@ func (c *Connector) SeriesWatches(id string) ([]*Watch, error) {
 	}
 
 	s := &Series{}
-	err = App().DB.Series.FindByID(oid, s)
+	err = db.Series.FindByID(oid, s)
 	if err != nil {
 		return nil, err
 	}
 
-	eps, err := App().DB.Episode.Query().Where("_type", "Episode").
+	eps, err := db.Episode.Query().Where("_type", "Episode").
 		Where("series_id", oid).
 		Desc("season_number").Desc("episode_number").Desc("absolute_number").
 		Limit(5000).
@@ -265,12 +265,12 @@ func (c *Connector) SeriesWatches(id string) ([]*Watch, error) {
 
 	mmap := map[primitive.ObjectID]*Medium{}
 	for _, m := range media {
-		//App().Log.Infof("medium %s: %#v", m.ID.Hex(), m)
+		//c.log.Infof("medium %s: %#v", m.ID.Hex(), m)
 		mmap[m.ID] = m
 	}
 
 	for _, w := range watches {
-		//App().Log.Infof("watch %s: %#v", w.MediumId.Hex(), w.MediumId)
+		//c.log.Infof("watch %s: %#v", w.MediumId.Hex(), w.MediumId)
 		w.Medium = mmap[w.MediumId]
 	}
 

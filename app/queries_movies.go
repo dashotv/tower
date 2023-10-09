@@ -7,7 +7,7 @@ func (c *Connector) MovieSetting(id, setting string, value bool) error {
 		return err
 	}
 
-	App().Log.Infof("movie setting: %s %t", setting, value)
+	c.log.Infof("movie setting: %s %t", setting, value)
 	switch setting {
 	case "active":
 		m.Active = value
@@ -22,7 +22,7 @@ func (c *Connector) MovieSetting(id, setting string, value bool) error {
 
 func (c *Connector) MoviePaths(id string) ([]Path, error) {
 	m := &Movie{}
-	err := App().DB.Movie.Find(id, m)
+	err := db.Movie.Find(id, m)
 	if err != nil {
 		return nil, err
 	}

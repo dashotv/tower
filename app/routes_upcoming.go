@@ -7,7 +7,7 @@ import (
 )
 
 func UpcomingIndex(c *gin.Context) {
-	episodes, err := App().DB.Upcoming()
+	episodes, err := db.Upcoming()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

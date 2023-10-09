@@ -5,13 +5,13 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.uber.org/zap"
 
 	"github.com/dashotv/grimoire"
 )
 
-var cfg *Config
-
 type Connector struct {
+	log      *zap.SugaredLogger
 	Download *grimoire.Store[*Download]
 	Episode  *grimoire.Store[*Episode]
 	Feed     *grimoire.Store[*Feed]
@@ -24,7 +24,6 @@ type Connector struct {
 }
 
 func NewConnector() (*Connector, error) {
-	cfg = ConfigInstance()
 	var s *Connection
 	var err error
 
@@ -111,6 +110,7 @@ func NewConnector() (*Connector, error) {
 	}
 
 	c := &Connector{
+		log:      log.Named("db"),
 		Download: download,
 		Episode:  episode,
 		Feed:     feed,

@@ -29,7 +29,7 @@ func (s *Server) Watcher() {
 	}
 
 	total := 0
-	for _, fs := range ConfigInstance().Filesystems.Directories {
+	for _, fs := range cfg.Filesystems.Directories {
 		_ = filepath.Walk(fs, func(path string, fi os.FileInfo, err error) error {
 			if fi.IsDir() {
 				ch <- path

@@ -19,7 +19,7 @@ func EpisodesUpdate(c *gin.Context, id string) {
 		return
 	}
 
-	err = App().DB.EpisodeSetting(id, data.Setting, data.Value)
+	err = db.EpisodeSetting(id, data.Setting, data.Value)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -36,7 +36,7 @@ func EpisodesSetting(c *gin.Context, id string) {
 		return
 	}
 
-	err = App().DB.EpisodeSetting(id, data.Setting, data.Value)
+	err = db.EpisodeSetting(id, data.Setting, data.Value)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

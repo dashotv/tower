@@ -9,7 +9,7 @@ import (
 )
 
 func (s *Server) Cron() error {
-	if ConfigInstance().Cron {
+	if cfg.Cron {
 		c := cron.New(cron.WithSeconds())
 
 		// every 30 seconds DownloadsProcess
@@ -41,7 +41,7 @@ func (s *Server) DownloadsProcess() {
 
 func (s *Server) ProcessFeeds() {
 	s.Log.Info("processing feeds")
-	App().DB.ProcessFeeds()
+	db.ProcessFeeds()
 }
 
 func (s *Server) PopularReleases() {
@@ -57,13 +57,12 @@ func (s *Server) PopularReleases() {
 		for _, t := range releaseTypes {
 			date := time.Now().AddDate(0, 0, -i)
 
-			results, err := App().DB.ReleasesPopularQuery(t, date, limit)
+			results, err := db.ReleasesPopularQuery(t, date, limit)
 			if err != nil {
 				s.Log.Error(errors.Wrap(err, fmt.Sprintf("popular releases %s %s", f, t)))
 				return
 			}
 
-			cache := App().Cache
 			cache.Set(fmt.Sprintf("releases_popular_%s_%s", f, t), results)
 		}
 	}

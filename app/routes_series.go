@@ -19,13 +19,13 @@ func SeriesIndex(c *gin.Context) {
 		return
 	}
 
-	count, err := App().DB.Series.Count(bson.M{"_type": "Series"})
+	count, err := db.Series.Count(bson.M{"_type": "Series"})
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	q := App().DB.Series.Query()
+	q := db.Series.Query()
 	results, err := q.
 		Where("_type", "Series").
 		Limit(pagesize).
@@ -33,7 +33,7 @@ func SeriesIndex(c *gin.Context) {
 		Desc("created_at").Run()
 
 	for _, s := range results {
-		unwatched, err := App().DB.SeriesAllUnwatched(s)
+		unwatched, err := db.SeriesAllUnwatched(s)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -68,15 +68,15 @@ func SeriesCreate(c *gin.Context) {
 
 func SeriesShow(c *gin.Context, id string) {
 	result := &Series{}
-	App().Log.Infof("series.show id=%s", id)
+	log.Infof("series.show id=%s", id)
 	// cache this? have to figure out how to handle breaking cache
-	err := App().DB.Series.Find(id, result)
+	err := db.Series.Find(id, result)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	unwatched, err := App().DB.SeriesAllUnwatched(result)
+	unwatched, err := db.SeriesAllUnwatched(result)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -95,28 +95,28 @@ func SeriesShow(c *gin.Context, id string) {
 	}
 
 	//Paths
-	result.Paths, err = App().DB.SeriesPaths(id)
+	result.Paths, err = db.SeriesPaths(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	//Seasons
-	result.Seasons, err = App().DB.SeriesSeasons(id)
+	result.Seasons, err = db.SeriesSeasons(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	//CurrentSeason
-	result.CurrentSeason, err = App().DB.SeriesCurrentSeason(id)
+	result.CurrentSeason, err = db.SeriesCurrentSeason(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	//Watches
-	result.Watches, err = App().DB.SeriesWatches(id)
+	result.Watches, err = db.SeriesWatches(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -133,7 +133,7 @@ func SeriesUpdate(c *gin.Context, id string) {
 		return
 	}
 
-	err = App().DB.SeriesSetting(id, data.Setting, data.Value)
+	err = db.SeriesSetting(id, data.Setting, data.Value)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -150,7 +150,7 @@ func SeriesSetting(c *gin.Context, id string) {
 		return
 	}
 
-	err = App().DB.SeriesSetting(id, data.Setting, data.Value)
+	err = db.SeriesSetting(id, data.Setting, data.Value)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -164,7 +164,7 @@ func SeriesDelete(c *gin.Context, id string) {
 }
 
 func SeriesCurrentSeason(c *gin.Context, id string) {
-	i, err := App().DB.SeriesCurrentSeason(id)
+	i, err := db.SeriesCurrentSeason(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -173,7 +173,7 @@ func SeriesCurrentSeason(c *gin.Context, id string) {
 }
 
 func SeriesSeasons(c *gin.Context, id string) {
-	results, err := App().DB.SeriesSeasons(id)
+	results, err := db.SeriesSeasons(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -183,7 +183,7 @@ func SeriesSeasons(c *gin.Context, id string) {
 }
 
 func SeriesSeasonEpisodesAll(c *gin.Context, id string) {
-	results, err := App().DB.SeriesSeasonEpisodesAll(id)
+	results, err := db.SeriesSeasonEpisodesAll(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -193,7 +193,7 @@ func SeriesSeasonEpisodesAll(c *gin.Context, id string) {
 }
 
 func SeriesSeasonEpisodes(c *gin.Context, id string, season string) {
-	results, err := App().DB.SeriesSeasonEpisodes(id, season)
+	results, err := db.SeriesSeasonEpisodes(id, season)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -203,7 +203,7 @@ func SeriesSeasonEpisodes(c *gin.Context, id string, season string) {
 }
 
 func SeriesPaths(c *gin.Context, id string) {
-	results, err := App().DB.SeriesPaths(id)
+	results, err := db.SeriesPaths(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -213,7 +213,7 @@ func SeriesPaths(c *gin.Context, id string) {
 }
 
 func SeriesWatches(c *gin.Context, id string) {
-	results, err := App().DB.SeriesWatches(id)
+	results, err := db.SeriesWatches(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
