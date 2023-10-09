@@ -1,4 +1,4 @@
-mode: release
+mode: dev
 port: 9000
 cron: true
 filesystems:

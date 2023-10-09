@@ -56,20 +56,22 @@ func initialize() *Application {
 		log.Errorf("database connection failed: %s", err)
 	}
 
-	clerKey := os.Getenv("CLERK_SECRET_KEY")
-	if clerKey == "" {
-		log.Fatal("CLERK_SECRET_KEY is not set")
-	}
-
-	clerkClient, err := clerk.NewClient(clerKey)
-	if err != nil {
-		log.Fatalf("clerk: %s", err)
-	}
-
-	injectActiveSession := clerk.WithSession(clerkClient)
-
 	router := gin.New()
-	router.Use(ginzap.Ginzap(logger, time.RFC3339, true), ginzap.RecoveryWithZap(logger, true), AsGin(injectActiveSession))
+	router.Use(ginzap.Ginzap(logger, time.RFC3339, true), ginzap.RecoveryWithZap(logger, true))
+
+	if cfg.Mode == "release" {
+		clerKey := os.Getenv("CLERK_SECRET_KEY")
+		if clerKey == "" {
+			log.Fatal("CLERK_SECRET_KEY is not set")
+		}
+
+		clerkClient, err := clerk.NewClient(clerKey)
+		if err != nil {
+			log.Fatalf("clerk: %s", err)
+		}
+
+		router.Use(requireSession(clerkClient))
+	}
 
 	cache, err := NewCache(redis.Options{Address: cfg.Redis.Address})
 	if err != nil {
@@ -95,16 +97,17 @@ func App() *Application {
 }
 
 // AsGin converts middleware to the gin middleware handler.
-func AsGin(middleware func(next http.Handler) http.Handler) gin.HandlerFunc {
+func requireSession(client clerk.Client) gin.HandlerFunc {
+	requireActionSession := clerk.RequireSessionV2(client)
 	return func(gctx *gin.Context) {
 		var skip = true
 		var handler http.HandlerFunc = func(http.ResponseWriter, *http.Request) {
 			skip = false
 		}
-		middleware(handler).ServeHTTP(gctx.Writer, gctx.Request)
+		requireActionSession(handler).ServeHTTP(gctx.Writer, gctx.Request)
 		switch {
 		case skip:
-			gctx.Abort()
+			gctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "session required"})
 		default:
 			gctx.Next()
 		}
