@@ -7,6 +7,9 @@ import (
 )
 
 func testConnector() *Connector {
+	setupConfig()
+	setupLogger()
+
 	url := os.Getenv("TEST_MONGODB_URL")
 	if url == "" {
 		return nil
@@ -46,6 +49,7 @@ func testConnector() *Connector {
 	}
 
 	c := &Connector{
+		log:      log.Named("db"),
 		Download: download,
 		Episode:  episode,
 		Feed:     feed,
