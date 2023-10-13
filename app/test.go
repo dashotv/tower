@@ -32,10 +32,6 @@ func testConnector() *Connector {
 	if err != nil {
 		panic(err)
 	}
-	path, err := grimoire.New[*Path](url, "seer_development", "paths")
-	if err != nil {
-		panic(err)
-	}
 	release, err := grimoire.New[*Release](url, "torch_development", "torrents")
 	if err != nil {
 		panic(err)
@@ -55,7 +51,6 @@ func testConnector() *Connector {
 		Feed:     feed,
 		Medium:   medium,
 		Movie:    movie,
-		Path:     path,
 		Release:  release,
 		Series:   series,
 		Watch:    watch,

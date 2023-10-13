@@ -1,5 +1,5 @@
 name: path
-type: model
+type: struct
 fields:
   - name: type
     type: primitive.Symbol
@@ -11,3 +11,5 @@ fields:
     type: int
   - name: extension
     type: string
+  - name: updated_at
+    type: time.Time
