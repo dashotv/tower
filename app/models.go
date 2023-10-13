@@ -276,16 +276,13 @@ type Movie struct { // model
 	Background   string           `json:"background" bson:"-"`
 }
 
-type Path struct { // model
-	// grimoire.Document `bson:",inline"` // includes default model settings
-	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
-	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
-	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
+type Path struct { // struct
 	Type      primitive.Symbol `json:"type" bson:"type"`
 	Remote    string           `json:"remote" bson:"remote"`
 	Local     string           `json:"local" bson:"local"`
 	Size      int              `json:"size" bson:"size"`
 	Extension string           `json:"extension" bson:"extension"`
+	UpdatedAt time.Time        `json:"updated_at" bson:"updated_at"`
 }
 
 type Release struct { // model
