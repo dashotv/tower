@@ -10,7 +10,9 @@ import (
 )
 
 type Server struct {
-	Router  *gin.Engine
+	Engine  *gin.Engine
+	Router  *gin.RouterGroup
+	Default *gin.RouterGroup
 	Log     *zap.SugaredLogger
 	watcher *fsnotify.Watcher
 }
@@ -23,13 +25,16 @@ func (s *Server) Start() error {
 	}
 
 	s.Routes()
+	plexRouter := s.Default.Group("/plex")
+	plexRouter.GET("/", PlexIndex)
+	plexRouter.POST("/auth", PlexAuth)
 	if cfg.Filesystems.Enabled {
 		s.Watcher()
 		defer s.watcher.Close()
 	}
 
 	s.Log.Info("starting web...")
-	if err := s.Router.Run(fmt.Sprintf(":%d", cfg.Port)); err != nil {
+	if err := s.Engine.Run(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		return errors.Wrap(err, "starting router")
 	}
 

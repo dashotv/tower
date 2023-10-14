@@ -39,3 +39,6 @@ connections:
   watch:
     database: seer_production
     collection: watches
+  pin:
+    database: tower_production
+    collection: pins

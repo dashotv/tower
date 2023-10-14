@@ -1,6 +1,17 @@
 name: tower
 repo: github.com/dashotv/tower
 groups:
+  pins:
+    path: /pins
+    routes:
+      create:
+        path: /
+        method: POST
+      show:
+        path: /:id
+        params:
+          - name: id
+            type: string
   downloads:
     path: /downloads
     routes:

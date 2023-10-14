@@ -42,3 +42,6 @@ connections:
   watch:
     database: seer_development
     collection: watches
+  pin:
+    database: tower_development
+    collection: pins

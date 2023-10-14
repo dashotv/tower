@@ -1,0 +1,12 @@
+name: pin
+type: model
+imports:
+fields:
+  - name: pin
+    type: int64
+  - name: code
+    type: string
+  - name: token
+    type: string
+  - name: auth
+    type: bool

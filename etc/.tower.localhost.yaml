@@ -19,20 +19,29 @@ connections:
     uri: mongodb://localhost:27017
     database: database
   medium:
-    database: seer_production
+    database: seer_development
     collection: media
   download:
-    database: seer_production
+    database: seer_development
     collection: downloads
   series:
-    database: seer_production
+    database: seer_development
     collection: media
   episode:
-    database: seer_production
+    database: seer_development
+    collection: media
+  movie:
+    database: seer_development
     collection: media
   release:
-    database: torch_production
+    database: torch_development
     collection: torrents
+  feed:
+    database: torch_development
+    collection: feeds
   watch:
-    database: seer_production
+    database: seer_development
     collection: watches
+  pin:
+    database: tower_development
+    collection: pins

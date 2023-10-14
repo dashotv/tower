@@ -20,13 +20,15 @@ var log *zap.SugaredLogger
 var logger *zap.Logger
 var db *Connector
 var router *gin.Engine
+var routerDefault *gin.RouterGroup
+var routerAuth *gin.RouterGroup
 var cache *Cache
 var server *Server
 
 type SetupFunc func() error
 
 func Start() error {
-	err := setup(setupConfig, setupLogger, setupDb, setupRouter, setupCache)
+	err := setup(setupConfig, setupLogger, setupDb, setupRouter, setupCache, setupWorkers)
 	if err != nil {
 		return err
 	}
@@ -35,7 +37,7 @@ func Start() error {
 	log.Info("initialized: ", initialized)
 	log.Debugf("config: %#v", cfg)
 
-	server = &Server{Log: log.Named("server"), Router: router}
+	server = &Server{Log: log.Named("server"), Engine: router, Router: routerAuth, Default: routerDefault}
 	return server.Start()
 }
 
@@ -116,6 +118,8 @@ func setupRouter() (err error) {
 
 	router = gin.New()
 	router.Use(ginzap.Ginzap(logger, time.RFC3339, true), ginzap.RecoveryWithZap(logger, true))
+	routerDefault = router.Group("/")
+	routerAuth = router.Group("/")
 
 	if cfg.Auth {
 		clerKey := os.Getenv("CLERK_SECRET_KEY")
@@ -128,7 +132,7 @@ func setupRouter() (err error) {
 			log.Fatalf("clerk: %s", err)
 		}
 
-		router.Use(requireSession(clerkClient))
+		routerAuth.Use(requireSession(clerkClient))
 	}
 
 	return nil

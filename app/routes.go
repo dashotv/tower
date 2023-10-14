@@ -9,7 +9,7 @@ import (
 )
 
 func (s *Server) Routes() {
-	s.Router.GET("/", homeHandler)
+	s.Default.GET("/", homeHandler)
 
 	downloads := s.Router.Group("/downloads")
 	downloads.POST("/", downloadsCreateHandler)
@@ -41,6 +41,10 @@ func (s *Server) Routes() {
 	movies.PATCH("/:id", moviesSettingHandler)
 	movies.GET("/:id", moviesShowHandler)
 	movies.PUT("/:id", moviesUpdateHandler)
+
+	pins := s.Router.Group("/pins")
+	pins.POST("/", pinsCreateHandler)
+	pins.GET("/:id", pinsShowHandler)
 
 	releases := s.Router.Group("/releases")
 	releases.POST("/", releasesCreateHandler)
@@ -75,7 +79,19 @@ func homeHandler(c *gin.Context) {
 }
 
 func Index(c *gin.Context) {
-	c.String(http.StatusOK, "home")
+	c.JSON(http.StatusOK, gin.H{
+		"name": "tower",
+		"routes": gin.H{
+			"downloads": "/downloads",
+			"episodes":  "/episodes",
+			"feeds":     "/feeds",
+			"movies":    "/movies",
+			"pins":      "/pins",
+			"releases":  "/releases",
+			"series":    "/series",
+			"upcoming":  "/upcoming",
+		},
+	})
 }
 
 // /downloads
@@ -211,6 +227,18 @@ func moviesUpdateHandler(c *gin.Context) {
 	id := c.Param("id")
 
 	MoviesUpdate(c, id)
+}
+
+// /pins
+func pinsCreateHandler(c *gin.Context) {
+
+	PinsCreate(c)
+}
+
+func pinsShowHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	PinsShow(c, id)
 }
 
 // /releases
