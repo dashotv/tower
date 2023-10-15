@@ -43,22 +43,22 @@ func (m *Minion) Add(name string, f MinionFunc) error {
 	}
 
 	mf := func(id int, log *zap.SugaredLogger) error {
-		log.Infof("starting %s", name)
+		log.Infof("starting %s: %s", name, j.ID.Hex())
 		err := f(id, log)
 
 		j.ProcessedAt = time.Now()
 		if err != nil {
-			log.Errorf("processing %s: %s", name, err)
+			log.Errorf("processing %s: %s: %s", name, j.ID.Hex(), err)
 			j.Error = errors.Wrap(err, "failed to run minion job").Error()
 		}
 
 		err = db.MinionJob.Update(j)
 		if err != nil {
-			log.Errorf("error %s: %s", name, err)
+			log.Errorf("error %s: %s: %s", name, j.ID.Hex(), err)
 			return errors.Wrap(err, "failed to save minion job")
 		}
 
-		log.Infof("finished %s", name)
+		log.Infof("finished %s: %s", name, j.ID.Hex())
 		return nil
 	}
 	m.Queue <- &Job{ID: j.ID.Hex(), Func: mf}
