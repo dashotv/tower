@@ -3,6 +3,8 @@ port: 9000
 cron: true
 auth: true
 plex: https://www.dasho.tv/plex
+minion:
+  concurrency: 5
 filesystems:
   enabled: false
   directories:
@@ -43,3 +45,6 @@ connections:
   pin:
     database: tower_production
     collection: pins
+  minion_job:
+    database: tower_development
+    collection: minion_jobs

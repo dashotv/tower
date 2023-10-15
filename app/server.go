@@ -24,11 +24,14 @@ func (s *Server) Start() error {
 		return err
 	}
 
+	go minion.Start()
+
 	s.Routes()
 	plexRouter := s.Default.Group("/plex")
 	plexRouter.GET("/", PlexIndex)
 	plexRouter.POST("/auth", PlexAuth)
 	plexRouter.GET("/auth", PlexAuth)
+
 	if cfg.Filesystems.Enabled {
 		s.Watcher()
 		defer s.watcher.Close()

@@ -24,6 +24,7 @@ var routerDefault *gin.RouterGroup
 var routerAuth *gin.RouterGroup
 var cache *Cache
 var server *Server
+var minion *Minion
 
 type SetupFunc func() error
 
@@ -135,6 +136,11 @@ func setupRouter() (err error) {
 		routerAuth.Use(requireSession(clerkClient))
 	}
 
+	return nil
+}
+
+func setupWorkers() error {
+	minion = NewMinion(cfg.Minion.Concurrency)
 	return nil
 }
 

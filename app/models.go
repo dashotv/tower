@@ -13,16 +13,17 @@ import (
 )
 
 type Connector struct {
-	log      *zap.SugaredLogger
-	Download *grimoire.Store[*Download]
-	Episode  *grimoire.Store[*Episode]
-	Feed     *grimoire.Store[*Feed]
-	Medium   *grimoire.Store[*Medium]
-	Movie    *grimoire.Store[*Movie]
-	Pin      *grimoire.Store[*Pin]
-	Release  *grimoire.Store[*Release]
-	Series   *grimoire.Store[*Series]
-	Watch    *grimoire.Store[*Watch]
+	log       *zap.SugaredLogger
+	Download  *grimoire.Store[*Download]
+	Episode   *grimoire.Store[*Episode]
+	Feed      *grimoire.Store[*Feed]
+	Medium    *grimoire.Store[*Medium]
+	MinionJob *grimoire.Store[*MinionJob]
+	Movie     *grimoire.Store[*Movie]
+	Pin       *grimoire.Store[*Pin]
+	Release   *grimoire.Store[*Release]
+	Series    *grimoire.Store[*Series]
+	Watch     *grimoire.Store[*Watch]
 }
 
 func NewConnector() (*Connector, error) {
@@ -61,6 +62,15 @@ func NewConnector() (*Connector, error) {
 		return nil, err
 	}
 	medium, err := grimoire.New[*Medium](s.URI, s.Database, s.Collection)
+	if err != nil {
+		return nil, err
+	}
+
+	s, err = settingsFor("minion_job")
+	if err != nil {
+		return nil, err
+	}
+	minion_job, err := grimoire.New[*MinionJob](s.URI, s.Database, s.Collection)
 	if err != nil {
 		return nil, err
 	}
@@ -111,16 +121,17 @@ func NewConnector() (*Connector, error) {
 	}
 
 	c := &Connector{
-		log:      log.Named("db"),
-		Download: download,
-		Episode:  episode,
-		Feed:     feed,
-		Medium:   medium,
-		Movie:    movie,
-		Pin:      pin,
-		Release:  release,
-		Series:   series,
-		Watch:    watch,
+		log:       log.Named("db"),
+		Download:  download,
+		Episode:   episode,
+		Feed:      feed,
+		Medium:    medium,
+		MinionJob: minion_job,
+		Movie:     movie,
+		Pin:       pin,
+		Release:   release,
+		Series:    series,
+		Watch:     watch,
 	}
 
 	return c, nil
@@ -256,6 +267,16 @@ type Medium struct { // model
 	SeasonNumber   int                `json:"season_number" bson:"season_number"`
 	EpisodeNumber  int                `json:"episode_number" bson:"episode_number"`
 	AbsoluteNumber int                `json:"absolute_number" bson:"absolute_number"`
+}
+
+type MinionJob struct { // model
+	grimoire.Document `bson:",inline"` // includes default model settings
+	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
+	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
+	Name        string    `json:"name" bson:"name"`
+	ProcessedAt time.Time `json:"processed_at" bson:"processed_at"`
+	Error       error     `json:"error" bson:"error"`
 }
 
 type Movie struct { // model

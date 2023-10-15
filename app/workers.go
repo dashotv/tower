@@ -1,50 +1,87 @@
 package app
 
 import (
+	"fmt"
 	"time"
 
-	"github.com/madflojo/tasks"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
-var workers *Workers
-
-type Workers struct {
-	log       *zap.SugaredLogger
-	scheduler *tasks.Scheduler
+type Minion struct {
+	Concurrency int
+	Queue       chan *Job
+	Log         *zap.SugaredLogger
 }
 
-func (w *Workers) Add(task *tasks.Task) (string, error) {
-	return w.scheduler.Add(task)
-}
+type MinionFunc func(id int, log *zap.SugaredLogger) error
 
-// func setupPlex() (err error) {
-// 	plexClient, err = plex.New(cfg.PlexToken, cfg.PlexURL, cfg.PlexMetadata, cfg.PlexTV)
-// 	if err != nil {
-// 		return errors.Wrap(err, "creating plex instance")
-// 	}
-// 	return nil
-// }
-
-func setupWorkers() error {
-	workers = &Workers{
-		log:       log.Named("workers"),
-		scheduler: tasks.New(),
+func NewMinion(concurrency int) *Minion {
+	return &Minion{
+		Concurrency: concurrency,
+		Log:         log.Named("minion"),
+		Queue:       make(chan *Job, concurrency*concurrency),
 	}
+}
+
+func (m *Minion) Start() {
+	m.Log.Infof("starting minion (concurrency=%d)...", m.Concurrency)
+	for w := 0; w < m.Concurrency; w++ {
+		worker := &Worker{w, m.Log.Named(fmt.Sprintf("worker:%d", w)), m.Queue}
+		go worker.Run()
+	}
+}
+
+func (m *Minion) Add(name string, f MinionFunc) error {
+	j := &MinionJob{
+		Name: name,
+	}
+
+	err := db.MinionJob.Save(j)
+	if err != nil {
+		return errors.Wrap(err, "failed to save minion job")
+	}
+
+	mf := func(id int, log *zap.SugaredLogger) error {
+		log.Infof("starting %s", name)
+		err := f(id, log)
+		if err != nil {
+			return errors.Wrap(err, "failed to run minion job")
+		}
+
+		j.ProcessedAt = time.Now()
+		j.Error = err
+
+		err = db.MinionJob.Update(j)
+		if err != nil {
+			log.Errorf("error %s: %s", name, err)
+			return errors.Wrap(err, "failed to save minion job")
+		}
+
+		log.Infof("finished %s", name)
+		return nil
+	}
+	m.Queue <- &Job{ID: j.ID.Hex(), Func: mf}
 	return nil
 }
 
-func schedulePinTask(p *Pin) (string, error) {
-	return workers.Add(&tasks.Task{
-		Interval: 60 * time.Second,
-		RunOnce:  true,
-		TaskFunc: func() error {
-			workers.log.Info("polling pin: ", p.ID)
+type Job struct {
+	ID   string // reference to MinionJob in db
+	Func MinionFunc
+}
 
-			// check if pin is done
-			// if done, stop polling
-			// if not done, continue polling
-			return nil
-		},
-	})
+func (j *Job) Run(id int, log *zap.SugaredLogger) error {
+	return j.Func(id, log)
+}
+
+type Worker struct {
+	ID    int
+	Log   *zap.SugaredLogger
+	Queue chan *Job
+}
+
+func (w *Worker) Run() {
+	for j := range w.Queue {
+		j.Run(w.ID, w.Log)
+	}
 }

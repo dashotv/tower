@@ -6,13 +6,14 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
+	"go.uber.org/zap"
 )
 
 func (s *Server) Cron() error {
 	if cfg.Cron {
 		c := cron.New(cron.WithSeconds())
 
-		// every 30 seconds DownloadsProcess
+		// every 5 seconds DownloadsProcess
 		// if _, err := c.AddFunc("*/5 * * * * *", s.DownloadsProcess); err != nil {
 		// 	return errors.Wrap(err, "adding cron function")
 		// }
@@ -26,6 +27,11 @@ func (s *Server) Cron() error {
 		// 	return errors.Wrap(err, "adding cron function: PopularReleases")
 		// }
 
+		// every day at 3am
+		if _, err := c.AddFunc("0 0 3 * * *", s.CleanPlexPins); err != nil {
+			return errors.Wrap(err, "adding cron function: CleanPlexPins")
+		}
+
 		//TODO: clean up plex pins
 
 		go func() {
@@ -38,7 +44,10 @@ func (s *Server) Cron() error {
 }
 
 func (s *Server) DownloadsProcess() {
-	s.Log.Info("processing downloads")
+	minion.Add("downloads process", func(id int, log *zap.SugaredLogger) error {
+		log.Info("processing downloads")
+		return nil
+	})
 }
 
 func (s *Server) ProcessFeeds() {
@@ -46,29 +55,52 @@ func (s *Server) ProcessFeeds() {
 	db.ProcessFeeds()
 }
 
-func (s *Server) PopularReleases() {
-	limit := 25
-	intervals := map[string]int{
-		"daily":   1,
-		"weekly":  7,
-		"monthly": 30,
-	}
-
-	start := time.Now()
-	for f, i := range intervals {
-		for _, t := range releaseTypes {
-			date := time.Now().AddDate(0, 0, -i)
-
-			results, err := db.ReleasesPopularQuery(t, date, limit)
-			if err != nil {
-				s.Log.Error(errors.Wrap(err, fmt.Sprintf("popular releases %s %s", f, t)))
-				return
-			}
-
-			cache.Set(fmt.Sprintf("releases_popular_%s_%s", f, t), results)
+func (s *Server) CleanPlexPins() {
+	minion.Add("clean plex pins", func(id int, log *zap.SugaredLogger) error {
+		list, err := db.Pin.Query().
+			GreaterThan("created_at", time.Now().AddDate(0, 0, -1)).
+			Run()
+		if err != nil {
+			return errors.Wrap(err, "querying pins")
 		}
-	}
 
-	diff := time.Since(start)
-	s.Log.Infof("PopularReleases: took %s", diff)
+		for _, p := range list {
+			err := db.Pin.Delete(p)
+			if err != nil {
+				return errors.Wrap(err, "deleting pin")
+			}
+		}
+
+		return nil
+	})
+}
+
+func (s *Server) PopularReleases() {
+	minion.Add("popular releases", func(id int, log *zap.SugaredLogger) error {
+		limit := 25
+		intervals := map[string]int{
+			"daily":   1,
+			"weekly":  7,
+			"monthly": 30,
+		}
+
+		start := time.Now()
+		for f, i := range intervals {
+			for _, t := range releaseTypes {
+				date := time.Now().AddDate(0, 0, -i)
+
+				results, err := db.ReleasesPopularQuery(t, date, limit)
+				if err != nil {
+					return errors.Wrap(err, fmt.Sprintf("popular releases %s %s", f, t))
+				}
+
+				cache.Set(fmt.Sprintf("releases_popular_%s_%s", f, t), results)
+			}
+		}
+
+		diff := time.Since(start)
+		log.Infof("PopularReleases: took %s", diff)
+
+		return nil
+	})
 }

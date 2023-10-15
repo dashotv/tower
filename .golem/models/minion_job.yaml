@@ -1,0 +1,9 @@
+name: minion_job
+type: model
+fields:
+  - name: name
+    type: string
+  - name: processed_at
+    type: time.Time
+  - name: error
+    type: error

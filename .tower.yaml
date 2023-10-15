@@ -3,6 +3,8 @@ port: 9000
 cron: true
 auth: false
 plex: http://localhost:9000/plex # external plex proxied url
+minion:
+  concurrency: 5
 filesystems:
   enabled: false
   directories:
@@ -46,3 +48,6 @@ connections:
   pin:
     database: tower_development
     collection: pins
+  minion_job:
+    database: tower_development
+    collection: minion_jobs
