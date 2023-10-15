@@ -78,7 +78,6 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 		}
 	}
 
-	c.log.Info("blarg")
 	c.log.Infof("episodes %d sids %d series %d seriesmap %d", len(list), len(sids), len(series), len(maps.Keys(seriesMap)))
 	return list, nil
 }
