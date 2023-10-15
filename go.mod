@@ -11,7 +11,6 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/joho/godotenv v1.5.1
 	github.com/kamva/mgm/v3 v3.5.0
-	github.com/madflojo/tasks v1.1.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/philippgille/gokv/redis v0.6.0
 	github.com/pkg/errors v0.9.1
@@ -58,7 +57,6 @@ require (
 	github.com/philippgille/gokv/encoding v0.6.0 // indirect
 	github.com/philippgille/gokv/util v0.6.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/rs/xid v1.5.0 // indirect
 	github.com/sagikazarmark/locafero v0.3.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
