@@ -58,7 +58,7 @@ func (s *Server) ProcessFeeds() {
 func (s *Server) CleanPlexPins() {
 	minion.Add("clean plex pins", func(id int, log *zap.SugaredLogger) error {
 		list, err := db.Pin.Query().
-			GreaterThan("created_at", time.Now().AddDate(0, 0, -1)).
+			GreaterThan("created_at", time.Now().UTC().AddDate(0, 0, -1)).
 			Run()
 		if err != nil {
 			return errors.Wrap(err, "querying pins")
