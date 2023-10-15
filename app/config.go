@@ -10,6 +10,7 @@ type Config struct {
 	Connections map[string]*Connection `yaml:"connections"`
 	Cron        bool                   `yaml:"cron"`
 	Auth        bool                   `yaml:"auth"`
+	Plex        string                 `yaml:"plex"`
 	Redis       struct {
 		Address string `yaml:"address"`
 	} `yaml:"redis"`

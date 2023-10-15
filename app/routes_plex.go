@@ -161,7 +161,7 @@ func plexAuthUrl(pin *Pin) string {
 	data := url.Values{}
 	data.Set("clientID", identifier)
 	data.Set("code", pin.Code)
-	data.Set("forwardUrl", fmt.Sprintf("http://localhost:9000/plex/auth?pin=%d", pin.Pin))
+	data.Set("forwardUrl", fmt.Sprintf("%s/auth?pin=%d", cfg.Plex, pin.Pin))
 	data.Set("context[device][product]", product)
 	data.Set("context[device][version]", "0.1.0")
 	data.Set("context[device][deviceName]", device)

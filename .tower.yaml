@@ -2,6 +2,7 @@ mode: release
 port: 9000
 cron: true
 auth: false
+plex: http://localhost:9000/plex # external plex proxied url
 filesystems:
   enabled: false
   directories:

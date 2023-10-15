@@ -35,7 +35,7 @@ func Start() error {
 
 	initialized = true
 	log.Info("initialized: ", initialized)
-	log.Debugf("config: %#v", cfg)
+	log.Debugf("config: %+v", cfg)
 
 	server = &Server{Log: log.Named("server"), Engine: router, Router: routerAuth, Default: routerDefault}
 	return server.Start()
