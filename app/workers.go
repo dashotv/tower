@@ -45,13 +45,11 @@ func (m *Minion) Add(name string, f MinionFunc) error {
 	mf := func(id int, log *zap.SugaredLogger) error {
 		log.Infof("starting %s", name)
 		err := f(id, log)
-		if err != nil {
-			return errors.Wrap(err, "failed to run minion job")
-		}
 
 		j.ProcessedAt = time.Now()
 		if err != nil {
-			j.Error = err.Error()
+			log.Errorf("processing %s: %s", name, err)
+			j.Error = errors.Wrap(err, "failed to run minion job").Error()
 		}
 
 		err = db.MinionJob.Update(j)

@@ -17,6 +17,9 @@ func (s *Server) Cron() error {
 		// if _, err := c.AddFunc("*/5 * * * * *", s.DownloadsProcess); err != nil {
 		// 	return errors.Wrap(err, "adding cron function")
 		// }
+		// if _, err := c.AddFunc("*/5 * * * * *", s.CausingErrors); err != nil {
+		// 	return errors.Wrap(err, "adding cron function")
+		// }
 
 		// every 5 minutes
 		if _, err := c.AddFunc("0 */5 * * * *", s.PopularReleases); err != nil {
@@ -31,6 +34,10 @@ func (s *Server) Cron() error {
 		if _, err := c.AddFunc("0 0 3 * * *", s.CleanPlexPins); err != nil {
 			return errors.Wrap(err, "adding cron function: CleanPlexPins")
 		}
+		// every day at 3am
+		if _, err := c.AddFunc("0 0 3 * * *", s.CleanJobs); err != nil {
+			return errors.Wrap(err, "adding cron function: CleanJobs")
+		}
 
 		//TODO: clean up plex pins
 
@@ -43,10 +50,16 @@ func (s *Server) Cron() error {
 	return nil
 }
 
+func (s *Server) CausingErrors() {
+	minion.Add("causing errors", func(id int, log *zap.SugaredLogger) error {
+		log.Info("causing error")
+		return errors.Errorf("trying error")
+	})
+}
 func (s *Server) DownloadsProcess() {
 	minion.Add("downloads process", func(id int, log *zap.SugaredLogger) error {
 		log.Info("processing downloads")
-		return nil
+		return errors.Errorf("trying error")
 	})
 }
 
@@ -68,6 +81,26 @@ func (s *Server) CleanPlexPins() {
 			err := db.Pin.Delete(p)
 			if err != nil {
 				return errors.Wrap(err, "deleting pin")
+			}
+		}
+
+		return nil
+	})
+}
+
+func (s *Server) CleanJobs() {
+	minion.Add("clean jobs", func(id int, log *zap.SugaredLogger) error {
+		list, err := db.MinionJob.Query().
+			GreaterThan("created_at", time.Now().UTC().AddDate(0, 0, -1)).
+			Run()
+		if err != nil {
+			return errors.Wrap(err, "querying jobs")
+		}
+
+		for _, j := range list {
+			err := db.MinionJob.Delete(j)
+			if err != nil {
+				return errors.Wrap(err, "deleting job")
 			}
 		}
 
