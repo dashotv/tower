@@ -157,7 +157,7 @@ func plexCheckPin(pin *Pin) (bool, error) {
 }
 
 func plexAuthUrl(pin *Pin) string {
-	base := "https://app.plex.tv/auth#?"
+	base := "https://app.plex.tv/auth/#?"
 	data := url.Values{}
 	data.Set("clientID", identifier)
 	data.Set("code", pin.Code)
