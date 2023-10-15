@@ -302,10 +302,11 @@ type Pin struct { // model
 	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
-	Pin   int64  `json:"pin" bson:"pin"`
-	Code  string `json:"code" bson:"code"`
-	Token string `json:"token" bson:"token"`
-	Auth  bool   `json:"auth" bson:"auth"`
+	Pin        int    `json:"id" bson:"pin"`
+	Code       string `json:"code" bson:"code"`
+	Token      string `json:"authToken" bson:"token"`
+	Product    string `json:"product" bson:"product"`
+	Identifier string `json:"clientIdentifier" bson:"identifier"`
 }
 
 type Release struct { // model

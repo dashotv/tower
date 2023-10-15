@@ -1,71 +1,29 @@
-name: tower
 repo: github.com/dashotv/tower
+name: tower
 groups:
-  pins:
-    path: /pins
-    routes:
-      create:
-        path: /
-        method: POST
-      show:
-        path: /:id
-        params:
-          - name: id
-            type: string
   downloads:
     path: /downloads
     routes:
+      create:
+        path: /
+        method: POST
+      delete:
+        path: /:id
+        method: DELETE
+        params:
+          - name: id
+            type: string
       index:
         path: /
-      create:
-        method: POST
-        path: /
-      show:
-        path: /:id
-        params:
-          - name: id
-            type: string
-      update:
-        method: PUT
-        path: /:id
-        params:
-          - name: id
-            type: string
-      setting:
-        method: PATCH
-        path: /:id
-        params:
-          - name: id
-            type: string
-      delete:
-        method: DELETE
-        path: /:id
-        params:
-          - name: id
-            type: string
-      recent:
-        path: /recent
       medium:
         path: /:id/medium
         params:
           - name: id
             type: string
+      recent:
+        path: /recent
       select:
-        method: PUT
         path: /:id/select
-        params:
-          - name: id
-            type: string
-  upcoming:
-    path: /upcoming
-    routes:
-      index:
-        path: /
-  episodes:
-    path: /episodes
-    routes:
-      update:
-        path: /:id
         method: PUT
         params:
           - name: id
@@ -73,47 +31,132 @@ groups:
       setting:
         path: /:id
         method: PATCH
+        params:
+          - name: id
+            type: string
+      show:
+        path: /:id
+        params:
+          - name: id
+            type: string
+      update:
+        path: /:id
+        method: PUT
+        params:
+          - name: id
+            type: string
+  episodes:
+    path: /episodes
+    routes:
+      setting:
+        path: /:id
+        method: PATCH
+        params:
+          - name: id
+            type: string
+      update:
+        path: /:id
+        method: PUT
+        params:
+          - name: id
+            type: string
+  feeds:
+    path: /feeds
+    rest: true
+  movies:
+    path: /movies
+    routes:
+      create:
+        path: /
+        method: POST
+      delete:
+        path: /:id
+        method: DELETE
+        params:
+          - name: id
+            type: string
+      index:
+        path: /
+      paths:
+        path: /:id/paths
+        params:
+          - name: id
+            type: string
+      setting:
+        path: /:id
+        method: PATCH
+        params:
+          - name: id
+            type: string
+      show:
+        path: /:id
+        params:
+          - name: id
+            type: string
+      update:
+        path: /:id
+        method: PUT
+        params:
+          - name: id
+            type: string
+  releases:
+    path: /releases
+    routes:
+      create:
+        path: /
+        method: POST
+      delete:
+        path: /:id
+        method: DELETE
+        params:
+          - name: id
+            type: string
+      index:
+        path: /
+      popular:
+        name: popular
+        path: /popular/:interval
+        params:
+          - name: interval
+            type: string
+      setting:
+        path: /:id
+        method: PATCH
+        params:
+          - name: id
+            type: string
+      show:
+        path: /:id
+        params:
+          - name: id
+            type: string
+      update:
+        path: /:id
+        method: PUT
         params:
           - name: id
             type: string
   series:
     path: /series
     routes:
-      index:
-        path: /
       create:
-        method: POST
         path: /
-      show:
-        path: /:id
-        params:
-          - name: id
-            type: string
-      update:
-        method: PUT
-        path: /:id
-        params:
-          - name: id
-            type: string
-      setting:
-        method: PATCH
-        path: /:id
+        method: POST
+      currentSeason:
+        path: /:id/currentseason
         params:
           - name: id
             type: string
       delete:
-        method: DELETE
         path: /:id
+        method: DELETE
         params:
           - name: id
             type: string
-      seasons:
-        path: /:id/seasons
-        params:
-          - name: id
-            type: string
-      seasonEpisodesAll:
-        path: /:id/seasons/all
+      index:
+        path: /
+      paths:
+        path: /:id/paths
         params:
           - name: id
             type: string
@@ -124,13 +167,30 @@ groups:
             type: string
           - name: season
             type: string
-      currentSeason:
-        path: /:id/currentseason
+      seasonEpisodesAll:
+        path: /:id/seasons/all
         params:
           - name: id
             type: string
-      paths:
-        path: /:id/paths
+      seasons:
+        path: /:id/seasons
+        params:
+          - name: id
+            type: string
+      setting:
+        path: /:id
+        method: PATCH
+        params:
+          - name: id
+            type: string
+      show:
+        path: /:id
+        params:
+          - name: id
+            type: string
+      update:
+        path: /:id
+        method: PUT
         params:
           - name: id
             type: string
@@ -139,79 +199,8 @@ groups:
         params:
           - name: id
             type: string
-  movies:
-    path: /movies
+  upcoming:
+    path: /upcoming
     routes:
       index:
         path: /
-      create:
-        method: POST
-        path: /
-      show:
-        path: /:id
-        params:
-          - name: id
-            type: string
-      update:
-        method: PUT
-        path: /:id
-        params:
-          - name: id
-            type: string
-      setting:
-        method: PATCH
-        path: /:id
-        params:
-          - name: id
-            type: string
-      delete:
-        method: DELETE
-        path: /:id
-        params:
-          - name: id
-            type: string
-      paths:
-        path: /:id/paths
-        params:
-          - name: id
-            type: string
-  releases:
-    path: /releases
-    routes:
-      index:
-        path: /
-      create:
-        method: POST
-        path: /
-      show:
-        path: /:id
-        params:
-          - name: id
-            type: string
-      update:
-        method: PUT
-        path: /:id
-        params:
-          - name: id
-            type: string
-      setting:
-        method: PATCH
-        path: /:id
-        params:
-          - name: id
-            type: string
-      delete:
-        method: DELETE
-        path: /:id
-        params:
-          - name: id
-            type: string
-      popular:
-        name: popular
-        path: /popular/:interval
-        params:
-          - name: interval
-            type: string
-  feeds:
-    path: /feeds
-    rest: true

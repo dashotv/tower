@@ -3,10 +3,15 @@ type: model
 imports:
 fields:
   - name: pin
-    type: int64
+    type: int
+    json: id
   - name: code
     type: string
   - name: token
     type: string
-  - name: auth
-    type: bool
+    json: authToken
+  - name: product
+    type: string
+  - name: identifier
+    type: string
+    json: clientIdentifier

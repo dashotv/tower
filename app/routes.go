@@ -42,10 +42,6 @@ func (s *Server) Routes() {
 	movies.GET("/:id", moviesShowHandler)
 	movies.PUT("/:id", moviesUpdateHandler)
 
-	pins := s.Router.Group("/pins")
-	pins.POST("/", pinsCreateHandler)
-	pins.GET("/:id", pinsShowHandler)
-
 	releases := s.Router.Group("/releases")
 	releases.POST("/", releasesCreateHandler)
 	releases.DELETE("/:id", releasesDeleteHandler)
@@ -86,7 +82,6 @@ func Index(c *gin.Context) {
 			"episodes":  "/episodes",
 			"feeds":     "/feeds",
 			"movies":    "/movies",
-			"pins":      "/pins",
 			"releases":  "/releases",
 			"series":    "/series",
 			"upcoming":  "/upcoming",
@@ -227,18 +222,6 @@ func moviesUpdateHandler(c *gin.Context) {
 	id := c.Param("id")
 
 	MoviesUpdate(c, id)
-}
-
-// /pins
-func pinsCreateHandler(c *gin.Context) {
-
-	PinsCreate(c)
-}
-
-func pinsShowHandler(c *gin.Context) {
-	id := c.Param("id")
-
-	PinsShow(c, id)
 }
 
 // /releases
