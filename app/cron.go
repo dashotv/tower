@@ -26,6 +26,8 @@ func (s *Server) Cron() error {
 		// 	return errors.Wrap(err, "adding cron function: PopularReleases")
 		// }
 
+		//TODO: clean up plex pins
+
 		go func() {
 			s.Log.Info("starting cron...")
 			c.Start()

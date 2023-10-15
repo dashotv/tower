@@ -63,6 +63,7 @@ func PlexAuth(c *gin.Context) {
 		return
 	}
 
+	// TODO: get user from token (call myplex api), maybe background this?
 	c.String(200, "Authorization complete!")
 }
 
@@ -147,7 +148,7 @@ func plexCheckPin(pin *Pin) (bool, error) {
 	pin.Product = newPin.Product
 	pin.Identifier = newPin.Identifier
 
-	err = db.Pin.Save(pin)
+	err = db.Pin.Update(pin)
 	if err != nil {
 		return false, errors.Wrap(err, "failed to save pin")
 	}
