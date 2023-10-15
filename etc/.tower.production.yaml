@@ -2,7 +2,7 @@ mode: release
 port: 9000
 cron: true
 auth: true
-plex: https://dasho.tv/plex
+plex: https://www.dasho.tv/plex
 filesystems:
   enabled: false
   directories:
