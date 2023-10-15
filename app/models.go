@@ -276,7 +276,7 @@ type MinionJob struct { // model
 	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
 	Name        string    `json:"name" bson:"name"`
 	ProcessedAt time.Time `json:"processed_at" bson:"processed_at"`
-	Error       error     `json:"error" bson:"error"`
+	Error       string    `json:"error" bson:"error"`
 }
 
 type Movie struct { // model

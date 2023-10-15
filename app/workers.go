@@ -50,7 +50,9 @@ func (m *Minion) Add(name string, f MinionFunc) error {
 		}
 
 		j.ProcessedAt = time.Now()
-		j.Error = err
+		if err != nil {
+			j.Error = err.Error()
+		}
 
 		err = db.MinionJob.Update(j)
 		if err != nil {

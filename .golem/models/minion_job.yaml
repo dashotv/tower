@@ -6,4 +6,4 @@ fields:
   - name: processed_at
     type: time.Time
   - name: error
-    type: error
+    type: string

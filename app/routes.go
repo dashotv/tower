@@ -33,6 +33,9 @@ func (s *Server) Routes() {
 	feeds.GET("/:id", feedsShowHandler)
 	feeds.PUT("/:id", feedsUpdateHandler)
 
+	jobs := s.Router.Group("/jobs")
+	jobs.GET("/", jobsIndexHandler)
+
 	movies := s.Router.Group("/movies")
 	movies.POST("/", moviesCreateHandler)
 	movies.DELETE("/:id", moviesDeleteHandler)
@@ -81,6 +84,7 @@ func Index(c *gin.Context) {
 			"downloads": "/downloads",
 			"episodes":  "/episodes",
 			"feeds":     "/feeds",
+			"jobs":      "/jobs",
 			"movies":    "/movies",
 			"releases":  "/releases",
 			"series":    "/series",
@@ -181,6 +185,12 @@ func feedsUpdateHandler(c *gin.Context) {
 	id := c.Param("id")
 
 	FeedsUpdate(c, id)
+}
+
+// /jobs
+func jobsIndexHandler(c *gin.Context) {
+
+	JobsIndex(c)
 }
 
 // /movies

@@ -63,6 +63,13 @@ groups:
   feeds:
     path: /feeds
     rest: true
+  jobs:
+    name: jobs
+    path: /jobs
+    routes:
+      index:
+        name: index
+        path: /
   movies:
     path: /movies
     routes:
