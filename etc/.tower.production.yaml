@@ -3,6 +3,8 @@ port: 9000
 cron: true
 auth: true
 plex: https://www.dasho.tv/plex
+Nats:
+  URL: nats://host.docker.internal:4222
 minion:
   concurrency: 5
 filesystems:
