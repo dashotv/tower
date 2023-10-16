@@ -11,7 +11,10 @@ type Config struct {
 	Cron        bool                   `yaml:"cron"`
 	Auth        bool                   `yaml:"auth"`
 	Plex        string                 `yaml:"plex"`
-	Minion      struct {
+	Nats        struct {
+		URL string `yaml:"url"`
+	} `yaml:"nats"`
+	Minion struct {
 		Concurrency int `yaml:"concurrency"`
 	} `yaml:"minion"`
 	Redis struct {

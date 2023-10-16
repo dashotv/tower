@@ -24,6 +24,7 @@ func (s *Server) Start() error {
 		return err
 	}
 
+	go events.Start()
 	go minion.Start()
 
 	s.Routes()

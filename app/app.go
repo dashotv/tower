@@ -29,7 +29,15 @@ var minion *Minion
 type SetupFunc func() error
 
 func Start() error {
-	err := setup(setupConfig, setupLogger, setupDb, setupRouter, setupCache, setupWorkers)
+	err := setup(
+		setupConfig,
+		setupLogger,
+		setupDb,
+		setupRouter,
+		setupCache,
+		setupWorkers,
+		setupEvents,
+	)
 	if err != nil {
 		return err
 	}
