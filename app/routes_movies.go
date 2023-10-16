@@ -10,35 +10,30 @@ import (
 )
 
 func MoviesIndex(c *gin.Context) {
-	log.Warnf("MoviesIndex")
 	page, err := web.QueryDefaultInteger(c, "page", 1)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	log.Warnf("MoviesIndex: count")
-	count, err := db.Series.Count(bson.M{"_type": "Movie"})
+	count, err := db.Movie.Count(bson.M{"_type": "Movie"})
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	log.Warnf("MoviesIndex: count: %d", count)
 
-	log.Warnf("MoviesIndex: query")
 	q := db.Movie.Query()
 	results, err := q.
 		Where("_type", "Movie").
 		Limit(pagesize).
 		Skip((page - 1) * pagesize).
 		Desc("created_at").Run()
-	log.Warnf("MoviesIndex: query: %d %s", len(results), err)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	log.Warnf("MoviesIndex: range")
+	// TODO: do this with custom unmarshaling?
 	for _, m := range results {
 		m.Display = fmt.Sprintf("%s (%s)", m.Source, m.SourceId)
 		for _, p := range m.Paths {
@@ -53,7 +48,6 @@ func MoviesIndex(c *gin.Context) {
 		}
 	}
 
-	log.Warnf("MoviesIndex: return")
 	c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
 }
 

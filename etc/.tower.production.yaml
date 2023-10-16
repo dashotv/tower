@@ -35,6 +35,9 @@ connections:
   episode:
     database: seer_production
     collection: media
+  movie:
+    database: seer_production
+    collection: media
   release:
     database: torch_production
     collection: torrents
@@ -48,5 +51,5 @@ connections:
     database: tower_production
     collection: pins
   minion_job:
-    database: tower_development
+    database: tower_production
     collection: minion_jobs
