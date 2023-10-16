@@ -15,6 +15,7 @@ func (s *Server) Routes() {
 	downloads.POST("/", downloadsCreateHandler)
 	downloads.DELETE("/:id", downloadsDeleteHandler)
 	downloads.GET("/", downloadsIndexHandler)
+	downloads.GET("/last", downloadsLastHandler)
 	downloads.GET("/:id/medium", downloadsMediumHandler)
 	downloads.GET("/recent", downloadsRecentHandler)
 	downloads.PUT("/:id/select", downloadsSelectHandler)
@@ -108,6 +109,11 @@ func downloadsDeleteHandler(c *gin.Context) {
 func downloadsIndexHandler(c *gin.Context) {
 
 	DownloadsIndex(c)
+}
+
+func downloadsLastHandler(c *gin.Context) {
+
+	DownloadsLast(c)
 }
 
 func downloadsMediumHandler(c *gin.Context) {

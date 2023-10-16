@@ -3,10 +3,9 @@ package app
 import (
 	"net/http"
 
+	"github.com/dashotv/golem/web"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
-
-	"github.com/dashotv/golem/web"
 )
 
 func DownloadsIndex(c *gin.Context) {
@@ -17,6 +16,17 @@ func DownloadsIndex(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, results)
+}
+
+func DownloadsLast(c *gin.Context) {
+	var t int
+	_, err := cache.Get("seer_downloads", &t)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"last": t})
 }
 
 func DownloadsCreate(c *gin.Context) {

@@ -15,6 +15,9 @@ groups:
             type: string
       index:
         path: /
+      last:
+        name: last
+        path: /last
       medium:
         path: /:id/medium
         params:
