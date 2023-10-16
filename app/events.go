@@ -46,6 +46,8 @@ func NewEvents() (*Events, error) {
 }
 
 func (e *Events) Start() error {
+	e.Log.Infof("starting events...")
+
 	seer_notices := make(chan *EventSeerNotice, 5)
 	if err := e.Merc.Receiver("seer.notices", seer_notices); err != nil {
 		return err

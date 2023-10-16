@@ -5,6 +5,17 @@ import (
 	"go.uber.org/zap"
 )
 
+var cache *Cache
+
+func setupCache() (err error) {
+	cache, err = NewCache(log.Named("cache"), redis.Options{Address: cfg.Redis.Address})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func NewCache(log *zap.SugaredLogger, options redis.Options) (*Cache, error) {
 	client, err := redis.NewClient(options)
 	if err != nil {

@@ -6,6 +6,7 @@ require (
 	github.com/clerkinc/clerk-sdk-go v1.48.3
 	github.com/dashotv/golem v0.9.1
 	github.com/dashotv/grimoire v0.2.8
+	github.com/dashotv/mercury v0.0.0-20191123112423-0a4863e890cd
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gin-contrib/zap v0.2.0
 	github.com/gin-gonic/gin v1.9.1
@@ -28,7 +29,6 @@ require (
 	github.com/bytedance/sonic v1.10.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.0 // indirect
-	github.com/dashotv/mercury v0.0.0-20191123112423-0a4863e890cd // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect

@@ -1,8 +1,33 @@
 package app
 
 import (
-	"errors"
+	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
+
+var cfg *Config
+
+func setupConfig() (err error) {
+	cfg = &Config{}
+
+	viper.AutomaticEnv() // read in environment variables that match
+
+	// If a config file is found, read it in.
+	if err := viper.ReadInConfig(); err != nil {
+		// fmt.Printf("WARN: unable to read config: %s\n", err)
+		return nil //errors.Wrap(err, "unable to read config")
+	}
+
+	if err := viper.Unmarshal(cfg); err != nil {
+		return errors.Wrap(err, "failed to unmarshal configuration file")
+	}
+
+	if err := cfg.Validate(); err != nil {
+		return errors.Wrap(err, "failed to validate config")
+	}
+
+	return nil
+}
 
 type Config struct {
 	Mode        string                 `yaml:"mode"`
