@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/dashotv/grimoire"
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
-
-	"github.com/dashotv/grimoire"
 )
 
 type Connector struct {
@@ -143,7 +143,8 @@ func settingsFor(name string) (*Connection, error) {
 	}
 
 	if _, ok := cfg.Connections[name]; !ok {
-		return cfg.Connections["default"], nil
+		// return nil, errors.Errorf("missing connection for %s", name)
+		panic(errors.Errorf("missing connection for %s", name))
 	}
 
 	s := cfg.Connections["default"]
