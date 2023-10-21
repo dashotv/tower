@@ -43,3 +43,4 @@ trigger:
     - main
   event:
     - push
+    - custom
