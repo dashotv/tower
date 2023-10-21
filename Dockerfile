@@ -15,5 +15,4 @@ FROM alpine
 # Copy our static executable.
 WORKDIR /root/
 COPY --from=builder /go/bin/tower .
-COPY --from=builder /go/src/app/etc/.tower.production.yaml ./.tower.yaml
 CMD ["./tower", "server"]
