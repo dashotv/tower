@@ -12,8 +12,9 @@ const imagesBaseURL = "/media-images" // proxy this instead of dealing with CORS
 
 func (c *Connector) Upcoming() ([]*Episode, error) {
 	seriesMap := map[primitive.ObjectID]*Series{}
-	now := time.Now().UTC().Add(time.Hour * 24 * 90)
-	since := time.Now().UTC().Add(-time.Hour * 36)
+	utc := time.Now().UTC()
+	today := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC)
+	later := today.Add(time.Hour * 24 * 90)
 	list, err := c.Episode.Query().
 		Where("_type", "Episode").
 		Where("downloaded", false).
@@ -22,8 +23,8 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 		In("missing", []interface{}{false, nil}).
 		GreaterThan("season_number", 0).
 		GreaterThan("episode_number", 0).
-		LessThanEqual("release_date", now).
-		GreaterThanEqual("release_date", since).
+		GreaterThanEqual("release_date", today).
+		LessThanEqual("release_date", later).
 		Asc("release_date").Asc("season_number").Asc("episode_number").
 		Limit(1000).
 		Run()
