@@ -62,11 +62,6 @@ func SeriesIndex(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
 }
 
-type CreateRequest struct {
-	ID     string `json:"id"`
-	Source string `json:"source"`
-}
-
 func SeriesCreate(c *gin.Context) {
 	r := &CreateRequest{}
 	c.BindJSON(r)
@@ -79,6 +74,7 @@ func SeriesCreate(c *gin.Context) {
 		SourceId:    r.ID,
 		Source:      r.Source,
 		ReleaseDate: time.Unix(0, 0).UTC(),
+		Title:       r.Title,
 	}
 
 	err := db.Series.Save(s)

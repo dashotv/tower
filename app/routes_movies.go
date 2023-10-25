@@ -64,6 +64,7 @@ func MoviesCreate(c *gin.Context) {
 		SourceId:    r.ID,
 		Source:      r.Source,
 		ReleaseDate: time.Unix(0, 0).UTC(),
+		Title:       r.Title,
 	}
 
 	err := db.Movie.Save(m)
