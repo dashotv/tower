@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/dashotv/golem/web"
 	"github.com/gin-gonic/gin"
@@ -52,7 +53,27 @@ func MoviesIndex(c *gin.Context) {
 }
 
 func MoviesCreate(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"error": false})
+	r := &CreateRequest{}
+	c.BindJSON(r)
+	if r.ID == "" || r.Source == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "id and source are required"})
+		return
+	}
+	m := &Movie{
+		Type:        "Movie",
+		SourceId:    r.ID,
+		Source:      r.Source,
+		ReleaseDate: time.Unix(0, 0).UTC(),
+	}
+
+	err := db.Movie.Save(m)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// TODO: queue update job
+	c.JSON(http.StatusOK, gin.H{"error": false, "movie": m})
 }
 
 func MoviesShow(c *gin.Context, id string) {

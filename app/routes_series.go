@@ -3,11 +3,11 @@ package app
 import (
 	"fmt"
 	"net/http"
-
-	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
+	"time"
 
 	"github.com/dashotv/golem/web"
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 const pagesize = 42
@@ -62,8 +62,33 @@ func SeriesIndex(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
 }
 
+type CreateRequest struct {
+	ID     string `json:"id"`
+	Source string `json:"source"`
+}
+
 func SeriesCreate(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"error": false})
+	r := &CreateRequest{}
+	c.BindJSON(r)
+	if r.ID == "" || r.Source == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "id and source are required"})
+		return
+	}
+	s := &Series{
+		Type:        "Series",
+		SourceId:    r.ID,
+		Source:      r.Source,
+		ReleaseDate: time.Unix(0, 0).UTC(),
+	}
+
+	err := db.Series.Save(s)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// TODO: queue update job
+	c.JSON(http.StatusOK, gin.H{"error": false, "series": s})
 }
 
 func SeriesShow(c *gin.Context, id string) {
