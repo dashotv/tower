@@ -55,12 +55,16 @@ func (m *Minion) Start() error {
 		// 	return err
 		// }
 
-		// every day at 3am
-		if err := m.AddCron("0 0 3 * * *", "CleanPlexPins", m.CleanPlexPins); err != nil {
+		// every day at 3am (11am UTC)
+		if err := m.AddCron("0 0 11 * * *", "CleanPlexPins", m.CleanPlexPins); err != nil {
 			return err
 		}
-		// every day at 3am
-		if err := m.AddCron("0 0 3 * * *", "CleanJobs", m.CleanJobs); err != nil {
+		// every day at 3am (11am UTC)
+		if err := m.AddCron("0 0 11 * * *", "CleanJobs", m.CleanJobs); err != nil {
+			return err
+		}
+		// every day at 2am (10am UTC)
+		if err := m.AddCron("0 0 10 * * *", "UserWatchlist", m.UserWatchlist); err != nil {
 			return err
 		}
 	}
@@ -221,5 +225,9 @@ func (m *Minion) PopularReleases(id int, log *zap.SugaredLogger) error {
 	diff := time.Since(start)
 	log.Infof("PopularReleases: took %s", diff)
 
+	return nil
+}
+
+func (m *Minion) UserWatchlist(id int, log *zap.SugaredLogger) error {
 	return nil
 }

@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 var pinUrl = "https://plex.tv/api/v2/pins"
@@ -57,11 +58,20 @@ func PlexAuth(c *gin.Context) {
 	}
 
 	pin := list[0]
-	_, err = plexCheckPin(pin)
+	ok, err := plexCheckPin(pin)
 	if err != nil {
 		c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		return
 	}
+	if !ok {
+		c.AbortWithStatusJSON(401, gin.H{"error": "something went wrong..."})
+		return
+	}
+
+	minion.Add("plex get user", func(id int, log *zap.SugaredLogger) error {
+		// TODO: need working plex client
+		return nil
+	})
 
 	// TODO: get user from token (call myplex api), maybe background this?
 	c.String(200, "Authorization complete!")
