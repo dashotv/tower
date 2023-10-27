@@ -69,15 +69,22 @@ func SeriesCreate(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "id and source are required"})
 		return
 	}
-	s := &Series{
-		Type:        "Series",
-		SourceId:    r.ID,
-		Source:      r.Source,
-		ReleaseDate: time.Unix(0, 0).UTC(),
-		Title:       r.Title,
-	}
 
-	err := db.Series.Save(s)
+	s := &Series{
+		Type:     "Series",
+		SourceId: r.ID,
+		Source:   r.Source,
+		Title:    r.Title,
+		Kind:     "tv",
+	}
+	d, err := time.Parse("2006-01-02", r.Date)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	s.ReleaseDate = d
+
+	err = db.Series.Save(s)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

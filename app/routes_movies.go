@@ -60,14 +60,20 @@ func MoviesCreate(c *gin.Context) {
 		return
 	}
 	m := &Movie{
-		Type:        "Movie",
-		SourceId:    r.ID,
-		Source:      r.Source,
-		ReleaseDate: time.Unix(0, 0).UTC(),
-		Title:       r.Title,
+		Type:     "Movie",
+		SourceId: r.ID,
+		Source:   r.Source,
+		Title:    r.Title,
+		Kind:     "movies",
 	}
+	d, err := time.Parse("2006-01-02", r.Date)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	m.ReleaseDate = d
 
-	err := db.Movie.Save(m)
+	err = db.Movie.Save(m)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
