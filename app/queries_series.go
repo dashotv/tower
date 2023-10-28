@@ -111,10 +111,6 @@ func (c *Connector) SeriesSeasonEpisodes(id string, season string) ([]*Episode, 
 		return nil, err
 	}
 
-	for _, e := range eps {
-		e.Watched = c.MediumWatched(e.ID)
-	}
-
 	return eps, nil
 }
 

@@ -64,7 +64,6 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 			}
 			e.Unwatched = unwatched
 			e.Active = seriesMap[sid].Active
-			e.Display = fmt.Sprintf("%dx%d %s", e.SeasonNumber, e.EpisodeNumber, e.Title)
 			e.Title = seriesMap[sid].Title
 			for _, p := range seriesMap[sid].Paths {
 				if p.Type == "cover" {
@@ -97,8 +96,6 @@ func (c *Connector) EpisodeSetting(id, setting string, value bool) error {
 		e.Skipped = value
 	case "completed":
 		e.Completed = value
-	case "watched":
-		e.Watched = value
 	}
 
 	return c.Episode.Update(e)

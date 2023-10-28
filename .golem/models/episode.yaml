@@ -9,21 +9,11 @@ fields:
     bson: _type
   - name: series_id
     type: primitive.ObjectID
-  - name: kind
-    type: primitive.Symbol
-  - name: source
-    type: string
   - name: source_id
     type: string
   - name: title
     type: string
   - name: description
-    type: string
-  - name: slug
-    type: string
-  - name: text
-    type: '[]string'
-  - name: display
     type: string
   - name: directory
     type: string
@@ -35,8 +25,6 @@ fields:
     type: int
   - name: absolute_number
     type: int
-  - name: search_params
-    type: '*SearchParams'
   - name: active
     type: bool
   - name: downloaded
@@ -45,20 +33,18 @@ fields:
     type: bool
   - name: skipped
     type: bool
-  - name: watched
-    type: bool
   - name: broken
     type: bool
   - name: unwatched
     type: int
-    bson: '-'
+    bson: "-"
   - name: release_date
     type: time.Time
   - name: paths
-    type: '[]Path'
+    type: "[]Path"
   - name: cover
     type: string
-    bson: '-'
+    bson: "-"
   - name: background
     type: string
-    bson: '-'
+    bson: "-"
