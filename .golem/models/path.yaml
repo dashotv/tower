@@ -1,6 +1,9 @@
 name: path
 type: struct
 fields:
+  - name: id
+    type: primitive.ObjectID
+    bson: _id,omitempty
   - name: type
     type: primitive.Symbol
   - name: remote
