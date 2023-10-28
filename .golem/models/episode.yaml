@@ -25,15 +25,11 @@ fields:
     type: int
   - name: absolute_number
     type: int
-  - name: active
-    type: bool
   - name: downloaded
     type: bool
   - name: completed
     type: bool
   - name: skipped
-    type: bool
-  - name: broken
     type: bool
   - name: unwatched
     type: int

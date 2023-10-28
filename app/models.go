@@ -202,11 +202,9 @@ type Episode struct { // model
 	SeasonNumber   int                `json:"season_number" bson:"season_number"`
 	EpisodeNumber  int                `json:"episode_number" bson:"episode_number"`
 	AbsoluteNumber int                `json:"absolute_number" bson:"absolute_number"`
-	Active         bool               `json:"active" bson:"active"`
 	Downloaded     bool               `json:"downloaded" bson:"downloaded"`
 	Completed      bool               `json:"completed" bson:"completed"`
 	Skipped        bool               `json:"skipped" bson:"skipped"`
-	Broken         bool               `json:"broken" bson:"broken"`
 	Unwatched      int                `json:"unwatched" bson:"-"`
 	ReleaseDate    time.Time          `json:"release_date" bson:"release_date"`
 	Paths          []Path             `json:"paths" bson:"paths"`
