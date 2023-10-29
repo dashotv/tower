@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/dashotv/grimoire"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
-
-	"github.com/dashotv/grimoire"
 )
 
 type Connector struct {
@@ -205,11 +204,12 @@ type Episode struct { // model
 	Downloaded     bool               `json:"downloaded" bson:"downloaded"`
 	Completed      bool               `json:"completed" bson:"completed"`
 	Skipped        bool               `json:"skipped" bson:"skipped"`
-	Unwatched      int                `json:"unwatched" bson:"-"`
 	ReleaseDate    time.Time          `json:"release_date" bson:"release_date"`
 	Paths          []Path             `json:"paths" bson:"paths"`
 	Cover          string             `json:"cover" bson:"-"`
 	Background     string             `json:"background" bson:"-"`
+	Active         bool               `json:"active" bson:"-"`
+	Unwatched      int                `json:"unwatched" bson:"-"`
 }
 
 type Feed struct { // model

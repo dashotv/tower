@@ -31,16 +31,21 @@ fields:
     type: bool
   - name: skipped
     type: bool
-  - name: unwatched
-    type: int
-    bson: "-"
   - name: release_date
     type: time.Time
   - name: paths
     type: "[]Path"
+  # Simplified paths for images
   - name: cover
     type: string
     bson: "-"
   - name: background
     type: string
+    bson: "-"
+  # Series-related fields
+  - name: active
+    type: bool
+    bson: "-"
+  - name: unwatched
+    type: int
     bson: "-"

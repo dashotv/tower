@@ -63,6 +63,7 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 				c.log.Errorf("getting unwatched %s: %s", sid, err)
 			}
 			e.Unwatched = unwatched
+			e.Active = seriesMap[sid].Active
 			e.Title = seriesMap[sid].Title
 			for _, p := range seriesMap[sid].Paths {
 				if p.Type == "cover" {
