@@ -14,6 +14,7 @@ func Start() error {
 		setupCache,
 		setupWorkers,
 		setupEvents,
+		setupPlex,
 	)
 	if err != nil {
 		return err
