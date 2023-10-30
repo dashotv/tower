@@ -13,7 +13,9 @@ func (e *Episode) Saving() error {
 	}
 
 	for _, p := range e.Paths {
-		p.Id = primitive.NewObjectID()
+		if p.Id.IsZero() {
+			p.Id = primitive.NewObjectID()
+		}
 		p.UpdatedAt = time.Now()
 	}
 
@@ -27,7 +29,9 @@ func (m *Movie) Saving() error {
 	}
 
 	for _, p := range m.Paths {
-		p.Id = primitive.NewObjectID()
+		if p.Id.IsZero() {
+			p.Id = primitive.NewObjectID()
+		}
 		p.UpdatedAt = time.Now()
 	}
 
@@ -41,7 +45,9 @@ func (s *Series) Saving() error {
 	}
 
 	for _, p := range s.Paths {
-		p.Id = primitive.NewObjectID()
+		if p.Id.IsZero() {
+			p.Id = primitive.NewObjectID()
+		}
 		p.UpdatedAt = time.Now()
 	}
 
