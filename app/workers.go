@@ -178,24 +178,109 @@ func PlexUserUpdates() error {
 		}
 
 		for _, d := range details {
-			if d == nil || len(d.MediaContainer.Metadata) == 0 {
+			if d == nil || d.MediaContainer.Size != 1 {
+				server.Log.Debugf("PlexUserUpdates: dm empty? size %d len %d", d.MediaContainer.Size, len(d.MediaContainer.Metadata))
 				continue
 			}
-			for _, dm := range d.MediaContainer.Metadata {
-				m, err := findMediaByGUIDs(dm.GUID)
-				if err != nil {
-					return errors.Wrap(err, "finding media")
-				}
-				if m != nil {
-					continue
-				}
-				server.Log.Debugf("PlexUserUpdates: %s: NOT FOUND", dm.Title)
-				// TODO: create request for media
+			dm := d.MediaContainer.Metadata[0]
+			m, err := findMediaByGUIDs(dm.GUID)
+			if err != nil {
+				return errors.Wrap(err, "finding media")
 			}
+			if m != nil {
+				continue
+			}
+			server.Log.Debugf("PlexUserUpdates: NOT FOUND: %s: %s", dm.Title, dm.Type)
+			err = createRequest(u.Name, dm.Title, dm.Type, dm.GUID)
+			if err != nil {
+				return errors.Wrap(err, "creating request")
+			}
+			server.Log.Infof("PlexUserUpdates: REQUESTED: %s: %s", dm.Title, dm.Type)
 		}
 	}
 	// upate each users watchlist data
 	return nil
+}
+
+func createRequest(user, title, t string, guids []GUID) error {
+	switch t {
+	case "movie":
+		return createMovieRequest(user, title, guids)
+	case "show":
+		return createShowRequest(user, title, guids)
+	default:
+		return errors.Errorf("createRequest: unknown type: %s", t)
+	}
+}
+
+func createMovieRequest(user, title string, guids []GUID) error {
+	source_id := guidToSourceID("tmdb", guids)
+	if source_id == "" {
+		return errors.New("createMovieRequest: no tmdb guid")
+	}
+
+	reqs, err := db.Request.Query().Where("source", "tmdb").Where("source_id", source_id).Run()
+	if err != nil {
+		return errors.Wrap(err, "querying requests")
+	}
+	if len(reqs) > 0 {
+		return nil
+	}
+
+	req := &Request{
+		User:     user,
+		Title:    title,
+		Source:   "tmdb",
+		SourceId: source_id,
+		Type:     "movie",
+	}
+
+	err = db.Request.Save(req)
+	if err != nil {
+		return errors.Wrap(err, "saving request")
+	}
+
+	return nil
+}
+
+func createShowRequest(user, title string, guids []GUID) error {
+	source_id := guidToSourceID("tvdb", guids)
+	if source_id == "" {
+		return errors.New("createShowRequest: no tvdb guid")
+	}
+
+	reqs, err := db.Request.Query().Where("source", "tvdb").Where("source_id", source_id).Run()
+	if err != nil {
+		return errors.Wrap(err, "querying requests")
+	}
+	if len(reqs) > 0 {
+		return nil
+	}
+
+	req := &Request{
+		User:     user,
+		Title:    title,
+		Source:   "tvdb",
+		SourceId: source_id,
+		Type:     "series",
+	}
+
+	err = db.Request.Save(req)
+	if err != nil {
+		return errors.Wrap(err, "saving request")
+	}
+	return nil
+}
+
+func guidToSourceID(source string, guids []GUID) string {
+	for _, g := range guids {
+		s := strings.Split(g.ID, "://")
+		if s[0] == source {
+			return s[1]
+		}
+	}
+
+	return ""
 }
 
 func findMediaByGUIDs(list []GUID) (*Medium, error) {

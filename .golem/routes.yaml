@@ -118,7 +118,7 @@ groups:
         path: /auth
       index:
         name: index
-        path: /index
+        path: /
       update:
         name: update
         path: /update
@@ -159,6 +159,19 @@ groups:
         params:
           - name: id
             type: string
+  requests:
+    name: requests
+    path: /requests
+    routes:
+      show:
+        name: show
+        path: /:id
+        params:
+          - name: id
+            type: string
+      index:
+        name: index
+        path: /
   series:
     path: /series
     routes:

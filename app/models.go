@@ -22,6 +22,7 @@ type Connector struct {
 	Movie     *grimoire.Store[*Movie]
 	Pin       *grimoire.Store[*Pin]
 	Release   *grimoire.Store[*Release]
+	Request   *grimoire.Store[*Request]
 	Series    *grimoire.Store[*Series]
 	User      *grimoire.Store[*User]
 	Watch     *grimoire.Store[*Watch]
@@ -103,6 +104,15 @@ func NewConnector() (*Connector, error) {
 		return nil, err
 	}
 
+	s, err = settingsFor("request")
+	if err != nil {
+		return nil, err
+	}
+	request, err := grimoire.New[*Request](s.URI, s.Database, s.Collection)
+	if err != nil {
+		return nil, err
+	}
+
 	s, err = settingsFor("series")
 	if err != nil {
 		return nil, err
@@ -140,6 +150,7 @@ func NewConnector() (*Connector, error) {
 		Movie:     movie,
 		Pin:       pin,
 		Release:   release,
+		Request:   request,
 		Series:    series,
 		User:      user,
 		Watch:     watch,
@@ -364,6 +375,18 @@ type Release struct { // model
 	Encoding    string    `json:"encoding" bson:"encoding"`
 	Quality     string    `json:"quality" bson:"quality"`
 	PublishedAt time.Time `json:"published_at" bson:"published_at"`
+}
+
+type Request struct { // model
+	grimoire.Document `bson:",inline"` // includes default model settings
+	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
+	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
+	Title    string `json:"title" bson:"title"`
+	User     string `json:"user" bson:"user"`
+	Type     string `json:"type" bson:"type"`
+	Source   string `json:"source" bson:"source"`
+	SourceId string `json:"source_id" bson:"source_id"`
 }
 
 type SearchParams struct { // struct

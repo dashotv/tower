@@ -1,0 +1,13 @@
+name: request
+type: model
+fields:
+  - name: title
+    type: string
+  - name: user
+    type: string
+  - name: type
+    type: string
+  - name: source
+    type: string
+  - name: source_id
+    type: string

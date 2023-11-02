@@ -48,7 +48,7 @@ func (s *Server) Routes() {
 
 	plex := s.Router.Group("/plex")
 	plex.GET("/auth", plexAuthHandler)
-	plex.GET("/index", plexIndexHandler)
+	plex.GET("/", plexIndexHandler)
 	plex.GET("/update", plexUpdateHandler)
 
 	releases := s.Router.Group("/releases")
@@ -59,6 +59,10 @@ func (s *Server) Routes() {
 	releases.PATCH("/:id", releasesSettingHandler)
 	releases.GET("/:id", releasesShowHandler)
 	releases.PUT("/:id", releasesUpdateHandler)
+
+	requests := s.Router.Group("/requests")
+	requests.GET("/", requestsIndexHandler)
+	requests.GET("/:id", requestsShowHandler)
 
 	series := s.Router.Group("/series")
 	series.POST("/", seriesCreateHandler)
@@ -94,6 +98,7 @@ func Index(c *gin.Context) {
 			"movies":    "/movies",
 			"plex":      "/plex",
 			"releases":  "/releases",
+			"requests":  "/requests",
 			"series":    "/series",
 			"upcoming":  "/upcoming",
 		},
@@ -301,6 +306,18 @@ func releasesUpdateHandler(c *gin.Context) {
 	id := c.Param("id")
 
 	ReleasesUpdate(c, id)
+}
+
+// /requests
+func requestsIndexHandler(c *gin.Context) {
+
+	RequestsIndex(c)
+}
+
+func requestsShowHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	RequestsShow(c, id)
 }
 
 // /series
