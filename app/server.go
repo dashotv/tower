@@ -30,11 +30,6 @@ func setupServer() (err error) {
 	server.Default = server.Engine.Group("/")
 	server.Router = server.Engine.Group("/")
 
-	plexRouter := server.Default.Group("/plex")
-	plexRouter.GET("/", PlexIndex)
-	plexRouter.POST("/auth", PlexAuth)
-	plexRouter.GET("/auth", PlexAuth)
-
 	server.Routes()
 
 	if cfg.Auth {

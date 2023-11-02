@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dashotv/grimoire"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
+
+	"github.com/dashotv/grimoire"
 )
 
 type Connector struct {
@@ -22,6 +23,7 @@ type Connector struct {
 	Pin       *grimoire.Store[*Pin]
 	Release   *grimoire.Store[*Release]
 	Series    *grimoire.Store[*Series]
+	User      *grimoire.Store[*User]
 	Watch     *grimoire.Store[*Watch]
 }
 
@@ -110,6 +112,15 @@ func NewConnector() (*Connector, error) {
 		return nil, err
 	}
 
+	s, err = settingsFor("user")
+	if err != nil {
+		return nil, err
+	}
+	user, err := grimoire.New[*User](s.URI, s.Database, s.Collection)
+	if err != nil {
+		return nil, err
+	}
+
 	s, err = settingsFor("watch")
 	if err != nil {
 		return nil, err
@@ -130,6 +141,7 @@ func NewConnector() (*Connector, error) {
 		Pin:       pin,
 		Release:   release,
 		Series:    series,
+		User:      user,
 		Watch:     watch,
 	}
 
@@ -398,6 +410,19 @@ type Series struct { // model
 	Seasons       []int            `json:"seasons" bson:"-"`
 	Episodes      []*Episode       `json:"episodes" bson:"-"`
 	Watches       []*Watch         `json:"watches" bson:"-"`
+}
+
+type User struct { // model
+	grimoire.Document `bson:",inline"` // includes default model settings
+	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
+	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
+	Name  string `json:"name" bson:"name"`
+	Email string `json:"email" bson:"email"`
+	Token string `json:"token" bson:"token"`
+	Thumb string `json:"thumb" bson:"thumb"`
+	Home  bool   `json:"home" bson:"home"`
+	Admin bool   `json:"admin" bson:"admin"`
 }
 
 type Watch struct { // model

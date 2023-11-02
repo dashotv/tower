@@ -109,6 +109,19 @@ groups:
         params:
           - name: id
             type: string
+  plex:
+    name: plex
+    path: /plex
+    routes:
+      auth:
+        name: auth
+        path: /auth
+      index:
+        name: index
+        path: /index
+      update:
+        name: update
+        path: /update
   releases:
     path: /releases
     routes:

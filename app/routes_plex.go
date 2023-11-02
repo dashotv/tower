@@ -14,6 +14,7 @@ func PlexIndex(c *gin.Context) {
 		return
 	}
 
+	server.Log.Debugf("PlexIndex: saving pin %+v", pin)
 	err = db.Pin.Save(pin)
 	if err != nil {
 		c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
@@ -59,5 +60,11 @@ func PlexAuth(c *gin.Context) {
 	// 	return nil
 	// }))
 
+	workers.Enqueue("PlexUserUpdates")
 	c.String(200, "Authorization complete!")
+}
+
+func PlexUpdate(c *gin.Context) {
+	workers.Enqueue("PlexUserUpdates")
+	c.String(200, "Updating users...")
 }

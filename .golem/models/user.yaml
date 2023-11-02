@@ -1,0 +1,15 @@
+name: user
+type: model
+fields:
+  - name: name
+    type: string
+  - name: email
+    type: string
+  - name: token
+    type: string
+  - name: thumb
+    type: string
+  - name: home
+    type: bool
+  - name: admin
+    type: bool
