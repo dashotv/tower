@@ -267,6 +267,7 @@ type MinionJob struct { // model
 	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
 	Name        string    `json:"name" bson:"name"`
 	ProcessedAt time.Time `json:"processed_at" bson:"processed_at"`
+	Duration    float64   `json:"duration" bson:"duration"`
 	Error       string    `json:"error" bson:"error"`
 }
 

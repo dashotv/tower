@@ -66,7 +66,7 @@ func (s *Server) Start() error {
 	s.Log.Info("starting tower...")
 
 	go events.Start()
-	go minion.Start()
+	go workers.Start()
 
 	if cfg.Filesystems.Enabled {
 		s.Log.Info("starting watcher...")

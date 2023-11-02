@@ -5,5 +5,7 @@ fields:
     type: string
   - name: processed_at
     type: time.Time
+  - name: duration
+    type: float64
   - name: error
     type: string

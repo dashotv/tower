@@ -25,14 +25,12 @@ func setupPlex() error {
 	data.Set("strong", "true")
 	data.Set("X-Plex-Client-Identifier", plex.Identifier)
 	data.Set("X-Plex-Product", plex.Product)
+	data.Set("X-Plex-Token", "hgmTDYWTG5p6Hnq65sjE")
 	plex.data = data
 
 	plex.headers = map[string]string{
-		"Accept":                   "application/json",
-		"Content-Type":             "application/x-www-form-urlencoded",
-		"strong":                   "true",
-		"X-Plex-Client-Identifier": plex.Identifier,
-		"X-Plex-Product":           plex.Product,
+		"Accept":       "application/json",
+		"Content-Type": "application/x-www-form-urlencoded",
 	}
 
 	return nil
@@ -48,13 +46,16 @@ type Plex struct {
 }
 
 func (p *Plex) request(method, url string, values url.Values) (*http.Response, error) {
-	r, err := http.NewRequest("POST", p.PinURL, strings.NewReader(values.Encode()))
+	r, err := http.NewRequest(method, url, strings.NewReader(values.Encode()))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create request")
 	}
 
 	for k, v := range p.headers {
 		r.Header.Set(k, v)
+	}
+	for k, v := range values {
+		r.Header.Set(k, v[0])
 	}
 
 	return http.DefaultClient.Do(r)
@@ -83,11 +84,17 @@ func (p *Plex) CreatePin() (*Pin, error) {
 }
 
 func (p *Plex) CheckPin(pin *Pin) (bool, error) {
-	resp, err := p.request("POST", fmt.Sprintf("%s/%d", p.PinURL, pin.Pin), p.data)
+	data := url.Values(http.Header(p.data).Clone())
+	data.Set("code", pin.Code)
+
+	resp, err := p.request("GET", fmt.Sprintf("%s/%d", p.PinURL, pin.Pin), data)
 	if err != nil {
 		return false, errors.Wrap(err, "failed to make request")
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return false, errors.Errorf("pin not authorized: %s", resp.Status)
+	}
 
 	d, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -101,7 +108,7 @@ func (p *Plex) CheckPin(pin *Pin) (bool, error) {
 	}
 
 	if newPin.Token == "" {
-		return false, errors.Errorf("pin not authorized")
+		return false, errors.Errorf("pin not authorized: %s", resp.Status)
 	}
 
 	pin.Token = newPin.Token
@@ -110,7 +117,7 @@ func (p *Plex) CheckPin(pin *Pin) (bool, error) {
 
 	err = db.Pin.Update(pin)
 	if err != nil {
-		return false, errors.Wrap(err, "failed to save pin")
+		return false, errors.Wrap(err, "failed to update token")
 	}
 
 	return true, nil

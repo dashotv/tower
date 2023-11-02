@@ -31,6 +31,7 @@ func setupConfig() (err error) {
 
 type Config struct {
 	Mode        string                 `yaml:"mode"`
+	Logger      string                 `yaml:"logger"`
 	Port        int                    `yaml:"port"`
 	Connections map[string]*Connection `yaml:"connections"`
 	Cron        bool                   `yaml:"cron"`

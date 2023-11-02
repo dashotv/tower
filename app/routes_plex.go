@@ -4,7 +4,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
 func PlexIndex(c *gin.Context) {
@@ -39,7 +38,6 @@ func PlexAuth(c *gin.Context) {
 		c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	server.Log.Infof("list: %d %+v", pinId, list)
 	if len(list) != 1 {
 		c.AbortWithStatusJSON(404, gin.H{"error": "pin not found"})
 		return
@@ -56,11 +54,10 @@ func PlexAuth(c *gin.Context) {
 		return
 	}
 
-	minion.Add("plex get user", func(id int, log *zap.SugaredLogger) error {
-		// TODO: need working plex client
-		return nil
-	})
+	// TODO: get user from token (myplex api), then scheduled job to handle watchlist?
+	// workers.Enqueue(runJob(&MinionJob{Name: "PlexAuth"}, func() error {
+	// 	return nil
+	// }))
 
-	// TODO: get user from token (call myplex api), maybe background this?
 	c.String(200, "Authorization complete!")
 }
