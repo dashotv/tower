@@ -82,6 +82,8 @@ func initConfig() {
 
 		// Search config in home directory with name ".tower" (without extension).
 		viper.AddConfigPath(".")
+		viper.AddConfigPath("./etc")
+		viper.AddConfigPath("./tower")
 		viper.AddConfigPath(home)
 		viper.AddConfigPath("/etc/tower")
 		viper.SetConfigName(".tower")

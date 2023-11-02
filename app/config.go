@@ -1,6 +1,10 @@
 package app
 
 import (
+	"fmt"
+	"os"
+
+	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
@@ -9,6 +13,18 @@ var cfg *Config
 
 func setupConfig() (err error) {
 	cfg = &Config{}
+
+	home, err := homedir.Dir()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	viper.AddConfigPath("..")
+	viper.AddConfigPath("../etc")
+	viper.AddConfigPath(home)
+	viper.AddConfigPath("/etc/tower")
+	viper.SetConfigName(".tower")
 
 	viper.AutomaticEnv() // read in environment variables that match
 

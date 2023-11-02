@@ -1,0 +1,62 @@
+mode: release
+logger: dev
+port: 9000
+cron: true
+auth: false
+plex: http://localhost:9000/plex # external plex proxied url
+minion:
+  concurrency: 5
+Nats:
+  URL: nats://dashotv-nats-1:4222
+filesystems:
+  enabled: false
+  directories:
+    - /media/anime
+    - /media/ecchi
+    - /media/kids
+    - /media/movies
+    - /media/movies3d
+    - /media/movies4k
+    - /media/tv
+redis:
+  address: redis:6379
+connections:
+  default:
+    uri: mongodb://dashotv-db-1:27017
+    database: database
+  medium:
+    database: seer_development
+    collection: media
+  download:
+    database: seer_development
+    collection: downloads
+  series:
+    database: seer_development
+    collection: media
+  episode:
+    database: seer_development
+    collection: media
+  movie:
+    database: seer_development
+    collection: media
+  release:
+    database: torch_development
+    collection: torrents
+  feed:
+    database: torch_development
+    collection: feeds
+  watch:
+    database: seer_development
+    collection: watches
+  pin:
+    database: tower_development
+    collection: pins
+  user:
+    database: tower_development
+    collection: users
+  request:
+    database: tower_development
+    collection: requests
+  minion_job:
+    database: tower_development
+    collection: minion_jobs
