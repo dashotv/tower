@@ -20,7 +20,7 @@ var jobs = map[string]Job{
 	"PopularReleases": {PopularReleases, "0 */5 * * * *"},
 	"CleanPlexPins":   {CleanPlexPins, "0 0 11 * * *"},
 	"CleanJobs":       {CleanJobs, "0 0 11 * * *"},
-	"PlexUserUpdates": {PlexUserUpdates, ""}, // "0 0 * * * *"
+	"PlexUserUpdates": {PlexUserUpdates, "0 0 * * * *"}, // "0 0 * * * *"
 	// "DownloadsProcess": {DownloadsProcess, "*/5 * * * * *"},
 }
 
