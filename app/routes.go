@@ -63,6 +63,7 @@ func (s *Server) Routes() {
 	requests := s.Router.Group("/requests")
 	requests.GET("/", requestsIndexHandler)
 	requests.GET("/:id", requestsShowHandler)
+	requests.PUT("/:id", requestsUpdateHandler)
 
 	series := s.Router.Group("/series")
 	series.POST("/", seriesCreateHandler)
@@ -322,6 +323,12 @@ func requestsShowHandler(c *gin.Context) {
 	id := c.Param("id")
 
 	RequestsShow(c, id)
+}
+
+func requestsUpdateHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	RequestsUpdate(c, id)
 }
 
 // /series

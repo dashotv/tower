@@ -164,11 +164,15 @@ groups:
     path: /requests
     routes:
       index:
-        name: index
         path: /
       show:
-        name: show
         path: /:id
+        params:
+          - name: id
+            type: string
+      update:
+        path: /:id
+        method: PUT
         params:
           - name: id
             type: string
