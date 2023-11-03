@@ -81,6 +81,9 @@ func (s *Server) Routes() {
 	upcoming := s.Router.Group("/upcoming")
 	upcoming.GET("/", upcomingIndexHandler)
 
+	users := s.Router.Group("/users")
+	users.GET("/", usersIndexHandler)
+
 }
 
 func homeHandler(c *gin.Context) {
@@ -101,6 +104,7 @@ func Index(c *gin.Context) {
 			"requests":  "/requests",
 			"series":    "/series",
 			"upcoming":  "/upcoming",
+			"users":     "/users",
 		},
 	})
 }
@@ -396,4 +400,10 @@ func seriesWatchesHandler(c *gin.Context) {
 func upcomingIndexHandler(c *gin.Context) {
 
 	UpcomingIndex(c)
+}
+
+// /users
+func usersIndexHandler(c *gin.Context) {
+
+	UsersIndex(c)
 }

@@ -163,15 +163,15 @@ groups:
     name: requests
     path: /requests
     routes:
+      index:
+        name: index
+        path: /
       show:
         name: show
         path: /:id
         params:
           - name: id
             type: string
-      index:
-        name: index
-        path: /
   series:
     path: /series
     routes:
@@ -239,4 +239,11 @@ groups:
     path: /upcoming
     routes:
       index:
+        path: /
+  users:
+    name: users
+    path: /users
+    routes:
+      index:
+        name: index
         path: /
