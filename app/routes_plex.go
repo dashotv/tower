@@ -60,11 +60,19 @@ func PlexAuth(c *gin.Context) {
 	// 	return nil
 	// }))
 
-	workers.Enqueue("PlexUserUpdates")
+	err = workers.Enqueue("PlexPinToUsers")
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		return
+	}
 	c.String(200, "Authorization complete!")
 }
 
 func PlexUpdate(c *gin.Context) {
-	workers.Enqueue("PlexUserUpdates")
+	err := workers.Enqueue("PlexPinToUsers")
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		return
+	}
 	c.String(200, "Updating users...")
 }
