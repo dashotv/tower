@@ -1,16 +1,20 @@
 package app
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 func RequestsIndex(c *gin.Context) {
-	list, err := db.Request.Query().Run()
+	list, err := db.Request.Query().Desc("created_at").Run()
 	if err != nil {
 		c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(200, list)
+	c.JSON(http.StatusOK, list)
 }
 
 func RequestsShow(c *gin.Context, id string) {
-	c.JSON(200, gin.H{"message": "RequestsShow"})
+	c.JSON(http.StatusOK, gin.H{"message": "RequestsShow"})
 }

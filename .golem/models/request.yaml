@@ -11,3 +11,5 @@ fields:
     type: string
   - name: source_id
     type: string
+  - name: status
+    type: string

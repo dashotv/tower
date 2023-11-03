@@ -387,6 +387,7 @@ type Request struct { // model
 	Type     string `json:"type" bson:"type"`
 	Source   string `json:"source" bson:"source"`
 	SourceId string `json:"source_id" bson:"source_id"`
+	Status   string `json:"status" bson:"status"`
 }
 
 type SearchParams struct { // struct
