@@ -7,7 +7,7 @@ require (
 	github.com/dashotv/golem v0.9.1
 	github.com/dashotv/grimoire v0.2.8
 	github.com/dashotv/mercury v0.0.0-20191123112423-0a4863e890cd
-	github.com/dashotv/minion v0.1.5
+	github.com/dashotv/minion v0.1.6
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gin-contrib/zap v0.2.0
 	github.com/gin-gonic/gin v1.9.1

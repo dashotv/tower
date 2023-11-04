@@ -31,20 +31,19 @@ func setupWorkers() error {
 	workers = minion.New(cfg.Minion.Concurrency).WithLogger(log.Named("minion"))
 
 	for n, j := range jobs {
-		workers.Register(n, wrapJob(n, j.Function))
-		if cfg.Cron {
-			if j.Schedule != "" {
-				if _, err := workers.Schedule(j.Schedule, n); err != nil {
-					return err
-				}
+		if cfg.Cron && j.Schedule != "" {
+			if _, err := workers.Schedule(j.Schedule, n, wrapJob(n, j.Function)); err != nil {
+				return err
 			}
+		} else {
+			workers.Register(n, wrapJob(n, j.Function))
 		}
 	}
 
 	return nil
 }
 
-func CleanPlexPins() error {
+func CleanPlexPins(_ any) error {
 	list, err := db.Pin.Query().
 		GreaterThan("created_at", time.Now().UTC().AddDate(0, 0, -1)).
 		Run()
@@ -62,7 +61,7 @@ func CleanPlexPins() error {
 	return nil
 }
 
-func CleanJobs() error {
+func CleanJobs(_ any) error {
 	list, err := db.MinionJob.Query().
 		GreaterThan("created_at", time.Now().UTC().AddDate(0, 0, -1)).
 		Run()
@@ -80,7 +79,7 @@ func CleanJobs() error {
 	return nil
 }
 
-func PopularReleases() error {
+func PopularReleases(_ any) error {
 	limit := 25
 	intervals := map[string]int{
 		"daily":   1,
@@ -104,7 +103,7 @@ func PopularReleases() error {
 	return nil
 }
 
-func CreateMediaFromRequests() error {
+func CreateMediaFromRequests(_ any) error {
 	log := log.Named("job.CreateMediaFromRequests")
 
 	requests, err := db.Request.Query().Where("status", "approved").Run()
@@ -194,23 +193,23 @@ func createMovieFromRequest(r *Request) error {
 	return nil
 }
 
-func CausingErrors() error {
+func CausingErrors(_ any) error {
 	log.Info("causing error")
 	return nil
 }
 
-func DownloadsProcess() error {
+func DownloadsProcess(_ any) error {
 	log.Info("processing downloads")
 	return nil
 }
 
-func ProcessFeeds() error {
+func ProcessFeeds(_ any) error {
 	log.Info("processing feeds")
 	return db.ProcessFeeds()
 }
 
-func wrapJob(name string, f func() error) func() error {
-	return func() error {
+func wrapJob(name string, f minion.Func) minion.Func {
+	return func(payload any) error {
 		j := &MinionJob{Name: name}
 
 		err := db.MinionJob.Save(j)
@@ -219,7 +218,7 @@ func wrapJob(name string, f func() error) func() error {
 		}
 
 		start := time.Now()
-		ferr := f()
+		ferr := f(payload)
 		if ferr != nil {
 			log.Errorf("job:%s: %s", name, ferr)
 			j.Error = ferr.Error()

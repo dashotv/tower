@@ -7,7 +7,7 @@ import (
 )
 
 // PlexPinToUsers ensures users are created from athorized pins
-func PlexPinToUsers() error {
+func PlexPinToUsers(_ any) error {
 	log := log.Named("job.PlexPinToUsers")
 	log.Debugf("creating users from authenticated pins")
 
@@ -55,7 +55,7 @@ func PlexPinToUsers() error {
 }
 
 // PlexUserUpdates updates users from plex
-func PlexUserUpdates() error {
+func PlexUserUpdates(_ any) error {
 	log := log.Named("job.PlexUserUpdates")
 	log.Debugf("updating users")
 
@@ -92,7 +92,7 @@ func PlexUserUpdates() error {
 }
 
 // PlexWatchlistUpdate updates watchlist from plex
-func PlexWatchlistUpdates() error {
+func PlexWatchlistUpdates(_ any) error {
 	log := log.Named("job.PlexWatchlistUpdates")
 	log.Debugf("creating requests from watchlists")
 
