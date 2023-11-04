@@ -38,5 +38,13 @@ func RequestsUpdate(c *gin.Context, id string) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	server.Log.Warnf("updated request: %s", req.Status)
+	if updated.Status == "approved" {
+		if err := workers.Enqueue("CreateMediaFromRequests"); err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
 	c.JSON(http.StatusOK, req)
 }

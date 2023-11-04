@@ -6,6 +6,7 @@ import (
 
 	"github.com/dashotv/minion"
 	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 var workers *minion.Minion
@@ -16,12 +17,13 @@ type Job struct {
 }
 
 var jobs = map[string]Job{
-	"PopularReleases":      {PopularReleases, "0 */5 * * * *"},    // every 5 minutes
-	"CleanPlexPins":        {CleanPlexPins, "0 0 11 * * *"},       // every day at 11am UTC
-	"CleanJobs":            {CleanJobs, "0 0 11 * * *"},           // every day at 11am UTC
-	"PlexPinToUsers":       {PlexPinToUsers, ""},                  // run on demand from route
-	"PlexUserUpdates":      {PlexUserUpdates, "0 0 11 * * *"},     // every day at 11am UTC
-	"PlexWatchlistUpdates": {PlexWatchlistUpdates, "0 0 * * * *"}, // every hour and on demond
+	"PopularReleases":         {PopularReleases, "0 */5 * * * *"},       // every 5 minutes
+	"CleanPlexPins":           {CleanPlexPins, "0 0 11 * * *"},          // every day at 11am UTC
+	"CleanJobs":               {CleanJobs, "0 0 11 * * *"},              // every day at 11am UTC
+	"PlexPinToUsers":          {PlexPinToUsers, ""},                     // run on demand from route
+	"PlexUserUpdates":         {PlexUserUpdates, "0 0 11 * * *"},        // every day at 11am UTC
+	"PlexWatchlistUpdates":    {PlexWatchlistUpdates, "0 0 * * * *"},    // every hour and on demond
+	"CreateMediaFromRequests": {CreateMediaFromRequests, "0 0 * * * *"}, // every hour and on demond
 	// "DownloadsProcess": {DownloadsProcess, "*/5 * * * * *"},
 }
 
@@ -97,6 +99,96 @@ func PopularReleases() error {
 
 			cache.Set(fmt.Sprintf("releases_popular_%s_%s", f, t), results)
 		}
+	}
+
+	return nil
+}
+
+func CreateMediaFromRequests() error {
+	log := log.Named("job.CreateMediaFromRequests")
+
+	requests, err := db.Request.Query().Where("status", "approved").Run()
+	if err != nil {
+		return errors.Wrap(err, "querying requests")
+	}
+
+	for _, r := range requests {
+		log.Infof("processing request: %s", r.Title)
+		if r.Source == "tmdb" {
+			err := createMovieFromRequest(r)
+			if err != nil {
+				log.Errorf("creating movie from request: %s", err)
+				r.Status = "failed"
+			} else {
+				log.Infof("created movie: %s", r.Title)
+				r.Status = "completed"
+			}
+		} else if r.Source == "tvdb" {
+			err := createShowFromRequest(r)
+			if err != nil {
+				log.Errorf("creating series from request: %s", err)
+				r.Status = "failed"
+			} else {
+				log.Infof("created series: %s", r.Title)
+				r.Status = "completed"
+			}
+		}
+
+		log.Infof("request: [%s] %s", r.Status, r.Title)
+		if err := db.Request.Update(r); err != nil {
+			return errors.Wrap(err, "updating request")
+		}
+
+		// TODO: queue job to update media
+	}
+	return nil
+}
+
+func createShowFromRequest(r *Request) error {
+	count, err := db.Series.Count(bson.M{"_type": "Series", "source": r.Source, "source_id": r.SourceId})
+	if err != nil {
+		return errors.Wrap(err, "counting series")
+	}
+	if count > 0 {
+		return nil
+	}
+
+	s := &Series{
+		Type:     "Series",
+		Source:   r.Source,
+		SourceId: r.SourceId,
+		Title:    r.Title,
+		Kind:     "tv",
+	}
+
+	err = db.Series.Save(s)
+	if err != nil {
+		return errors.Wrap(err, "saving show")
+	}
+
+	return nil
+}
+
+func createMovieFromRequest(r *Request) error {
+	count, err := db.Series.Count(bson.M{"_type": "Series", "source": r.Source, "source_id": r.SourceId})
+	if err != nil {
+		return errors.Wrap(err, "counting series")
+	}
+	if count > 0 {
+		return nil
+	}
+
+	m := &Movie{
+		Type:     "Movie",
+		Source:   r.Source,
+		SourceId: r.SourceId,
+		Title:    r.Title,
+		Kind:     "movies",
+	}
+
+	err = db.Movie.Save(m)
+	if err != nil {
+		return errors.Wrap(err, "saving movie")
 	}
 
 	return nil
