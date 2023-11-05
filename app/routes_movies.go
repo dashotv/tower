@@ -79,7 +79,11 @@ func MoviesCreate(c *gin.Context) {
 		return
 	}
 
-	// TODO: queue update job
+	if err := workers.EnqueueWithPayload("TmdbUpdateMovie", m.ID.Hex()); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"error": false, "movie": m})
 }
 

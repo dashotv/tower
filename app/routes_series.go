@@ -79,18 +79,22 @@ func SeriesCreate(c *gin.Context) {
 	}
 	d, err := time.Parse("2006-01-02", r.Date)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	s.ReleaseDate = d
 
 	err = db.Series.Save(s)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// TODO: queue update job
+	if err := workers.EnqueueWithPayload("TvdbUpdateSeries", s.ID.Hex()); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"error": false, "series": s})
 }
 
