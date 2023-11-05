@@ -58,10 +58,10 @@ func TmdbUpdateMovie(payload any) error {
 	}
 	movie.ReleaseDate = d
 	if resp.PosterPath != nil {
-		workers.EnqueueWithPayload("TmdbUpdateMovieImage", &TmdbUpdateMovieImagePayload{movie.ID.Hex(), "cover", tmdb.StringValue(resp.PosterPath), posterRatio})
+		workers.EnqueueWithPayload("TmdbUpdateMovieImage", &ImagePayload{movie.ID.Hex(), "cover", tmdb.StringValue(resp.PosterPath), posterRatio})
 	}
 	if resp.BackdropPath != nil {
-		workers.EnqueueWithPayload("TmdbUpdateMovieImage", &TmdbUpdateMovieImagePayload{movie.ID.Hex(), "background", tmdb.StringValue(resp.BackdropPath), backgroundRatio})
+		workers.EnqueueWithPayload("TmdbUpdateMovieImage", &ImagePayload{movie.ID.Hex(), "background", tmdb.StringValue(resp.BackdropPath), backgroundRatio})
 	}
 
 	err = db.Movie.Update(movie)
@@ -72,7 +72,7 @@ func TmdbUpdateMovie(payload any) error {
 	return nil
 }
 
-type TmdbUpdateMovieImagePayload struct {
+type ImagePayload struct {
 	ID    string
 	Type  string
 	Path  string
@@ -80,7 +80,7 @@ type TmdbUpdateMovieImagePayload struct {
 }
 
 func TmdbUpdateMovieImage(payload any) error {
-	input := payload.(*TmdbUpdateMovieImagePayload)
+	input := payload.(*ImagePayload)
 	remote := cfg.Tmdb.Images + input.Path
 	extension := filepath.Ext(input.Path)[1:]
 	local := fmt.Sprintf("movie-%s/%s", input.ID, input.Type)

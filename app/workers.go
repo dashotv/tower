@@ -17,15 +17,18 @@ type Job struct {
 }
 
 var jobs = map[string]Job{
-	"PopularReleases":         {PopularReleases, "0 */5 * * * *"},       // every 5 minutes
-	"CleanPlexPins":           {CleanPlexPins, "0 0 11 * * *"},          // every day at 11am UTC
-	"CleanJobs":               {CleanJobs, "0 0 11 * * *"},              // every day at 11am UTC
-	"PlexPinToUsers":          {PlexPinToUsers, ""},                     // run on demand from route
-	"PlexUserUpdates":         {PlexUserUpdates, "0 0 11 * * *"},        // every day at 11am UTC
-	"PlexWatchlistUpdates":    {PlexWatchlistUpdates, "0 0 * * * *"},    // every hour and on demond
-	"CreateMediaFromRequests": {CreateMediaFromRequests, "0 0 * * * *"}, // every hour and on demand
-	"TmdbUpdateMovie":         {TmdbUpdateMovie, ""},                    // run on demoand
-	"TmdbUpdateMovieImage":    {TmdbUpdateMovieImage, ""},               // run on demand
+	"PopularReleases":          {PopularReleases, "0 */5 * * * *"},       // every 5 minutes
+	"CleanPlexPins":            {CleanPlexPins, "0 0 11 * * *"},          // every day at 11am UTC
+	"CleanJobs":                {CleanJobs, "0 0 11 * * *"},              // every day at 11am UTC
+	"PlexPinToUsers":           {PlexPinToUsers, ""},                     // run on demand from route
+	"PlexUserUpdates":          {PlexUserUpdates, "0 0 11 * * *"},        // every day at 11am UTC
+	"PlexWatchlistUpdates":     {PlexWatchlistUpdates, "0 0 * * * *"},    // every hour and on demond
+	"CreateMediaFromRequests":  {CreateMediaFromRequests, "0 0 * * * *"}, // every hour and on demand
+	"TmdbUpdateMovie":          {TmdbUpdateMovie, ""},                    // run on demoand
+	"TmdbUpdateMovieImage":     {TmdbUpdateMovieImage, ""},               // run on demand
+	"TvdbUpdateSeries":         {TvdbUpdateSeries, ""},                   // run on demand
+	"TvdbUpdateSeriesImage":    {TvdbUpdateSeriesImage, ""},              // run on demand
+	"TvdbUpdateSeriesEpisodes": {TvdbUpdateSeriesEpisodes, ""},           // run on demand
 	// "DownloadsProcess": {DownloadsProcess, "*/5 * * * * *"},
 }
 
@@ -167,6 +170,9 @@ func createShowFromRequest(r *Request) error {
 		return errors.Wrap(err, "saving show")
 	}
 
+	if err := workers.EnqueueWithPayload("TvdbUpdateSeries", s.ID.Hex()); err != nil {
+		return errors.Wrap(err, "queueing update job")
+	}
 	return nil
 }
 
@@ -192,7 +198,9 @@ func createMovieFromRequest(r *Request) error {
 		return errors.Wrap(err, "saving movie")
 	}
 
-	workers.EnqueueWithPayload("TmdbUpdateMovie", m.ID.Hex())
+	if err := workers.EnqueueWithPayload("TmdbUpdateMovie", m.ID.Hex()); err != nil {
+		return errors.Wrap(err, "queueing update job")
+	}
 	return nil
 }
 

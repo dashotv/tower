@@ -249,3 +249,8 @@ func SeriesWatches(c *gin.Context, id string) {
 
 	c.JSON(http.StatusOK, results)
 }
+
+func SeriesRefresh(c *gin.Context, id string) {
+	workers.EnqueueWithPayload("TvdbUpdateSeries", id)
+	c.JSON(http.StatusOK, gin.H{"error": false})
+}

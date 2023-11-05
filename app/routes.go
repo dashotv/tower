@@ -71,6 +71,7 @@ func (s *Server) Routes() {
 	series.DELETE("/:id", seriesDeleteHandler)
 	series.GET("/", seriesIndexHandler)
 	series.GET("/:id/paths", seriesPathsHandler)
+	series.PUT("/:id/refresh", seriesRefreshHandler)
 	series.GET("/:id/seasons/:season", seriesSeasonEpisodesHandler)
 	series.GET("/:id/seasons/all", seriesSeasonEpisodesAllHandler)
 	series.GET("/:id/seasons", seriesSeasonsHandler)
@@ -358,6 +359,12 @@ func seriesPathsHandler(c *gin.Context) {
 	id := c.Param("id")
 
 	SeriesPaths(c, id)
+}
+
+func seriesRefreshHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	SeriesRefresh(c, id)
 }
 
 func seriesSeasonEpisodesHandler(c *gin.Context) {

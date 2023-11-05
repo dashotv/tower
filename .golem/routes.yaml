@@ -234,6 +234,12 @@ groups:
         params:
           - name: id
             type: string
+      refresh:
+        path: /:id/refresh
+        method: PUT
+        params:
+          - name: id
+            type: string
       watches:
         path: /:id/watches
         params:

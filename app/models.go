@@ -411,6 +411,7 @@ type Series struct { // model
 	Kind          primitive.Symbol `json:"kind" bson:"kind"`
 	Source        string           `json:"source" bson:"source"`
 	SourceId      string           `json:"source_id" bson:"source_id"`
+	ImdbId        string           `json:"imdb_id" bson:"imdb_id"`
 	Title         string           `json:"title" bson:"title"`
 	Description   string           `json:"description" bson:"description"`
 	Slug          string           `json:"slug" bson:"slug"`
@@ -419,6 +420,7 @@ type Series struct { // model
 	Directory     string           `json:"directory" bson:"directory"`
 	Search        string           `json:"search" bson:"search"`
 	SearchParams  *SearchParams    `json:"search_params" bson:"search_params"`
+	Status        string           `json:"status" bson:"status"`
 	Active        bool             `json:"active" bson:"active"`
 	Downloaded    bool             `json:"downloaded" bson:"downloaded"`
 	Completed     bool             `json:"completed" bson:"completed"`

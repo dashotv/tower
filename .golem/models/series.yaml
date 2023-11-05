@@ -13,6 +13,8 @@ fields:
     type: string
   - name: source_id
     type: string
+  - name: imdb_id
+    type: string
   - name: title
     type: string
   - name: description
@@ -29,6 +31,8 @@ fields:
     type: string
   - name: search_params
     type: "*SearchParams"
+  - name: status
+    type: string
   - name: active
     type: bool
   - name: downloaded
