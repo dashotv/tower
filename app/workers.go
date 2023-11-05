@@ -23,7 +23,9 @@ var jobs = map[string]Job{
 	"PlexPinToUsers":          {PlexPinToUsers, ""},                     // run on demand from route
 	"PlexUserUpdates":         {PlexUserUpdates, "0 0 11 * * *"},        // every day at 11am UTC
 	"PlexWatchlistUpdates":    {PlexWatchlistUpdates, "0 0 * * * *"},    // every hour and on demond
-	"CreateMediaFromRequests": {CreateMediaFromRequests, "0 0 * * * *"}, // every hour and on demond
+	"CreateMediaFromRequests": {CreateMediaFromRequests, "0 0 * * * *"}, // every hour and on demand
+	"TmdbUpdateMovie":         {TmdbUpdateMovie, ""},                    // run on demoand
+	"TmdbUpdateMovieImage":    {TmdbUpdateMovieImage, ""},               // run on demand
 	// "DownloadsProcess": {DownloadsProcess, "*/5 * * * * *"},
 }
 
@@ -169,7 +171,7 @@ func createShowFromRequest(r *Request) error {
 }
 
 func createMovieFromRequest(r *Request) error {
-	count, err := db.Series.Count(bson.M{"_type": "Series", "source": r.Source, "source_id": r.SourceId})
+	count, err := db.Series.Count(bson.M{"_type": "Movie", "source": r.Source, "source_id": r.SourceId})
 	if err != nil {
 		return errors.Wrap(err, "counting series")
 	}
@@ -190,6 +192,7 @@ func createMovieFromRequest(r *Request) error {
 		return errors.Wrap(err, "saving movie")
 	}
 
+	workers.EnqueueWithPayload("TmdbUpdateMovie", m.ID.Hex())
 	return nil
 }
 

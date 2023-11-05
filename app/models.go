@@ -228,7 +228,7 @@ type Episode struct { // model
 	Completed      bool               `json:"completed" bson:"completed"`
 	Skipped        bool               `json:"skipped" bson:"skipped"`
 	ReleaseDate    time.Time          `json:"release_date" bson:"release_date"`
-	Paths          []Path             `json:"paths" bson:"paths"`
+	Paths          []*Path            `json:"paths" bson:"paths"`
 	Cover          string             `json:"cover" bson:"-"`
 	Background     string             `json:"background" bson:"-"`
 	Active         bool               `json:"active" bson:"-"`
@@ -274,7 +274,7 @@ type Medium struct { // model
 	Favorite       bool               `json:"favorite" bson:"favorite"`
 	Unwatched      int                `json:"unwatched" bson:"unwatched"`
 	ReleaseDate    time.Time          `json:"release_date" bson:"release_date"`
-	Paths          []Path             `json:"paths" bson:"paths"`
+	Paths          []*Path            `json:"paths" bson:"paths"`
 	Cover          string             `json:"cover" bson:"-"`
 	Background     string             `json:"background" bson:"-"`
 	SeriesId       primitive.ObjectID `json:"series_id" bson:"series_id"`
@@ -303,6 +303,7 @@ type Movie struct { // model
 	Kind         primitive.Symbol `json:"kind" bson:"kind"`
 	Source       string           `json:"source" bson:"source"`
 	SourceId     string           `json:"source_id" bson:"source_id"`
+	ImdbId       string           `json:"imdb_id" bson:"imdb_id"`
 	Title        string           `json:"title" bson:"title"`
 	Description  string           `json:"description" bson:"description"`
 	Slug         string           `json:"slug" bson:"slug"`
@@ -319,7 +320,7 @@ type Movie struct { // model
 	Broken       bool             `json:"broken" bson:"broken"`
 	Favorite     bool             `json:"favorite" bson:"favorite"`
 	ReleaseDate  time.Time        `json:"release_date" bson:"release_date"`
-	Paths        []Path           `json:"paths" bson:"paths"`
+	Paths        []*Path          `json:"paths" bson:"paths"`
 	Cover        string           `json:"cover" bson:"-"`
 	Background   string           `json:"background" bson:"-"`
 }
@@ -427,7 +428,7 @@ type Series struct { // model
 	Favorite      bool             `json:"favorite" bson:"favorite"`
 	Unwatched     int              `json:"unwatched" bson:"-"`
 	ReleaseDate   time.Time        `json:"release_date" bson:"release_date"`
-	Paths         []Path           `json:"paths" bson:"paths"`
+	Paths         []*Path          `json:"paths" bson:"paths"`
 	Cover         string           `json:"cover" bson:"-"`
 	Background    string           `json:"background" bson:"-"`
 	CurrentSeason int              `json:"currentSeason" bson:"-"`

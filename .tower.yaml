@@ -8,6 +8,10 @@ minion:
   concurrency: 5
 Nats:
   URL: nats://dashotv-nats-1:4222
+directories:
+  images: /images
+tmdb:
+  image_base: https://image.tmdb.org/t/p/original
 filesystems:
   enabled: false
   directories:

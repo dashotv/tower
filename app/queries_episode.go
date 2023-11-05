@@ -101,7 +101,7 @@ func (c *Connector) EpisodeSetting(id, setting string, value bool) error {
 	return c.Episode.Update(e)
 }
 
-func (c *Connector) EpisodePaths(id string) ([]Path, error) {
+func (c *Connector) EpisodePaths(id string) ([]*Path, error) {
 	e := &Episode{}
 	err := db.Episode.Find(id, e)
 	if err != nil {

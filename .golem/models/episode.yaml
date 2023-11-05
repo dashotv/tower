@@ -34,7 +34,7 @@ fields:
   - name: release_date
     type: time.Time
   - name: paths
-    type: "[]Path"
+    type: "[]*Path"
   # Simplified paths for images
   - name: cover
     type: string

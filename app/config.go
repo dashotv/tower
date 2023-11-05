@@ -20,10 +20,10 @@ func setupConfig() (err error) {
 		os.Exit(1)
 	}
 
+	viper.AddConfigPath("/etc/tower") // used by docker-compose and deployment
 	viper.AddConfigPath("..")
 	viper.AddConfigPath("../etc")
 	viper.AddConfigPath(home)
-	viper.AddConfigPath("/etc/tower")
 	viper.SetConfigName(".tower")
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -31,7 +31,7 @@ func setupConfig() (err error) {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
 		// fmt.Printf("WARN: unable to read config: %s\n", err)
-		return nil //errors.Wrap(err, "unable to read config")
+		return errors.Wrap(err, "unable to read config")
 	}
 
 	if err := viper.Unmarshal(cfg); err != nil {
@@ -39,9 +39,11 @@ func setupConfig() (err error) {
 	}
 
 	if err := cfg.Validate(); err != nil {
+		fmt.Printf("validation failed: %+v\n", cfg)
 		return errors.Wrap(err, "failed to validate config")
 	}
 
+	fmt.Printf("INFO: reading config from %s\n", viper.ConfigFileUsed())
 	return nil
 }
 
@@ -62,6 +64,12 @@ type Config struct {
 	Redis struct {
 		Address string `yaml:"address"`
 	} `yaml:"redis"`
+	Directories struct {
+		Images string `yaml:"images"`
+	} `yaml:"directories"`
+	Tmdb struct {
+		Images string `yaml:"images"`
+	} `yaml:"tmdb"`
 	Filesystems struct {
 		Enabled     bool     `yaml:"enabled"`
 		Directories []string `yaml:"directories"`
@@ -77,6 +85,9 @@ type Connection struct {
 func (c *Config) Validate() error {
 	if err := c.validateDefaultConnection(); err != nil {
 		return err
+	}
+	if cfg.Tmdb.Images == "" {
+		return errors.New("tmdb.images must be set")
 	}
 	// TODO: add more validations?
 	return nil

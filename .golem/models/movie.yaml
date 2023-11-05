@@ -13,6 +13,8 @@ fields:
     type: string
   - name: source_id
     type: string
+  - name: imdb_id
+    type: string
   - name: title
     type: string
   - name: description
@@ -20,7 +22,7 @@ fields:
   - name: slug
     type: string
   - name: text
-    type: '[]string'
+    type: "[]string"
   - name: display
     type: string
   - name: directory
@@ -28,7 +30,7 @@ fields:
   - name: search
     type: string
   - name: search_params
-    type: '*SearchParams'
+    type: "*SearchParams"
   - name: active
     type: bool
   - name: downloaded
@@ -46,10 +48,10 @@ fields:
   - name: release_date
     type: time.Time
   - name: paths
-    type: '[]Path'
+    type: "[]*Path"
   - name: cover
     type: string
-    bson: '-'
+    bson: "-"
   - name: background
     type: string
-    bson: '-'
+    bson: "-"

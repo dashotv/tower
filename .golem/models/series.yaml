@@ -20,7 +20,7 @@ fields:
   - name: slug
     type: string
   - name: text
-    type: '[]string'
+    type: "[]string"
   - name: display
     type: string
   - name: directory
@@ -28,7 +28,7 @@ fields:
   - name: search
     type: string
   - name: search_params
-    type: '*SearchParams'
+    type: "*SearchParams"
   - name: active
     type: bool
   - name: downloaded
@@ -45,26 +45,26 @@ fields:
     type: bool
   - name: unwatched
     type: int
-    bson: '-'
+    bson: "-"
   - name: release_date
     type: time.Time
   - name: paths
-    type: '[]Path'
+    type: "[]*Path"
   - name: cover
     type: string
-    bson: '-'
+    bson: "-"
   - name: background
     type: string
-    bson: '-'
+    bson: "-"
   - name: currentSeason
     type: int
-    bson: '-'
+    bson: "-"
   - name: seasons
-    type: '[]int'
-    bson: '-'
+    type: "[]int"
+    bson: "-"
   - name: episodes
-    type: '[]*Episode'
-    bson: '-'
+    type: "[]*Episode"
+    bson: "-"
   - name: watches
-    type: '[]*Watch'
-    bson: '-'
+    type: "[]*Watch"
+    bson: "-"

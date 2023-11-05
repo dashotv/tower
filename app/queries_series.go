@@ -186,7 +186,7 @@ func (c *Connector) SeriesCurrentSeason(id string) (int, error) {
 	return seasons[len(seasons)-1], nil
 }
 
-func (c *Connector) SeriesPaths(id string) ([]Path, error) {
+func (c *Connector) SeriesPaths(id string) ([]*Path, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -198,7 +198,7 @@ func (c *Connector) SeriesPaths(id string) ([]Path, error) {
 		return nil, err
 	}
 
-	var out []Path
+	var out []*Path
 	out = append(out, s.Paths...)
 
 	eps, err := db.Episode.Query().Where("_type", "Episode").
