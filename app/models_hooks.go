@@ -19,7 +19,7 @@ func (e *Episode) Saving() error {
 		p.UpdatedAt = time.Now()
 	}
 
-	return nil
+	return events.Send("tower.episodes", &EventTowerEpisode{"updated", e.ID.Hex(), e})
 }
 
 func (m *Movie) Saving() error {
@@ -35,7 +35,7 @@ func (m *Movie) Saving() error {
 		p.UpdatedAt = time.Now()
 	}
 
-	return nil
+	return events.Send("tower.movies", &EventTowerMovie{"updated", m.ID.Hex(), m})
 }
 
 func (s *Series) Saving() error {
@@ -51,5 +51,9 @@ func (s *Series) Saving() error {
 		p.UpdatedAt = time.Now()
 	}
 
-	return nil
+	if s.SearchParams == nil {
+		s.SearchParams = &SearchParams{Type: "tv", Resolution: 1080, Verified: true}
+	}
+
+	return events.Send("tower.series", &EventTowerSeries{"updated", s.ID.Hex(), s})
 }
