@@ -97,6 +97,9 @@ func TvdbUpdateSeriesImages(id string, sid int64) error {
 		if r.Data == nil {
 			return errors.New("no data")
 		}
+		if len(r.Data.Artworks) == 0 {
+			return errors.New("no artworks")
+		}
 
 		background := r.Data.Artworks[0]
 		workers.EnqueueWithPayload("TvdbUpdateSeriesImage", &ImagePayload{id, "background", tvdb.StringValue(background.Image), backgroundRatio})
