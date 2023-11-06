@@ -16,13 +16,13 @@ type EventsTopic string
 type Events struct {
 	Merc          *mercury.Mercury
 	Log           *zap.SugaredLogger
-	SeerLogs      chan EventSeerLog
-	SeerDownloads chan EventSeerDownload
-	SeerNotices   chan EventSeerNotice
-	TowerLogs     chan EventTowerLog
-	TowerEpisodes chan EventTowerEpisode
-	TowerSeries   chan EventTowerSeries
-	TowerMovies   chan EventTowerMovie
+	SeerLogs      chan *EventSeerLog
+	SeerDownloads chan *EventSeerDownload
+	SeerNotices   chan *EventSeerNotice
+	TowerLogs     chan *EventTowerLog
+	TowerEpisodes chan *EventTowerEpisode
+	TowerSeries   chan *EventTowerSeries
+	TowerMovies   chan *EventTowerMovie
 }
 
 type EventSeerNotice struct {
@@ -75,13 +75,13 @@ func NewEvents() (*Events, error) {
 	e := &Events{
 		Merc:          m,
 		Log:           log.Named("events"),
-		SeerLogs:      make(chan EventSeerLog, 5),
-		SeerDownloads: make(chan EventSeerDownload, 5),
-		SeerNotices:   make(chan EventSeerNotice, 5),
-		TowerLogs:     make(chan EventTowerLog),
-		TowerEpisodes: make(chan EventTowerEpisode),
-		TowerSeries:   make(chan EventTowerSeries),
-		TowerMovies:   make(chan EventTowerMovie),
+		SeerLogs:      make(chan *EventSeerLog, 5),
+		SeerDownloads: make(chan *EventSeerDownload, 5),
+		SeerNotices:   make(chan *EventSeerNotice, 5),
+		TowerLogs:     make(chan *EventTowerLog),
+		TowerEpisodes: make(chan *EventTowerEpisode),
+		TowerSeries:   make(chan *EventTowerSeries),
+		TowerMovies:   make(chan *EventTowerMovie),
 	}
 
 	if err := e.Merc.Receiver("seer.logs", e.SeerLogs); err != nil {
@@ -130,7 +130,7 @@ func (e *Events) Start() error {
 			if err := db.Message.Save(l); err != nil {
 				e.Log.Errorf("error saving log: %s", err)
 			}
-			e.Send("tower.logs", EventTowerLog{Event: "new", ID: l.ID.Hex(), Log: l})
+			e.Send("tower.logs", &EventTowerLog{Event: "new", ID: l.ID.Hex(), Log: l})
 		}
 	}
 }
@@ -138,7 +138,7 @@ func (e *Events) Start() error {
 func (e *Events) Send(topic EventsTopic, data any) error {
 	switch topic {
 	case "tower.logs":
-		m, ok := data.(EventTowerLog)
+		m, ok := data.(*EventTowerLog)
 		if !ok {
 			e.Log.Errorf("events.send: wrong data type: %t", data)
 			return errors.New("events.send: wrong data type")
@@ -146,19 +146,19 @@ func (e *Events) Send(topic EventsTopic, data any) error {
 		e.Log.Infof("log: %+v", m)
 		e.TowerLogs <- m
 	case "tower.episodes":
-		m, ok := data.(EventTowerEpisode)
+		m, ok := data.(*EventTowerEpisode)
 		if !ok {
 			return errors.New("events.send: wrong data type")
 		}
 		e.TowerEpisodes <- m
 	case "tower.series":
-		m, ok := data.(EventTowerSeries)
+		m, ok := data.(*EventTowerSeries)
 		if !ok {
 			return errors.New("events.send: wrong data type")
 		}
 		e.TowerSeries <- m
 	case "tower.movies":
-		m, ok := data.(EventTowerMovie)
+		m, ok := data.(*EventTowerMovie)
 		if !ok {
 			return errors.New("events.send: wrong data type")
 		}
