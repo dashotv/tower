@@ -121,11 +121,13 @@ func (e *Events) Start() error {
 		case m := <-e.SeerDownloads:
 			e.Log.Infof("download: %s %s", m.ID, m.Event)
 		case m := <-e.SeerLogs:
+			e.Log.Infof("log: %+v", m)
 			l := &Message{
 				Level:    m.Level,
 				Message:  m.Message,
 				Facility: m.Facility,
 			}
+			l.CreatedAt = m.Time
 			if err := db.Message.Save(l); err != nil {
 				e.Log.Errorf("error saving log: %s", err)
 			}
