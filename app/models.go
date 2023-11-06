@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/dashotv/grimoire"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
-
-	"github.com/dashotv/grimoire"
 )
 
 type Connector struct {
@@ -176,7 +175,7 @@ func settingsFor(name string) (*Connection, error) {
 	}
 
 	if _, ok := cfg.Connections[name]; !ok {
-		return cfg.Connections["default"], nil
+		return nil, fmt.Errorf("no config for %s", name)
 	}
 
 	s := cfg.Connections["default"]
