@@ -24,7 +24,7 @@ func Start() error {
 
 	initialized = true
 	log.Info("initialized: ", initialized)
-	log.Debugf("config: %+v", cfg)
+	// log.Debugf("config: %+v", cfg)
 
 	return server.Start()
 }
