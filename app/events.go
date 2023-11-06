@@ -121,7 +121,6 @@ func (e *Events) Start() error {
 		case m := <-e.SeerDownloads:
 			e.Log.Infof("download: %s %s", m.ID, m.Event)
 		case m := <-e.SeerLogs:
-			e.Log.Infof("log: %+v", m)
 			l := &Message{
 				Level:    m.Level,
 				Message:  m.Message,
@@ -131,7 +130,7 @@ func (e *Events) Start() error {
 			if err := db.Message.Save(l); err != nil {
 				e.Log.Errorf("error saving log: %s", err)
 			}
-			e.Send("tower.logs", &EventTowerLog{Event: "new", ID: l.ID.Hex(), Log: l})
+			e.Send("tower.logs", EventTowerLog{Event: "new", ID: l.ID.Hex(), Log: l})
 		}
 	}
 }
@@ -141,8 +140,10 @@ func (e *Events) Send(topic EventsTopic, data any) error {
 	case "tower.logs":
 		m, ok := data.(EventTowerLog)
 		if !ok {
+			e.Log.Errorf("events.send: wrong data type: %t", data)
 			return errors.New("events.send: wrong data type")
 		}
+		e.Log.Infof("log: %+v", m)
 		e.TowerLogs <- m
 	case "tower.episodes":
 		m, ok := data.(EventTowerEpisode)
