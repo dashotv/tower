@@ -128,6 +128,15 @@ func (e *Events) Start() error {
 			if m.Message == "processing downloads" {
 				cache.Set("seer_downloads", time.Now().Unix())
 			}
+			l := &Message{
+				Level:    m.Level,
+				Message:  m.Message,
+				Facility: m.Class,
+			}
+			if err := db.Message.Save(l); err != nil {
+				e.Log.Errorf("error saving log: %s", err)
+			}
+			e.Send("tower.logs", &EventTowerLog{Event: "new", ID: l.ID.Hex(), Log: l})
 		case m := <-e.SeerDownloads:
 			e.Log.Infof("download: %s %s", m.ID, m.Event)
 		case m := <-e.SeerLogs:
