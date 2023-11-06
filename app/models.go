@@ -18,6 +18,7 @@ type Connector struct {
 	Episode   *grimoire.Store[*Episode]
 	Feed      *grimoire.Store[*Feed]
 	Medium    *grimoire.Store[*Medium]
+	Message   *grimoire.Store[*Message]
 	MinionJob *grimoire.Store[*MinionJob]
 	Movie     *grimoire.Store[*Movie]
 	Pin       *grimoire.Store[*Pin]
@@ -64,6 +65,15 @@ func NewConnector() (*Connector, error) {
 		return nil, err
 	}
 	medium, err := grimoire.New[*Medium](s.URI, s.Database, s.Collection)
+	if err != nil {
+		return nil, err
+	}
+
+	s, err = settingsFor("message")
+	if err != nil {
+		return nil, err
+	}
+	message, err := grimoire.New[*Message](s.URI, s.Database, s.Collection)
 	if err != nil {
 		return nil, err
 	}
@@ -146,6 +156,7 @@ func NewConnector() (*Connector, error) {
 		Episode:   episode,
 		Feed:      feed,
 		Medium:    medium,
+		Message:   message,
 		MinionJob: minion_job,
 		Movie:     movie,
 		Pin:       pin,
@@ -281,6 +292,16 @@ type Medium struct { // model
 	SeasonNumber   int                `json:"season_number" bson:"season_number"`
 	EpisodeNumber  int                `json:"episode_number" bson:"episode_number"`
 	AbsoluteNumber int                `json:"absolute_number" bson:"absolute_number"`
+}
+
+type Message struct { // model
+	grimoire.Document `bson:",inline"` // includes default model settings
+	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
+	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
+	Level    string `json:"level" bson:"level"`
+	Facility string `json:"facility" bson:"facility"`
+	Message  string `json:"message" bson:"message"`
 }
 
 type MinionJob struct { // model

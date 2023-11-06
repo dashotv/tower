@@ -14,10 +14,15 @@ type EventsChannel string
 type EventsTopic string
 
 type Events struct {
-	Merc      *mercury.Mercury
-	Log       *zap.SugaredLogger
-	Receivers map[EventsTopic]chan any
-	Senders   map[EventsTopic]chan any
+	Merc          *mercury.Mercury
+	Log           *zap.SugaredLogger
+	SeerLogs      chan EventSeerLog
+	SeerDownloads chan EventSeerDownload
+	SeerNotices   chan EventSeerNotice
+	TowerLogs     chan EventTowerLog
+	TowerEpisodes chan EventTowerEpisode
+	TowerSeries   chan EventTowerSeries
+	TowerMovies   chan EventTowerMovie
 }
 
 type EventSeerNotice struct {
@@ -32,6 +37,12 @@ type EventSeerDownload struct {
 	Event    string
 	ID       string
 	Download *Download
+}
+type EventSeerLog struct {
+	Time     time.Time
+	Message  string
+	Level    string
+	Facility string
 }
 
 type EventTowerEpisode struct {
@@ -49,6 +60,11 @@ type EventTowerMovie struct {
 	ID    string
 	Movie *Movie
 }
+type EventTowerLog struct {
+	Event string
+	ID    string
+	Log   *Message
+}
 
 func NewEvents() (*Events, error) {
 	m, err := mercury.New("tower", cfg.Nats.URL)
@@ -57,28 +73,37 @@ func NewEvents() (*Events, error) {
 	}
 
 	e := &Events{
-		Merc: m,
-		Log:  log.Named("events"),
-	}
-	e.Senders = map[EventsTopic]chan any{
-		"tower.episodes": make(chan any),
-		"tower.series":   make(chan any),
-		"tower.movies":   make(chan any),
-	}
-	e.Receivers = map[EventsTopic]chan any{
-		"seer.notices":   make(chan any, 5),
-		"seer.downloads": make(chan any, 5),
+		Merc:          m,
+		Log:           log.Named("events"),
+		SeerLogs:      make(chan EventSeerLog, 5),
+		SeerDownloads: make(chan EventSeerDownload, 5),
+		SeerNotices:   make(chan EventSeerNotice, 5),
+		TowerLogs:     make(chan EventTowerLog),
+		TowerEpisodes: make(chan EventTowerEpisode),
+		TowerSeries:   make(chan EventTowerSeries),
+		TowerMovies:   make(chan EventTowerMovie),
 	}
 
-	for topic, channel := range e.Senders {
-		if err := e.Merc.Sender(string(topic), channel); err != nil {
-			return nil, err
-		}
+	if err := e.Merc.Receiver("seer.logs", e.SeerLogs); err != nil {
+		return nil, err
 	}
-	for topic, channel := range e.Receivers {
-		if err := e.Merc.Receiver(string(topic), channel); err != nil {
-			return nil, err
-		}
+	if err := e.Merc.Receiver("seer.downloads", e.SeerDownloads); err != nil {
+		return nil, err
+	}
+	if err := e.Merc.Receiver("seer.notices", e.SeerNotices); err != nil {
+		return nil, err
+	}
+	if err := e.Merc.Sender("tower.logs", e.TowerLogs); err != nil {
+		return nil, err
+	}
+	if err := e.Merc.Sender("tower.episodes", e.TowerEpisodes); err != nil {
+		return nil, err
+	}
+	if err := e.Merc.Sender("tower.series", e.TowerSeries); err != nil {
+		return nil, err
+	}
+	if err := e.Merc.Sender("tower.movies", e.TowerMovies); err != nil {
+		return nil, err
 	}
 
 	return e, nil
@@ -89,25 +114,53 @@ func (e *Events) Start() error {
 
 	for {
 		select {
-		case r := <-e.Receivers["seer.notices"]:
-			m := r.(EventSeerNotice)
+		case m := <-e.SeerNotices:
 			if m.Message == "processing downloads" {
 				cache.Set("seer_downloads", time.Now().Unix())
 			}
-		case r := <-e.Receivers["seer.downloads"]:
-			m := r.(EventSeerDownload)
+		case m := <-e.SeerDownloads:
 			e.Log.Infof("download: %s %s", m.ID, m.Event)
+		case m := <-e.SeerLogs:
+			l := &Message{
+				Level:    m.Level,
+				Message:  m.Message,
+				Facility: m.Facility,
+			}
+			if err := db.Message.Save(l); err != nil {
+				e.Log.Errorf("error saving log: %s", err)
+			}
+			e.Send("tower.logs", &EventTowerLog{Event: "new", ID: l.ID.Hex(), Log: l})
 		}
 	}
 }
 
 func (e *Events) Send(topic EventsTopic, data any) error {
-	c := events.Senders[topic]
-	if c == nil {
-		return errors.Errorf("events: %s does not exist", topic)
+	switch topic {
+	case "tower.logs":
+		m, ok := data.(EventTowerLog)
+		if !ok {
+			return errors.New("events.send: wrong data type")
+		}
+		e.TowerLogs <- m
+	case "tower.episodes":
+		m, ok := data.(EventTowerEpisode)
+		if !ok {
+			return errors.New("events.send: wrong data type")
+		}
+		e.TowerEpisodes <- m
+	case "tower.series":
+		m, ok := data.(EventTowerSeries)
+		if !ok {
+			return errors.New("events.send: wrong data type")
+		}
+		e.TowerSeries <- m
+	case "tower.movies":
+		m, ok := data.(EventTowerMovie)
+		if !ok {
+			return errors.New("events.send: wrong data type")
+		}
+		e.TowerMovies <- m
 	}
-	e.Log.Infof("sending %s: %+v", topic, data)
-	c <- data
 	return nil
 }
 
