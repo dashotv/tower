@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -20,6 +21,7 @@ var jobs = map[string]Job{
 	"PopularReleases":          {PopularReleases, "0 */5 * * * *"},       // every 5 minutes
 	"CleanPlexPins":            {CleanPlexPins, "0 0 11 * * *"},          // every day at 11am UTC
 	"CleanJobs":                {CleanJobs, "0 0 11 * * *"},              // every day at 11am UTC
+	"CleanLogs":                {CleanLogs, "0 0 11 * * *"},              // every day at 11am UTC
 	"PlexPinToUsers":           {PlexPinToUsers, ""},                     // run on demand from route
 	"PlexUserUpdates":          {PlexUserUpdates, "0 0 11 * * *"},        // every day at 11am UTC
 	"PlexWatchlistUpdates":     {PlexWatchlistUpdates, "0 0 * * * *"},    // every hour and on demond
@@ -79,6 +81,15 @@ func CleanJobs(_ any) error {
 		if err != nil {
 			return errors.Wrap(err, "deleting job")
 		}
+	}
+
+	return nil
+}
+
+func CleanLogs(_ any) error {
+	_, err := db.Message.Collection.DeleteMany(context.Background(), bson.M{"created_at": bson.M{"$lt": time.Now().UTC().AddDate(0, 0, -1)}})
+	if err != nil {
+		return errors.Wrap(err, "cleaning logs")
 	}
 
 	return nil
