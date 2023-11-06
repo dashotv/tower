@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -23,8 +24,8 @@ var jobs = map[string]Job{
 	"CleanLogs":                {CleanLogs, "0 0 11 * * *"},              // every day at 11am UTC
 	"PlexPinToUsers":           {PlexPinToUsers, ""},                     // run on demand from route
 	"PlexUserUpdates":          {PlexUserUpdates, "0 0 11 * * *"},        // every day at 11am UTC
-	"PlexWatchlistUpdates":     {PlexWatchlistUpdates, "0 0 * * * *"},    // every hour and on demond
-	"CreateMediaFromRequests":  {CreateMediaFromRequests, "0 0 * * * *"}, // every hour and on demand
+	"PlexWatchlistUpdates":     {PlexWatchlistUpdates, "0 0 * * * *"},    // every hour
+	"CreateMediaFromRequests":  {CreateMediaFromRequests, "0 0 * * * *"}, // every hour
 	"TmdbUpdateMovie":          {TmdbUpdateMovie, ""},                    // run on demoand
 	"TmdbUpdateMovieImage":     {TmdbUpdateMovieImage, ""},               // run on demand
 	"TvdbUpdateSeries":         {TvdbUpdateSeries, ""},                   // run on demand
@@ -86,10 +87,10 @@ func CleanJobs(_ any) error {
 }
 
 func CleanLogs(_ any) error {
-	// _, err := db.Message.Collection.DeleteMany(context.Background(), bson.M{"created_at": bson.M{"$lt": time.Now().UTC().AddDate(0, 0, -1)}})
-	// if err != nil {
-	// 	return errors.Wrap(err, "cleaning logs")
-	// }
+	_, err := db.Message.Collection.DeleteMany(context.Background(), bson.M{"created_at": bson.M{"$lt": time.Now().UTC().AddDate(0, 0, -5)}})
+	if err != nil {
+		return errors.Wrap(err, "cleaning logs")
+	}
 
 	return nil
 }

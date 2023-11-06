@@ -7,26 +7,26 @@ plex: http://localhost:9000/plex # external plex proxied url
 minion:
   concurrency: 5
 Nats:
-  URL: nats://dashotv-nats-1:4222
+  URL: nats://localhost:4222
+tmdb:
+  images: https://image.tmdb.org/t/p/original
 directories:
   images: /images
-tmdb:
-  image_base: https://image.tmdb.org/t/p/original
 filesystems:
   enabled: false
-  directories:
-    - /media/anime
-    - /media/ecchi
-    - /media/kids
-    - /media/movies
-    - /media/movies3d
-    - /media/movies4k
-    - /media/tv
+  # directories:
+  #   - /media/anime
+  #   - /media/ecchi
+  #   - /media/kids
+  #   - /media/movies
+  #   - /media/movies3d
+  #   - /media/movies4k
+  #   - /media/tv
 redis:
   address: redis:6379
 connections:
   default:
-    uri: mongodb://dashotv-db-1:27017
+    uri: mongodb://localhost:27017
     database: database
   medium:
     database: seer_development
