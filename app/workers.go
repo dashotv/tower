@@ -1,7 +1,6 @@
 package app
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -87,10 +86,10 @@ func CleanJobs(_ any) error {
 }
 
 func CleanLogs(_ any) error {
-	_, err := db.Message.Collection.DeleteMany(context.Background(), bson.M{"created_at": bson.M{"$lt": time.Now().UTC().AddDate(0, 0, -1)}})
-	if err != nil {
-		return errors.Wrap(err, "cleaning logs")
-	}
+	// _, err := db.Message.Collection.DeleteMany(context.Background(), bson.M{"created_at": bson.M{"$lt": time.Now().UTC().AddDate(0, 0, -1)}})
+	// if err != nil {
+	// 	return errors.Wrap(err, "cleaning logs")
+	// }
 
 	return nil
 }
