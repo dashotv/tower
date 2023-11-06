@@ -37,6 +37,9 @@ func (s *Server) Routes() {
 	jobs := s.Router.Group("/jobs")
 	jobs.GET("/", jobsIndexHandler)
 
+	messages := s.Router.Group("/messages")
+	messages.GET("/", messagesIndexHandler)
+
 	movies := s.Router.Group("/movies")
 	movies.POST("/", moviesCreateHandler)
 	movies.DELETE("/:id", moviesDeleteHandler)
@@ -100,6 +103,7 @@ func Index(c *gin.Context) {
 			"episodes":  "/episodes",
 			"feeds":     "/feeds",
 			"jobs":      "/jobs",
+			"messages":  "/messages",
 			"movies":    "/movies",
 			"plex":      "/plex",
 			"releases":  "/releases",
@@ -214,6 +218,12 @@ func feedsUpdateHandler(c *gin.Context) {
 func jobsIndexHandler(c *gin.Context) {
 
 	JobsIndex(c)
+}
+
+// /messages
+func messagesIndexHandler(c *gin.Context) {
+
+	MessagesIndex(c)
 }
 
 // /movies

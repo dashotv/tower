@@ -73,6 +73,12 @@ groups:
       index:
         name: index
         path: /
+  messages:
+    name: messages
+    path: /messages
+    routes:
+      index:
+        path: /
   movies:
     path: /movies
     routes:
@@ -200,6 +206,12 @@ groups:
         params:
           - name: id
             type: string
+      refresh:
+        path: /:id/refresh
+        method: PUT
+        params:
+          - name: id
+            type: string
       seasonEpisodes:
         path: /:id/seasons/:season
         params:
@@ -230,12 +242,6 @@ groups:
             type: string
       update:
         path: /:id
-        method: PUT
-        params:
-          - name: id
-            type: string
-      refresh:
-        path: /:id/refresh
         method: PUT
         params:
           - name: id
