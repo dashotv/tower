@@ -23,6 +23,7 @@ type Events struct {
 	TowerEpisodes chan *EventTowerEpisode
 	TowerSeries   chan *EventTowerSeries
 	TowerMovies   chan *EventTowerMovie
+	TowerEvents   chan *EventTowerRequest
 }
 
 type EventSeerNotice struct {
@@ -65,6 +66,11 @@ type EventTowerLog struct {
 	ID    string
 	Log   *Message
 }
+type EventTowerRequest struct {
+	Event   string
+	ID      string
+	Request *Request
+}
 
 func NewEvents() (*Events, error) {
 	m, err := mercury.New("tower", cfg.Nats.URL)
@@ -82,6 +88,7 @@ func NewEvents() (*Events, error) {
 		TowerEpisodes: make(chan *EventTowerEpisode),
 		TowerSeries:   make(chan *EventTowerSeries),
 		TowerMovies:   make(chan *EventTowerMovie),
+		TowerEvents:   make(chan *EventTowerRequest),
 	}
 
 	if err := e.Merc.Receiver("seer.logs", e.SeerLogs); err != nil {
@@ -103,6 +110,9 @@ func NewEvents() (*Events, error) {
 		return nil, err
 	}
 	if err := e.Merc.Sender("tower.movies", e.TowerMovies); err != nil {
+		return nil, err
+	}
+	if err := e.Merc.Sender("tower.requests", e.TowerEvents); err != nil {
 		return nil, err
 	}
 
@@ -148,21 +158,33 @@ func (e *Events) Send(topic EventsTopic, data any) error {
 	case "tower.episodes":
 		m, ok := data.(*EventTowerEpisode)
 		if !ok {
+			e.Log.Errorf("events.send: wrong data type: %t", data)
 			return errors.New("events.send: wrong data type")
 		}
 		e.TowerEpisodes <- m
 	case "tower.series":
 		m, ok := data.(*EventTowerSeries)
 		if !ok {
+			e.Log.Errorf("events.send: wrong data type: %t", data)
 			return errors.New("events.send: wrong data type")
 		}
 		e.TowerSeries <- m
 	case "tower.movies":
 		m, ok := data.(*EventTowerMovie)
 		if !ok {
+			e.Log.Errorf("events.send: wrong data type: %t", data)
 			return errors.New("events.send: wrong data type")
 		}
 		e.TowerMovies <- m
+	case "tower.requests":
+		m, ok := data.(*EventTowerRequest)
+		if !ok {
+			e.Log.Errorf("events.send: wrong data type: %t", data)
+			return errors.New("events.send: wrong data type")
+		}
+		e.TowerEvents <- m
+	default:
+		e.Log.Warnf("events.send: unknown topic: %s", topic)
 	}
 	return nil
 }

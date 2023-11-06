@@ -153,7 +153,9 @@ func CreateMediaFromRequests(_ any) error {
 			return errors.Wrap(err, "updating request")
 		}
 
-		// TODO: queue job to update media
+		if err := events.Send("tower.requests", &EventTowerRequest{Event: "update", ID: r.ID.Hex(), Request: r}); err != nil {
+			return errors.Wrap(err, "sending event")
+		}
 	}
 	return nil
 }
