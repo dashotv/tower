@@ -35,6 +35,10 @@ func (m *Movie) Saving() error {
 		p.UpdatedAt = time.Now()
 	}
 
+	if m.SearchParams == nil {
+		m.SearchParams = &SearchParams{Type: "movie", Resolution: 1080, Verified: true}
+	}
+
 	return events.Send("tower.movies", &EventTowerMovie{"updated", m.ID.Hex(), m})
 }
 
