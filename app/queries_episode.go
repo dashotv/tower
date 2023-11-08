@@ -55,9 +55,12 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 	for _, e := range list {
 		sid := e.SeriesId
 		if seriesMap[sid] != nil {
-			//if seriesMap[sid].Type == "Anime" {
-			//	e.Display = fmt.Sprintf("#%d %s", e.AbsoluteNumber, e.Title)
-			//} else {
+			if seriesMap[sid].Kind == "anime" {
+				e.Display = fmt.Sprintf("#%d %s", e.AbsoluteNumber, e.Title)
+			} else {
+				e.Display = fmt.Sprintf("%02dx%02d %s", e.SeasonNumber, e.EpisodeNumber, e.Title)
+			}
+			e.Title = seriesMap[sid].Title
 			unwatched, err := c.SeriesAllUnwatched(seriesMap[sid])
 			if err != nil {
 				c.log.Errorf("getting unwatched %s: %s", sid, err)

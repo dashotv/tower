@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dashotv/grimoire"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
+
+	"github.com/dashotv/grimoire"
 )
 
 type Connector struct {
@@ -175,7 +176,7 @@ func settingsFor(name string) (*Connection, error) {
 	}
 
 	if _, ok := cfg.Connections[name]; !ok {
-		return nil, fmt.Errorf("no config for %s", name)
+		return cfg.Connections["default"], nil
 	}
 
 	s := cfg.Connections["default"]
@@ -228,6 +229,7 @@ type Episode struct { // model
 	SeriesId       primitive.ObjectID `json:"series_id" bson:"series_id"`
 	SourceId       string             `json:"source_id" bson:"source_id"`
 	Title          string             `json:"title" bson:"title"`
+	Display        string             `json:"display" bson:"-"`
 	Description    string             `json:"description" bson:"description"`
 	Directory      string             `json:"directory" bson:"directory"`
 	Search         string             `json:"search" bson:"search"`
