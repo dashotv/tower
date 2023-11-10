@@ -17,7 +17,7 @@ func JobsIndex(c *gin.Context) {
 }
 
 func MessagesIndex(c *gin.Context) {
-	list, err := db.Message.Query().Desc("created_at").Run()
+	list, err := db.Message.Query().Desc("created_at").Limit(250).Run()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
