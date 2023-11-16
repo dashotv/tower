@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/dashotv/tvdb"
-	"github.com/dashotv/tvdb/openapi/models/operations"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -177,7 +176,8 @@ func TvdbUpdateSeriesEpisodes(payload any) error {
 		return errors.Wrap(err, "converting source id")
 	}
 
-	resp, err := tvdbClient.GetSeriesExtended(int64(sid), operations.GetSeriesExtendedMetaEpisodes.ToPointer(), tvdb.Bool(true))
+	// resp, err := tvdbClient.GetSeriesExtended(int64(sid), operations.GetSeriesExtendedMetaEpisodes.ToPointer(), tvdb.Bool(true))
+	resp, err := tvdbClient.GetSeriesSeasonEpisodesTranslated(int64(sid), "eng", 0, "default")
 	if err != nil {
 		return errors.Wrap(err, "getting episodes")
 	}
