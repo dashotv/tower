@@ -40,8 +40,6 @@ func SeriesIndex(c *gin.Context) {
 		}
 		s.Unwatched = unwatched
 
-		s.Title = s.Display
-		s.Display = fmt.Sprintf("%s (%s)", s.Source, s.SourceId)
 		for _, p := range s.Paths {
 			if p.Type == "cover" {
 				s.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
@@ -107,9 +105,6 @@ func SeriesShow(c *gin.Context, id string) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	result.Title = result.Display
-	result.Display = fmt.Sprintf("%s (%s)", result.Source, result.SourceId)
 
 	unwatched, err := db.SeriesAllUnwatched(result)
 	if err != nil {
