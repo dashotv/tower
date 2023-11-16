@@ -229,7 +229,6 @@ type Episode struct { // model
 	SeriesId       primitive.ObjectID `json:"series_id" bson:"series_id"`
 	SourceId       string             `json:"source_id" bson:"source_id"`
 	Title          string             `json:"title" bson:"title"`
-	Display        string             `json:"display" bson:"-"`
 	Description    string             `json:"description" bson:"description"`
 	Directory      string             `json:"directory" bson:"directory"`
 	Search         string             `json:"search" bson:"search"`
@@ -240,11 +239,12 @@ type Episode struct { // model
 	Completed      bool               `json:"completed" bson:"completed"`
 	Skipped        bool               `json:"skipped" bson:"skipped"`
 	ReleaseDate    time.Time          `json:"release_date" bson:"release_date"`
-	Paths          []*Path            `json:"paths" bson:"paths"`
+	Paths          []*Path            `json:"paths" bson:"paths,omitempty"`
 	Cover          string             `json:"cover" bson:"-"`
 	Background     string             `json:"background" bson:"-"`
 	Active         bool               `json:"active" bson:"-"`
 	Unwatched      int                `json:"unwatched" bson:"-"`
+	Display        string             `json:"display" bson:"-"`
 }
 
 type Feed struct { // model

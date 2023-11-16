@@ -39,6 +39,16 @@ func (m *Movie) Saving() error {
 		m.SearchParams = &SearchParams{Type: "movie", Resolution: 1080, Verified: true}
 	}
 
+	if m.Display == "" {
+		m.Display = m.Title
+	}
+	if m.Search == "" {
+		m.Search = path(m.Title)
+	}
+	if m.Directory == "" {
+		m.Directory = path(m.Title)
+	}
+
 	return events.Send("tower.movies", &EventTowerMovie{"updated", m.ID.Hex(), m})
 }
 
@@ -57,6 +67,16 @@ func (s *Series) Saving() error {
 
 	if s.SearchParams == nil {
 		s.SearchParams = &SearchParams{Type: "tv", Resolution: 1080, Verified: true}
+	}
+
+	if s.Display == "" {
+		s.Display = s.Title
+	}
+	if s.Search == "" {
+		s.Search = path(s.Title)
+	}
+	if s.Directory == "" {
+		s.Directory = path(s.Title)
 	}
 
 	return events.Send("tower.series", &EventTowerSeries{"updated", s.ID.Hex(), s})
