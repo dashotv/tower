@@ -108,6 +108,9 @@ func SeriesShow(c *gin.Context, id string) {
 		return
 	}
 
+	result.Title = result.Display
+	result.Display = fmt.Sprintf("%s (%s)", result.Source, result.SourceId)
+
 	unwatched, err := db.SeriesAllUnwatched(result)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
