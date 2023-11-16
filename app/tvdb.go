@@ -33,6 +33,29 @@ func TvdbUpdateSeries(payload any) error {
 		return errors.Wrap(err, "converting source id")
 	}
 
+	{
+		resp, err := tvdbClient.GetSeriesTranslation(int64(sid), "eng")
+		if err != nil {
+			return err
+		}
+
+		if resp.Data == nil {
+			return errors.New("no data")
+		}
+
+		series.Title = tvdb.StringValue(resp.Data.Name)
+		if series.Display == "" {
+			series.Display = series.Title
+		}
+		if series.Search == "" {
+			series.Search = path(series.Title)
+		}
+		if series.Directory == "" {
+			series.Directory = path(series.Title)
+		}
+		series.Description = tvdb.StringValue(resp.Data.Overview)
+	}
+
 	resp, err := tvdbClient.GetSeriesBase(int64(sid))
 	if err != nil {
 		return err
@@ -43,18 +66,6 @@ func TvdbUpdateSeries(payload any) error {
 	}
 
 	data := resp.Data
-
-	series.Title = tvdb.StringValue(data.Name)
-	if series.Display == "" {
-		series.Display = series.Title
-	}
-	if series.Search == "" {
-		series.Search = path(series.Title)
-	}
-	if series.Directory == "" {
-		series.Directory = path(series.Title)
-	}
-	series.Description = tvdb.StringValue(data.Overview)
 	series.Status = tvdb.StringValue(data.Status.Name)
 
 	date, err := time.Parse("2006-01-02", tvdb.StringValue(data.FirstAired))
