@@ -36,7 +36,6 @@ func MoviesIndex(c *gin.Context) {
 
 	// TODO: do this with custom unmarshaling?
 	for _, m := range results {
-		m.Display = fmt.Sprintf("%s (%s)", m.Source, m.SourceId)
 		for _, p := range m.Paths {
 			if p.Type == "cover" {
 				m.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
