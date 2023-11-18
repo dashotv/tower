@@ -9,12 +9,12 @@ func (c *Connector) MovieSetting(id, setting string, value bool) error {
 
 	c.log.Infof("movie setting: %s %t", setting, value)
 	switch setting {
-	case "active":
-		m.Active = value
-	case "favorite":
-		m.Favorite = value
 	case "broken":
 		m.Broken = value
+	case "completed":
+		m.Completed = value
+	case "downloaded":
+		m.Downloaded = value
 	}
 
 	return c.Movie.Update(m)
