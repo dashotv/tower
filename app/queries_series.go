@@ -171,12 +171,7 @@ func (c *Connector) SeriesUpdate(id string, data *Series) error {
 	s.Search = data.Search
 	s.SearchParams = data.SearchParams
 
-	err = c.Series.Update(s)
-	if err != nil {
-		return err
-	}
-
-	return events.Send("tower.series", &EventTowerSeries{Event: "update", ID: s.ID.Hex(), Series: s})
+	return c.Series.Update(s)
 }
 
 func (c *Connector) SeriesCurrentSeason(id string) (int, error) {

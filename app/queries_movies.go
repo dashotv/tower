@@ -34,12 +34,7 @@ func (c *Connector) MovieUpdate(id string, data *Movie) error {
 	m.SourceId = data.SourceId
 	m.Search = data.Search
 
-	err = c.Movie.Update(m)
-	if err != nil {
-		return err
-	}
-
-	return events.Send("tower.movies", &EventTowerMovie{Event: "update", ID: m.ID.Hex(), Movie: m})
+	return c.Movie.Update(m)
 }
 func (c *Connector) MoviePaths(id string) ([]*Path, error) {
 	m := &Movie{}
