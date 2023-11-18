@@ -156,14 +156,14 @@ func SeriesShow(c *gin.Context, id string) {
 }
 
 func SeriesUpdate(c *gin.Context, id string) {
-	data := &Setting{}
+	data := &Series{}
 	err := c.BindJSON(&data)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err = db.SeriesSetting(id, data.Setting, data.Value)
+	err = db.SeriesUpdate(id, data)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

@@ -156,6 +156,29 @@ func (c *Connector) SeriesSetting(id, setting string, value bool) error {
 	return c.Series.Update(s)
 }
 
+func (c *Connector) SeriesUpdate(id string, data *Series) error {
+	s := &Series{}
+	err := c.Series.Find(id, s)
+	if err != nil {
+		return err
+	}
+
+	s.Display = data.Display
+	s.Directory = data.Directory
+	s.Kind = data.Kind
+	s.Source = data.Source
+	s.SourceId = data.SourceId
+	s.Search = data.Search
+	s.SearchParams = data.SearchParams
+
+	err = c.Series.Update(s)
+	if err != nil {
+		return err
+	}
+
+	return events.Send("tower.series", &EventTowerSeries{Event: "update", ID: s.ID.Hex(), Series: s})
+}
+
 func (c *Connector) SeriesCurrentSeason(id string) (int, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
