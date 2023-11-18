@@ -82,6 +82,13 @@ groups:
   movies:
     path: /movies
     routes:
+      refresh:
+        name: :id
+        path: /:id/refresh
+        method: PUT
+        params:
+          - name: id
+            type: string
       create:
         path: /
         method: POST

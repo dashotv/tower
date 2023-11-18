@@ -125,6 +125,16 @@ func MoviesUpdate(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
 }
 
+func MoviesRefresh(c *gin.Context, id string) {
+	err := workers.EnqueueWithPayload("TmdbUpdateMovie", id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"error": false})
+}
+
 func MoviesSetting(c *gin.Context, id string) {
 	data := &Setting{}
 	err := c.BindJSON(&data)

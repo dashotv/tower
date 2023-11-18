@@ -253,6 +253,10 @@ func SeriesWatches(c *gin.Context, id string) {
 }
 
 func SeriesRefresh(c *gin.Context, id string) {
-	workers.EnqueueWithPayload("TvdbUpdateSeries", id)
+	err := workers.EnqueueWithPayload("TvdbUpdateSeries", id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }

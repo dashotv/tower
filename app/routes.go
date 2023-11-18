@@ -45,6 +45,7 @@ func (s *Server) Routes() {
 	movies.DELETE("/:id", moviesDeleteHandler)
 	movies.GET("/", moviesIndexHandler)
 	movies.GET("/:id/paths", moviesPathsHandler)
+	movies.PUT("/:id/refresh", moviesRefreshHandler)
 	movies.PATCH("/:id", moviesSettingHandler)
 	movies.GET("/:id", moviesShowHandler)
 	movies.PUT("/:id", moviesUpdateHandler)
@@ -247,6 +248,12 @@ func moviesPathsHandler(c *gin.Context) {
 	id := c.Param("id")
 
 	MoviesPaths(c, id)
+}
+
+func moviesRefreshHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	MoviesRefresh(c, id)
 }
 
 func moviesSettingHandler(c *gin.Context) {
