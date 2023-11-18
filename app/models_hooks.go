@@ -16,7 +16,9 @@ func (e *Episode) Saving() error {
 		if p.Id.IsZero() {
 			p.Id = primitive.NewObjectID()
 		}
-		p.UpdatedAt = time.Now()
+		if p.UpdatedAt.IsZero() {
+			p.UpdatedAt = time.Now()
+		}
 	}
 
 	return events.Send("tower.episodes", &EventTowerEpisode{"updated", e.ID.Hex(), e})
@@ -32,7 +34,9 @@ func (m *Movie) Saving() error {
 		if p.Id.IsZero() {
 			p.Id = primitive.NewObjectID()
 		}
-		p.UpdatedAt = time.Now()
+		if p.UpdatedAt.IsZero() {
+			p.UpdatedAt = time.Now()
+		}
 	}
 
 	if m.SearchParams == nil {
@@ -62,7 +66,9 @@ func (s *Series) Saving() error {
 		if p.Id.IsZero() {
 			p.Id = primitive.NewObjectID()
 		}
-		p.UpdatedAt = time.Now()
+		if p.UpdatedAt.IsZero() {
+			p.UpdatedAt = time.Now()
+		}
 	}
 
 	if s.SearchParams == nil {
