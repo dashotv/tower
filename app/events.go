@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/dashotv/mercury"
@@ -165,6 +166,21 @@ func (e *Events) Start() error {
 }
 
 func (e *Events) Send(topic EventsTopic, data any) error {
+	f := func() interface{} { return e.doSend(topic, data) }
+
+	err, ok := WithTimeout(f, time.Second*2)
+	if !ok {
+		e.Log.Errorf("events.send: timeout sending message: %s", topic)
+		return fmt.Errorf("events.send: timeout sending message: %s", topic)
+	}
+	if err != nil {
+		e.Log.Errorf("events.send: %s", err)
+		return errors.Wrap(err.(error), "events.send")
+	}
+	return nil
+}
+
+func (e *Events) doSend(topic EventsTopic, data any) error {
 	switch topic {
 	case "tower.logs":
 		m, ok := data.(*EventTowerLog)
@@ -172,7 +188,7 @@ func (e *Events) Send(topic EventsTopic, data any) error {
 			e.Log.Errorf("events.send: wrong data type: %t", data)
 			return errors.New("events.send: wrong data type")
 		}
-		e.Log.Infof("log: %+v", m)
+
 		e.TowerLogs <- m
 	case "tower.episodes":
 		m, ok := data.(*EventTowerEpisode)
