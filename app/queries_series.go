@@ -41,7 +41,7 @@ func (c *Connector) SeriesAllUnwatched(s *Series) (int, error) {
 	ids = lo.Uniq[primitive.ObjectID](ids)
 
 	// get watches for those ids
-	watches, err := c.Watch.Query().Where("username", "xenonsoul").In("medium_id", ids).Run()
+	watches, err := c.Watch.Query().Where("username", "xenonsoul").In("medium_id", ids).Limit(-1).Run()
 	if err != nil {
 		return 0, err
 	}
