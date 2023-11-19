@@ -113,7 +113,6 @@ func (c *Connector) SeriesSeasonEpisodes(id string, season string) ([]*Episode, 
 
 	for _, e := range eps {
 		e.Watched = c.MediumWatched(e.ID)
-		db.log.Debugf("episode: %s: %t", e.ID.Hex(), e.Watched)
 	}
 
 	return eps, nil
