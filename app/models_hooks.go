@@ -6,6 +6,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+func (d *Download) Saving() error {
+	// Call the DefaultModel Saving hook
+	if err := d.DefaultModel.Saving(); err != nil {
+		return err
+	}
+
+	return events.Send("tower.downloads", &EventTowerDownload{"updated", d.ID.Hex(), d})
+}
+
 func (e *Episode) Saving() error {
 	// Call the DefaultModel Saving hook
 	if err := e.DefaultModel.Saving(); err != nil {

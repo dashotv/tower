@@ -14,16 +14,17 @@ type EventsChannel string
 type EventsTopic string
 
 type Events struct {
-	Merc          *mercury.Mercury
-	Log           *zap.SugaredLogger
-	SeerLogs      chan *EventSeerLog
-	SeerDownloads chan *EventSeerDownload
-	SeerNotices   chan *EventSeerNotice
-	TowerLogs     chan *EventTowerLog
-	TowerEpisodes chan *EventTowerEpisode
-	TowerSeries   chan *EventTowerSeries
-	TowerMovies   chan *EventTowerMovie
-	TowerEvents   chan *EventTowerRequest
+	Merc           *mercury.Mercury
+	Log            *zap.SugaredLogger
+	SeerLogs       chan *EventSeerLog
+	SeerDownloads  chan *EventSeerDownload
+	SeerNotices    chan *EventSeerNotice
+	TowerLogs      chan *EventTowerLog
+	TowerEpisodes  chan *EventTowerEpisode
+	TowerSeries    chan *EventTowerSeries
+	TowerMovies    chan *EventTowerMovie
+	TowerEvents    chan *EventTowerRequest
+	TowerDownloads chan *EventTowerDownload
 }
 
 type EventSeerNotice struct {
@@ -46,6 +47,11 @@ type EventSeerLog struct {
 	Facility string
 }
 
+type EventTowerDownload struct {
+	Event    string
+	ID       string
+	Download *Download
+}
 type EventTowerEpisode struct {
 	Event   string
 	ID      string
@@ -79,16 +85,17 @@ func NewEvents() (*Events, error) {
 	}
 
 	e := &Events{
-		Merc:          m,
-		Log:           log.Named("events"),
-		SeerLogs:      make(chan *EventSeerLog, 5),
-		SeerDownloads: make(chan *EventSeerDownload, 5),
-		SeerNotices:   make(chan *EventSeerNotice, 5),
-		TowerLogs:     make(chan *EventTowerLog),
-		TowerEpisodes: make(chan *EventTowerEpisode),
-		TowerSeries:   make(chan *EventTowerSeries),
-		TowerMovies:   make(chan *EventTowerMovie),
-		TowerEvents:   make(chan *EventTowerRequest),
+		Merc:           m,
+		Log:            log.Named("events"),
+		SeerLogs:       make(chan *EventSeerLog, 5),
+		SeerDownloads:  make(chan *EventSeerDownload, 5),
+		SeerNotices:    make(chan *EventSeerNotice, 5),
+		TowerLogs:      make(chan *EventTowerLog),
+		TowerEpisodes:  make(chan *EventTowerEpisode),
+		TowerSeries:    make(chan *EventTowerSeries),
+		TowerMovies:    make(chan *EventTowerMovie),
+		TowerEvents:    make(chan *EventTowerRequest),
+		TowerDownloads: make(chan *EventTowerDownload),
 	}
 
 	if err := e.Merc.Receiver("seer.logs", e.SeerLogs); err != nil {
@@ -113,6 +120,9 @@ func NewEvents() (*Events, error) {
 		return nil, err
 	}
 	if err := e.Merc.Sender("tower.requests", e.TowerEvents); err != nil {
+		return nil, err
+	}
+	if err := e.Merc.Sender("tower.downloads", e.TowerDownloads); err != nil {
 		return nil, err
 	}
 
@@ -192,6 +202,13 @@ func (e *Events) Send(topic EventsTopic, data any) error {
 			return errors.New("events.send: wrong data type")
 		}
 		e.TowerEvents <- m
+	case "tower.downloads":
+		m, ok := data.(*EventTowerDownload)
+		if !ok {
+			e.Log.Errorf("events.send: wrong data type: %t", data)
+			return errors.New("events.send: wrong data type")
+		}
+		e.TowerDownloads <- m
 	default:
 		e.Log.Warnf("events.send: unknown topic: %s", topic)
 	}
