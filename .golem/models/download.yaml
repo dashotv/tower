@@ -5,9 +5,6 @@ imports:
 fields:
   - name: medium_id
     type: primitive.ObjectID
-  - name: medium
-    type: '*Medium'
-    bson: '-'
   - name: auto
     type: bool
   - name: multi
@@ -21,6 +18,19 @@ fields:
     bson: tdo_id
   - name: thash
     type: string
+  - name: selected
+    type: string
+  - name: status
+    type: string
+  - name: files
+    type: "[]*DownloadFile"
+    json: download_files
+    bson: download_files
+  # for the UI
+  - name: medium
+    type: "*Medium"
+    bson: "-"
+# not used
 #  - name: timestamps
 #    type: struct
 #    fields:
@@ -34,11 +44,3 @@ fields:
 #        type: time.Time
 #      - name: deleted
 #        type: time.Time
-  - name: selected
-    type: string
-  - name: status
-    type: string
-  - name: files
-    type: '[]*DownloadFile'
-    json: download_files
-    bson: download_files

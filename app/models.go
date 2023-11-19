@@ -201,7 +201,6 @@ type Download struct { // model
 	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
 	MediumId  primitive.ObjectID `json:"medium_id" bson:"medium_id"`
-	Medium    *Medium            `json:"medium" bson:"-"`
 	Auto      bool               `json:"auto" bson:"auto"`
 	Multi     bool               `json:"multi" bson:"multi"`
 	Force     bool               `json:"force" bson:"force"`
@@ -211,6 +210,7 @@ type Download struct { // model
 	Selected  string             `json:"selected" bson:"selected"`
 	Status    string             `json:"status" bson:"status"`
 	Files     []*DownloadFile    `json:"download_files" bson:"download_files"`
+	Medium    *Medium            `json:"medium" bson:"-"`
 }
 
 type DownloadFile struct { // struct
