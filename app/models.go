@@ -242,6 +242,7 @@ type Episode struct { // model
 	Paths          []*Path            `json:"paths" bson:"paths,omitempty"`
 	Cover          string             `json:"cover" bson:"-"`
 	Background     string             `json:"background" bson:"-"`
+	Watched        bool               `json:"watched" bson:"-"`
 	Active         bool               `json:"active" bson:"-"`
 	Unwatched      int                `json:"unwatched" bson:"-"`
 	Display        string             `json:"display" bson:"-"`

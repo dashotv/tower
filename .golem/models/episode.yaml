@@ -43,6 +43,10 @@ fields:
   - name: background
     type: string
     bson: "-"
+  # Simplified access to watched status
+  - name: watched
+    type: bool
+    bson: "-"
   # Series-related fields
   - name: active
     type: bool

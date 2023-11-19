@@ -105,10 +105,15 @@ func (c *Connector) SeriesSeasonEpisodes(id string, season string) ([]*Episode, 
 		Where("series_id", oid).
 		Where("season_number", s).
 		Asc("episode_number").
-		Limit(1000).
+		Limit(-1).
 		Run()
 	if err != nil {
 		return nil, err
+	}
+
+	for _, e := range eps {
+		e.Watched = c.MediumWatched(e.ID)
+		db.log.Debugf("episode: %s: %t", e.ID.Hex(), e.Watched)
 	}
 
 	return eps, nil
