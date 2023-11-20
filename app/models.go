@@ -287,7 +287,7 @@ type Medium struct { // model
 	Favorite       bool               `json:"favorite" bson:"favorite"`
 	Unwatched      int                `json:"unwatched" bson:"unwatched"`
 	ReleaseDate    time.Time          `json:"release_date" bson:"release_date"`
-	Paths          []*Path            `json:"paths" bson:"paths"`
+	Paths          []*Path            `json:"paths" bson:"paths,omitempty"`
 	Cover          string             `json:"cover" bson:"-"`
 	Background     string             `json:"background" bson:"-"`
 	SeriesId       primitive.ObjectID `json:"series_id" bson:"series_id"`
@@ -343,7 +343,7 @@ type Movie struct { // model
 	Broken       bool             `json:"broken" bson:"broken"`
 	Favorite     bool             `json:"favorite" bson:"favorite"`
 	ReleaseDate  time.Time        `json:"release_date" bson:"release_date"`
-	Paths        []*Path          `json:"paths" bson:"paths"`
+	Paths        []*Path          `json:"paths" bson:"paths,omitempty"`
 	Cover        string           `json:"cover" bson:"-"`
 	Background   string           `json:"background" bson:"-"`
 }
@@ -453,7 +453,7 @@ type Series struct { // model
 	Favorite      bool             `json:"favorite" bson:"favorite"`
 	Unwatched     int              `json:"unwatched" bson:"-"`
 	ReleaseDate   time.Time        `json:"release_date" bson:"release_date"`
-	Paths         []*Path          `json:"paths" bson:"paths"`
+	Paths         []*Path          `json:"paths" bson:"paths,omitempty"`
 	Cover         string           `json:"cover" bson:"-"`
 	Background    string           `json:"background" bson:"-"`
 	CurrentSeason int              `json:"currentSeason" bson:"-"`
