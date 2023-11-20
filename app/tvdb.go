@@ -7,15 +7,20 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dashotv/tvdb"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/dashotv/tvdb"
 )
 
 var tvdbClient *tvdb.Client
 
 func setupTvdb() error {
-	tvdbClient = tvdb.New(os.Getenv("TVDB_API_KEY"), os.Getenv("TVDB_API_TOKEN"))
+	c, err := tvdb.Login(os.Getenv("TVDB_API_KEY"))
+	if err != nil {
+		return err
+	}
+	tvdbClient = c
 	return nil
 }
 
