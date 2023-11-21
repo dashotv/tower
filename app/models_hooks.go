@@ -66,9 +66,13 @@ func (m *Movie) Saving() error {
 	}
 	if m.Search == "" {
 		m.Search = path(m.Title)
+	} else {
+		m.Search = path(m.Search)
 	}
 	if m.Directory == "" {
 		m.Directory = path(m.Title)
+	} else {
+		m.Directory = path(m.Directory)
 	}
 
 	return events.Send("tower.movies", &EventTowerMovie{"updated", m.ID.Hex(), m})
@@ -101,9 +105,13 @@ func (s *Series) Saving() error {
 	}
 	if s.Search == "" {
 		s.Search = path(s.Title)
+	} else {
+		s.Search = path(s.Search)
 	}
 	if s.Directory == "" {
 		s.Directory = path(s.Title)
+	} else {
+		s.Directory = path(s.Directory)
 	}
 
 	return events.Send("tower.series", &EventTowerSeries{"updated", s.ID.Hex(), s})
