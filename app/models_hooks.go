@@ -49,7 +49,7 @@ func (m *Movie) Saving() error {
 	}
 
 	if m.SearchParams == nil {
-		m.SearchParams = &SearchParams{Type: "movie", Resolution: 1080, Verified: true}
+		m.SearchParams = &SearchParams{Type: "movies", Resolution: 1080, Verified: true}
 	}
 
 	if m.Display == "" {
