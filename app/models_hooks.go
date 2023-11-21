@@ -11,6 +11,9 @@ func (d *Download) Saving() error {
 	if err := d.DefaultModel.Saving(); err != nil {
 		return err
 	}
+	if d.Files == nil {
+		d.Files = []*DownloadFile{}
+	}
 
 	return events.Send("tower.downloads", &EventTowerDownload{"updated", d.ID.Hex(), d})
 }
@@ -21,6 +24,9 @@ func (e *Episode) Saving() error {
 		return err
 	}
 
+	if e.Paths == nil {
+		e.Paths = []*Path{}
+	}
 	for _, p := range e.Paths {
 		if p.Id.IsZero() {
 			p.Id = primitive.NewObjectID()
@@ -39,6 +45,9 @@ func (m *Movie) Saving() error {
 		return err
 	}
 
+	if m.Paths == nil {
+		m.Paths = []*Path{}
+	}
 	for _, p := range m.Paths {
 		if p.Id.IsZero() {
 			p.Id = primitive.NewObjectID()
@@ -71,6 +80,9 @@ func (s *Series) Saving() error {
 		return err
 	}
 
+	if s.Paths == nil {
+		s.Paths = []*Path{}
+	}
 	for _, p := range s.Paths {
 		if p.Id.IsZero() {
 			p.Id = primitive.NewObjectID()
