@@ -5,9 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dashotv/golem/web"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/dashotv/golem/web"
 )
 
 const pagesize = 42
@@ -68,13 +70,21 @@ func SeriesCreate(c *gin.Context) {
 		return
 	}
 
+	server.Log.Debugf("series create: %+v", r)
 	s := &Series{
-		Type:     "Series",
-		SourceId: r.ID,
-		Source:   r.Source,
-		Title:    r.Title,
-		Kind:     "tv",
+		Type:         "Series",
+		SourceId:     r.ID,
+		Source:       r.Source,
+		Title:        r.Title,
+		Description:  r.Description,
+		Kind:         primitive.Symbol(r.Kind),
+		SearchParams: &SearchParams{Resolution: 1080, Verified: true, Type: "tv"},
 	}
+
+	if r.Kind == "anime" {
+		s.SearchParams.Type = "anime"
+	}
+
 	d, err := time.Parse("2006-01-02", r.Date)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

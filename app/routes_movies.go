@@ -8,6 +8,7 @@ import (
 	"github.com/dashotv/golem/web"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func MoviesIndex(c *gin.Context) {
@@ -58,13 +59,17 @@ func MoviesCreate(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "id and source are required"})
 		return
 	}
+
 	m := &Movie{
-		Type:     "Movie",
-		SourceId: r.ID,
-		Source:   r.Source,
-		Title:    r.Title,
-		Kind:     "movies",
+		Type:         "Movie",
+		SourceId:     r.ID,
+		Source:       r.Source,
+		Title:        r.Title,
+		Description:  r.Description,
+		Kind:         primitive.Symbol(r.Kind),
+		SearchParams: &SearchParams{Type: "movies", Resolution: 1080, Verified: true},
 	}
+
 	d, err := time.Parse("2006-01-02", r.Date)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
