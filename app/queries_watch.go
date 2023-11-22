@@ -7,3 +7,52 @@ func (c *Connector) MediumWatched(id primitive.ObjectID) bool {
 	watches, _ := db.Watch.Query().Where("medium_id", id).Where("username", "xenonsoul").Run()
 	return len(watches) > 0
 }
+
+func (c *Connector) Watches(mediumId, username string) ([]*Watch, error) {
+	query := db.Watch.Query().Desc("watched_at")
+	if username != "" {
+		query = query.Where("username", username)
+	}
+
+	if mediumId != "" {
+		m := &Medium{}
+		if err := db.Medium.Find(mediumId, m); err != nil {
+			return nil, err
+		}
+
+		if m.Type == "Series" {
+			episodes, err := db.Episode.Query().
+				Where("_type", "Episode").
+				Where("series_id", m.ID).
+				Desc("episode_number").Desc("series_number").
+				Limit(-1).Run()
+			if err != nil {
+				return nil, err
+			}
+
+			ids := make([]primitive.ObjectID, len(episodes))
+			for i, e := range episodes {
+				ids[i] = e.ID
+			}
+
+			query = query.Limit(len(ids)).In("medium_id", ids)
+		} else {
+			query = query.Where("medium_id", mediumId)
+		}
+	}
+
+	watches, err := query.Run()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, w := range watches {
+		m := &Medium{}
+		if err := db.Medium.FindByID(w.MediumId, m); err != nil {
+			return nil, err
+		}
+		w.Medium = m
+	}
+
+	return watches, nil
+}

@@ -447,6 +447,7 @@ func usersIndexHandler(c *gin.Context) {
 // /watches
 func watchesIndexHandler(c *gin.Context) {
 	medium_id := web.QueryString(c, "medium_id")
+	username := web.QueryString(c, "username")
 
-	WatchesIndex(c, medium_id)
+	WatchesIndex(c, medium_id, username)
 }

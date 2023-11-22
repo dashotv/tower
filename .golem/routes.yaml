@@ -280,3 +280,6 @@ groups:
           - name: medium_id
             type: string
             query: true
+          - name: username
+            type: string
+            query: true
