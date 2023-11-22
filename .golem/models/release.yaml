@@ -43,6 +43,8 @@ fields:
     type: bool
   - name: bluray
     type: bool
+  - name: nzb
+    type: bool
   - name: resolution
     type: string
   - name: encoding

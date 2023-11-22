@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dashotv/golem/web"
 	"github.com/gin-gonic/gin"
+
+	"github.com/dashotv/golem/web"
 )
 
 const releasePageSize = 25
@@ -18,6 +19,7 @@ func ReleasesIndex(c *gin.Context) {
 	}
 
 	results, err := db.Release.Query().
+		Desc("published_at").
 		Desc("created_at").
 		Limit(releasePageSize).Skip((page - 1) * releasePageSize).
 		Run()

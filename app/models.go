@@ -395,6 +395,7 @@ type Release struct { // model
 	Widescreen  bool      `json:"widescreen" bson:"widescreen"`
 	Uncensored  bool      `json:"uncensored" bson:"uncensored"`
 	Bluray      bool      `json:"bluray" bson:"bluray"`
+	Nzb         bool      `json:"nzb" bson:"nzb"`
 	Resolution  string    `json:"resolution" bson:"resolution"`
 	Encoding    string    `json:"encoding" bson:"encoding"`
 	Quality     string    `json:"quality" bson:"quality"`
