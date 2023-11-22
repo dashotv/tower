@@ -15,6 +15,11 @@ func (c *Connector) Watches(mediumId, username string) ([]*Watch, error) {
 	}
 
 	if mediumId != "" {
+		id, err := primitive.ObjectIDFromHex(mediumId)
+		if err != nil {
+			return nil, err
+		}
+
 		m := &Medium{}
 		if err := db.Medium.Find(mediumId, m); err != nil {
 			return nil, err
@@ -37,7 +42,7 @@ func (c *Connector) Watches(mediumId, username string) ([]*Watch, error) {
 
 			query = query.Limit(len(ids)).In("medium_id", ids)
 		} else {
-			query = query.Where("medium_id", mediumId)
+			query = query.Where("medium_id", id)
 		}
 	}
 
