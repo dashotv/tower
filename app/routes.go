@@ -5,6 +5,7 @@ package app
 import (
 	"net/http"
 
+	"github.com/dashotv/golem/web"
 	"github.com/gin-gonic/gin"
 )
 
@@ -90,6 +91,9 @@ func (s *Server) Routes() {
 	users := s.Router.Group("/users")
 	users.GET("/", usersIndexHandler)
 
+	watches := s.Router.Group("/watches")
+	watches.GET("/", watchesIndexHandler)
+
 }
 
 func homeHandler(c *gin.Context) {
@@ -112,6 +116,7 @@ func Index(c *gin.Context) {
 			"series":    "/series",
 			"upcoming":  "/upcoming",
 			"users":     "/users",
+			"watches":   "/watches",
 		},
 	})
 }
@@ -437,4 +442,11 @@ func upcomingIndexHandler(c *gin.Context) {
 func usersIndexHandler(c *gin.Context) {
 
 	UsersIndex(c)
+}
+
+// /watches
+func watchesIndexHandler(c *gin.Context) {
+	medium_id := web.QueryString(c, "medium_id")
+
+	WatchesIndex(c, medium_id)
 }

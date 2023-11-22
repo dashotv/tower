@@ -270,3 +270,13 @@ groups:
       index:
         name: index
         path: /
+  watches:
+    name: watches
+    path: /watches
+    routes:
+      index:
+        path: /
+        params:
+          - name: medium_id
+            type: string
+            query: true
