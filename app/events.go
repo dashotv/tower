@@ -148,8 +148,6 @@ func (e *Events) Start() error {
 				e.Log.Errorf("error saving log: %s", err)
 			}
 			e.Send("tower.logs", &EventTowerLog{Event: "new", ID: l.ID.Hex(), Log: l})
-		case m := <-e.SeerDownloads:
-			e.Log.Infof("download: %s %s", m.ID, m.Event)
 		case m := <-e.SeerLogs:
 			l := &Message{
 				Level:    m.Level,
@@ -161,6 +159,15 @@ func (e *Events) Start() error {
 				e.Log.Errorf("error saving log: %s", err)
 			}
 			e.Send("tower.logs", &EventTowerLog{Event: "new", ID: l.ID.Hex(), Log: l})
+		case m := <-e.SeerDownloads:
+			d := &Download{}
+			err := db.Download.Find(m.ID, d)
+			if err != nil {
+				e.Log.Errorf("error finding download: %s", err)
+				continue
+			}
+			db.processDownloads([]*Download{d})
+			e.Send("tower.downloads", &EventTowerDownload{Event: "new", ID: d.ID.Hex(), Download: d})
 		}
 	}
 }
