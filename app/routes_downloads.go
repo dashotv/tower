@@ -61,6 +61,22 @@ func DownloadsUpdate(c *gin.Context, id string) {
 		return
 	}
 
+	if data.Status == "deleted" {
+		m := &Medium{}
+		err = db.Medium.Find(data.MediumId.Hex(), m)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		m.Downloaded = false
+		err = db.Medium.Update(m)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
 	c.JSON(http.StatusOK, data)
 }
 
