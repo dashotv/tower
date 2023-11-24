@@ -5,8 +5,9 @@ package app
 import (
 	"net/http"
 
-	"github.com/dashotv/golem/web"
 	"github.com/gin-gonic/gin"
+
+	"github.com/dashotv/golem/web"
 )
 
 func (s *Server) Routes() {
@@ -32,6 +33,7 @@ func (s *Server) Routes() {
 	feeds.POST("/", feedsCreateHandler)
 	feeds.DELETE("/:id", feedsDeleteHandler)
 	feeds.GET("/", feedsIndexHandler)
+	feeds.PATCH("/:id", feedsSettingHandler)
 	feeds.GET("/:id", feedsShowHandler)
 	feeds.PUT("/:id", feedsUpdateHandler)
 
@@ -206,6 +208,12 @@ func feedsDeleteHandler(c *gin.Context) {
 func feedsIndexHandler(c *gin.Context) {
 
 	FeedsIndex(c)
+}
+
+func feedsSettingHandler(c *gin.Context) {
+	id := c.Param("id")
+
+	FeedsSetting(c, id)
 }
 
 func feedsShowHandler(c *gin.Context) {

@@ -65,7 +65,35 @@ groups:
             type: string
   feeds:
     path: /feeds
-    rest: true
+    routes:
+      index:
+        path: /
+      create:
+        path: /
+        method: POST
+      delete:
+        path: /:id
+        method: DELETE
+        params:
+          - name: id
+            type: string
+      show:
+        path: /:id
+        params:
+          - name: id
+            type: string
+      update:
+        path: /:id
+        method: PUT
+        params:
+          - name: id
+            type: string
+      setting:
+        path: /:id
+        method: PATCH
+        params:
+          - name: id
+            type: string
   jobs:
     name: jobs
     path: /jobs
