@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dashotv/mercury"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+
+	"github.com/dashotv/mercury"
 )
 
 var events *Events
@@ -21,6 +22,7 @@ type Events struct {
 	SeerDownloads  chan *EventSeerDownload
 	SeerNotices    chan *EventSeerNotice
 	SeerEpisodes   chan *EventSeerEpisode
+	TowerNotices   chan *EventTowerNotice
 	TowerLogs      chan *EventTowerLog
 	TowerEpisodes  chan *EventTowerEpisode
 	TowerSeries    chan *EventTowerSeries
@@ -53,7 +55,13 @@ type EventSeerLog struct {
 	Level    string    `json:"level,omitempty"`
 	Facility string    `json:"facility,omitempty"`
 }
-
+type EventTowerNotice struct {
+	Event   string `json:"event,omitempty"`
+	Time    string `json:"time,omitempty"`
+	Class   string `json:"class,omitempty"`
+	Level   string `json:"level,omitempty"`
+	Message string `json:"message,omitempty"`
+}
 type EventTowerDownload struct {
 	Event    string    `json:"event,omitempty"`
 	ID       string    `json:"id,omitempty"`
@@ -98,6 +106,7 @@ func NewEvents() (*Events, error) {
 		SeerDownloads:  make(chan *EventSeerDownload, 5),
 		SeerNotices:    make(chan *EventSeerNotice, 5),
 		SeerEpisodes:   make(chan *EventSeerEpisode, 5),
+		TowerNotices:   make(chan *EventTowerNotice),
 		TowerLogs:      make(chan *EventTowerLog),
 		TowerEpisodes:  make(chan *EventTowerEpisode),
 		TowerSeries:    make(chan *EventTowerSeries),
@@ -116,6 +125,9 @@ func NewEvents() (*Events, error) {
 		return nil, err
 	}
 	if err := e.Merc.Receiver("seer.episodes", e.SeerEpisodes); err != nil {
+		return nil, err
+	}
+	if err := e.Merc.Sender("tower.notices", e.TowerNotices); err != nil {
 		return nil, err
 	}
 	if err := e.Merc.Sender("tower.logs", e.TowerLogs); err != nil {
@@ -157,6 +169,14 @@ func (e *Events) Start() error {
 			if err := db.Message.Save(l); err != nil {
 				e.Log.Errorf("error saving log: %s", err)
 			}
+			n := &EventTowerNotice{
+				Event:   m.Event,
+				Time:    m.Time,
+				Class:   m.Class,
+				Level:   m.Level,
+				Message: m.Message,
+			}
+			e.Send("tower.notices", n)
 			e.Send("tower.logs", &EventTowerLog{Event: "new", ID: l.ID.Hex(), Log: l})
 		case m := <-e.SeerLogs:
 			l := &Message{
@@ -208,13 +228,19 @@ func (e *Events) Send(topic EventsTopic, data any) error {
 
 func (e *Events) doSend(topic EventsTopic, data any) error {
 	switch topic {
+	case "tower.notices":
+		m, ok := data.(*EventTowerNotice)
+		if !ok {
+			e.Log.Errorf("events.send: wrong data type: %t", data)
+			return errors.New("events.send: wrong data type")
+		}
+		e.TowerNotices <- m
 	case "tower.logs":
 		m, ok := data.(*EventTowerLog)
 		if !ok {
 			e.Log.Errorf("events.send: wrong data type: %t", data)
 			return errors.New("events.send: wrong data type")
 		}
-
 		e.TowerLogs <- m
 	case "tower.episodes":
 		m, ok := data.(*EventTowerEpisode)
@@ -222,7 +248,6 @@ func (e *Events) doSend(topic EventsTopic, data any) error {
 			e.Log.Errorf("events.send: wrong data type: %t", data)
 			return errors.New("events.send: wrong data type")
 		}
-		e.Log.Infof("sending episode %s", m.ID)
 		e.TowerEpisodes <- m
 	case "tower.series":
 		m, ok := data.(*EventTowerSeries)
