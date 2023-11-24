@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/exp/maps"
 )
@@ -51,38 +52,52 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 		}
 	}
 
-	// Copy the paths (images) from Series to Episode
 	for _, e := range list {
 		sid := e.SeriesId
 		if seriesMap[sid] != nil {
-			if seriesMap[sid].Kind == "anime" {
-				e.Display = fmt.Sprintf("#%d %s", e.AbsoluteNumber, e.Title)
-			} else {
-				e.Display = fmt.Sprintf("%02dx%02d %s", e.SeasonNumber, e.EpisodeNumber, e.Title)
-			}
-			e.Title = seriesMap[sid].Title
-			unwatched, err := c.SeriesAllUnwatched(seriesMap[sid])
-			if err != nil {
-				c.log.Errorf("getting unwatched %s: %s", sid, err)
-			}
-			e.Unwatched = unwatched
-			e.Active = seriesMap[sid].Active
-			e.Title = seriesMap[sid].Title
-			for _, p := range seriesMap[sid].Paths {
-				if p.Type == "cover" {
-					e.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
-					continue
-				}
-				if p.Type == "background" {
-					e.Background = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
-					continue
-				}
-			}
+			db.processSeriesEpisode(seriesMap[sid], e)
 		}
 	}
 
 	c.log.Infof("episodes %d sids %d series %d seriesmap %d", len(list), len(sids), len(series), len(maps.Keys(seriesMap)))
 	return list, nil
+}
+
+func (c *Connector) processEpisode(e *Episode) error {
+	s := &Series{}
+	err := c.Series.Find(e.SeriesId.Hex(), s)
+	if err != nil {
+		return errors.Wrap(err, "processEpisode")
+	}
+
+	c.processSeriesEpisode(s, e)
+	return nil
+}
+
+func (c *Connector) processSeriesEpisode(s *Series, e *Episode) {
+	if s.Kind == "anime" {
+		e.Display = fmt.Sprintf("#%d %s", e.AbsoluteNumber, e.Title)
+	} else {
+		e.Display = fmt.Sprintf("%02dx%02d %s", e.SeasonNumber, e.EpisodeNumber, e.Title)
+	}
+	e.Title = s.Title
+	unwatched, err := c.SeriesAllUnwatched(s)
+	if err != nil {
+		c.log.Errorf("getting unwatched %s: %s", s.ID.Hex(), err)
+	}
+	e.Unwatched = unwatched
+	e.Active = s.Active
+	e.Title = s.Title
+	for _, p := range s.Paths {
+		if p.Type == "cover" {
+			e.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+			continue
+		}
+		if p.Type == "background" {
+			e.Background = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+			continue
+		}
+	}
 }
 
 func (c *Connector) EpisodeSetting(id, setting string, value bool) error {

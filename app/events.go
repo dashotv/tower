@@ -20,6 +20,7 @@ type Events struct {
 	SeerLogs       chan *EventSeerLog
 	SeerDownloads  chan *EventSeerDownload
 	SeerNotices    chan *EventSeerNotice
+	SeerEpisodes   chan *EventSeerEpisode
 	TowerLogs      chan *EventTowerLog
 	TowerEpisodes  chan *EventTowerEpisode
 	TowerSeries    chan *EventTowerSeries
@@ -29,54 +30,59 @@ type Events struct {
 }
 
 type EventSeerNotice struct {
-	Event   string
-	Time    string
-	Class   string
-	Level   string
-	Message string
+	Event   string `json:"event,omitempty"`
+	Time    string `json:"time,omitempty"`
+	Class   string `json:"class,omitempty"`
+	Level   string `json:"level,omitempty"`
+	Message string `json:"message,omitempty"`
 }
 
 type EventSeerDownload struct {
-	Event    string
-	ID       string
-	Download *Download
+	Event    string    `json:"event,omitempty"`
+	ID       string    `json:"id,omitempty"`
+	Download *Download `json:"download,omitempty"`
+}
+
+type EventSeerEpisode struct {
+	Event string `json:"event,omitempty"`
+	ID    string `json:"id,omitempty"`
 }
 type EventSeerLog struct {
-	Time     time.Time
-	Message  string
-	Level    string
-	Facility string
+	Time     time.Time `json:"time,omitempty"`
+	Message  string    `json:"message,omitempty"`
+	Level    string    `json:"level,omitempty"`
+	Facility string    `json:"facility,omitempty"`
 }
 
 type EventTowerDownload struct {
-	Event    string
-	ID       string
-	Download *Download
+	Event    string    `json:"event,omitempty"`
+	ID       string    `json:"id,omitempty"`
+	Download *Download `json:"download,omitempty"`
 }
 type EventTowerEpisode struct {
-	Event   string
-	ID      string
-	Episode *Episode
+	Event   string   `json:"event,omitempty"`
+	ID      string   `json:"id,omitempty"`
+	Episode *Episode `json:"episode,omitempty"`
 }
 type EventTowerSeries struct {
-	Event  string
-	ID     string
-	Series *Series
+	Event  string  `json:"event,omitempty"`
+	ID     string  `json:"id,omitempty"`
+	Series *Series `json:"series,omitempty"`
 }
 type EventTowerMovie struct {
-	Event string
-	ID    string
-	Movie *Movie
+	Event string `json:"event,omitempty"`
+	ID    string `json:"id,omitempty"`
+	Movie *Movie `json:"movie,omitempty"`
 }
 type EventTowerLog struct {
-	Event string
-	ID    string
-	Log   *Message
+	Event string   `json:"event,omitempty"`
+	ID    string   `json:"id,omitempty"`
+	Log   *Message `json:"log,omitempty"`
 }
 type EventTowerRequest struct {
-	Event   string
-	ID      string
-	Request *Request
+	Event   string   `json:"event,omitempty"`
+	ID      string   `json:"id,omitempty"`
+	Request *Request `json:"request,omitempty"`
 }
 
 func NewEvents() (*Events, error) {
@@ -91,6 +97,7 @@ func NewEvents() (*Events, error) {
 		SeerLogs:       make(chan *EventSeerLog, 5),
 		SeerDownloads:  make(chan *EventSeerDownload, 5),
 		SeerNotices:    make(chan *EventSeerNotice, 5),
+		SeerEpisodes:   make(chan *EventSeerEpisode, 5),
 		TowerLogs:      make(chan *EventTowerLog),
 		TowerEpisodes:  make(chan *EventTowerEpisode),
 		TowerSeries:    make(chan *EventTowerSeries),
@@ -106,6 +113,9 @@ func NewEvents() (*Events, error) {
 		return nil, err
 	}
 	if err := e.Merc.Receiver("seer.notices", e.SeerNotices); err != nil {
+		return nil, err
+	}
+	if err := e.Merc.Receiver("seer.episodes", e.SeerEpisodes); err != nil {
 		return nil, err
 	}
 	if err := e.Merc.Sender("tower.logs", e.TowerLogs); err != nil {
@@ -167,7 +177,16 @@ func (e *Events) Start() error {
 				continue
 			}
 			db.processDownloads([]*Download{d})
-			e.Send("tower.downloads", &EventTowerDownload{Event: "new", ID: d.ID.Hex(), Download: d})
+			e.Send("tower.downloads", &EventTowerDownload{Event: m.Event, ID: d.ID.Hex(), Download: d})
+		case m := <-e.SeerEpisodes:
+			ep := &Episode{}
+			err := db.Episode.Find(m.ID, ep)
+			if err != nil {
+				e.Log.Errorf("error finding episode: %s", err)
+				continue
+			}
+			db.processEpisode(ep)
+			e.Send("tower.episodes", &EventTowerEpisode{Event: m.Event, ID: ep.ID.Hex(), Episode: ep})
 		}
 	}
 }
@@ -203,6 +222,7 @@ func (e *Events) doSend(topic EventsTopic, data any) error {
 			e.Log.Errorf("events.send: wrong data type: %t", data)
 			return errors.New("events.send: wrong data type")
 		}
+		e.Log.Infof("sending episode %s", m.ID)
 		e.TowerEpisodes <- m
 	case "tower.series":
 		m, ok := data.(*EventTowerSeries)
