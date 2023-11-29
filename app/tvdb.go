@@ -95,7 +95,7 @@ func TvdbUpdateSeriesImages(id string, sid int64) error {
 			return errors.Wrap(err, "getting series artworks")
 		}
 
-		if r.Data == nil {
+		if r.Data == nil || len(r.Data.Artworks) == 0 {
 			return errors.New("no data")
 		}
 
@@ -108,7 +108,7 @@ func TvdbUpdateSeriesImages(id string, sid int64) error {
 			return errors.Wrap(err, "getting series artworks")
 		}
 
-		if r.Data == nil {
+		if r.Data == nil || len(r.Data.Artworks) == 0 {
 			return errors.New("no data")
 		}
 		if len(r.Data.Artworks) == 0 {
