@@ -3,6 +3,7 @@ package app
 import (
 	"time"
 
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -75,6 +76,9 @@ func (m *Movie) Saving() error {
 		m.Directory = path(m.Directory)
 	}
 
+	if err := events.Send("tower.index.media", m); err != nil {
+		return errors.Wrap(err, "sending elastic search index")
+	}
 	return events.Send("tower.movies", &EventTowerMovie{"updated", m.ID.Hex(), m})
 }
 
@@ -114,5 +118,20 @@ func (s *Series) Saving() error {
 		s.Directory = path(s.Directory)
 	}
 
+	if err := events.Send("tower.index.media", s); err != nil {
+		return errors.Wrap(err, "sending elastic search index")
+	}
 	return events.Send("tower.series", &EventTowerSeries{"updated", s.ID.Hex(), s})
+}
+
+func (t *Release) Saving() error {
+	// Call the DefaultModel Saving hook
+	if err := t.DefaultModel.Saving(); err != nil {
+		return err
+	}
+
+	if err := events.Send("tower.index.releases", t); err != nil {
+		return errors.Wrap(err, "sending elastic search index")
+	}
+	return nil
 }

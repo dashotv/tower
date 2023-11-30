@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/dashotv/minion"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
-
-	"github.com/dashotv/minion"
 )
 
 var workers *minion.Minion

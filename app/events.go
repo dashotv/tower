@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/dashotv/mercury"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-
-	"github.com/dashotv/mercury"
 )
 
 var events *Events
@@ -16,19 +15,21 @@ type EventsChannel string
 type EventsTopic string
 
 type Events struct {
-	Merc           *mercury.Mercury
-	Log            *zap.SugaredLogger
-	SeerLogs       chan *EventSeerLog
-	SeerDownloads  chan *EventSeerDownload
-	SeerNotices    chan *EventSeerNotice
-	SeerEpisodes   chan *EventSeerEpisode
-	TowerNotices   chan *EventTowerNotice
-	TowerLogs      chan *EventTowerLog
-	TowerEpisodes  chan *EventTowerEpisode
-	TowerSeries    chan *EventTowerSeries
-	TowerMovies    chan *EventTowerMovie
-	TowerEvents    chan *EventTowerRequest
-	TowerDownloads chan *EventTowerDownload
+	Merc               *mercury.Mercury
+	Log                *zap.SugaredLogger
+	SeerLogs           chan *EventSeerLog
+	SeerDownloads      chan *EventSeerDownload
+	SeerNotices        chan *EventSeerNotice
+	SeerEpisodes       chan *EventSeerEpisode
+	TowerNotices       chan *EventTowerNotice
+	TowerLogs          chan *EventTowerLog
+	TowerEpisodes      chan *EventTowerEpisode
+	TowerSeries        chan *EventTowerSeries
+	TowerMovies        chan *EventTowerMovie
+	TowerEvents        chan *EventTowerRequest
+	TowerDownloads     chan *EventTowerDownload
+	TowerIndexMedia    chan *Series
+	TowerIndexReleases chan *Release
 }
 
 type EventSeerNotice struct {
@@ -100,19 +101,21 @@ func NewEvents() (*Events, error) {
 	}
 
 	e := &Events{
-		Merc:           m,
-		Log:            log.Named("events"),
-		SeerLogs:       make(chan *EventSeerLog, 5),
-		SeerDownloads:  make(chan *EventSeerDownload, 5),
-		SeerNotices:    make(chan *EventSeerNotice, 5),
-		SeerEpisodes:   make(chan *EventSeerEpisode, 5),
-		TowerNotices:   make(chan *EventTowerNotice),
-		TowerLogs:      make(chan *EventTowerLog),
-		TowerEpisodes:  make(chan *EventTowerEpisode),
-		TowerSeries:    make(chan *EventTowerSeries),
-		TowerMovies:    make(chan *EventTowerMovie),
-		TowerEvents:    make(chan *EventTowerRequest),
-		TowerDownloads: make(chan *EventTowerDownload),
+		Merc:               m,
+		Log:                log.Named("events"),
+		SeerLogs:           make(chan *EventSeerLog, 5),
+		SeerDownloads:      make(chan *EventSeerDownload, 5),
+		SeerNotices:        make(chan *EventSeerNotice, 5),
+		SeerEpisodes:       make(chan *EventSeerEpisode, 5),
+		TowerNotices:       make(chan *EventTowerNotice),
+		TowerLogs:          make(chan *EventTowerLog),
+		TowerEpisodes:      make(chan *EventTowerEpisode),
+		TowerSeries:        make(chan *EventTowerSeries),
+		TowerMovies:        make(chan *EventTowerMovie),
+		TowerEvents:        make(chan *EventTowerRequest),
+		TowerDownloads:     make(chan *EventTowerDownload),
+		TowerIndexMedia:    make(chan *Series),
+		TowerIndexReleases: make(chan *Release),
 	}
 
 	if err := e.Merc.Receiver("seer.logs", e.SeerLogs); err != nil {
@@ -146,6 +149,12 @@ func NewEvents() (*Events, error) {
 		return nil, err
 	}
 	if err := e.Merc.Sender("tower.downloads", e.TowerDownloads); err != nil {
+		return nil, err
+	}
+	if err := e.Merc.Sender("tower.index.media", e.TowerIndexMedia); err != nil {
+		return nil, err
+	}
+	if err := e.Merc.Sender("tower.index.releases", e.TowerIndexReleases); err != nil {
 		return nil, err
 	}
 
@@ -214,7 +223,7 @@ func (e *Events) Start() error {
 func (e *Events) Send(topic EventsTopic, data any) error {
 	f := func() interface{} { return e.doSend(topic, data) }
 
-	err, ok := WithTimeout(f, time.Second*2)
+	err, ok := WithTimeout(f, time.Second*5)
 	if !ok {
 		e.Log.Errorf("events.send: timeout sending message: %s", topic)
 		return fmt.Errorf("events.send: timeout sending message: %s", topic)
@@ -277,6 +286,20 @@ func (e *Events) doSend(topic EventsTopic, data any) error {
 			return errors.New("events.send: wrong data type")
 		}
 		e.TowerDownloads <- m
+	case "tower.index.media":
+		m, ok := data.(*Series)
+		if !ok {
+			e.Log.Errorf("events.send: wrong data type: %t", data)
+			return errors.New("events.send: wrong data type")
+		}
+		e.TowerIndexMedia <- m
+	case "tower.index.releases":
+		m, ok := data.(*Release)
+		if !ok {
+			e.Log.Errorf("events.send: wrong data type: %t", data)
+			return errors.New("events.send: wrong data type")
+		}
+		e.TowerIndexReleases <- m
 	default:
 		e.Log.Warnf("events.send: unknown topic: %s", topic)
 	}
