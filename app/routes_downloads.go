@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/golem/web"
 )
@@ -30,8 +31,51 @@ func DownloadsLast(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"last": t})
 }
 
+type DownloadRequest struct {
+	MediumId string `json:"medium_id"`
+}
+
 func DownloadsCreate(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"error": false})
+	data := &DownloadRequest{}
+	err := c.BindJSON(data)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if data.MediumId == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "medium_id is required"})
+		return
+	}
+
+	id, err := primitive.ObjectIDFromHex(data.MediumId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	d := &Download{MediumId: id, Status: "searching"}
+	err = db.Download.Save(d)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	m := &Medium{}
+	err = db.Medium.Find(data.MediumId, m)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	m.Downloaded = true
+	err = db.Medium.Update(m)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"error": false, "id": d.ID.Hex()})
 }
 
 func DownloadsShow(c *gin.Context, id string) {
