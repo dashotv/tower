@@ -7,9 +7,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dashotv/tvdb"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/dashotv/tvdb"
 )
 
 var tvdbClient *tvdb.Client

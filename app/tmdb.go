@@ -7,9 +7,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dashotv/tmdb"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/dashotv/tmdb"
 )
 
 var tmdbClient *tmdb.Client

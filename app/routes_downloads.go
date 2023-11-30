@@ -3,9 +3,10 @@ package app
 import (
 	"net/http"
 
-	"github.com/dashotv/golem/web"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+
+	"github.com/dashotv/golem/web"
 )
 
 func DownloadsIndex(c *gin.Context) {

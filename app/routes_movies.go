@@ -5,10 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dashotv/golem/web"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/dashotv/golem/web"
 )
 
 func MoviesIndex(c *gin.Context) {
