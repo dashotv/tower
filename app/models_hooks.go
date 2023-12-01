@@ -76,7 +76,7 @@ func (m *Movie) Saving() error {
 		m.Directory = path(m.Directory)
 	}
 
-	if err := events.Send("tower.index.media", m); err != nil {
+	if err := events.Send("tower.index.movies", m); err != nil {
 		return errors.Wrap(err, "sending elastic search index")
 	}
 	return events.Send("tower.movies", &EventTowerMovie{"updated", m.ID.Hex(), m})
@@ -118,7 +118,7 @@ func (s *Series) Saving() error {
 		s.Directory = path(s.Directory)
 	}
 
-	if err := events.Send("tower.index.media", s); err != nil {
+	if err := events.Send("tower.index.series", s); err != nil {
 		return errors.Wrap(err, "sending elastic search index")
 	}
 	return events.Send("tower.series", &EventTowerSeries{"updated", s.ID.Hex(), s})
