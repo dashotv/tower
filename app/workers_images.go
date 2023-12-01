@@ -36,6 +36,11 @@ func imageDownload(source, destination string) error {
 		return errors.Wrap(err, "copying image")
 	}
 
+	err = os.Chown(destination, 1001, 1001)
+	if err != nil {
+		return errors.Wrap(err, "chowning image")
+	}
+
 	return nil
 }
 
