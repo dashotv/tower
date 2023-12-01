@@ -10,26 +10,24 @@ import (
 )
 
 var log *zap.SugaredLogger
-var logger *zap.Logger
 
 func setupLogger() (err error) {
-	zapcfg := zap.NewProductionConfig()
-	verbosity := 1
-
 	switch cfg.Logger {
 	case "dev":
 		isTTY := term.IsTerminal(int(os.Stderr.Fd()))
+		verbosity := 1
 		logStdoutWriter := zapcore.Lock(os.Stderr)
-		logger = zap.New(zapcore.NewCore(logging.NewEncoder(verbosity, isTTY), logStdoutWriter, zapcore.DebugLevel))
+		l := zap.New(zapcore.NewCore(logging.NewEncoder(verbosity, isTTY), logStdoutWriter, zapcore.DebugLevel))
+		log = l.Sugar().Named("app")
 	case "release":
+		zapcfg := zap.NewProductionConfig()
 		zapcfg.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
-		logger, err = zap.NewProduction()
+		l, err := zap.NewProduction()
 		if err != nil {
 			return err
 		}
+		log = l.Sugar().Named("app")
 	}
-
-	log = logger.Sugar().Named("app")
 
 	return nil
 }

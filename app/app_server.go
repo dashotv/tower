@@ -26,7 +26,7 @@ func setupServer() (err error) {
 	}
 
 	server.Engine = gin.New()
-	server.Engine.Use(ginzap.Ginzap(logger, time.RFC3339, true), ginzap.RecoveryWithZap(logger, true))
+	server.Engine.Use(ginzap.Ginzap(log.Desugar(), time.RFC3339, true), ginzap.RecoveryWithZap(log.Desugar(), true))
 	server.Default = server.Engine.Group("/")
 	server.Router = server.Engine.Group("/")
 
