@@ -55,5 +55,10 @@ func imageResize(source, destination string, width, height int) error {
 		return errors.Wrap(err, "saving image")
 	}
 
+	err = os.Chown(destination, 1001, 1001)
+	if err != nil {
+		return errors.Wrap(err, "chowning image")
+	}
+
 	return nil
 }
