@@ -349,13 +349,16 @@ type Movie struct { // model
 }
 
 type Path struct { // struct
-	Id        primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-	Type      primitive.Symbol   `json:"type" bson:"type"`
-	Remote    string             `json:"remote" bson:"remote"`
-	Local     string             `json:"local" bson:"local"`
-	Size      int                `json:"size" bson:"size"`
-	Extension string             `json:"extension" bson:"extension"`
-	UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
+	Id         primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	Type       primitive.Symbol   `json:"type" bson:"type"`
+	Remote     string             `json:"remote" bson:"remote"`
+	Local      string             `json:"local" bson:"local"`
+	Extension  string             `json:"extension" bson:"extension"`
+	Size       int                `json:"size" bson:"size"`
+	Resolution int                `json:"resolution" bson:"resolution"`
+	Bitrate    int                `json:"bitrate" bson:"bitrate"`
+	Checksum   string             `json:"checksum" bson:"checksum"`
+	UpdatedAt  time.Time          `json:"updated_at" bson:"updated_at"`
 }
 
 type Pin struct { // model

@@ -10,9 +10,15 @@ fields:
     type: string
   - name: local
     type: string
+  - name: extension
+    type: string
   - name: size
     type: int
-  - name: extension
+  - name: resolution
+    type: int
+  - name: bitrate
+    type: int
+  - name: checksum
     type: string
   - name: updated_at
     type: time.Time
