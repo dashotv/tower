@@ -3,8 +3,9 @@ package app
 import (
 	"context"
 
-	"github.com/dashotv/minion"
 	"github.com/pkg/errors"
+
+	"github.com/dashotv/minion"
 )
 
 var workers *minion.Minion
@@ -25,7 +26,7 @@ func setupWorkers() error {
 	}
 
 	m.Subscribe(func(n *minion.Notification) {
-		if n.Event != "job:load" && n.Event != "job:success" && n.Event != "job:fail" {
+		if n.Event != "job:start" && n.Event != "job:success" && n.Event != "job:fail" {
 			return
 		}
 
@@ -36,7 +37,7 @@ func setupWorkers() error {
 			return
 		}
 
-		if n.Event == "job:load" {
+		if n.Event == "job:start" {
 			events.Send("tower.jobs", &EventTowerJob{"created", j.ID.Hex(), j})
 			return
 		}
@@ -108,7 +109,7 @@ func setupWorkers() error {
 	// if err := minion.Register[*Ping](m, &Ping{}); err != nil {
 	// 	return errors.Wrap(err, "registering worker: Ping")
 	// }
-	// if _, err := m.Schedule("* * * * * *", &Ping{}); err != nil {
+	// if _, err := m.Schedule("*/5 * * * * *", &Ping{}); err != nil {
 	// 	return errors.Wrap(err, "scheduling worker: Ping")
 	// }
 
@@ -121,5 +122,6 @@ func setupWorkers() error {
 // func (j *Ping) Kind() string { return "ping" }
 // func (j *Ping) Work(ctx context.Context, job *minion.Job[*Ping]) error {
 // 	log.Named("ping").Debug("ping")
+// 	time.Sleep(8 * time.Second)
 // 	return nil
 // }
