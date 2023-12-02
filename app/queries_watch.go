@@ -1,6 +1,10 @@
 package app
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"fmt"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 func (c *Connector) MediumWatched(id primitive.ObjectID) bool {
 	// TODO: add user name to config
@@ -57,6 +61,9 @@ func (c *Connector) Watches(mediumId, username string) ([]*Watch, error) {
 			return nil, err
 		}
 		w.Medium = m
+		if m.Type == "Episode" {
+			m.Display = fmt.Sprintf("%dx%d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)
+		}
 	}
 
 	return watches, nil
