@@ -1,12 +1,15 @@
 package app
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson"
+
+	"github.com/dashotv/minion"
 )
 
 func TestCleanLogs(t *testing.T) {
@@ -39,7 +42,8 @@ func TestCleanLogs(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	err = CleanLogs(nil)
+	job := &CleanupLogs{}
+	err = job.Work(context.Background(), &minion.Job[*CleanupLogs]{})
 	assert.NoError(t, err)
 
 	count, err := db.Message.Count(bson.M{})

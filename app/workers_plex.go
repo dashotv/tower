@@ -1,13 +1,20 @@
 package app
 
 import (
+	"context"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
+
+	"github.com/dashotv/minion"
 )
 
 // PlexPinToUsers ensures users are created from athorized pins
-func PlexPinToUsers(_ any) error {
+type PlexPinToUsers struct{}
+
+func (j *PlexPinToUsers) Kind() string { return "PlexPinToUsers" }
+func (j *PlexPinToUsers) Work(ctx context.Context, job *minion.Job[*PlexPinToUsers]) error {
 	log := log.Named("job.PlexPinToUsers")
 	log.Debugf("creating users from authenticated pins")
 
@@ -46,8 +53,7 @@ func PlexPinToUsers(_ any) error {
 		}
 	}
 
-	err = workers.Enqueue("PlexUserUpdates")
-	if err != nil {
+	if err := workers.Enqueue(&PlexUserUpdates{}); err != nil {
 		return errors.Wrap(err, "enqueuing worker")
 	}
 
@@ -55,7 +61,10 @@ func PlexPinToUsers(_ any) error {
 }
 
 // PlexUserUpdates updates users from plex
-func PlexUserUpdates(_ any) error {
+type PlexUserUpdates struct{}
+
+func (j *PlexUserUpdates) Kind() string { return "PlexUserUpdates" }
+func (j *PlexUserUpdates) Work(ctx context.Context, job *minion.Job[*PlexUserUpdates]) error {
 	log := log.Named("job.PlexUserUpdates")
 	log.Debugf("updating users")
 
@@ -83,16 +92,18 @@ func PlexUserUpdates(_ any) error {
 		}
 	}
 
-	err = workers.Enqueue("PlexWatchlistUpdates")
-	if err != nil {
+	if err := workers.Enqueue(&PlexWatchlistUpdates{}); err != nil {
 		return errors.Wrap(err, "enqueuing worker")
 	}
 
 	return nil
 }
 
-// PlexWatchlistUpdate updates watchlist from plex
-func PlexWatchlistUpdates(_ any) error {
+// PlexWatchlistUpdates updates watchlist from plex
+type PlexWatchlistUpdates struct{}
+
+func (j *PlexWatchlistUpdates) Kind() string { return "PlexWatchlistUpdates" }
+func (j *PlexWatchlistUpdates) Work(ctx context.Context, job *minion.Job[*PlexWatchlistUpdates]) error {
 	log := log.Named("job.PlexWatchlistUpdates")
 	log.Debugf("creating requests from watchlists")
 
@@ -137,6 +148,28 @@ func PlexWatchlistUpdates(_ any) error {
 			log.Infof("PlexUserUpdates: REQUESTED: %s: %s", dm.Title, dm.Type)
 		}
 	}
+	return nil
+}
+
+// CleanPlexPins removes old pins
+type CleanPlexPins struct{}
+
+func (j *CleanPlexPins) Kind() string { return "CleanPlexPins" }
+func (j *CleanPlexPins) Work(ctx context.Context, job *minion.Job[*CleanPlexPins]) error {
+	list, err := db.Pin.Query().
+		GreaterThan("created_at", time.Now().UTC().AddDate(0, 0, -1)).
+		Run()
+	if err != nil {
+		return errors.Wrap(err, "querying pins")
+	}
+
+	for _, p := range list {
+		err := db.Pin.Delete(p)
+		if err != nil {
+			return errors.Wrap(err, "deleting pin")
+		}
+	}
+
 	return nil
 }
 

@@ -40,7 +40,7 @@ func RequestsUpdate(c *gin.Context, id string) {
 	}
 
 	if updated.Status == "approved" {
-		if err := workers.Enqueue("CreateMediaFromRequests"); err != nil {
+		if err := workers.Enqueue(&CreateMediaFromRequests{}); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}

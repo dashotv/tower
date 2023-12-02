@@ -18,6 +18,10 @@ connections:
   default:
     uri: mongodb://localhost:27017
     database: database
+  minion:
+    uri: mongodb://localhost:27017
+    database: minion
+    collection: jobs
   medium:
     database: seer_development
     collection: media

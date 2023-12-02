@@ -5,11 +5,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/dashotv/golem/web"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	"github.com/dashotv/golem/web"
 )
 
 const pagesize = 42
@@ -98,7 +97,7 @@ func SeriesCreate(c *gin.Context) {
 		return
 	}
 
-	if err := workers.EnqueueWithPayload("TvdbUpdateSeries", s.ID.Hex()); err != nil {
+	if err := workers.Enqueue(&TvdbUpdateSeries{s.ID.Hex()}); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -256,8 +255,8 @@ func SeriesWatches(c *gin.Context, id string) {
 }
 
 func SeriesRefresh(c *gin.Context, id string) {
-	err := workers.EnqueueWithPayload("TvdbUpdateSeries", id)
-	if err != nil {
+
+	if err := workers.Enqueue(&TvdbUpdateSeries{id}); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

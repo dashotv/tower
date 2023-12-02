@@ -5,11 +5,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/dashotv/golem/web"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	"github.com/dashotv/golem/web"
 )
 
 func MoviesIndex(c *gin.Context) {
@@ -84,7 +83,7 @@ func MoviesCreate(c *gin.Context) {
 		return
 	}
 
-	if err := workers.EnqueueWithPayload("TmdbUpdateMovie", m.ID.Hex()); err != nil {
+	if err := workers.Enqueue(&TmdbUpdateMovie{m.ID.Hex()}); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -132,8 +131,7 @@ func MoviesUpdate(c *gin.Context, id string) {
 }
 
 func MoviesRefresh(c *gin.Context, id string) {
-	err := workers.EnqueueWithPayload("TmdbUpdateMovie", id)
-	if err != nil {
+	if err := workers.Enqueue(&TmdbUpdateMovie{id}); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
+	"github.com/dashotv/minion"
 	"github.com/dashotv/tvdb"
 )
 
@@ -24,8 +26,14 @@ func setupTvdb() error {
 	return nil
 }
 
-func TvdbUpdateSeries(payload any) error {
-	id := payload.(string)
+// TvdbUpdateSeries
+type TvdbUpdateSeries struct {
+	ID string
+}
+
+func (j *TvdbUpdateSeries) Kind() string { return "TvdbUpdateSeries" }
+func (j *TvdbUpdateSeries) Work(ctx context.Context, job *minion.Job[*TvdbUpdateSeries]) error {
+	id := job.Args.ID
 
 	series := &Series{}
 	err := db.Series.Find(id, series)
@@ -84,7 +92,7 @@ func TvdbUpdateSeries(payload any) error {
 	}
 
 	TvdbUpdateSeriesImages(series.ID.Hex(), int64(sid))
-	workers.EnqueueWithPayload("TvdbUpdateSeriesEpisodes", series.ID.Hex())
+	workers.Enqueue(&TvdbUpdateSeriesEpisodes{series.ID.Hex()})
 
 	return nil
 }
@@ -101,7 +109,7 @@ func TvdbUpdateSeriesImages(id string, sid int64) error {
 		}
 
 		cover := r.Data.Artworks[0]
-		workers.EnqueueWithPayload("TvdbUpdateSeriesImage", &ImagePayload{id, "cover", tvdb.StringValue(cover.Image), posterRatio})
+		workers.Enqueue(&TvdbUpdateSeriesImage{id, "cover", tvdb.StringValue(cover.Image), posterRatio})
 	}
 	{
 		r, err := tvdbClient.GetSeriesArtworks(sid, tvdb.String("eng"), tvdb.Int64(int64(3)))
@@ -117,17 +125,26 @@ func TvdbUpdateSeriesImages(id string, sid int64) error {
 		}
 
 		background := r.Data.Artworks[0]
-		workers.EnqueueWithPayload("TvdbUpdateSeriesImage", &ImagePayload{id, "background", tvdb.StringValue(background.Image), backgroundRatio})
+		workers.Enqueue(&TvdbUpdateSeriesImage{id, "background", tvdb.StringValue(background.Image), backgroundRatio})
 	}
 
 	return nil
 }
 
-func TvdbUpdateSeriesImage(payload any) error {
+// TvdbUpdateSeriesImage
+type TvdbUpdateSeriesImage struct {
+	ID    string
+	Type  string
+	Path  string
+	Ratio float32
+}
+
+func (j *TvdbUpdateSeriesImage) Kind() string { return "TvdbUpdateSeriesImage" }
+func (j *TvdbUpdateSeriesImage) Work(ctx context.Context, job *minion.Job[*TvdbUpdateSeriesImage]) error {
 	log := log.Named("TvdbUpdateSeriesImage")
 	log.Info("updating series image")
 
-	input := payload.(*ImagePayload)
+	input := job.Args
 	remote := input.Path // tvdb images are full urls
 	extension := filepath.Ext(input.Path)[1:]
 	local := fmt.Sprintf("series-%s/%s", input.ID, input.Type)
@@ -175,11 +192,17 @@ func TvdbUpdateSeriesImage(payload any) error {
 	return nil
 }
 
-func TvdbUpdateSeriesEpisodes(payload any) error {
+// TvdbUpdateSeriesEpisodes
+type TvdbUpdateSeriesEpisodes struct {
+	ID string
+}
+
+func (j *TvdbUpdateSeriesEpisodes) Kind() string { return "TvdbUpdateSeriesEpisodes" }
+func (j *TvdbUpdateSeriesEpisodes) Work(ctx context.Context, job *minion.Job[*TvdbUpdateSeriesEpisodes]) error {
 	log := log.Named("TvdbUpdateSeriesEpisodes")
 	log.Info("updating series episodes")
 
-	id := payload.(string)
+	id := job.Args.ID
 
 	series := &Series{}
 	err := db.Series.Find(id, series)

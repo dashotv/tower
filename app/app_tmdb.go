@@ -1,16 +1,17 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
 	"time"
 
+	"github.com/dashotv/minion"
+	"github.com/dashotv/tmdb"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	"github.com/dashotv/tmdb"
 )
 
 var tmdbClient *tmdb.Client
@@ -22,8 +23,14 @@ func setupTmdb() error {
 	return nil
 }
 
-func TmdbUpdateMovie(payload any) error {
-	id := payload.(string)
+// TmdbUpdateMovie
+type TmdbUpdateMovie struct {
+	ID string
+}
+
+func (j *TmdbUpdateMovie) Kind() string { return "TmdbUpdateMovie" }
+func (j *TmdbUpdateMovie) Work(ctx context.Context, job *minion.Job[*TmdbUpdateMovie]) error {
+	id := job.Args.ID
 
 	movie := &Movie{}
 	err := db.Movie.Find(id, movie)
@@ -59,10 +66,10 @@ func TmdbUpdateMovie(payload any) error {
 	}
 	movie.ReleaseDate = d
 	if resp.PosterPath != nil {
-		workers.EnqueueWithPayload("TmdbUpdateMovieImage", &ImagePayload{movie.ID.Hex(), "cover", tmdb.StringValue(resp.PosterPath), posterRatio})
+		workers.Enqueue(&TmdbUpdateMovieImage{movie.ID.Hex(), "cover", tmdb.StringValue(resp.PosterPath), posterRatio})
 	}
 	if resp.BackdropPath != nil {
-		workers.EnqueueWithPayload("TmdbUpdateMovieImage", &ImagePayload{movie.ID.Hex(), "background", tmdb.StringValue(resp.BackdropPath), backgroundRatio})
+		workers.Enqueue(&TmdbUpdateMovieImage{movie.ID.Hex(), "background", tmdb.StringValue(resp.BackdropPath), backgroundRatio})
 	}
 
 	err = db.Movie.Update(movie)
@@ -73,15 +80,17 @@ func TmdbUpdateMovie(payload any) error {
 	return nil
 }
 
-type ImagePayload struct {
+// TmdbUpdateMovieImage
+type TmdbUpdateMovieImage struct {
 	ID    string
 	Type  string
 	Path  string
 	Ratio float32
 }
 
-func TmdbUpdateMovieImage(payload any) error {
-	input := payload.(*ImagePayload)
+func (j *TmdbUpdateMovieImage) Kind() string { return "TmdbUpdateMovieImage" }
+func (j *TmdbUpdateMovieImage) Work(ctx context.Context, job *minion.Job[*TmdbUpdateMovieImage]) error {
+	input := job.Args
 	remote := cfg.Tmdb.Images + input.Path
 	extension := filepath.Ext(input.Path)[1:]
 	local := fmt.Sprintf("movie-%s/%s", input.ID, input.Type)
