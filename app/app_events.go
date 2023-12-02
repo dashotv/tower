@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	flame "github.com/dashotv/flame/app"
 	"github.com/dashotv/mercury"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -17,6 +18,7 @@ type EventsTopic string
 type Events struct {
 	Merc               *mercury.Mercury
 	Log                *zap.SugaredLogger
+	FlameCombined      chan *flame.Combined
 	SeerLogs           chan *EventSeerLog
 	SeerDownloads      chan *EventSeerDownload
 	SeerNotices        chan *EventSeerNotice
@@ -31,6 +33,7 @@ type Events struct {
 	TowerIndexSeries   chan *Series
 	TowerIndexMovies   chan *Movie
 	TowerIndexReleases chan *Release
+	TowerDownloading   chan *EventTowerDownloading
 }
 
 type EventSeerNotice struct {
@@ -95,6 +98,11 @@ type EventTowerRequest struct {
 	Request *Request `json:"request,omitempty"`
 }
 
+type EventTowerDownloading struct {
+	Downloads map[string]*Downloading `json:"downloads,omitempty"`
+	Metrics   *flame.Metrics          `json:"metrics,omitempty"`
+}
+
 func NewEvents() (*Events, error) {
 	m, err := mercury.New("tower", cfg.Nats.URL)
 	if err != nil {
@@ -104,6 +112,7 @@ func NewEvents() (*Events, error) {
 	e := &Events{
 		Merc:               m,
 		Log:                log.Named("events"),
+		FlameCombined:      make(chan *flame.Combined, 5),
 		SeerLogs:           make(chan *EventSeerLog, 5),
 		SeerDownloads:      make(chan *EventSeerDownload, 5),
 		SeerNotices:        make(chan *EventSeerNotice, 5),
@@ -118,6 +127,7 @@ func NewEvents() (*Events, error) {
 		TowerIndexSeries:   make(chan *Series),
 		TowerIndexMovies:   make(chan *Movie),
 		TowerIndexReleases: make(chan *Release),
+		TowerDownloading:   make(chan *EventTowerDownloading),
 	}
 
 	if err := e.Merc.Receiver("seer.logs", e.SeerLogs); err != nil {
@@ -130,6 +140,9 @@ func NewEvents() (*Events, error) {
 		return nil, err
 	}
 	if err := e.Merc.Receiver("seer.episodes", e.SeerEpisodes); err != nil {
+		return nil, err
+	}
+	if err := e.Merc.Receiver("flame.combined", e.FlameCombined); err != nil {
 		return nil, err
 	}
 	if err := e.Merc.Sender("tower.notices", e.TowerNotices); err != nil {
@@ -160,6 +173,9 @@ func NewEvents() (*Events, error) {
 		return nil, err
 	}
 	if err := e.Merc.Sender("tower.index.releases", e.TowerIndexReleases); err != nil {
+		return nil, err
+	}
+	if err := e.Merc.Sender("tower.downloading", e.TowerDownloading); err != nil {
 		return nil, err
 	}
 
@@ -221,6 +237,8 @@ func (e *Events) Start() error {
 			}
 			db.processEpisode(ep)
 			e.Send("tower.episodes", &EventTowerEpisode{Event: m.Event, ID: ep.ID.Hex(), Episode: ep})
+		case m := <-e.FlameCombined:
+			sendDownloading(m)
 		}
 	}
 }
@@ -230,11 +248,11 @@ func (e *Events) Send(topic EventsTopic, data any) error {
 
 	err, ok := WithTimeout(f, time.Second*5)
 	if !ok {
-		e.Log.Errorf("events.send: timeout sending message: %s", topic)
-		return fmt.Errorf("events.send: timeout sending message: %s", topic)
+		e.Log.Errorf("timeout sending: %s", topic)
+		return fmt.Errorf("timeout sending: %s", topic)
 	}
 	if err != nil {
-		e.Log.Errorf("events.send: %s", err)
+		e.Log.Errorf("sending: %s", err)
 		return errors.Wrap(err.(error), "events.send")
 	}
 	return nil
@@ -312,6 +330,13 @@ func (e *Events) doSend(topic EventsTopic, data any) error {
 			return errors.New("events.send: wrong data type")
 		}
 		e.TowerIndexReleases <- m
+	case "tower.downloading":
+		m, ok := data.(*EventTowerDownloading)
+		if !ok {
+			e.Log.Errorf("events.send: wrong data type: %t", data)
+			return errors.New("events.send: wrong data type")
+		}
+		e.TowerDownloading <- m
 	default:
 		e.Log.Warnf("events.send: unknown topic: %s", topic)
 	}
