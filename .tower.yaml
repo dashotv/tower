@@ -58,6 +58,3 @@ connections:
   message:
     database: tower_development
     collection: messages
-  minion_job:
-    database: tower_development
-    collection: minion_jobs

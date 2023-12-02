@@ -6,27 +6,26 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/dashotv/grimoire"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
-
-	"github.com/dashotv/grimoire"
 )
 
 type Connector struct {
-	log       *zap.SugaredLogger
-	Download  *grimoire.Store[*Download]
-	Episode   *grimoire.Store[*Episode]
-	Feed      *grimoire.Store[*Feed]
-	Medium    *grimoire.Store[*Medium]
-	Message   *grimoire.Store[*Message]
-	MinionJob *grimoire.Store[*MinionJob]
-	Movie     *grimoire.Store[*Movie]
-	Pin       *grimoire.Store[*Pin]
-	Release   *grimoire.Store[*Release]
-	Request   *grimoire.Store[*Request]
-	Series    *grimoire.Store[*Series]
-	User      *grimoire.Store[*User]
-	Watch     *grimoire.Store[*Watch]
+	log      *zap.SugaredLogger
+	Download *grimoire.Store[*Download]
+	Episode  *grimoire.Store[*Episode]
+	Feed     *grimoire.Store[*Feed]
+	Medium   *grimoire.Store[*Medium]
+	Message  *grimoire.Store[*Message]
+	Minion   *grimoire.Store[*Minion]
+	Movie    *grimoire.Store[*Movie]
+	Pin      *grimoire.Store[*Pin]
+	Release  *grimoire.Store[*Release]
+	Request  *grimoire.Store[*Request]
+	Series   *grimoire.Store[*Series]
+	User     *grimoire.Store[*User]
+	Watch    *grimoire.Store[*Watch]
 }
 
 func NewConnector() (*Connector, error) {
@@ -78,11 +77,11 @@ func NewConnector() (*Connector, error) {
 		return nil, err
 	}
 
-	s, err = settingsFor("minion_job")
+	s, err = settingsFor("minion")
 	if err != nil {
 		return nil, err
 	}
-	minion_job, err := grimoire.New[*MinionJob](s.URI, s.Database, s.Collection)
+	minion, err := grimoire.New[*Minion](s.URI, s.Database, s.Collection)
 	if err != nil {
 		return nil, err
 	}
@@ -151,20 +150,20 @@ func NewConnector() (*Connector, error) {
 	}
 
 	c := &Connector{
-		log:       log.Named("db"),
-		Download:  download,
-		Episode:   episode,
-		Feed:      feed,
-		Medium:    medium,
-		Message:   message,
-		MinionJob: minion_job,
-		Movie:     movie,
-		Pin:       pin,
-		Release:   release,
-		Request:   request,
-		Series:    series,
-		User:      user,
-		Watch:     watch,
+		log:      log.Named("db"),
+		Download: download,
+		Episode:  episode,
+		Feed:     feed,
+		Medium:   medium,
+		Message:  message,
+		Minion:   minion,
+		Movie:    movie,
+		Pin:      pin,
+		Release:  release,
+		Request:  request,
+		Series:   series,
+		User:     user,
+		Watch:    watch,
 	}
 
 	return c, nil
@@ -306,15 +305,23 @@ type Message struct { // model
 	Message  string `json:"message" bson:"message"`
 }
 
-type MinionJob struct { // model
+type Minion struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	//CreatedAt time.Time          `json:"created_at" bson:"created_at"`
 	//UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
-	Name        string    `json:"name" bson:"name"`
-	ProcessedAt time.Time `json:"processed_at" bson:"processed_at"`
-	Duration    float64   `json:"duration" bson:"duration"`
-	Error       string    `json:"error" bson:"error"`
+	Kind     string           `json:"kind" bson:"kind"`
+	Args     string           `json:"args" bson:"args"`
+	Status   string           `json:"status" bson:"status"`
+	Attempts []*MinionAttempt `json:"attempts" bson:"attempts"`
+}
+
+type MinionAttempt struct { // struct
+	StartedAt  time.Time `json:"started_at" bson:"started_at"`
+	Duration   float64   `json:"duration" bson:"duration"`
+	Status     string    `json:"status" bson:"status"`
+	Error      string    `json:"error" bson:"error"`
+	Stacktrace []string  `json:"stacktrace" bson:"stacktrace"`
 }
 
 type Movie struct { // model

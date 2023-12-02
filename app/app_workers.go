@@ -3,9 +3,8 @@ package app
 import (
 	"context"
 
-	"github.com/pkg/errors"
-
 	"github.com/dashotv/minion"
+	"github.com/pkg/errors"
 )
 
 var workers *minion.Minion
@@ -65,7 +64,7 @@ func setupWorkers() error {
 		return errors.Wrap(err, "registering worker: TvdbUpdateSeriesEpisodes")
 	}
 
-	if _, err := m.Schedule("0 * * * * *", &PopularReleases{}); err != nil {
+	if _, err := m.Schedule("0 */5 * * * *", &PopularReleases{}); err != nil {
 		return errors.Wrap(err, "scheduling worker: PopularReleases")
 	}
 	if _, err := m.Schedule("0 0 11 * * *", &CleanPlexPins{}); err != nil {

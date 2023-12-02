@@ -7,7 +7,7 @@ import (
 )
 
 func JobsIndex(c *gin.Context) {
-	list, err := db.MinionJob.Query().Desc("created_at").Run()
+	list, err := db.Minion.Query().Desc("created_at").Run()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
