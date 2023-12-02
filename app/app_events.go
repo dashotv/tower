@@ -98,11 +98,6 @@ type EventTowerRequest struct {
 	Request *Request `json:"request,omitempty"`
 }
 
-type EventTowerDownloading struct {
-	Downloads map[string]*Downloading `json:"downloads,omitempty"`
-	Metrics   *flame.Metrics          `json:"metrics,omitempty"`
-}
-
 func NewEvents() (*Events, error) {
 	m, err := mercury.New("tower", cfg.Nats.URL)
 	if err != nil {
