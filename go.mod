@@ -9,7 +9,7 @@ require (
 	github.com/dashotv/golem v0.9.1
 	github.com/dashotv/grimoire v0.3.0
 	github.com/dashotv/mercury v0.3.0
-	github.com/dashotv/minion v0.2.0
+	github.com/dashotv/minion v0.2.1
 	github.com/dashotv/tmdb v0.2.0
 	github.com/dashotv/tvdb v0.3.0
 	github.com/fsnotify/fsnotify v1.7.0

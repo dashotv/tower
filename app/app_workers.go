@@ -24,6 +24,25 @@ func setupWorkers() error {
 		return errors.Wrap(err, "creating minion")
 	}
 
+	m.Subscribe(func(n *minion.Notification) {
+		if n.Event != "job:load" && n.Event != "job:success" && n.Event != "job:fail" {
+			return
+		}
+
+		j := &Minion{}
+		err := db.Minion.Find(n.JobID, j)
+		if err != nil {
+			log.Errorf("finding job: %s", err)
+			return
+		}
+
+		if n.Event == "job:load" {
+			events.Send("tower.jobs", &EventTowerJob{"created", j.ID.Hex(), j})
+			return
+		}
+		events.Send("tower.jobs", &EventTowerJob{"updated", j.ID.Hex(), j})
+	})
+
 	if err := minion.Register[*CleanupLogs](m, &CleanupLogs{}); err != nil {
 		return errors.Wrap(err, "registering worker")
 	}
@@ -85,6 +104,13 @@ func setupWorkers() error {
 	if _, err := m.Schedule("15 0 * * * *", &CreateMediaFromRequests{}); err != nil {
 		return errors.Wrap(err, "scheduling worker: CreateMediaFromRequests")
 	}
+
+	// if err := minion.Register[*Ping](m, &Ping{}); err != nil {
+	// 	return errors.Wrap(err, "registering worker: Ping")
+	// }
+	// if _, err := m.Schedule("* * * * * *", &Ping{}); err != nil {
+	// 	return errors.Wrap(err, "scheduling worker: Ping")
+	// }
 
 	workers = m
 	return nil

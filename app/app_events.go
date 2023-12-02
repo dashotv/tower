@@ -34,6 +34,7 @@ type Events struct {
 	TowerIndexMovies   chan *Movie
 	TowerIndexReleases chan *Release
 	TowerDownloading   chan *EventTowerDownloading
+	TowerJobs          chan *EventTowerJob
 }
 
 type EventSeerNotice struct {
@@ -98,6 +99,12 @@ type EventTowerRequest struct {
 	Request *Request `json:"request,omitempty"`
 }
 
+type EventTowerJob struct {
+	Event string  `json:"event,omitempty"`
+	ID    string  `json:"id,omitempty"`
+	Job   *Minion `json:"job,omitempty"`
+}
+
 func NewEvents() (*Events, error) {
 	m, err := mercury.New("tower", cfg.Nats.URL)
 	if err != nil {
@@ -123,6 +130,7 @@ func NewEvents() (*Events, error) {
 		TowerIndexMovies:   make(chan *Movie),
 		TowerIndexReleases: make(chan *Release),
 		TowerDownloading:   make(chan *EventTowerDownloading),
+		TowerJobs:          make(chan *EventTowerJob),
 	}
 
 	if err := e.Merc.Receiver("seer.logs", e.SeerLogs); err != nil {
@@ -171,6 +179,9 @@ func NewEvents() (*Events, error) {
 		return nil, err
 	}
 	if err := e.Merc.Sender("tower.downloading", e.TowerDownloading); err != nil {
+		return nil, err
+	}
+	if err := e.Merc.Sender("tower.jobs", e.TowerJobs); err != nil {
 		return nil, err
 	}
 
@@ -332,6 +343,13 @@ func (e *Events) doSend(topic EventsTopic, data any) error {
 			return errors.New("events.send: wrong data type")
 		}
 		e.TowerDownloading <- m
+	case "tower.jobs":
+		m, ok := data.(*EventTowerJob)
+		if !ok {
+			e.Log.Errorf("events.send: wrong data type: %t", data)
+			return errors.New("events.send: wrong data type")
+		}
+		e.TowerJobs <- m
 	default:
 		e.Log.Warnf("events.send: unknown topic: %s", topic)
 	}
