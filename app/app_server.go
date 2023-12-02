@@ -63,12 +63,6 @@ func (s *Server) Start() error {
 	go events.Start()
 	go workers.Start()
 
-	if cfg.Filesystems.Enabled {
-		s.Log.Info("starting watcher...")
-		s.Watcher()
-		defer s.watcher.Close()
-	}
-
 	s.Log.Info("starting web...")
 	if err := s.Engine.Run(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		return errors.Wrap(err, "starting router")

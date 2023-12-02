@@ -12,16 +12,6 @@ tmdb:
   images: https://image.tmdb.org/t/p/original
 directories:
   images: /images
-filesystems:
-  enabled: false
-  # directories:
-  #   - /media/anime
-  #   - /media/ecchi
-  #   - /media/kids
-  #   - /media/movies
-  #   - /media/movies3d
-  #   - /media/movies4k
-  #   - /media/tv
 redis:
   address: redis:6379
 connections:
