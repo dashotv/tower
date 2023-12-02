@@ -145,16 +145,12 @@ github.com/coreos/go-etcd v2.0.0+incompatible/go.mod h1:Jez6KQU2B/sWsbdaef3ED8Nz
 github.com/coreos/go-semver v0.2.0/go.mod h1:nnelYz7RCh+5ahJtPPxZlU+153eP4D4r3EedlOD2RNk=
 github.com/cpuguy83/go-md2man v1.0.10/go.mod h1:SmD6nW6nTyfqj6ABTjUi3V3JVMnlJmwcJI5acqYI6dE=
 github.com/cpuguy83/go-md2man/v2 v2.0.3/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
-github.com/dashotv/flame v0.8.0 h1:3d5Z/ypzU51XBiuYK66rt/3H2Ku2RRSVfL5aCZs7kCk=
-github.com/dashotv/flame v0.8.0/go.mod h1:UrmbLLStAu1IxJxDHKMoQXi6KFiogAKuNiUqoJ1hjd8=
 github.com/dashotv/flame v0.8.1 h1:K7XkObEu5fomDwqvoyibW3bJJ4f1AzmTHSUkVC6vYbc=
 github.com/dashotv/flame v0.8.1/go.mod h1:UrmbLLStAu1IxJxDHKMoQXi6KFiogAKuNiUqoJ1hjd8=
 github.com/dashotv/golem v0.9.1 h1:rE4eAyWww7m3arsftkw3SZlkCiQ3h2oeSQD1B+Pq6fg=
 github.com/dashotv/golem v0.9.1/go.mod h1:A+IRXbdtlcLjQj/Cs66b1Pauw4XvEhopstWV9GUQKwg=
 github.com/dashotv/grimoire v0.3.0 h1:sgS6R+iS6ST+ZsGA+0yR9dTa9RW2Gn44AVumUmgHqS4=
 github.com/dashotv/grimoire v0.3.0/go.mod h1:q76AxToGXZ4acrFIt+ZyCrupxeymiamJzlXO6qtSHzM=
-github.com/dashotv/mercury v0.2.0 h1:v7XVyXTXP68LumjTi+6+INyREix442wuhIwk+auiX1I=
-github.com/dashotv/mercury v0.2.0/go.mod h1:OF7xiKpyMwBG1JdjSkrWm/LFNIlQoDnGKF+Hx/+6ITk=
 github.com/dashotv/mercury v0.3.0 h1:QJsiSjeazpgvtQsLFq3iFcoMEU3nAcPzDCC3uyj+XAI=
 github.com/dashotv/mercury v0.3.0/go.mod h1:OF7xiKpyMwBG1JdjSkrWm/LFNIlQoDnGKF+Hx/+6ITk=
 github.com/dashotv/minion v0.1.6 h1:3GjBuUeURJyc4myfvF9jjJvguAcBQFfet0XVyAX9d1Q=
@@ -200,8 +196,6 @@ github.com/gabriel-vasile/mimetype v1.4.3 h1:in2uUcidCuFcDKtdcBxlR0rJ1+fsokWf+uq
 github.com/gabriel-vasile/mimetype v1.4.3/go.mod h1:d8uq/6HKRL6CGdk+aubisF/M5GcPfT7nKyLpA0lbSSk=
 github.com/getkin/kin-openapi v0.120.0 h1:MqJcNJFrMDFNc07iwE8iFC5eT2k/NPUFDIpNeiZv8Jg=
 github.com/getkin/kin-openapi v0.120.0/go.mod h1:PCWw/lfBrJY4HcdqE3jj+QFkaFK8ABoqo7PvqVhXXqw=
-github.com/ghodss/yaml v1.0.0 h1:wQHKEahhL6wmXdzwWG11gIVCkOv05bNOh+Rxn0yngAk=
-github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE=
 github.com/gin-contrib/sse v0.1.0/go.mod h1:RHrZQHXnP2xjPF+u1gW/2HnVO7nvIa9PG3Gm+fLHvGI=
 github.com/gin-contrib/zap v0.2.0 h1:HLvt3rZXyC8XC+s2lHzMFow3UDqiEbfrBWJyHHS6L8A=
