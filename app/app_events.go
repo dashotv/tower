@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	flame "github.com/dashotv/flame/app"
-	"github.com/dashotv/mercury"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+
+	"github.com/dashotv/mercury"
 )
 
 var events *Events
@@ -18,7 +18,7 @@ type EventsTopic string
 type Events struct {
 	Merc               *mercury.Mercury
 	Log                *zap.SugaredLogger
-	FlameCombined      chan *flame.Combined
+	FlameCombined      chan *FlameCombined
 	SeerLogs           chan *EventSeerLog
 	SeerDownloads      chan *EventSeerDownload
 	SeerNotices        chan *EventSeerNotice
@@ -107,7 +107,7 @@ func NewEvents() (*Events, error) {
 	e := &Events{
 		Merc:               m,
 		Log:                log.Named("events"),
-		FlameCombined:      make(chan *flame.Combined, 5),
+		FlameCombined:      make(chan *FlameCombined, 5),
 		SeerLogs:           make(chan *EventSeerLog, 5),
 		SeerDownloads:      make(chan *EventSeerDownload, 5),
 		SeerNotices:        make(chan *EventSeerNotice, 5),
