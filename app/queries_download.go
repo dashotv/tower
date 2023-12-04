@@ -1,13 +1,57 @@
 package app
 
 import (
-	"errors"
 	"fmt"
+	"regexp"
 
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+var nzbgeekRegex = regexp.MustCompile("^https://api.nzbgeek")
 var activeStates = []string{"searching", "loading", "managing", "downloading", "reviewing", "paused"}
+
+func (c *Connector) DownloadGet(id string) (*Download, error) {
+	d := &Download{}
+	err := c.Download.Find(id, d)
+	if err != nil {
+		return nil, err
+	}
+
+	c.processDownloads([]*Download{d})
+	return d, nil
+}
+
+func (d *Download) GetURL() (string, error) {
+	if d.Url != "" {
+		return d.Url, nil
+	}
+
+	if d.ReleaseId != "" {
+		r := &Release{}
+		err := db.Release.Find(d.ReleaseId, r)
+		if err != nil {
+			return "", err
+		}
+
+		return r.Download, nil
+	}
+
+	return "", errors.New("no url or release")
+}
+
+func (d *Download) IsNzb() bool {
+	url, err := d.GetURL()
+	if err != nil {
+		return false
+	}
+
+	if nzbgeekRegex.MatchString(url) {
+		return true
+	}
+
+	return false
+}
 
 func (c *Connector) ActiveDownloads() ([]*Download, error) {
 	q := c.Download.Query()
@@ -35,6 +79,16 @@ func (c *Connector) RecentDownloads(page int) ([]*Download, error) {
 	return list, nil
 }
 
+func (c *Connector) DownloadByStatus(status string) ([]*Download, error) {
+	list, err := c.Download.Query().Where("status", status).Run()
+	if err != nil {
+		return nil, err
+	}
+
+	c.processDownloads(list)
+	return list, nil
+}
+
 func (c *Connector) processDownloads(list []*Download) {
 	for i, d := range list {
 		m := &Medium{}
@@ -45,7 +99,6 @@ func (c *Connector) processDownloads(list []*Download) {
 		}
 
 		paths := m.Paths
-		m.Display = m.Type
 		if m.Type == "Episode" && !m.SeriesId.IsZero() {
 			s := &Series{}
 			err := db.Series.FindByID(m.SeriesId, s)
@@ -54,19 +107,24 @@ func (c *Connector) processDownloads(list []*Download) {
 				continue
 			}
 
-			unwatched, err := db.SeriesAllUnwatched(s)
+			unwatched, err := db.SeriesUserUnwatched(s)
 			if err != nil {
 				c.log.Errorf("could not get unwatched count: %s: %s", s.ID.Hex(), err)
 			}
-
-			if s.Source == "tvdb" {
-				m.SourceId = s.SourceId
-			}
-			m.SearchParams = s.SearchParams
-			m.Kind = s.Kind
 			m.Unwatched = unwatched
-			m.Display = fmt.Sprintf("%dx%d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)
+
+			if s.Kind == "anime" {
+				m.Display = fmt.Sprintf("#%d %s", m.AbsoluteNumber, m.Title)
+			} else {
+				m.Display = fmt.Sprintf("%02dx%02d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)
+			}
 			m.Title = s.Title
+			m.Kind = s.Kind
+
+			m.SearchParams = s.SearchParams
+			m.Directory = s.Directory
+			m.Active = s.Active
+			m.Favorite = s.Favorite
 			paths = s.Paths
 		}
 

@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -9,11 +10,29 @@ import (
 )
 
 var workers *minion.Minion
+var workersList = map[string]minion.Payload{
+	"CleanupLogs":              &CleanupLogs{},
+	"CleanupJobs":              &CleanupJobs{},
+	"PopularReleases":          &PopularReleases{},
+	"CleanPlexPins":            &CleanPlexPins{},
+	"PlexPinToUsers":           &PlexPinToUsers{},
+	"PlexUserUpdates":          &PlexUserUpdates{},
+	"PlexWatchlistUpdates":     &PlexWatchlistUpdates{},
+	"CreateMediaFromRequests":  &CreateMediaFromRequests{},
+	"TmdbUpdateMovie":          &TmdbUpdateMovie{},
+	"TmdbUpdateMovieImage":     &TmdbUpdateMovieImage{},
+	"TvdbUpdateSeries":         &TvdbUpdateSeries{},
+	"TvdbUpdateSeriesImage":    &TvdbUpdateSeriesImage{},
+	"TvdbUpdateSeriesEpisodes": &TvdbUpdateSeriesEpisodes{},
+	"DownloadsProcess":         &DownloadsProcess{},
+	// "DownloadsFileMove":        &DownloadFileMover{},
+}
 
 func setupWorkers() error {
 	ctx := context.Background()
 
 	mcfg := &minion.Config{
+		Debug:       true,
 		Concurrency: cfg.Minion.Concurrency,
 		Logger:      log.Named("minion"),
 		Database:    cfg.Connections["minion"].Database,
@@ -83,6 +102,12 @@ func setupWorkers() error {
 	if err := minion.Register[*TvdbUpdateSeriesEpisodes](m, &TvdbUpdateSeriesEpisodes{}); err != nil {
 		return errors.Wrap(err, "registering worker: TvdbUpdateSeriesEpisodes")
 	}
+	if err := minion.Register[*DownloadsProcess](m, &DownloadsProcess{}); err != nil {
+		return errors.Wrap(err, "registering worker: DownloadsProcess")
+	}
+	// if err := minion.Register[*DownloadFileMover](m, &DownloadFileMover{}); err != nil {
+	// 	return errors.Wrap(err, "registering worker: DownloadsProcess")
+	// }
 
 	if _, err := m.Schedule("0 */5 * * * *", &PopularReleases{}); err != nil {
 		return errors.Wrap(err, "scheduling worker: PopularReleases")
@@ -109,7 +134,7 @@ func setupWorkers() error {
 	// if err := minion.Register[*Ping](m, &Ping{}); err != nil {
 	// 	return errors.Wrap(err, "registering worker: Ping")
 	// }
-	// if _, err := m.Schedule("*/5 * * * * *", &Ping{}); err != nil {
+	// if _, err := m.Schedule("*/30 * * * * *", &Ping{}); err != nil {
 	// 	return errors.Wrap(err, "scheduling worker: Ping")
 	// }
 
@@ -117,11 +142,12 @@ func setupWorkers() error {
 	return nil
 }
 
-// type Ping struct{}
-//
-// func (j *Ping) Kind() string { return "ping" }
-// func (j *Ping) Work(ctx context.Context, job *minion.Job[*Ping]) error {
-// 	log.Named("ping").Debug("ping")
-// 	time.Sleep(8 * time.Second)
-// 	return nil
-// }
+type Ping struct{}
+
+func (j *Ping) Kind() string { return "ping" }
+func (j *Ping) Work(ctx context.Context, job *minion.Job[*Ping]) error {
+	log.Named("ping").Debug("ping")
+	time.Sleep(8 * time.Second)
+	// return errors.Errorf("testing error: %s", time.Now())
+	return nil
+}

@@ -26,34 +26,61 @@ func (c *Connector) SeriesAll() ([]*Series, error) {
 		Run()
 }
 
-func (c *Connector) SeriesAllUnwatched(s *Series) (int, error) {
-	list, err := c.Episode.Query().Where("series_id", s.ID).GreaterThan("season_number", 0).Where("completed", true).Limit(-1).Run()
+func (c *Connector) SeriesUnwatchedByID(id string) (int, error) {
+	s := &Series{}
+	err := c.Series.Find(id, s)
 	if err != nil {
 		return 0, err
 	}
 
-	// get ids of all episodes from query above
-	ids := []primitive.ObjectID{}
-	for _, e := range list {
-		ids = append(ids, e.ID)
+	return c.SeriesUnwatched(s, "")
+}
+
+func (c *Connector) SeriesUnwatched(s *Series, user string) (int, error) {
+	list, err := c.Episode.Query().
+		Where("series_id", s.ID).
+		GreaterThan("season_number", 0).
+		Where("completed", true).
+		Limit(-1).
+		Run()
+	if err != nil {
+		return 0, err
 	}
-	// get distinct list of ids
+
+	grouped := lo.GroupBy(list, func(e *Episode) primitive.ObjectID {
+		return e.ID
+	})
+	ids := lo.Keys(grouped)
 	ids = lo.Uniq[primitive.ObjectID](ids)
 
 	// get watches for those ids
-	watches, err := c.Watch.Query().Where("username", "xenonsoul").In("medium_id", ids).Limit(-1).Run()
+	q := c.Watch.Query()
+	if user != "" {
+		q = q.Where("username", user)
+	}
+	watches, err := q.In("medium_id", ids).Limit(-1).Run()
 	if err != nil {
 		return 0, err
 	}
 
+	grpwatches := lo.GroupBy(watches, func(e *Watch) primitive.ObjectID {
+		return e.ID
+	})
+	wids := lo.Keys(grpwatches)
+	wids = lo.Uniq[primitive.ObjectID](wids)
+
 	// return total episodes - total watches
-	return len(ids) - len(watches), nil
+	return len(ids) - len(wids), nil
 }
 
-func (c *Connector) SeriesAllUnwatchedCached(s *Series) (int, error) {
+func (c *Connector) SeriesUserUnwatched(s *Series) (int, error) {
+	return c.SeriesUnwatched(s, "xenonsoul")
+}
+
+func (c *Connector) SeriesUserUnwatchedCached(s *Series) (int, error) {
 	unwatched := 0
 	_, err := cache.Fetch(fmt.Sprintf("series-unwatched-%s", s.ID.Hex()), &unwatched, func() (interface{}, error) {
-		return c.SeriesAllUnwatched(s)
+		return c.SeriesUserUnwatched(s)
 	})
 	if err != nil {
 		return 0, err

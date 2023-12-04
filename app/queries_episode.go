@@ -7,16 +7,14 @@ import (
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/exp/maps"
+
+	"github.com/dashotv/grimoire"
 )
 
 const imagesBaseURL = "/media-images" // proxy this instead of dealing with CORS
 
-func (c *Connector) Upcoming() ([]*Episode, error) {
-	seriesMap := map[primitive.ObjectID]*Series{}
-	utc := time.Now().UTC()
-	today := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC)
-	later := today.Add(time.Hour * 24 * 90)
-	list, err := c.Episode.Query().
+func (c *Connector) UpcomingQuery() *grimoire.QueryBuilder[*Episode] {
+	return c.Episode.Query().
 		Where("_type", "Episode").
 		Where("downloaded", false).
 		Where("completed", false).
@@ -24,15 +22,39 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 		In("missing", []interface{}{false, nil}).
 		GreaterThan("season_number", 0).
 		GreaterThan("episode_number", 0).
+		Asc("release_date").Asc("season_number").Asc("episode_number")
+}
+
+func (c *Connector) Upcoming() ([]*Episode, error) {
+	utc := time.Now().UTC()
+	today := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC)
+	later := today.Add(time.Hour * 24 * 90)
+	q := c.UpcomingQuery().
 		GreaterThanEqual("release_date", today).
 		LessThanEqual("release_date", later).
-		Asc("release_date").Asc("season_number").Asc("episode_number").
-		Limit(1000).
-		Run()
+		Limit(-1)
+	return c.UpcomingFrom(q)
+}
+
+func (c *Connector) UpcomingNow() ([]*Episode, error) {
+	utc := time.Now().UTC()
+	today := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC)
+	tomorrow := today.Add(time.Hour * 24)
+	q := c.UpcomingQuery().
+		GreaterThanEqual("release_date", today.Add(-30*time.Hour*24)).
+		LessThan("release_date", tomorrow).
+		Limit(-1)
+	return c.UpcomingFrom(q)
+}
+
+func (c *Connector) UpcomingFrom(query *grimoire.QueryBuilder[*Episode]) ([]*Episode, error) {
+	seriesMap := map[primitive.ObjectID]*Series{}
+	list, err := query.Run()
 	if err != nil {
 		return nil, err
 	}
 
+	db.log.Debugf("upcoming: %d", len(list))
 	list = groupEpisodes(list)
 
 	// Create a slice of ids
@@ -63,6 +85,28 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 	return list, nil
 }
 
+func (c *Connector) SeriesDownloadCounts() (map[string]int, error) {
+	counts := map[string]int{}
+
+	list, err := c.ActiveDownloads()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, d := range list {
+		m := &Medium{}
+		err := c.Medium.Find(d.MediumId.Hex(), m)
+		if err != nil {
+			return nil, err
+		}
+		if m.Type == "Episode" {
+			counts[m.SeriesId.Hex()]++
+		}
+	}
+
+	return counts, nil
+}
+
 func (c *Connector) processEpisode(e *Episode) error {
 	s := &Series{}
 	err := c.Series.Find(e.SeriesId.Hex(), s)
@@ -80,13 +124,14 @@ func (c *Connector) processSeriesEpisode(s *Series, e *Episode) {
 	} else {
 		e.Display = fmt.Sprintf("%02dx%02d %s", e.SeasonNumber, e.EpisodeNumber, e.Title)
 	}
-	e.Title = s.Title
-	unwatched, err := c.SeriesAllUnwatched(s)
+	unwatched, err := c.SeriesUserUnwatched(s)
 	if err != nil {
 		c.log.Errorf("getting unwatched %s: %s", s.ID.Hex(), err)
 	}
 	e.Unwatched = unwatched
+	e.Directory = s.Directory
 	e.Active = s.Active
+	e.Favorite = s.Favorite
 	e.Title = s.Title
 	for _, p := range s.Paths {
 		if p.Type == "cover" {

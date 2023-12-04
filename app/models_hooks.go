@@ -1,12 +1,22 @@
 package app
 
 import (
+	"context"
 	"time"
 
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
+func (d *Download) Created(ctx context.Context) error {
+	db.log.Debugf("Download Created: %s", d.ID.Hex())
+	return events.Send("tower.downloads", &EventTowerDownload{"created", d.ID.Hex(), d})
+}
+func (d *Download) Updated(ctx context.Context, result *mongo.UpdateResult) error {
+	db.log.Debugf("Download Updated: %s", d.ID.Hex())
+	return events.Send("tower.downloads", &EventTowerDownload{"updated", d.ID.Hex(), d})
+}
 func (d *Download) Saving() error {
 	// Call the DefaultModel Saving hook
 	if err := d.DefaultModel.Saving(); err != nil {
@@ -16,9 +26,15 @@ func (d *Download) Saving() error {
 		d.Files = []*DownloadFile{}
 	}
 
-	return events.Send("tower.downloads", &EventTowerDownload{"updated", d.ID.Hex(), d})
+	return nil
 }
 
+func (e *Episode) Created(ctx context.Context) error {
+	return events.Send("tower.episodes", &EventTowerEpisode{"created", e.ID.Hex(), e})
+}
+func (e *Episode) Updated(ctx context.Context, result *mongo.UpdateResult) error {
+	return events.Send("tower.episodes", &EventTowerEpisode{"updated", e.ID.Hex(), e})
+}
 func (e *Episode) Saving() error {
 	// Call the DefaultModel Saving hook
 	if err := e.DefaultModel.Saving(); err != nil {
@@ -37,9 +53,21 @@ func (e *Episode) Saving() error {
 		}
 	}
 
-	return events.Send("tower.episodes", &EventTowerEpisode{"updated", e.ID.Hex(), e})
+	return nil
 }
 
+func (m *Movie) Created(ctx context.Context) error {
+	if err := events.Send("tower.index.movies", m); err != nil {
+		return errors.Wrap(err, "sending elastic search index")
+	}
+	return events.Send("tower.movies", &EventTowerMovie{"created", m.ID.Hex(), m})
+}
+func (m *Movie) Updated(ctx context.Context, result *mongo.UpdateResult) error {
+	if err := events.Send("tower.index.movies", m); err != nil {
+		return errors.Wrap(err, "sending elastic search index")
+	}
+	return events.Send("tower.movies", &EventTowerMovie{"updated", m.ID.Hex(), m})
+}
 func (m *Movie) Saving() error {
 	// Call the DefaultModel Saving hook
 	if err := m.DefaultModel.Saving(); err != nil {
@@ -76,12 +104,20 @@ func (m *Movie) Saving() error {
 		m.Directory = path(m.Directory)
 	}
 
-	if err := events.Send("tower.index.movies", m); err != nil {
+	return nil
+}
+func (s *Series) Created(ctx context.Context) error {
+	if err := events.Send("tower.index.series", s); err != nil {
 		return errors.Wrap(err, "sending elastic search index")
 	}
-	return events.Send("tower.movies", &EventTowerMovie{"updated", m.ID.Hex(), m})
+	return events.Send("tower.series", &EventTowerSeries{"created", s.ID.Hex(), s})
 }
-
+func (s *Series) Updated(ctx context.Context, result *mongo.UpdateResult) error {
+	if err := events.Send("tower.index.series", s); err != nil {
+		return errors.Wrap(err, "sending elastic search index")
+	}
+	return events.Send("tower.series", &EventTowerSeries{"updated", s.ID.Hex(), s})
+}
 func (s *Series) Saving() error {
 	// Call the DefaultModel Saving hook
 	if err := s.DefaultModel.Saving(); err != nil {
@@ -118,20 +154,9 @@ func (s *Series) Saving() error {
 		s.Directory = path(s.Directory)
 	}
 
-	if err := events.Send("tower.index.series", s); err != nil {
-		return errors.Wrap(err, "sending elastic search index")
-	}
-	return events.Send("tower.series", &EventTowerSeries{"updated", s.ID.Hex(), s})
+	return nil
 }
 
-func (t *Release) Saving() error {
-	// Call the DefaultModel Saving hook
-	if err := t.DefaultModel.Saving(); err != nil {
-		return err
-	}
-
-	if err := events.Send("tower.index.releases", t); err != nil {
-		return errors.Wrap(err, "sending elastic search index")
-	}
-	return nil
+func (t *Release) Updated(ctx context.Context, result *mongo.UpdateResult) error {
+	return events.Send("tower.index.releases", t)
 }

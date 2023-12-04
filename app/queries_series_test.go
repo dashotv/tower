@@ -17,7 +17,7 @@ func TestConnector_SeriesAllUnwatched(t *testing.T) {
 	err := c.Series.Find("644d88003359bb748dd63096", series)
 	assert.NoError(t, err, "Find Series")
 
-	got, err := c.SeriesAllUnwatched(series)
+	got, err := c.SeriesUserUnwatched(series)
 	assert.NoError(t, err, "unwatched")
 	assert.Greater(t, got, 0, "unwatched")
 }

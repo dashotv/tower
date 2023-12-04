@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dashotv/grimoire"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
+
+	"github.com/dashotv/grimoire"
 )
 
 type Connector struct {
@@ -243,6 +244,7 @@ type Episode struct { // model
 	Background     string             `json:"background" bson:"-"`
 	Watched        bool               `json:"watched" bson:"-"`
 	Active         bool               `json:"active" bson:"-"`
+	Favorite       bool               `json:"favorite" bson:"-"`
 	Unwatched      int                `json:"unwatched" bson:"-"`
 	Display        string             `json:"display" bson:"-"`
 }

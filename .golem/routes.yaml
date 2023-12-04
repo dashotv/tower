@@ -101,6 +101,13 @@ groups:
       index:
         name: index
         path: /
+      create:
+        path: /
+        method: POST
+        params:
+          - name: job
+            type: string
+            query: true
   messages:
     name: messages
     path: /messages

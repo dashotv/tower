@@ -5,10 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dashotv/golem/web"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/dashotv/golem/web"
 )
 
 const pagesize = 42
@@ -34,7 +35,7 @@ func SeriesIndex(c *gin.Context) {
 		Desc("created_at").Run()
 
 	for _, s := range results {
-		unwatched, err := db.SeriesAllUnwatched(s)
+		unwatched, err := db.SeriesUserUnwatched(s)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -115,7 +116,7 @@ func SeriesShow(c *gin.Context, id string) {
 		return
 	}
 
-	unwatched, err := db.SeriesAllUnwatched(result)
+	unwatched, err := db.SeriesUserUnwatched(result)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

@@ -12,8 +12,59 @@ tmdb:
   images: https://image.tmdb.org/t/p/original
 directories:
   images: /images
+  incoming: /Volumes/qbittorrent
+  completed: /Volumes/media
 redis:
   address: redis:6379
+downloads:
+  preferred:
+    - megusta
+  groups:
+    # movies
+    - megaradon
+    - vppv
+    - yify
+
+    # tv
+    - ethd
+    - etrg
+    - ettv
+    - eztv
+    - megusta
+    - naisu
+    - nayhtut
+    - ntb
+    - sneaky7
+    #- showrss # lots of bad torrents, trying again
+
+    # anime
+    - ae
+    - anime-koi
+    - animerg
+    - arrg
+    - asenshi
+    - bakedfish
+    - commie
+    - deadfish
+    - erai-raws
+    - fff
+    - gg
+    - hatsuyuki
+    - jackie
+    - kamifs
+    - ssa
+    - subdesu
+    - subsplease
+    - yuisubs
+    - bluesilversect
+    - vipapkstudios
+    - hall_of_c
+    - hall of c
+    - fs pavilion
+  extensions:
+    video: [avi, mkv, mp4, ogm, mpg, mpeg, divx, m4v, 3gp, 3gpp, wmv]
+    audio: [mp3, m4a, flac]
+    subtitles: [srt, idx, sub, ass]
 connections:
   default:
     uri: mongodb://localhost:27017

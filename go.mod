@@ -9,7 +9,8 @@ require (
 	github.com/dashotv/golem v0.9.1
 	github.com/dashotv/grimoire v0.3.0
 	github.com/dashotv/mercury v0.3.0
-	github.com/dashotv/minion v0.2.1
+	github.com/dashotv/minion v0.2.3
+	github.com/dashotv/scry v0.0.0-20231201022820-74c3e20e68f2
 	github.com/dashotv/tmdb v0.2.0
 	github.com/dashotv/tvdb v0.3.0
 	github.com/fsnotify/fsnotify v1.7.0
@@ -110,6 +111,7 @@ require (
 	github.com/nats-io/nats.go v1.31.0 // indirect
 	github.com/nats-io/nkeys v0.4.6 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
+	github.com/olivere/elastic v6.2.37+incompatible // indirect
 	github.com/onsi/gomega v1.20.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect

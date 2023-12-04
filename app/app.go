@@ -17,6 +17,9 @@ func Start() error {
 		setupPlex,
 		setupTmdb,
 		setupTvdb,
+		setupScry,
+		setupFlame,
+		setupNotifier,
 	)
 	if err != nil {
 		return err

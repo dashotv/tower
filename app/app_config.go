@@ -65,15 +65,36 @@ type Config struct {
 		Address string `yaml:"address"`
 	} `yaml:"redis"`
 	Directories struct {
-		Images string `yaml:"images"`
+		Images    string `yaml:"images"`
+		Incoming  string `yaml:"incoming"`
+		Completed string `yaml:"completed"`
 	} `yaml:"directories"`
 	Tmdb struct {
 		Images string `yaml:"images"`
 	} `yaml:"tmdb"`
+	Downloads struct {
+		Preferred  []string `yaml:"preferred"`
+		Groups     []string `yaml:"groups"`
+		Extensions struct {
+			Video    []string `yaml:"video"`
+			Audio    []string `yaml:"audio"`
+			Subtitle []string `yaml:"subtitle"`
+		} `yaml:"extensions"`
+	} `yaml:"downloads"`
 	Filesystems struct {
 		Enabled     bool     `yaml:"enabled"`
 		Directories []string `yaml:"directories"`
 	} `yaml:"filesystems"`
+}
+
+func (c *Config) Extensions() []string {
+	var exts []string
+
+	exts = append(exts, c.Downloads.Extensions.Video...)
+	exts = append(exts, c.Downloads.Extensions.Audio...)
+	exts = append(exts, c.Downloads.Extensions.Subtitle...)
+
+	return exts
 }
 
 type Connection struct {

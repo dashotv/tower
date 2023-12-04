@@ -51,6 +51,9 @@ fields:
   - name: active
     type: bool
     bson: "-"
+  - name: favorite
+    type: bool
+    bson: "-"
   - name: unwatched
     type: int
     bson: "-"

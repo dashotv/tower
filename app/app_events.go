@@ -232,7 +232,6 @@ func (e *Events) Start() error {
 				e.Log.Errorf("error finding download: %s", err)
 				continue
 			}
-			db.processDownloads([]*Download{d})
 			e.Send("tower.downloads", &EventTowerDownload{Event: m.Event, ID: d.ID.Hex(), Download: d})
 		case m := <-e.SeerEpisodes:
 			ep := &Episode{}
@@ -271,6 +270,9 @@ func (e *Events) doSend(topic EventsTopic, data any) error {
 		if !ok {
 			e.Log.Errorf("events.send: wrong data type: %t", data)
 			return errors.New("events.send: wrong data type")
+		}
+		if m.Message == "processing downloads" {
+			cache.Set("seer_downloads", time.Now().Unix())
 		}
 		e.TowerNotices <- m
 	case "tower.logs":
@@ -314,6 +316,7 @@ func (e *Events) doSend(topic EventsTopic, data any) error {
 			e.Log.Errorf("events.send: wrong data type: %t", data)
 			return errors.New("events.send: wrong data type")
 		}
+		db.processDownloads([]*Download{m.Download})
 		e.TowerDownloads <- m
 	case "tower.index.series":
 		m, ok := data.(*Series)

@@ -37,6 +37,7 @@ func (s *Server) Routes() {
 	feeds.PUT("/:id", feedsUpdateHandler)
 
 	jobs := s.Router.Group("/jobs")
+	jobs.POST("/", jobsCreateHandler)
 	jobs.GET("/", jobsIndexHandler)
 
 	messages := s.Router.Group("/messages")
@@ -228,6 +229,12 @@ func feedsUpdateHandler(c *gin.Context) {
 }
 
 // /jobs
+func jobsCreateHandler(c *gin.Context) {
+	job := web.QueryString(c, "job")
+
+	JobsCreate(c, job)
+}
+
 func jobsIndexHandler(c *gin.Context) {
 
 	JobsIndex(c)

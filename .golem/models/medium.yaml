@@ -17,10 +17,10 @@ fields:
     type: string
   - name: description
     type: string
-  - name: slug
-    type: string
-  - name: text
-    type: "[]string"
+  # - name: slug
+  #   type: string
+  # - name: text
+  #   type: "[]string"
   - name: display
     type: string
   - name: directory
@@ -56,7 +56,7 @@ fields:
   - name: background
     type: string
     bson: "-"
-
+  # Series
   - name: series_id
     type: primitive.ObjectID
   - name: season_number
