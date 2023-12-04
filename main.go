@@ -22,14 +22,12 @@ import (
 	"os"
 
 	"github.com/dotenv-org/godotenvvault"
-	_ "github.com/joho/godotenv/autoload"
 
 	"github.com/dashotv/tower/cmd"
 )
 
 func main() {
-	err := godotenvvault.Load()
-	if err != nil {
+	if err := godotenvvault.Load(); err != nil {
 		fmt.Printf("failed to load env: %s\n", err)
 		os.Exit(1)
 	}

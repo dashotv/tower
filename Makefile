@@ -25,7 +25,7 @@ docker:
 	docker build -t tower .
 
 docker-run:
-	docker run -d --rm --name tower -p 9000:9000 tower
+	docker run --rm --name tower-test -p 19000:9000 tower
 
 # this works on linux, for mac you use host.docker.internal
 # DOCKER_HOST := `/sbin/ifconfig docker0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`
