@@ -3,15 +3,15 @@ package app
 import (
 	"context"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 	"time"
 
-	"github.com/dashotv/minion"
-	"github.com/dashotv/tmdb"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/dashotv/minion"
+	"github.com/dashotv/tmdb"
 )
 
 var tmdbClient *tmdb.Client
@@ -19,7 +19,7 @@ var posterRatio float32 = 0.6666666666666666
 var backgroundRatio float32 = 1.7777777777777777
 
 func setupTmdb() error {
-	tmdbClient = tmdb.New(os.Getenv("TMDB_API_TOKEN"))
+	tmdbClient = tmdb.New(cfg.TmdbToken)
 	return nil
 }
 
@@ -91,11 +91,11 @@ type TmdbUpdateMovieImage struct {
 func (j *TmdbUpdateMovieImage) Kind() string { return "TmdbUpdateMovieImage" }
 func (j *TmdbUpdateMovieImage) Work(ctx context.Context, job *minion.Job[*TmdbUpdateMovieImage]) error {
 	input := job.Args
-	remote := cfg.Tmdb.Images + input.Path
+	remote := cfg.TmdbImages + input.Path
 	extension := filepath.Ext(input.Path)[1:]
 	local := fmt.Sprintf("movie-%s/%s", input.ID, input.Type)
-	dest := fmt.Sprintf("%s/%s.%s", cfg.Directories.Images, local, extension)
-	thumb := fmt.Sprintf("%s/%s_thumb.%s", cfg.Directories.Images, local, extension)
+	dest := fmt.Sprintf("%s/%s.%s", cfg.DirectoriesImages, local, extension)
+	thumb := fmt.Sprintf("%s/%s_thumb.%s", cfg.DirectoriesImages, local, extension)
 
 	if err := imageDownload(remote, dest); err != nil {
 		return errors.Wrap(err, "downloading image")

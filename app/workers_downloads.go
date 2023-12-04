@@ -281,9 +281,9 @@ func (j *DownloadsProcess) Move() error {
 			ext = ext[1:]
 		}
 
-		source := fmt.Sprintf("%s/%s", cfg.Directories.Incoming, tf.Name)
+		source := fmt.Sprintf("%s/%s", cfg.DirectoriesIncoming, tf.Name)
 		file := strings.ToLower(fmt.Sprintf("%s/%s/%s %s.%s", kind, dir, dir, d.Medium.Display, ext))
-		destination := fmt.Sprintf("%s/%s", cfg.Directories.Completed, file)
+		destination := fmt.Sprintf("%s/%s", cfg.DirectoriesCompleted, file)
 
 		workers.Log.Debugf("mover: %s", source)
 		workers.Log.Debugf("    -> %s", destination)

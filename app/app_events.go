@@ -106,7 +106,7 @@ type EventTowerJob struct {
 }
 
 func NewEvents() (*Events, error) {
-	m, err := mercury.New("tower", cfg.Nats.URL)
+	m, err := mercury.New("tower", cfg.NatsURL)
 	if err != nil {
 		return nil, err
 	}

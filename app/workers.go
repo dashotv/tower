@@ -33,7 +33,7 @@ func setupWorkers() error {
 
 	mcfg := &minion.Config{
 		Debug:       true,
-		Concurrency: cfg.Minion.Concurrency,
+		Concurrency: cfg.MinionConcurrency,
 		Logger:      log.Named("minion"),
 		Database:    cfg.Connections["minion"].Database,
 		Collection:  cfg.Connections["minion"].Collection,

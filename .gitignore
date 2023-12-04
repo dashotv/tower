@@ -1,3 +1,8 @@
 tower
 gin-bin
 tmp
+
+.env*
+.flaskenv*
+!.env.project
+!.env.vault

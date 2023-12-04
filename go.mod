@@ -4,6 +4,7 @@ go 1.21.3
 
 require (
 	github.com/anthonynsimon/bild v0.13.0
+	github.com/caarlos0/env/v10 v10.0.0
 	github.com/clerkinc/clerk-sdk-go v1.48.3
 	github.com/dashotv/flame v0.8.1
 	github.com/dashotv/golem v0.9.1
@@ -13,18 +14,17 @@ require (
 	github.com/dashotv/scry v0.0.0-20231201022820-74c3e20e68f2
 	github.com/dashotv/tmdb v0.2.0
 	github.com/dashotv/tvdb v0.3.0
+	github.com/dotenv-org/godotenvvault v0.6.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gin-contrib/zap v0.2.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-resty/resty/v2 v2.10.0
 	github.com/joho/godotenv v1.5.1
 	github.com/kamva/mgm/v3 v3.5.0
-	github.com/mitchellh/go-homedir v1.1.0
 	github.com/philippgille/gokv/redis v0.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/samber/lo v1.38.1
 	github.com/spf13/cobra v1.8.0
-	github.com/spf13/viper v1.17.0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/stretchr/testify v1.8.4
 	go.mongodb.org/mongo-driver v1.12.1
@@ -75,7 +75,6 @@ require (
 	github.com/gomarkdown/markdown v0.0.0-20230922112808-5421fefb8386 // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
-	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/invopop/yaml v0.2.0 // indirect
@@ -95,7 +94,6 @@ require (
 	github.com/labstack/gommon v0.4.1 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
-	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mailgun/raymond/v2 v2.0.48 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -103,7 +101,6 @@ require (
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/microcosm-cc/bluemonday v1.0.26 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
-	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
@@ -120,15 +117,9 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/sagikazarmark/locafero v0.3.0 // indirect
-	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/sourcegraph/conc v0.3.0 // indirect
-	github.com/spf13/afero v1.10.0 // indirect
-	github.com/spf13/cast v1.5.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/tdewolff/minify/v2 v2.20.6 // indirect
 	github.com/tdewolff/parse/v2 v2.7.4 // indirect
 	github.com/toorop/gin-logrus v0.0.0-20210225092905-2c785434f26f // indirect

@@ -2,97 +2,75 @@ package app
 
 import (
 	"fmt"
-	"os"
+	"strings"
 
-	"github.com/mitchellh/go-homedir"
+	"github.com/caarlos0/env/v10"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 var cfg *Config
 
 func setupConfig() (err error) {
 	cfg = &Config{}
-
-	home, err := homedir.Dir()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	if err := env.Parse(cfg); err != nil {
+		return errors.Wrap(err, "failed to parse environment variables")
 	}
 
-	viper.AddConfigPath("/etc/tower") // used by docker-compose and deployment
-	viper.AddConfigPath("..")
-	viper.AddConfigPath("../etc")
-	viper.AddConfigPath(home)
-	viper.SetConfigName(".tower")
-
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err != nil {
-		// fmt.Printf("WARN: unable to read config: %s\n", err)
-		return errors.Wrap(err, "unable to read config")
-	}
-
-	if err := viper.Unmarshal(cfg); err != nil {
-		return errors.Wrap(err, "failed to unmarshal configuration file")
-	}
+	// fmt.Println("Connections:")
+	// for k, v := range cfg.Connections {
+	// 	fmt.Printf("  %15s: %+v\n", k, v)
+	// }
 
 	if err := cfg.Validate(); err != nil {
 		fmt.Printf("validation failed: %+v\n", cfg)
 		return errors.Wrap(err, "failed to validate config")
 	}
 
-	fmt.Printf("INFO: reading config from %s\n", viper.ConfigFileUsed())
 	return nil
 }
 
 type Config struct {
-	Mode        string                 `yaml:"mode"`
-	Logger      string                 `yaml:"logger"`
-	Port        int                    `yaml:"port"`
-	Connections map[string]*Connection `yaml:"connections"`
-	Cron        bool                   `yaml:"cron"`
-	Auth        bool                   `yaml:"auth"`
-	Plex        string                 `yaml:"plex"`
-	Nats        struct {
-		URL string `yaml:"url"`
-	} `yaml:"nats"`
-	Minion struct {
-		Concurrency int `yaml:"concurrency"`
-	} `yaml:"minion"`
-	Redis struct {
-		Address string `yaml:"address"`
-	} `yaml:"redis"`
-	Directories struct {
-		Images    string `yaml:"images"`
-		Incoming  string `yaml:"incoming"`
-		Completed string `yaml:"completed"`
-	} `yaml:"directories"`
-	Tmdb struct {
-		Images string `yaml:"images"`
-	} `yaml:"tmdb"`
-	Downloads struct {
-		Preferred  []string `yaml:"preferred"`
-		Groups     []string `yaml:"groups"`
-		Extensions struct {
-			Video    []string `yaml:"video"`
-			Audio    []string `yaml:"audio"`
-			Subtitle []string `yaml:"subtitle"`
-		} `yaml:"extensions"`
-	} `yaml:"downloads"`
-	Filesystems struct {
-		Enabled     bool     `yaml:"enabled"`
-		Directories []string `yaml:"directories"`
-	} `yaml:"filesystems"`
+	Connections          ConnectionSet `env:"CONNECTIONS" envKeyValSeparator:"=" envSeparator:";"`
+	Mode                 string        `env:"MODE" envDefault:"dev"`
+	Logger               string        `env:"LOGGER" envDefault:"dev"`
+	Port                 int           `env:"PORT" envDefault:"9000"`
+	Cron                 bool          `env:"CRON" envDefault:"false"`
+	Auth                 bool          `env:"AUTH" envDefault:"false"`
+	Plex                 string        `env:"PLEX"`
+	PlexToken            string        `env:"PLEX_TOKEN"`
+	PlexAppName          string        `env:"PLEX_APP_NAME"`
+	PlexClientIdentifier string        `env:"PLEX_CLIENT_IDENTIFIER"`
+	PlexDevice           string        `env:"PLEX_DEVICE"`
+	PlexServerURL        string        `env:"PLEX_SERVER_URL"`
+	PlexMetaURL          string        `env:"PLEX_META_URL"`
+	PlexTvURL            string        `env:"PLEX_TV_URL"`
+	NatsURL              string        `env:"NATS_URL"`
+	MinionConcurrency    int           `env:"MINION_CONCURRENCY" envDefault:"1"`
+	MinionURI            string        `env:"MINION_URI"`
+	MinionDatabase       string        `env:"MINION_DATABASE"`
+	MinionCollection     string        `env:"MINION_COLLECTION"`
+	RedisAddress         string        `env:"REDIS_ADDRESS"`
+	DirectoriesImages    string        `env:"DIRECTORIES_IMAGES"`
+	DirectoriesIncoming  string        `env:"DIRECTORIES_INCOMING"`
+	DirectoriesCompleted string        `env:"DIRECTORIES_COMPLETED"`
+	TmdbToken            string        `env:"TMDB_TOKEN"`
+	TmdbImages           string        `env:"TMDB_IMAGES"`
+	TvdbKey              string        `env:"TVDB_KEY"`
+	ScryURL              string        `env:"SCRY_URL"`
+	DownloadsPreferred   []string      `env:"DOWNLOADS_PREFERRED" envSeparator:","`
+	DownloadsGroups      []string      `env:"DOWNLOADS_GROUPS" envSeparator:","`
+	ExtensionsVideo      []string      `env:"EXTENSIONS_VIDEO" envSeparator:","`
+	ExtensionsAudio      []string      `env:"EXTENSIONS_AUDIO" envSeparator:","`
+	ExtensionsSubtitles  []string      `env:"EXTENSIONS_SUBTITLES" envSeparator:","`
+	ClerkSecretKey       string        `env:"CLERK_SECRET_KEY"`
 }
 
 func (c *Config) Extensions() []string {
 	var exts []string
 
-	exts = append(exts, c.Downloads.Extensions.Video...)
-	exts = append(exts, c.Downloads.Extensions.Audio...)
-	exts = append(exts, c.Downloads.Extensions.Subtitle...)
+	exts = append(exts, c.ExtensionsVideo...)
+	exts = append(exts, c.ExtensionsAudio...)
+	exts = append(exts, c.ExtensionsSubtitles...)
 
 	return exts
 }
@@ -103,11 +81,35 @@ type Connection struct {
 	Collection string `yaml:"collection,omitempty"`
 }
 
+func (c *Connection) UnmarshalText(text []byte) error {
+	vals := strings.Split(string(text), ",")
+	c.URI = vals[0]
+	c.Database = vals[1]
+	c.Collection = vals[2]
+	return nil
+}
+
+type ConnectionSet map[string]*Connection
+
+func (c *ConnectionSet) UnmarshalText(text []byte) error {
+	*c = make(map[string]*Connection)
+	for _, conn := range strings.Split(string(text), ";") {
+		kv := strings.Split(conn, "=")
+		vals := strings.Split(kv[1]+",,", ",")
+		(*c)[kv[0]] = &Connection{
+			URI:        vals[0],
+			Database:   vals[1],
+			Collection: vals[2],
+		}
+	}
+	return nil
+}
+
 func (c *Config) Validate() error {
 	if err := c.validateDefaultConnection(); err != nil {
 		return err
 	}
-	if cfg.Tmdb.Images == "" {
+	if cfg.TmdbImages == "" {
 		return errors.New("tmdb.images must be set")
 	}
 	// TODO: add more validations?

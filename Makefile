@@ -32,6 +32,9 @@ docker-run:
 # to allow docker to talk to localhost mongo
 # $ docker run -it my_application --add-host 'DOCKER_HOST:$DOCKER_HOST'
 
+dotenv:
+	npx dotenv-vault local build
+
 check-env:
 ifndef TEST_MONGODB_URL
 	$(error TEST_MONGODB_URL is undefined)

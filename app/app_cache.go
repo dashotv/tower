@@ -8,7 +8,7 @@ import (
 var cache *Cache
 
 func setupCache() (err error) {
-	cache, err = NewCache(log.Named("cache"), redis.Options{Address: cfg.Redis.Address})
+	cache, err = NewCache(log.Named("cache"), redis.Options{Address: cfg.RedisAddress})
 	if err != nil {
 		return err
 	}

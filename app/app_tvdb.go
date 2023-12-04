@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -18,9 +17,9 @@ import (
 var tvdbClient *tvdb.Client
 
 func setupTvdb() error {
-	c, err := tvdb.Login(os.Getenv("TVDB_API_KEY"))
+	c, err := tvdb.Login(cfg.TvdbKey)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "tvdb login")
 	}
 	tvdbClient = c
 	return nil
@@ -148,8 +147,8 @@ func (j *TvdbUpdateSeriesImage) Work(ctx context.Context, job *minion.Job[*TvdbU
 	remote := input.Path // tvdb images are full urls
 	extension := filepath.Ext(input.Path)[1:]
 	local := fmt.Sprintf("series-%s/%s", input.ID, input.Type)
-	dest := fmt.Sprintf("%s/%s.%s", cfg.Directories.Images, local, extension)
-	thumb := fmt.Sprintf("%s/%s_thumb.%s", cfg.Directories.Images, local, extension)
+	dest := fmt.Sprintf("%s/%s.%s", cfg.DirectoriesImages, local, extension)
+	thumb := fmt.Sprintf("%s/%s_thumb.%s", cfg.DirectoriesImages, local, extension)
 
 	if err := imageDownload(remote, dest); err != nil {
 		return errors.Wrap(err, "downloading image")

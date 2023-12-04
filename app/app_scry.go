@@ -74,7 +74,7 @@ func selectRelease(opt *SearchOptions, releases []*search.Release) (*search.Rele
 }
 
 func Preferred(opt *SearchOptions, r *search.Release) bool {
-	for _, g := range cfg.Downloads.Preferred {
+	for _, g := range cfg.DownloadsPreferred {
 		if r.Group == g {
 			return true
 		}
@@ -85,7 +85,7 @@ func Preferred(opt *SearchOptions, r *search.Release) bool {
 
 func Good(opt *SearchOptions, r *search.Release) bool {
 	group := false
-	for _, g := range cfg.Downloads.Groups {
+	for _, g := range cfg.DownloadsGroups {
 		if r.Group == g {
 			group = true
 			break
