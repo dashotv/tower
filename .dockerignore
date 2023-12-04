@@ -2,3 +2,6 @@
 !.env.vault
 /.git
 /tmp
+
+.flaskenv*
+!.env.project
