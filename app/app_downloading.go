@@ -93,7 +93,10 @@ func sendDownloading(c *FlameCombined) {
 			})
 
 			if len(n) > 0 {
-				s := ((n[0].RemainingSizeMB * 1024) / (c.NzbStatus.DownloadRate / 1024)) * 1000
+				s := 0
+				if c.NzbStatus.DownloadRate > 0 {
+					s = ((n[0].RemainingSizeMB * 1024) / (c.NzbStatus.DownloadRate / 1024)) * 1000
+				}
 				g.Queue = float64(n[0].ID)
 				g.Progress = 100.0 - (float64(n[0].RemainingSizeMB)/float64(n[0].FileSizeMB))*100.0
 				if s > 0 {
