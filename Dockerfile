@@ -14,6 +14,7 @@ RUN go install
 FROM alpine
 # Copy our static executable.
 WORKDIR /root/
+RUN apk add --no-cache ffmpeg
 COPY --from=builder /go/bin/tower .
 COPY --from=builder /go/src/app/.env.vault .
 CMD ["./tower", "server"]
