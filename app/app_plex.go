@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	"net/url"
-	"os"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
@@ -18,8 +17,8 @@ var plex *Plex
 var headers = map[string]string{
 	"Plex-Container-Size":      "50",
 	"X-Plex-Container-Start":   "0",
-	"X-Plex-Product":           os.Getenv("PLEX_APP_NAME"),
-	"X-Plex-Client-Identifier": os.Getenv("PLEX_CLIENT_IDENTIFIER"),
+	"X-Plex-Product":           cfg.PlexAppName,
+	"X-Plex-Client-Identifier": cfg.PlexDevice,
 	"strong":                   "true",
 	"Accept":                   applicationJson,
 	"ContentType":              applicationJson,
@@ -29,14 +28,14 @@ func setupPlex() error {
 	// token := os.Getenv("PLEX_TOKEN")
 	plex = &Plex{
 		URL: &PlexURLs{
-			PlexTV:   os.Getenv("PLEX_TV"),
-			Server:   os.Getenv("PLEX_SERVER"),
-			Metadata: os.Getenv("PLEX_META"),
+			PlexTV:   cfg.PlexTvURL,
+			Server:   cfg.PlexServerURL,
+			Metadata: cfg.PlexMetaURL,
 		},
 		Clients:    &PlexClients{},
-		Identifier: os.Getenv("PLEX_CLIENT_IDENTIFIER"),
-		Product:    os.Getenv("PLEX_APP_NAME"),
-		Device:     os.Getenv("PLEX_DEVICE"),
+		Identifier: cfg.PlexClientIdentifier,
+		Product:    cfg.PlexAppName,
+		Device:     cfg.PlexDevice,
 	}
 
 	plex.Clients.PlexTV = resty.New().SetBaseURL(plex.URL.PlexTV)
@@ -47,7 +46,7 @@ func setupPlex() error {
 	data.Set("strong", "true")
 	data.Set("X-Plex-Client-Identifier", plex.Identifier)
 	data.Set("X-Plex-Product", plex.Product)
-	data.Set("X-Plex-Token", "hgmTDYWTG5p6Hnq65sjE")
+	data.Set("X-Plex-Token", cfg.PlexToken)
 	plex.data = data
 
 	return nil

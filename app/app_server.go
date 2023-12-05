@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/clerkinc/clerk-sdk-go/clerk"
@@ -33,12 +32,12 @@ func setupServer() (err error) {
 	server.Routes()
 
 	if cfg.Auth {
-		clerKey := os.Getenv("CLERK_SECRET_KEY")
-		if clerKey == "" {
+		clerkSecret := cfg.ClerkSecretKey
+		if clerkSecret == "" {
 			log.Fatal("CLERK_SECRET_KEY is not set")
 		}
 
-		clerkClient, err := clerk.NewClient(clerKey)
+		clerkClient, err := clerk.NewClient(clerkSecret)
 		if err != nil {
 			log.Fatalf("clerk: %s", err)
 		}
