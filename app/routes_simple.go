@@ -6,8 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func JobsIndex(c *gin.Context) {
-	list, err := db.Minion.Query().Desc("created_at").Run()
+func JobsIndex(c *gin.Context, page, limit int) {
+	if limit == 0 {
+		limit = 25
+	}
+	skip := (page * limit) - limit
+	list, err := db.Minion.Query().Skip(skip).Limit(limit).Desc("created_at").Run()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

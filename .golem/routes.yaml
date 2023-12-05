@@ -101,6 +101,13 @@ groups:
       index:
         name: index
         path: /
+        params:
+          - name: page
+            type: int
+            query: true
+          - name: limit
+            type: int
+            query: true
       create:
         path: /
         method: POST

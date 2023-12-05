@@ -236,8 +236,10 @@ func jobsCreateHandler(c *gin.Context) {
 }
 
 func jobsIndexHandler(c *gin.Context) {
+	page := web.QueryInt(c, "page")
+	limit := web.QueryInt(c, "limit")
 
-	JobsIndex(c)
+	JobsIndex(c, page, limit)
 }
 
 // /messages
