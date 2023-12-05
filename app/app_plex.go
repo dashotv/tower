@@ -14,15 +14,7 @@ const (
 )
 
 var plex *Plex
-var headers = map[string]string{
-	"Plex-Container-Size":      "50",
-	"X-Plex-Container-Start":   "0",
-	"X-Plex-Product":           cfg.PlexAppName,
-	"X-Plex-Client-Identifier": cfg.PlexDevice,
-	"strong":                   "true",
-	"Accept":                   applicationJson,
-	"ContentType":              applicationJson,
-}
+var headers map[string]string
 
 func setupPlex() error {
 	plex = &Plex{
@@ -35,6 +27,16 @@ func setupPlex() error {
 		Identifier: cfg.PlexClientIdentifier,
 		Product:    cfg.PlexAppName,
 		Device:     cfg.PlexDevice,
+	}
+
+	headers = map[string]string{
+		"Plex-Container-Size":      "50",
+		"X-Plex-Container-Start":   "0",
+		"X-Plex-Product":           cfg.PlexAppName,
+		"X-Plex-Client-Identifier": cfg.PlexDevice,
+		"strong":                   "true",
+		"Accept":                   applicationJson,
+		"ContentType":              applicationJson,
 	}
 
 	plex.Clients.PlexTV = resty.New().SetBaseURL(plex.URL.PlexTV)
