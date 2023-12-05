@@ -25,7 +25,6 @@ var headers = map[string]string{
 }
 
 func setupPlex() error {
-	// token := os.Getenv("PLEX_TOKEN")
 	plex = &Plex{
 		URL: &PlexURLs{
 			PlexTV:   cfg.PlexTvURL,
