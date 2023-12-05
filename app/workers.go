@@ -4,9 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/dashotv/minion"
+	"github.com/pkg/errors"
 )
 
 var workers *minion.Minion
@@ -108,6 +107,12 @@ func setupWorkers() error {
 	// if err := minion.Register[*DownloadFileMover](m, &DownloadFileMover{}); err != nil {
 	// 	return errors.Wrap(err, "registering worker: DownloadsProcess")
 	// }
+	if err := minion.Register[*MediaPaths](m, &MediaPaths{}); err != nil {
+		return errors.Wrap(err, "registering worker: DownloadsProcess")
+	}
+	if err := minion.Register[*PathImport](m, &PathImport{}); err != nil {
+		return errors.Wrap(err, "registering worker: DownloadsProcess")
+	}
 
 	if _, err := m.Schedule("0 */5 * * * *", &PopularReleases{}); err != nil {
 		return errors.Wrap(err, "scheduling worker: PopularReleases")

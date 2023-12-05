@@ -61,7 +61,10 @@ func (s *Server) Start() error {
 	s.Log.Info("starting tower...")
 
 	go events.Start()
-	go workers.Start()
+	go func() {
+		s.Log.Infof("starting workers (%d)...", cfg.MinionConcurrency)
+		workers.Start()
+	}()
 
 	s.Log.Info("starting web...")
 	if err := s.Engine.Run(fmt.Sprintf(":%d", cfg.Port)); err != nil {

@@ -273,8 +273,6 @@ type Medium struct { // model
 	SourceId       string             `json:"source_id" bson:"source_id"`
 	Title          string             `json:"title" bson:"title"`
 	Description    string             `json:"description" bson:"description"`
-	Slug           string             `json:"slug" bson:"slug"`
-	Text           []string           `json:"text" bson:"text"`
 	Display        string             `json:"display" bson:"display"`
 	Directory      string             `json:"directory" bson:"directory"`
 	Search         string             `json:"search" bson:"search"`

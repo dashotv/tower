@@ -3,6 +3,7 @@ module github.com/dashotv/tower
 go 1.21.3
 
 require (
+	github.com/AlexEidt/Vidio v1.5.0
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/clerkinc/clerk-sdk-go v1.48.3
@@ -10,7 +11,7 @@ require (
 	github.com/dashotv/golem v0.9.1
 	github.com/dashotv/grimoire v0.3.0
 	github.com/dashotv/mercury v0.3.0
-	github.com/dashotv/minion v0.2.3
+	github.com/dashotv/minion v0.2.6
 	github.com/dashotv/scry v0.0.0-20231201022820-74c3e20e68f2
 	github.com/dashotv/tmdb v0.2.0
 	github.com/dashotv/tvdb v0.3.0
@@ -138,7 +139,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.6.0 // indirect
 	golang.org/x/crypto v0.15.0 // indirect
-	golang.org/x/image v0.0.0-20190802002840-cff245a6509b // indirect
+	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8 // indirect
 	golang.org/x/net v0.18.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
