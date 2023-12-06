@@ -31,8 +31,9 @@ func setupWorkers() error {
 	ctx := context.Background()
 
 	mcfg := &minion.Config{
-		Debug:       true,
+		Debug:       cfg.MinionDebug,
 		Concurrency: cfg.MinionConcurrency,
+		BufferSize:  cfg.MinionBufferSize,
 		Logger:      log.Named("minion"),
 		Database:    cfg.Connections["minion"].Database,
 		Collection:  cfg.Connections["minion"].Collection,

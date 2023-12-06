@@ -11,7 +11,7 @@ require (
 	github.com/dashotv/golem v0.9.1
 	github.com/dashotv/grimoire v0.3.0
 	github.com/dashotv/mercury v0.3.0
-	github.com/dashotv/minion v0.2.6
+	github.com/dashotv/minion v0.2.7
 	github.com/dashotv/scry v0.0.0-20231201022820-74c3e20e68f2
 	github.com/dashotv/tmdb v0.2.0
 	github.com/dashotv/tvdb v0.3.0

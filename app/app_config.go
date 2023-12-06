@@ -45,7 +45,9 @@ type Config struct {
 	PlexMetaURL          string        `env:"PLEX_META_URL"`
 	PlexTvURL            string        `env:"PLEX_TV_URL"`
 	NatsURL              string        `env:"NATS_URL"`
-	MinionConcurrency    int           `env:"MINION_CONCURRENCY" envDefault:"1"`
+	MinionConcurrency    int           `env:"MINION_CONCURRENCY" envDefault:"10"`
+	MinionDebug          bool          `env:"MINION_DEBUG" envDefault:"false"`
+	MinionBufferSize     int           `env:"MINION_BUFFER_SIZE" envDefault:"100"`
 	MinionURI            string        `env:"MINION_URI"`
 	MinionDatabase       string        `env:"MINION_DATABASE"`
 	MinionCollection     string        `env:"MINION_COLLECTION"`
