@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/minion"
+	"github.com/dashotv/tmdb"
 	"github.com/dashotv/tvdb"
 )
 
@@ -89,42 +90,190 @@ func (j *TvdbUpdateSeries) Work(ctx context.Context, job *minion.Job[*TvdbUpdate
 	if err := db.Series.Update(series); err != nil {
 		return errors.Wrap(err, "updating series")
 	}
-
-	TvdbUpdateSeriesImages(series.ID.Hex(), int64(sid))
-	workers.Enqueue(&TvdbUpdateSeriesEpisodes{series.ID.Hex()})
+	if err := workers.Enqueue(&TvdbUpdateSeriesEpisodes{series.ID.Hex()}); err != nil {
+		return errors.Wrap(err, "enqueuing series episodes")
+	}
+	if err := TvdbUpdateSeriesCover(series.ID.Hex(), int64(sid)); err != nil {
+		log.Warnf("failed to update cover: %s", err)
+	}
+	if err := TvdbUpdateSeriesBackground(series.ID.Hex(), int64(sid)); err != nil {
+		log.Warnf("failed to update background: %s", err)
+	}
+	if err := workers.Enqueue(&MediaPaths{id}); err != nil {
+		return errors.Wrap(err, "enqueuing media paths")
+	}
 
 	return nil
 }
 
-func TvdbUpdateSeriesImages(id string, sid int64) error {
-	{
-		r, err := tvdbClient.GetSeriesArtworks(sid, tvdb.String("eng"), tvdb.Int64(int64(2)))
-		if err != nil {
-			return errors.Wrap(err, "getting series artworks")
-		}
-
-		if r.Data == nil || len(r.Data.Artworks) == 0 {
-			return errors.New("no data")
-		}
-
-		cover := r.Data.Artworks[0]
-		workers.Enqueue(&TvdbUpdateSeriesImage{id, "cover", tvdb.StringValue(cover.Image), posterRatio})
+func TvdbUpdateSeriesCover(id string, sid int64) error {
+	if err := TvdbUpdateSeriesCoverTvdb(id, sid); err != nil {
+		log.Warnf("failed to update cover from tvdb: %s", err)
+	} else {
+		return nil
 	}
-	{
-		r, err := tvdbClient.GetSeriesArtworks(sid, tvdb.String("eng"), tvdb.Int64(int64(3)))
-		if err != nil {
-			return errors.Wrap(err, "getting series artworks")
-		}
+	if err := TvdbUpdateSeriesCoverTmdb(id, sid); err != nil {
+		log.Warnf("failed to update cover from tmdb: %s", err)
+	} else {
+		return nil
+	}
+	if err := TvdbUpdateSeriesCoverFanart(id, sid); err != nil {
+		log.Warnf("failed to update cover from fanart: %s", err)
+	} else {
+		return nil
+	}
 
-		if r.Data == nil || len(r.Data.Artworks) == 0 {
-			return errors.New("no data")
-		}
-		if len(r.Data.Artworks) == 0 {
-			return errors.New("no artworks")
-		}
+	return nil
+}
 
-		background := r.Data.Artworks[0]
-		workers.Enqueue(&TvdbUpdateSeriesImage{id, "background", tvdb.StringValue(background.Image), backgroundRatio})
+func TvdbUpdateSeriesCoverTmdb(id string, sid int64) error {
+	find, err := tmdbClient.FindByID(fmt.Sprintf("%d", sid), "tvdb_id", tmdb.String("en-US"))
+	if err != nil {
+		return errors.Wrap(err, "getting series artworks")
+	}
+	if find.TvResults == nil || len(find.TvResults) == 0 {
+		return errors.New("can't find id")
+	}
+
+	res := find.TvResults[0].(map[string]interface{})
+	found := int(res["id"].(float64))
+
+	log.Named("TvdbUpdateSeriesCoverTmdb").Info("found:", found)
+	resp, err := tmdbClient.TvSeriesImages(found, nil, nil)
+	if err != nil {
+		return errors.Wrap(err, "getting series artworks")
+	}
+
+	if resp.Posters == nil || len(resp.Posters) == 0 {
+		return errors.New("no data")
+	}
+
+	url := cfg.TmdbImages + *resp.Posters[0].FilePath
+	if err := workers.Enqueue(&TvdbUpdateSeriesImage{id, "cover", url, posterRatio}); err != nil {
+		return errors.Wrap(err, "enqueuing series episodes")
+	}
+
+	return nil
+}
+
+func TvdbUpdateSeriesCoverFanart(id string, sid int64) error {
+	ftv, err := fanart.GetShowImages(fmt.Sprintf("%d", sid))
+	if err != nil {
+		return errors.Wrap(err, "getting fanart")
+	}
+	if len(ftv.Posters) == 0 {
+		return errors.New("no posters")
+	}
+
+	if err := workers.Enqueue(&TvdbUpdateSeriesImage{id, "cover", ftv.Posters[0].URL, posterRatio}); err != nil {
+		return errors.Wrap(err, "enqueuing series episodes")
+	}
+
+	return nil
+}
+
+func TvdbUpdateSeriesCoverTvdb(id string, sid int64) error {
+	log.Named("TvdbUpdateSeriesCover").Info("updating series images: cover")
+	r, err := tvdbClient.GetSeriesArtworks(sid, tvdb.String("eng"), tvdb.Int64(int64(2)))
+	if err != nil {
+		return errors.Wrap(err, "getting series artworks")
+	}
+
+	if r.Data == nil || len(r.Data.Artworks) == 0 {
+		return errors.New("no data")
+	}
+
+	cover := r.Data.Artworks[0]
+	if err := workers.Enqueue(&TvdbUpdateSeriesImage{id, "cover", tvdb.StringValue(cover.Image), posterRatio}); err != nil {
+		return errors.Wrap(err, "enqueuing series episodes")
+	}
+
+	return nil
+}
+
+func TvdbUpdateSeriesBackground(id string, sid int64) error {
+	if err := TvdbUpdateSeriesBackgroundTvdb(id, sid); err != nil {
+		log.Warnf("failed to update background from tvdb: %s", err)
+	} else {
+		return nil
+	}
+	if err := TvdbUpdateSeriesBackgroundTmdb(id, sid); err != nil {
+		log.Warnf("failed to update background from fanart: %s", err)
+	} else {
+		return nil
+	}
+	if err := TvdbUpdateSeriesBackgroundFanart(id, sid); err != nil {
+		log.Warnf("failed to update background from fanart: %s", err)
+	} else {
+		return nil
+	}
+
+	return nil
+}
+
+func TvdbUpdateSeriesBackgroundTmdb(id string, sid int64) error {
+	find, err := tmdbClient.FindByID(fmt.Sprintf("%d", sid), "tvdb_id", tmdb.String("en-US"))
+	if err != nil {
+		return errors.Wrap(err, "getting series artworks")
+	}
+	if find.TvResults == nil || len(find.TvResults) == 0 {
+		return errors.New("can't find id")
+	}
+
+	res := find.TvResults[0].(map[string]interface{})
+	found := int(res["id"].(float64))
+
+	log.Named("TvdbUpdateSeriesBackground").Info("found:", found)
+	resp, err := tmdbClient.TvSeriesImages(found, nil, nil)
+	if err != nil {
+		return errors.Wrap(err, "getting series artworks")
+	}
+
+	if resp.Backdrops == nil || len(resp.Backdrops) == 0 {
+		return errors.New("no data")
+	}
+
+	url := cfg.TmdbImages + *resp.Backdrops[0].FilePath
+	if err := workers.Enqueue(&TvdbUpdateSeriesImage{id, "background", url, backgroundRatio}); err != nil {
+		return errors.Wrap(err, "enqueuing series episodes")
+	}
+
+	return nil
+}
+
+func TvdbUpdateSeriesBackgroundFanart(id string, sid int64) error {
+	ftv, err := fanart.GetMovieImages(fmt.Sprintf("%d", sid))
+	if err != nil {
+		return errors.Wrap(err, "getting fanart")
+	}
+	if len(ftv.Posters) == 0 {
+		return errors.New("no posters")
+	}
+
+	if err := workers.Enqueue(&TvdbUpdateSeriesImage{id, "background", ftv.Posters[0].URL, backgroundRatio}); err != nil {
+		return errors.Wrap(err, "enqueuing series episodes")
+	}
+
+	return nil
+}
+
+func TvdbUpdateSeriesBackgroundTvdb(id string, sid int64) error {
+	log.Named("TvdbUpdateSeriesBackground").Info("updating series images: background")
+	r, err := tvdbClient.GetSeriesArtworks(sid, tvdb.String("eng"), tvdb.Int64(int64(3)))
+	if err != nil {
+		return errors.Wrap(err, "getting series artworks")
+	}
+
+	if r.Data == nil || len(r.Data.Artworks) == 0 {
+		return errors.New("no data")
+	}
+	if len(r.Data.Artworks) == 0 {
+		return errors.New("no artworks")
+	}
+
+	background := r.Data.Artworks[0]
+	if err := workers.Enqueue(&TvdbUpdateSeriesImage{id, "background", tvdb.StringValue(background.Image), backgroundRatio}); err != nil {
+		return errors.Wrap(err, "enqueuing series episodes")
 	}
 
 	return nil
@@ -198,8 +347,8 @@ type TvdbUpdateSeriesEpisodes struct {
 
 func (j *TvdbUpdateSeriesEpisodes) Kind() string { return "TvdbUpdateSeriesEpisodes" }
 func (j *TvdbUpdateSeriesEpisodes) Work(ctx context.Context, job *minion.Job[*TvdbUpdateSeriesEpisodes]) error {
-	log := log.Named("TvdbUpdateSeriesEpisodes")
-	log.Info("updating series episodes")
+	// log := log.Named("TvdbUpdateSeriesEpisodes")
+	// log.Info("updating series episodes")
 
 	id := job.Args.ID
 
@@ -228,8 +377,8 @@ func (j *TvdbUpdateSeriesEpisodes) Work(ctx context.Context, job *minion.Job[*Tv
 	if err != nil {
 		return errors.Wrap(err, "building episode map")
 	}
-	log.Infof("episode map: %d", len(episodeMap))
-	log.Infof("episodes: %d", len(resp.Data.Episodes))
+	// log.Infof("episode map: %d", len(episodeMap))
+	// log.Infof("episodes: %d", len(resp.Data.Episodes))
 
 	for _, e := range resp.Data.Episodes {
 		episode := episodeMap[tvdb.Int64Value(e.SeasonNumber)][tvdb.Int64Value(e.Number)]
@@ -237,7 +386,7 @@ func (j *TvdbUpdateSeriesEpisodes) Work(ctx context.Context, job *minion.Job[*Tv
 			episode = &Episode{}
 		}
 
-		log.Infof("creating/updating episode %d/%d %s", tvdb.Int64Value(e.SeasonNumber), tvdb.Int64Value(e.Number), tvdb.StringValue(e.Aired))
+		// log.Infof("creating/updating episode %d/%d %s", tvdb.Int64Value(e.SeasonNumber), tvdb.Int64Value(e.Number), tvdb.StringValue(e.Aired))
 		episode.Type = "Episode"
 		episode.SeriesId = series.ID
 		episode.SourceId = fmt.Sprintf("%d", tvdb.Int64Value(e.ID))

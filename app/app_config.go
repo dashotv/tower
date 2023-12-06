@@ -55,6 +55,8 @@ type Config struct {
 	DirectoriesImages    string        `env:"DIRECTORIES_IMAGES"`
 	DirectoriesIncoming  string        `env:"DIRECTORIES_INCOMING"`
 	DirectoriesCompleted string        `env:"DIRECTORIES_COMPLETED"`
+	FanartApiKey         string        `env:"FANART_API_KEY"`
+	FanartApiURL         string        `env:"FANART_API_URL"`
 	TmdbToken            string        `env:"TMDB_TOKEN"`
 	TmdbImages           string        `env:"TMDB_IMAGES"`
 	TvdbKey              string        `env:"TVDB_KEY"`

@@ -20,8 +20,12 @@ func Start() error {
 		setupScry,
 		setupFlame,
 		setupNotifier,
+		setupFanart,
 	)
 	if err != nil {
+		if log != nil {
+			log.Errorf("setup failed: %s", err)
+		}
 		return err
 	}
 
