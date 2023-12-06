@@ -121,6 +121,8 @@ func (c *Connector) processDownloads(list []*Download) {
 			m.Title = s.Title
 			m.Kind = s.Kind
 
+			m.Source = s.Source
+			m.SourceId = s.SourceId
 			m.SearchParams = s.SearchParams
 			m.Directory = s.Directory
 			m.Active = s.Active
