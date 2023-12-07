@@ -271,6 +271,7 @@ type Medium struct { // model
 	Kind           primitive.Symbol   `json:"kind" bson:"kind"`
 	Source         string             `json:"source" bson:"source"`
 	SourceId       string             `json:"source_id" bson:"source_id"`
+	ImdbId         string             `json:"imdb_id" bson:"imdb_id"`
 	Title          string             `json:"title" bson:"title"`
 	Description    string             `json:"description" bson:"description"`
 	Display        string             `json:"display" bson:"display"`

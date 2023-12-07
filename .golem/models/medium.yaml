@@ -13,6 +13,8 @@ fields:
     type: string
   - name: source_id
     type: string
+  - name: imdb_id
+    type: string
   - name: title
     type: string
   - name: description
