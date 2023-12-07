@@ -4,26 +4,31 @@ import (
 	"context"
 	"time"
 
-	"github.com/dashotv/minion"
 	"github.com/pkg/errors"
+
+	"github.com/dashotv/minion"
 )
 
 var workers *minion.Minion
 var workersList = map[string]minion.Payload{
-	"CleanupLogs":              &CleanupLogs{},
-	"CleanupJobs":              &CleanupJobs{},
-	"PopularReleases":          &PopularReleases{},
-	"CleanPlexPins":            &CleanPlexPins{},
-	"PlexPinToUsers":           &PlexPinToUsers{},
-	"PlexUserUpdates":          &PlexUserUpdates{},
-	"PlexWatchlistUpdates":     &PlexWatchlistUpdates{},
-	"CreateMediaFromRequests":  &CreateMediaFromRequests{},
-	"TmdbUpdateMovie":          &TmdbUpdateMovie{},
-	"TmdbUpdateMovieImage":     &TmdbUpdateMovieImage{},
+	"CleanupLogs":             &CleanupLogs{},
+	"CleanupJobs":             &CleanupJobs{},
+	"PopularReleases":         &PopularReleases{},
+	"CleanPlexPins":           &CleanPlexPins{},
+	"PlexPinToUsers":          &PlexPinToUsers{},
+	"PlexUserUpdates":         &PlexUserUpdates{},
+	"PlexWatchlistUpdates":    &PlexWatchlistUpdates{},
+	"CreateMediaFromRequests": &CreateMediaFromRequests{},
+
+	"TmdbUpdateMovie":      &TmdbUpdateMovie{},
+	"TmdbUpdateMovieImage": &TmdbUpdateMovieImage{},
+	"TmdbUpdateAll":        &TmdbUpdateAll{},
+
 	"TvdbUpdateSeries":         &TvdbUpdateSeries{},
 	"TvdbUpdateSeriesImage":    &TvdbUpdateSeriesImage{},
 	"TvdbUpdateSeriesEpisodes": &TvdbUpdateSeriesEpisodes{},
-	"DownloadsProcess":         &DownloadsProcess{},
+
+	"DownloadsProcess": &DownloadsProcess{},
 	// "DownloadsFileMove":        &DownloadFileMover{},
 }
 
@@ -114,6 +119,9 @@ func setupWorkers() error {
 	if err := minion.Register[*PathImport](m, &PathImport{}); err != nil {
 		return errors.Wrap(err, "registering worker: DownloadsProcess")
 	}
+	// if err := minion.Register[*TmdbUpdateAll](m, &TmdbUpdateAll{}); err != nil {
+	// 	return errors.Wrap(err, "registering worker: DownloadsProcess")
+	// }
 
 	if _, err := m.Schedule("0 */5 * * * *", &PopularReleases{}); err != nil {
 		return errors.Wrap(err, "scheduling worker: PopularReleases")

@@ -3,9 +3,10 @@ package app
 import (
 	"context"
 
-	"github.com/dashotv/minion"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
+
+	"github.com/dashotv/minion"
 )
 
 // CreateMediaFromRequests creates media from approved requests
@@ -104,7 +105,7 @@ func createMovieFromRequest(r *Request) error {
 		return errors.Wrap(err, "saving movie")
 	}
 
-	if err := workers.Enqueue(&TmdbUpdateMovie{m.ID.Hex()}); err != nil {
+	if err := workers.Enqueue(&TmdbUpdateMovie{m.ID.Hex(), true}); err != nil {
 		return errors.Wrap(err, "queueing update job")
 	}
 	return nil

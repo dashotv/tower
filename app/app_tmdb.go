@@ -23,9 +23,29 @@ func setupTmdb() error {
 	return nil
 }
 
+type TmdbUpdateAll struct{}
+
+func (j *TmdbUpdateAll) Kind() string { return "TmdbUpdateAll" }
+func (j *TmdbUpdateAll) Work(ctx context.Context, job *minion.Job[*TmdbUpdateAll]) error {
+	log := log.Named("job.TmdbUpdateAll")
+
+	movies, err := db.Movie.Query().Limit(-1).Run()
+	if err != nil {
+		return errors.Wrap(err, "querying movies")
+	}
+
+	for _, m := range movies {
+		log.Infof("updating movie: %s", m.Title)
+		workers.Enqueue(&TmdbUpdateMovie{m.ID.Hex(), false})
+	}
+
+	return nil
+}
+
 // TmdbUpdateMovie
 type TmdbUpdateMovie struct {
-	ID string
+	ID     string
+	Images bool
 }
 
 func (j *TmdbUpdateMovie) Kind() string { return "TmdbUpdateMovie" }
