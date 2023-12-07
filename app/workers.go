@@ -45,6 +45,10 @@ func setupWorkers() error {
 	}
 
 	m.Subscribe(func(n *minion.Notification) {
+		if n.JobID == "-" {
+			return
+		}
+
 		j := &Minion{}
 		err := db.Minion.Find(n.JobID, j)
 		if err != nil {
