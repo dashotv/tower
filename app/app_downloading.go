@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/samber/lo"
+
 	flame "github.com/dashotv/flame/app"
 	"github.com/dashotv/flame/nzbget"
 	"github.com/dashotv/flame/qbt"
-	"github.com/samber/lo"
 )
 
 type FlameCombined struct {
@@ -75,8 +76,12 @@ func sendDownloading(c *FlameCombined) {
 				}
 
 				if d.Multi && len(d.Files) > 0 && len(t[0].Files) > 0 {
-					completed := lo.Filter(t[0].Files, func(file *qbt.TorrentFile, _ int) bool {
-						return file.Progress == 100
+					// completed := lo.Filter(t[0].Files, func(file *qbt.TorrentFile, _ int) bool {
+					// 	return file.Progress == 100
+					// })
+					completed := lo.Filter(d.Files, func(file *DownloadFile, _ int) bool {
+						tf := t[0].Files[file.Num]
+						return !file.MediumId.IsZero() && tf.Progress == 100
 					})
 					g.Files.Completed = len(completed)
 
@@ -116,5 +121,8 @@ func sendDownloading(c *FlameCombined) {
 		Metrics:   c.Metrics,
 	}
 
+	// for _, d := range downloads {
+	// 	log.Debugf("downloading: %6.2f %d/%d", d.Progress, d.Files.Completed, d.Files.Selected)
+	// }
 	events.Send("tower.downloading", event)
 }

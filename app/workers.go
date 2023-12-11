@@ -4,9 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/dashotv/minion"
+	"github.com/pkg/errors"
 )
 
 var workers *minion.Minion
