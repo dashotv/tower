@@ -31,7 +31,6 @@ func (c *Connector) Watches(mediumId, username string) ([]*Watch, error) {
 
 		if m.Type == "Series" {
 			episodes, err := db.Episode.Query().
-				Where("_type", "Episode").
 				Where("series_id", m.ID).
 				Desc("episode_number").Desc("series_number").
 				Limit(-1).Run()

@@ -35,7 +35,7 @@ func (j *MediaPaths) Work(ctx context.Context, job *minion.Job[*MediaPaths]) err
 	}
 
 	if m.Type == "Series" {
-		eps, err := db.Episode.Query().Where("_type", "Episode").
+		eps, err := db.Episode.Query().
 			Where("series_id", m.ID).
 			Desc("season_number").Desc("episode_number").Desc("absolute_number").
 			Limit(-1).

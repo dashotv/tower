@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
 
@@ -50,6 +51,7 @@ func NewConnector() (*Connector, error) {
 	if err != nil {
 		return nil, err
 	}
+	episode.SetQueryDefaults([]bson.M{{"_type": "Episode"}})
 
 	s, err = settingsFor("feed")
 	if err != nil {
@@ -95,6 +97,7 @@ func NewConnector() (*Connector, error) {
 	if err != nil {
 		return nil, err
 	}
+	movie.SetQueryDefaults([]bson.M{{"_type": "Movie"}})
 
 	s, err = settingsFor("pin")
 	if err != nil {
@@ -131,6 +134,7 @@ func NewConnector() (*Connector, error) {
 	if err != nil {
 		return nil, err
 	}
+	series.SetQueryDefaults([]bson.M{{"_type": "Series"}})
 
 	s, err = settingsFor("user")
 	if err != nil {

@@ -5,10 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dashotv/golem/web"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/dashotv/golem/web"
 )
 
 const pagesize = 42
@@ -28,7 +29,6 @@ func SeriesIndex(c *gin.Context) {
 
 	q := db.Series.Query()
 	results, err := q.
-		Where("_type", "Series").
 		Limit(pagesize).
 		Skip((page - 1) * pagesize).
 		Desc("created_at").Run()

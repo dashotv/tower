@@ -420,7 +420,7 @@ func buildEpisodeMap(id string) (map[int64]map[int64]*Episode, error) {
 		return nil, errors.Wrap(err, "converting id")
 	}
 
-	episodes, err := db.Episode.Query().Where("_type", "Episode").Where("series_id", oid).Limit(-1).Run()
+	episodes, err := db.Episode.Query().Where("series_id", oid).Limit(-1).Run()
 	if err != nil {
 		return nil, errors.Wrap(err, "querying episodes")
 	}

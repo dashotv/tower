@@ -13,7 +13,6 @@ import (
 
 func (c *Connector) SeriesActive() ([]*Series, error) {
 	return c.Series.Query().
-		Where("_type", "Series").
 		Where("active", true).
 		Limit(1000).
 		Run()
@@ -21,7 +20,6 @@ func (c *Connector) SeriesActive() ([]*Series, error) {
 
 func (c *Connector) SeriesAll() ([]*Series, error) {
 	return c.Series.Query().
-		Where("_type", "Series").
 		Limit(5000).
 		Run()
 }
@@ -128,7 +126,6 @@ func (c *Connector) SeriesSeasonEpisodes(id string, season string) ([]*Episode, 
 
 	q := c.Episode.Query()
 	eps, err := q.
-		Where("_type", "Episode").
 		Where("series_id", oid).
 		Where("season_number", s).
 		Asc("episode_number").
@@ -153,7 +150,6 @@ func (c *Connector) SeriesSeasonEpisodesAll(id string) ([]*Episode, error) {
 
 	q := c.Episode.Query()
 	eps, err := q.
-		Where("_type", "Episode").
 		Where("series_id", oid).
 		Asc("season_number").
 		Asc("episode_number").
@@ -212,7 +208,6 @@ func (c *Connector) SeriesCurrentSeason(id string) (int, error) {
 	}
 
 	eps, err := c.Episode.Query().
-		Where("_type", "Episode").
 		Where("series_id", oid).
 		GreaterThan("season_number", 0).
 		Asc("season_number").Asc("episode_number").Asc("absolute_number").
@@ -250,7 +245,7 @@ func (c *Connector) SeriesPaths(id string) ([]*Path, error) {
 	var out []*Path
 	out = append(out, s.Paths...)
 
-	eps, err := db.Episode.Query().Where("_type", "Episode").
+	eps, err := db.Episode.Query().
 		Where("series_id", oid).
 		Desc("season_number").Desc("episode_number").Desc("absolute_number").
 		Limit(5000).
@@ -280,7 +275,7 @@ func (c *Connector) SeriesWatches(id string) ([]*Watch, error) {
 		return nil, err
 	}
 
-	eps, err := db.Episode.Query().Where("_type", "Episode").
+	eps, err := db.Episode.Query().
 		Where("series_id", oid).
 		Desc("season_number").Desc("episode_number").Desc("absolute_number").
 		Limit(5000).

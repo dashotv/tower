@@ -27,7 +27,6 @@ func MoviesIndex(c *gin.Context) {
 
 	q := db.Movie.Query()
 	results, err := q.
-		Where("_type", "Movie").
 		Limit(pagesize).
 		Skip((page - 1) * pagesize).
 		Desc("created_at").Run()
