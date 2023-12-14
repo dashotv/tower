@@ -4,8 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/dashotv/minion"
 	"github.com/pkg/errors"
+
+	"github.com/dashotv/minion"
 )
 
 var workers *minion.Minion
@@ -28,6 +29,7 @@ var workersList = map[string]minion.Payload{
 	"TvdbUpdateSeriesEpisodes": &TvdbUpdateSeriesEpisodes{},
 
 	"DownloadsProcess": &DownloadsProcess{},
+	"UpdateIndexes":    &UpdateIndexes{},
 	// "DownloadsFileMove":        &DownloadFileMover{},
 }
 
@@ -117,6 +119,9 @@ func setupWorkers() error {
 	}
 	if err := minion.Register[*PathImport](m, &PathImport{}); err != nil {
 		return errors.Wrap(err, "registering worker: DownloadsProcess")
+	}
+	if err := minion.Register[*UpdateIndexes](m, &UpdateIndexes{}); err != nil {
+		return errors.Wrap(err, "registering worker: UpdateIndexes")
 	}
 	// if err := minion.Register[*TmdbUpdateAll](m, &TmdbUpdateAll{}); err != nil {
 	// 	return errors.Wrap(err, "registering worker: DownloadsProcess")

@@ -1,5 +1,9 @@
 package app
 
+func (c *Connector) MoviesAll() ([]*Movie, error) {
+	return c.Movie.Query().Run()
+}
+
 func (c *Connector) MovieSetting(id, setting string, value bool) error {
 	m := &Movie{}
 	err := c.Movie.Find(id, m)

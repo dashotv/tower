@@ -28,7 +28,10 @@ func setupTvdb() error {
 
 // TvdbUpdateSeries
 type TvdbUpdateSeries struct {
-	ID string
+	ID       string
+	Images   bool
+	Paths    bool
+	Episodes bool
 }
 
 func (j *TvdbUpdateSeries) Kind() string { return "TvdbUpdateSeries" }
@@ -90,17 +93,23 @@ func (j *TvdbUpdateSeries) Work(ctx context.Context, job *minion.Job[*TvdbUpdate
 	if err := db.Series.Update(series); err != nil {
 		return errors.Wrap(err, "updating series")
 	}
-	if err := workers.Enqueue(&TvdbUpdateSeriesEpisodes{series.ID.Hex()}); err != nil {
-		return errors.Wrap(err, "enqueuing series episodes")
+	if j.Images {
+		if err := TvdbUpdateSeriesCover(series.ID.Hex(), int64(sid)); err != nil {
+			log.Warnf("failed to update cover: %s", err)
+		}
+		if err := TvdbUpdateSeriesBackground(series.ID.Hex(), int64(sid)); err != nil {
+			log.Warnf("failed to update background: %s", err)
+		}
 	}
-	if err := TvdbUpdateSeriesCover(series.ID.Hex(), int64(sid)); err != nil {
-		log.Warnf("failed to update cover: %s", err)
+	if j.Episodes {
+		if err := workers.Enqueue(&TvdbUpdateSeriesEpisodes{series.ID.Hex()}); err != nil {
+			return errors.Wrap(err, "enqueuing series episodes")
+		}
 	}
-	if err := TvdbUpdateSeriesBackground(series.ID.Hex(), int64(sid)); err != nil {
-		log.Warnf("failed to update background: %s", err)
-	}
-	if err := workers.Enqueue(&MediaPaths{id}); err != nil {
-		return errors.Wrap(err, "enqueuing media paths")
+	if j.Paths {
+		if err := workers.Enqueue(&MediaPaths{id}); err != nil {
+			return errors.Wrap(err, "enqueuing media paths")
+		}
 	}
 
 	return nil
