@@ -1,7 +1,7 @@
 package app
 
 func (c *Connector) MoviesAll() ([]*Movie, error) {
-	return c.Movie.Query().Run()
+	return c.Movie.Query().Limit(-1).Run()
 }
 
 func (c *Connector) MovieSetting(id, setting string, value bool) error {

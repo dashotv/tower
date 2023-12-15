@@ -28,6 +28,7 @@ func (j *UpdateIndexes) Work(ctx context.Context, job *minion.Job[*UpdateIndexes
 	if err != nil {
 		return errors.Wrap(err, "getting movies")
 	}
+	log.Infof("updating %d movies", len(movies))
 	for _, m := range movies {
 		<-time.After(1 * time.Second)
 		if err := workers.Enqueue(&TmdbUpdateMovie{m.ID.Hex(), false}); err != nil {

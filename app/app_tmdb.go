@@ -85,11 +85,13 @@ func (j *TmdbUpdateMovie) Work(ctx context.Context, job *minion.Job[*TmdbUpdateM
 		return errors.Wrap(err, "parsing release date")
 	}
 	movie.ReleaseDate = d
-	if resp.PosterPath != nil {
-		workers.Enqueue(&TmdbUpdateMovieImage{movie.ID.Hex(), "cover", tmdb.StringValue(resp.PosterPath), posterRatio})
-	}
-	if resp.BackdropPath != nil {
-		workers.Enqueue(&TmdbUpdateMovieImage{movie.ID.Hex(), "background", tmdb.StringValue(resp.BackdropPath), backgroundRatio})
+	if j.Images {
+		if resp.PosterPath != nil {
+			workers.Enqueue(&TmdbUpdateMovieImage{movie.ID.Hex(), "cover", tmdb.StringValue(resp.PosterPath), posterRatio})
+		}
+		if resp.BackdropPath != nil {
+			workers.Enqueue(&TmdbUpdateMovieImage{movie.ID.Hex(), "background", tmdb.StringValue(resp.BackdropPath), backgroundRatio})
+		}
 	}
 
 	err = db.Movie.Update(movie)

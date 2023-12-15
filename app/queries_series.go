@@ -20,7 +20,7 @@ func (c *Connector) SeriesActive() ([]*Series, error) {
 
 func (c *Connector) SeriesAll() ([]*Series, error) {
 	return c.Series.Query().
-		Limit(5000).
+		Limit(-1).
 		Run()
 }
 
