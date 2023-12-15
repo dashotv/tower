@@ -51,6 +51,7 @@ type TmdbUpdateMovie struct {
 func (j *TmdbUpdateMovie) Kind() string { return "TmdbUpdateMovie" }
 func (j *TmdbUpdateMovie) Work(ctx context.Context, job *minion.Job[*TmdbUpdateMovie]) error {
 	id := job.Args.ID
+	images := job.Args.Images
 
 	movie := &Movie{}
 	err := db.Movie.Find(id, movie)
@@ -85,7 +86,7 @@ func (j *TmdbUpdateMovie) Work(ctx context.Context, job *minion.Job[*TmdbUpdateM
 		return errors.Wrap(err, "parsing release date")
 	}
 	movie.ReleaseDate = d
-	if j.Images {
+	if images {
 		if resp.PosterPath != nil {
 			workers.Enqueue(&TmdbUpdateMovieImage{movie.ID.Hex(), "cover", tmdb.StringValue(resp.PosterPath), posterRatio})
 		}

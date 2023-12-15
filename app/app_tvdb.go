@@ -37,6 +37,9 @@ type TvdbUpdateSeries struct {
 func (j *TvdbUpdateSeries) Kind() string { return "TvdbUpdateSeries" }
 func (j *TvdbUpdateSeries) Work(ctx context.Context, job *minion.Job[*TvdbUpdateSeries]) error {
 	id := job.Args.ID
+	images := job.Args.Images
+	paths := job.Args.Paths
+	episodes := job.Args.Episodes
 
 	series := &Series{}
 	err := db.Series.Find(id, series)
@@ -93,7 +96,7 @@ func (j *TvdbUpdateSeries) Work(ctx context.Context, job *minion.Job[*TvdbUpdate
 	if err := db.Series.Update(series); err != nil {
 		return errors.Wrap(err, "updating series")
 	}
-	if j.Images {
+	if images {
 		if err := TvdbUpdateSeriesCover(series.ID.Hex(), int64(sid)); err != nil {
 			log.Warnf("failed to update cover: %s", err)
 		}
@@ -101,12 +104,12 @@ func (j *TvdbUpdateSeries) Work(ctx context.Context, job *minion.Job[*TvdbUpdate
 			log.Warnf("failed to update background: %s", err)
 		}
 	}
-	if j.Episodes {
+	if episodes {
 		if err := workers.Enqueue(&TvdbUpdateSeriesEpisodes{series.ID.Hex()}); err != nil {
 			return errors.Wrap(err, "enqueuing series episodes")
 		}
 	}
-	if j.Paths {
+	if paths {
 		if err := workers.Enqueue(&MediaPaths{id}); err != nil {
 			return errors.Wrap(err, "enqueuing media paths")
 		}
