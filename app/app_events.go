@@ -30,8 +30,6 @@ type Events struct {
 	TowerMovies        chan *EventTowerMovie
 	TowerEvents        chan *EventTowerRequest
 	TowerDownloads     chan *EventTowerDownload
-	TowerIndexSeries   chan *Series
-	TowerIndexMovies   chan *Movie
 	TowerIndexReleases chan *Release
 	TowerDownloading   chan *EventTowerDownloading
 	TowerJobs          chan *EventTowerJob
@@ -126,8 +124,6 @@ func NewEvents() (*Events, error) {
 		TowerMovies:        make(chan *EventTowerMovie),
 		TowerEvents:        make(chan *EventTowerRequest),
 		TowerDownloads:     make(chan *EventTowerDownload),
-		TowerIndexSeries:   make(chan *Series),
-		TowerIndexMovies:   make(chan *Movie),
 		TowerIndexReleases: make(chan *Release),
 		TowerDownloading:   make(chan *EventTowerDownloading),
 		TowerJobs:          make(chan *EventTowerJob),
@@ -167,12 +163,6 @@ func NewEvents() (*Events, error) {
 		return nil, err
 	}
 	if err := e.Merc.Sender("tower.downloads", e.TowerDownloads); err != nil {
-		return nil, err
-	}
-	if err := e.Merc.Sender("tower.index.series", e.TowerIndexSeries); err != nil {
-		return nil, err
-	}
-	if err := e.Merc.Sender("tower.index.movies", e.TowerIndexMovies); err != nil {
 		return nil, err
 	}
 	if err := e.Merc.Sender("tower.index.releases", e.TowerIndexReleases); err != nil {
@@ -318,20 +308,6 @@ func (e *Events) doSend(topic EventsTopic, data any) error {
 		}
 		db.processDownloads([]*Download{m.Download})
 		e.TowerDownloads <- m
-	case "tower.index.series":
-		m, ok := data.(*Series)
-		if !ok {
-			e.Log.Errorf("events.send: wrong data type: %t", data)
-			return errors.New("events.send: wrong data type")
-		}
-		e.TowerIndexSeries <- m
-	case "tower.index.movies":
-		m, ok := data.(*Movie)
-		if !ok {
-			e.Log.Errorf("events.send: wrong data type: %t", data)
-			return errors.New("events.send: wrong data type")
-		}
-		e.TowerIndexMovies <- m
 	case "tower.index.releases":
 		m, ok := data.(*Release)
 		if !ok {
