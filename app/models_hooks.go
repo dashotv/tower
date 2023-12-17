@@ -57,15 +57,9 @@ func (e *Episode) Saving() error {
 }
 
 func (m *Movie) Created(ctx context.Context) error {
-	if err := events.Send("tower.index.movies", m); err != nil {
-		return errors.Wrap(err, "sending elastic search index")
-	}
 	return events.Send("tower.movies", &EventTowerMovie{"created", m.ID.Hex(), m})
 }
 func (m *Movie) Updated(ctx context.Context, result *mongo.UpdateResult) error {
-	if err := events.Send("tower.index.movies", m); err != nil {
-		return errors.Wrap(err, "sending elastic search index")
-	}
 	return events.Send("tower.movies", &EventTowerMovie{"updated", m.ID.Hex(), m})
 }
 func (m *Movie) Saving() error {

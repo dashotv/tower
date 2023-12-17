@@ -58,6 +58,7 @@ func (j *TmdbUpdateMovie) Work(ctx context.Context, job *minion.Job[*TmdbUpdateM
 	if err != nil {
 		return errors.Wrap(err, "finding movie")
 	}
+	db.processMovies([]*Movie{movie})
 
 	mid, err := strconv.Atoi(movie.SourceId)
 	if err != nil {
@@ -134,6 +135,7 @@ func (j *TmdbUpdateMovieImage) Work(ctx context.Context, job *minion.Job[*TmdbUp
 	if err := db.Movie.Find(input.ID, movie); err != nil {
 		return errors.Wrap(err, "finding movie")
 	}
+	db.processMovies([]*Movie{movie})
 
 	var img *Path
 	for _, p := range movie.Paths {

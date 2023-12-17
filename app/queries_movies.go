@@ -1,7 +1,25 @@
 package app
 
+import "fmt"
+
 func (c *Connector) MoviesAll() ([]*Movie, error) {
 	return c.Movie.Query().Limit(-1).Run()
+}
+
+func (c *Connector) processMovies(list []*Movie) error {
+	for _, m := range list {
+		for _, p := range m.Paths {
+			if p.Type == "cover" {
+				m.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+				continue
+			}
+			if p.Type == "background" {
+				m.Background = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+				continue
+			}
+		}
+	}
+	return nil
 }
 
 func (c *Connector) MovieSetting(id, setting string, value bool) error {
