@@ -114,7 +114,12 @@ func (c *Connector) processDownloads(list []*Download) {
 			m.Unwatched = unwatched
 
 			if s.Kind == "anime" {
-				m.Display = fmt.Sprintf("#%d %s", m.AbsoluteNumber, m.Title)
+				d := fmt.Sprintf("e%d", m.AbsoluteNumber)
+				if m.Title != "" {
+					d = fmt.Sprintf("%s %s", d, m.Title)
+				}
+				m.Display = d
+
 			} else {
 				m.Display = fmt.Sprintf("%02dx%02d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)
 			}
