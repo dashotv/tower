@@ -289,7 +289,7 @@ func (j *DownloadsProcess) Move() error {
 		workers.Log.Debugf("    -> %s", destination)
 
 		if !exists(source) {
-			return errors.New("source does not exist")
+			return errors.Errorf("source does not exist: %s", source)
 		}
 		if exists(destination) {
 			if !d.Force {
