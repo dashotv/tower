@@ -93,7 +93,7 @@ func (a *Application) SeriesCreate(c *gin.Context) {
 		return
 	}
 
-	if err := app.Workers.Enqueue(&TvdbUpdateSeries{ID: s.ID.Hex(), Images: true, Paths: true, Episodes: true}); err != nil {
+	if err := app.Workers.Enqueue(&TvdbUpdateSeries{ID: s.ID.Hex()}); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -251,7 +251,7 @@ func (a *Application) SeriesWatches(c *gin.Context, id string) {
 }
 
 func (a *Application) SeriesRefresh(c *gin.Context, id string) {
-	if err := app.Workers.Enqueue(&TvdbUpdateSeries{ID: id, Images: true, Paths: true, Episodes: true}); err != nil {
+	if err := app.Workers.Enqueue(&TvdbUpdateSeries{ID: id}); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

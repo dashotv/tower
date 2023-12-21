@@ -14,10 +14,8 @@ import (
 // TvdbUpdateSeries
 type TvdbUpdateSeries struct {
 	minion.WorkerDefaults[*TvdbUpdateSeries]
-	ID       string
-	Images   bool
-	Paths    bool
-	Episodes bool
+	ID        string
+	JustMedia bool
 }
 
 func (j *TvdbUpdateSeries) Kind() string { return "TvdbUpdateSeries" }
@@ -79,20 +77,16 @@ func (j *TvdbUpdateSeries) Work(ctx context.Context, job *minion.Job[*TvdbUpdate
 	if err := app.DB.Series.Update(series); err != nil {
 		return errors.Wrap(err, "updating series")
 	}
-	if job.Args.Images {
+	if job.Args.JustMedia {
 		if err := TvdbUpdateSeriesCover(series.ID.Hex(), int64(sid)); err != nil {
 			app.Log.Warnf("failed to update cover: %s", err)
 		}
 		if err := TvdbUpdateSeriesBackground(series.ID.Hex(), int64(sid)); err != nil {
 			app.Log.Warnf("failed to update background: %s", err)
 		}
-	}
-	if job.Args.Episodes {
 		if err := app.Workers.Enqueue(&TvdbUpdateSeriesEpisodes{ID: series.ID.Hex()}); err != nil {
 			return errors.Wrap(err, "enqueuing series episodes")
 		}
-	}
-	if job.Args.Paths {
 		if err := app.Workers.Enqueue(&MediaPaths{ID: id}); err != nil {
 			return errors.Wrap(err, "enqueuing media paths")
 		}

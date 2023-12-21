@@ -77,7 +77,7 @@ func createShowFromRequest(r *Request) error {
 		return errors.Wrap(err, "saving show")
 	}
 
-	if err := app.Workers.Enqueue(&TvdbUpdateSeries{ID: s.ID.Hex(), Images: true, Paths: true, Episodes: true}); err != nil {
+	if err := app.Workers.Enqueue(&TvdbUpdateSeries{ID: s.ID.Hex()}); err != nil {
 		return errors.Wrap(err, "queueing update job")
 	}
 	return nil
@@ -105,7 +105,7 @@ func createMovieFromRequest(r *Request) error {
 		return errors.Wrap(err, "saving movie")
 	}
 
-	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: m.ID.Hex(), Images: true}); err != nil {
+	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: m.ID.Hex()}); err != nil {
 		return errors.Wrap(err, "queueing update job")
 	}
 	return nil

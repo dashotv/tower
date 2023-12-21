@@ -14,8 +14,8 @@ import (
 // TmdbUpdateMovie
 type TmdbUpdateMovie struct {
 	minion.WorkerDefaults[*TmdbUpdateMovie]
-	ID     string
-	Images bool
+	ID        string
+	JustMedia bool
 }
 
 func (j *TmdbUpdateMovie) Kind() string { return "TmdbUpdateMovie" }
@@ -56,12 +56,16 @@ func (j *TmdbUpdateMovie) Work(ctx context.Context, job *minion.Job[*TmdbUpdateM
 		return errors.Wrap(err, "parsing release date")
 	}
 	movie.ReleaseDate = d
-	if j.Images {
+
+	if !job.Args.JustMedia {
 		if resp.PosterPath != nil {
 			app.Workers.Enqueue(&TmdbUpdateMovieImage{ID: movie.ID.Hex(), Type: "cover", Path: tmdb.StringValue(resp.PosterPath), Ratio: posterRatio})
 		}
 		if resp.BackdropPath != nil {
 			app.Workers.Enqueue(&TmdbUpdateMovieImage{ID: movie.ID.Hex(), Type: "background", Path: tmdb.StringValue(resp.BackdropPath), Ratio: backgroundRatio})
+		}
+		if err := app.Workers.Enqueue(&MediaPaths{ID: id}); err != nil {
+			return errors.Wrap(err, "enqueuing media paths")
 		}
 	}
 

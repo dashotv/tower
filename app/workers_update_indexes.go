@@ -21,7 +21,7 @@ func (j *UpdateIndexes) Work(ctx context.Context, job *minion.Job[*UpdateIndexes
 	}
 	for _, s := range series {
 		<-time.After(1 * time.Second)
-		if err := app.Workers.Enqueue(&TvdbUpdateSeries{ID: s.ID.Hex(), Images: false, Paths: false, Episodes: false}); err != nil {
+		if err := app.Workers.Enqueue(&TvdbUpdateSeries{ID: s.ID.Hex(), JustMedia: true}); err != nil {
 			return errors.Wrap(err, "enqueueing series")
 		}
 	}
@@ -32,7 +32,7 @@ func (j *UpdateIndexes) Work(ctx context.Context, job *minion.Job[*UpdateIndexes
 	}
 	for _, m := range movies {
 		<-time.After(1 * time.Second)
-		if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: m.ID.Hex(), Images: false}); err != nil {
+		if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: m.ID.Hex(), JustMedia: true}); err != nil {
 			return errors.Wrap(err, "enqueueing movie")
 		}
 	}

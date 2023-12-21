@@ -83,7 +83,7 @@ func (a *Application) MoviesCreate(c *gin.Context) {
 		return
 	}
 
-	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: m.ID.Hex(), Images: true}); err != nil {
+	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: m.ID.Hex()}); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -131,7 +131,7 @@ func (a *Application) MoviesUpdate(c *gin.Context, id string) {
 }
 
 func (a *Application) MoviesRefresh(c *gin.Context, id string) {
-	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: id, Images: true}); err != nil {
+	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: id}); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

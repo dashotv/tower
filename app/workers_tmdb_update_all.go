@@ -21,7 +21,7 @@ func (j *TmdbUpdateAll) Work(ctx context.Context, job *minion.Job[*TmdbUpdateAll
 
 	for _, m := range movies {
 		app.Log.Infof("updating movie: %s", m.Title)
-		app.Workers.Enqueue(&TmdbUpdateMovie{ID: m.ID.Hex(), Images: false})
+		app.Workers.Enqueue(&TmdbUpdateMovie{ID: m.ID.Hex(), JustMedia: true})
 	}
 
 	return nil
