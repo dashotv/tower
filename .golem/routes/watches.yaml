@@ -1,0 +1,13 @@
+name: watches
+path: /watches
+routes:
+  - name: index
+    path: /
+    method: GET
+    params:
+      - name: medium_id
+        type: string
+        query: true
+      - name: username
+        type: string
+        query: true

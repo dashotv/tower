@@ -1,0 +1,6 @@
+name: flame_combined
+channel: flame.combined
+receiver: true
+existing_payload: FlameCombined
+proxy_to: tower.downloading
+proxy_type: EventDownloading

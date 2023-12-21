@@ -8,33 +8,29 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	"github.com/dashotv/golem/web"
 )
 
 const pagesize = 42
 
-func SeriesIndex(c *gin.Context) {
-	page, err := web.QueryDefaultInteger(c, "page", 1)
+func (a *Application) SeriesIndex(c *gin.Context, page, limit int) {
+	if page == 0 {
+		page = 1
+	}
+
+	count, err := app.DB.Series.Count(bson.M{"_type": "Series"})
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	count, err := db.Series.Count(bson.M{"_type": "Series"})
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	q := db.Series.Query()
+	q := app.DB.Series.Query()
 	results, err := q.
 		Limit(pagesize).
 		Skip((page - 1) * pagesize).
 		Desc("created_at").Run()
 
 	for _, s := range results {
-		unwatched, err := db.SeriesUserUnwatched(s)
+		unwatched, err := app.DB.SeriesUserUnwatched(s)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -61,7 +57,7 @@ func SeriesIndex(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
 }
 
-func SeriesCreate(c *gin.Context) {
+func (a *Application) SeriesCreate(c *gin.Context) {
 	r := &CreateRequest{}
 	c.BindJSON(r)
 	if r.ID == "" || r.Source == "" {
@@ -69,7 +65,7 @@ func SeriesCreate(c *gin.Context) {
 		return
 	}
 
-	server.Log.Debugf("series create: %+v", r)
+	app.Log.Debugf("series create: %+v", r)
 	s := &Series{
 		Type:         "Series",
 		SourceId:     r.ID,
@@ -91,13 +87,13 @@ func SeriesCreate(c *gin.Context) {
 	}
 	s.ReleaseDate = d
 
-	err = db.Series.Save(s)
+	err = app.DB.Series.Save(s)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := workers.Enqueue(&TvdbUpdateSeries{s.ID.Hex(), true, true, true}); err != nil {
+	if err := app.Workers.Enqueue(&TvdbUpdateSeries{ID: s.ID.Hex(), Images: true, Paths: true, Episodes: true}); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -105,17 +101,17 @@ func SeriesCreate(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"error": false, "series": s})
 }
 
-func SeriesShow(c *gin.Context, id string) {
+func (a *Application) SeriesShow(c *gin.Context, id string) {
 	result := &Series{}
-	log.Infof("series.show id=%s", id)
+	app.Log.Infof("series.show id=%s", id)
 	// cache this? have to figure out how to handle breaking cache
-	err := db.Series.Find(id, result)
+	err := app.DB.Series.Find(id, result)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	unwatched, err := db.SeriesUserUnwatched(result)
+	unwatched, err := app.DB.SeriesUserUnwatched(result)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -134,21 +130,21 @@ func SeriesShow(c *gin.Context, id string) {
 	}
 
 	//Paths
-	result.Paths, err = db.SeriesPaths(id)
+	result.Paths, err = app.DB.SeriesPaths(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	//Seasons
-	result.Seasons, err = db.SeriesSeasons(id)
+	result.Seasons, err = app.DB.SeriesSeasons(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	//CurrentSeason
-	result.CurrentSeason, err = db.SeriesCurrentSeason(id)
+	result.CurrentSeason, err = app.DB.SeriesCurrentSeason(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -157,7 +153,7 @@ func SeriesShow(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, result)
 }
 
-func SeriesUpdate(c *gin.Context, id string) {
+func (a *Application) SeriesUpdate(c *gin.Context, id string) {
 	data := &Series{}
 	err := c.BindJSON(&data)
 	if err != nil {
@@ -165,7 +161,7 @@ func SeriesUpdate(c *gin.Context, id string) {
 		return
 	}
 
-	err = db.SeriesUpdate(id, data)
+	err = app.DB.SeriesUpdate(id, data)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -174,7 +170,7 @@ func SeriesUpdate(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
 }
 
-func SeriesSetting(c *gin.Context, id string) {
+func (a *Application) SeriesSettings(c *gin.Context, id string) {
 	data := &Setting{}
 	err := c.BindJSON(&data)
 	if err != nil {
@@ -182,7 +178,7 @@ func SeriesSetting(c *gin.Context, id string) {
 		return
 	}
 
-	err = db.SeriesSetting(id, data.Setting, data.Value)
+	err = app.DB.SeriesSetting(id, data.Setting, data.Value)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -191,12 +187,12 @@ func SeriesSetting(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
 }
 
-func SeriesDelete(c *gin.Context, id string) {
+func (a *Application) SeriesDelete(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func SeriesCurrentSeason(c *gin.Context, id string) {
-	i, err := db.SeriesCurrentSeason(id)
+func (a *Application) SeriesCurrentSeason(c *gin.Context, id string) {
+	i, err := app.DB.SeriesCurrentSeason(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -204,8 +200,8 @@ func SeriesCurrentSeason(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"current": i})
 }
 
-func SeriesSeasons(c *gin.Context, id string) {
-	results, err := db.SeriesSeasons(id)
+func (a *Application) SeriesSeasons(c *gin.Context, id string) {
+	results, err := app.DB.SeriesSeasons(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -214,8 +210,8 @@ func SeriesSeasons(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, results)
 }
 
-func SeriesSeasonEpisodesAll(c *gin.Context, id string) {
-	results, err := db.SeriesSeasonEpisodesAll(id)
+func (a *Application) SeriesSeasonEpisodesAll(c *gin.Context, id string) {
+	results, err := app.DB.SeriesSeasonEpisodesAll(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -224,8 +220,8 @@ func SeriesSeasonEpisodesAll(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, results)
 }
 
-func SeriesSeasonEpisodes(c *gin.Context, id string, season string) {
-	results, err := db.SeriesSeasonEpisodes(id, season)
+func (a *Application) SeriesSeasonEpisodes(c *gin.Context, id string, season string) {
+	results, err := app.DB.SeriesSeasonEpisodes(id, season)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -234,8 +230,8 @@ func SeriesSeasonEpisodes(c *gin.Context, id string, season string) {
 	c.JSON(http.StatusOK, results)
 }
 
-func SeriesPaths(c *gin.Context, id string) {
-	results, err := db.SeriesPaths(id)
+func (a *Application) SeriesPaths(c *gin.Context, id string) {
+	results, err := app.DB.SeriesPaths(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -244,8 +240,8 @@ func SeriesPaths(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, results)
 }
 
-func SeriesWatches(c *gin.Context, id string) {
-	results, err := db.SeriesWatches(id)
+func (a *Application) SeriesWatches(c *gin.Context, id string) {
+	results, err := app.DB.SeriesWatches(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -254,8 +250,8 @@ func SeriesWatches(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, results)
 }
 
-func SeriesRefresh(c *gin.Context, id string) {
-	if err := workers.Enqueue(&TvdbUpdateSeries{id, true, true, true}); err != nil {
+func (a *Application) SeriesRefresh(c *gin.Context, id string) {
+	if err := app.Workers.Enqueue(&TvdbUpdateSeries{ID: id, Images: true, Paths: true, Episodes: true}); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

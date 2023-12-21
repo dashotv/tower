@@ -1,0 +1,10 @@
+name: series
+channel: tower.series
+receiver: false
+fields:
+  - name: event
+    type: string
+  - name: id
+    type: string
+  - name: series
+    type: "*Series"

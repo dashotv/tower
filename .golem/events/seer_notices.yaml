@@ -1,0 +1,6 @@
+name: seer_notices
+channel: seer.notices
+receiver: true
+existing_payload: EventSeerNotice
+proxy_to: tower.notices
+proxy_type: EventNotices

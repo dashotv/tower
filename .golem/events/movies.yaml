@@ -1,0 +1,10 @@
+name: movies
+channel: tower.movies
+receiver: false
+fields:
+  - name: event
+    type: string
+  - name: id
+    type: string
+  - name: movie
+    type: "*Movie"

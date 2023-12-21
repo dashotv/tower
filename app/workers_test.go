@@ -13,17 +13,18 @@ import (
 )
 
 func TestCleanLogs(t *testing.T) {
-	funcs := []func() error{
+	app := &Application{}
+	funcs := []func(a *Application) error{
 		setupConfig,
 		setupLogger,
 		setupDb,
 	}
 	for _, f := range funcs {
-		err := f()
+		err := f(app)
 		require.NoError(t, err)
 	}
 
-	before, err := db.Message.Count(bson.M{})
+	before, err := app.DB.Message.Count(bson.M{})
 	assert.NoError(t, err)
 
 	list := []struct {
@@ -35,10 +36,10 @@ func TestCleanLogs(t *testing.T) {
 	}
 	for _, v := range list {
 		m := &Message{Message: v.Message}
-		err := db.Message.Save(m)
+		err := app.DB.Message.Save(m)
 		require.NoError(t, err)
 		m.CreatedAt = v.CreatedAt
-		err = db.Message.Save(m)
+		err = app.DB.Message.Save(m)
 		require.NoError(t, err)
 	}
 
@@ -46,7 +47,7 @@ func TestCleanLogs(t *testing.T) {
 	err = job.Work(context.Background(), &minion.Job[*CleanupLogs]{})
 	assert.NoError(t, err)
 
-	count, err := db.Message.Count(bson.M{})
+	count, err := app.DB.Message.Count(bson.M{})
 	assert.NoError(t, err)
 	assert.Equal(t, before, count)
 

@@ -1,0 +1,3 @@
+name: feeds
+path: /feeds
+rest: true

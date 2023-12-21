@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func FeedsIndex(c *gin.Context) {
-	results, err := db.Feed.Query().
+func (a *Application) FeedsIndex(c *gin.Context, page, limit int) {
+	results, err := app.DB.Feed.Query().
 		Desc("processed").
 		Limit(1000).
 		Run()
@@ -19,13 +19,13 @@ func FeedsIndex(c *gin.Context) {
 	c.JSON(http.StatusOK, results)
 }
 
-func FeedsCreate(c *gin.Context) {
+func (a *Application) FeedsCreate(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func FeedsShow(c *gin.Context, id string) {
+func (a *Application) FeedsShow(c *gin.Context, id string) {
 	result := &Feed{}
-	err := db.Feed.Find(id, result)
+	err := app.DB.Feed.Find(id, result)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -33,7 +33,7 @@ func FeedsShow(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, result)
 }
 
-func FeedsUpdate(c *gin.Context, id string) {
+func (a *Application) FeedsUpdate(c *gin.Context, id string) {
 	data := &Feed{}
 	err := c.BindJSON(&data)
 	if err != nil {
@@ -41,7 +41,7 @@ func FeedsUpdate(c *gin.Context, id string) {
 		return
 	}
 
-	err = db.FeedUpdate(id, data)
+	err = app.DB.FeedUpdate(id, data)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -50,7 +50,7 @@ func FeedsUpdate(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func FeedsSetting(c *gin.Context, id string) {
+func (a *Application) FeedsSettings(c *gin.Context, id string) {
 	data := &Setting{}
 	err := c.BindJSON(&data)
 	if err != nil {
@@ -58,7 +58,7 @@ func FeedsSetting(c *gin.Context, id string) {
 		return
 	}
 
-	err = db.FeedSetting(id, data.Setting, data.Value)
+	err = app.DB.FeedSetting(id, data.Setting, data.Value)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -67,6 +67,6 @@ func FeedsSetting(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func FeedsDelete(c *gin.Context, id string) {
+func (a *Application) FeedsDelete(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }

@@ -1,0 +1,42 @@
+name: series
+path: /series
+rest: true
+routes:
+  - name: current_season
+    path: /:id/currentseason
+    method: GET
+    params:
+      - name: id
+        type: string
+  - name: paths
+    path: /:id/paths
+    method: GET
+    params:
+      - name: id
+        type: string
+  - name: refresh
+    path: /:id/refresh
+    method: PUT
+    params:
+      - name: id
+        type: string
+  - name: season_episodes_all
+    path: /:id/seasons/all
+    method: GET
+    params:
+      - name: id
+        type: string
+  - name: season_episodes
+    path: /:id/seasons/:season
+    method: GET
+    params:
+      - name: id
+        type: string
+      - name: season
+        type: string
+  - name: watches
+    path: /:id/watches
+    method: GET
+    params:
+      - name: id
+        type: string

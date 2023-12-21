@@ -1,0 +1,2 @@
+name: plex_watchlist_updates
+schedule: "0 0 * * * *"

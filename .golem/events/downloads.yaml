@@ -1,0 +1,10 @@
+name: downloads
+channel: tower.downloads
+receiver: false
+fields:
+  - name: event
+    type: string
+  - name: id
+    type: string
+  - name: download
+    type: "*Download"

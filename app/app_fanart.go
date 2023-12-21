@@ -5,10 +5,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-var fanart *Fanart
+func init() {
+	initializers = append(initializers, setupFanart)
+}
 
-func setupFanart() error {
-	fanart = NewFanart(cfg.FanartApiURL, cfg.FanartApiKey)
+func setupFanart(app *Application) error {
+	app.Fanart = NewFanart(app.Config.FanartApiURL, app.Config.FanartApiKey)
 	return nil
 }
 

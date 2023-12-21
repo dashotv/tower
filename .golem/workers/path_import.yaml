@@ -1,0 +1,8 @@
+name: path_import
+fields:
+    - name: id
+      type: string
+    - name: path_id
+      type: string
+    - name: title
+      type: string

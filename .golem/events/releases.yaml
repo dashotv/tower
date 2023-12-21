@@ -1,0 +1,4 @@
+name: releases
+channel: tower.index.releases
+receiver: false
+existing_payload: Release

@@ -5,34 +5,48 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/dashotv/minion"
 )
 
-type CleanupLogs struct{}
+// CleanPlexPins removes old pins
+type CleanPlexPins struct {
+	minion.WorkerDefaults[*CleanPlexPins]
+}
 
-func (j *CleanupLogs) Kind() string { return "CleanupLogs" }
-func (j *CleanupLogs) Work(ctx context.Context, job *minion.Job[*CleanupLogs]) error {
-	_, err := db.Message.Collection.DeleteMany(context.Background(), bson.M{"created_at": bson.M{"$lt": time.Now().UTC().AddDate(0, 0, -5)}})
+func (j *CleanPlexPins) Kind() string { return "CleanPlexPins" }
+func (j *CleanPlexPins) Work(ctx context.Context, job *minion.Job[*CleanPlexPins]) error {
+	list, err := app.DB.Pin.Query().
+		GreaterThan("created_at", time.Now().UTC().AddDate(0, 0, -1)).
+		Run()
 	if err != nil {
-		return errors.Wrap(err, "cleaning logs")
+		return errors.Wrap(err, "querying pins")
 	}
+
+	for _, p := range list {
+		err := app.DB.Pin.Delete(p)
+		if err != nil {
+			return errors.Wrap(err, "deleting pin")
+		}
+	}
+
 	return nil
 }
 
-type CleanupJobs struct{}
+type CleanupLogs struct {
+	minion.WorkerDefaults[*CleanupLogs]
+}
 
-func (j *CleanupJobs) Kind() string { return "CleanupJobs" }
+func (j *CleanupLogs) Kind() string { return "cleanup_logs" }
+func (j *CleanupLogs) Work(ctx context.Context, job *minion.Job[*CleanupLogs]) error {
+	return nil
+}
+
+type CleanupJobs struct {
+	minion.WorkerDefaults[*CleanupJobs]
+}
+
+func (j *CleanupJobs) Kind() string { return "cleanup_jobs" }
 func (j *CleanupJobs) Work(ctx context.Context, job *minion.Job[*CleanupJobs]) error {
-	_, err := db.Minion.Collection.DeleteMany(context.Background(), bson.M{"created_at": bson.M{"$lt": time.Now().UTC().AddDate(0, 0, -1)}})
-	if err != nil {
-		return errors.Wrap(err, "cleaning logs")
-	}
-	_, err = db.Minion.Collection.DeleteMany(context.Background(), bson.M{"kind": "ping"})
-	if err != nil {
-		return errors.Wrap(err, "cleaning logs")
-	}
-
 	return nil
 }

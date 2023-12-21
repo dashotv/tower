@@ -1,0 +1,4 @@
+name: media_paths
+fields:
+    - name: id
+      type: string

@@ -10,7 +10,17 @@ import (
 	"github.com/dashotv/scry/search"
 )
 
-var scryClient *Scry
+func init() {
+	initializers = append(initializers, setupScry)
+}
+
+func setupScry(app *Application) error {
+	app.Scry = &Scry{
+		URL: "https://scry:10080",
+		c:   resty.New().SetBaseURL("http://scry:10080"),
+	}
+	return nil
+}
 
 type Scry struct {
 	URL string
@@ -31,14 +41,6 @@ type SearchOptions struct {
 	Uncensored bool
 	Bluray     bool
 	Exact      bool
-}
-
-func setupScry() error {
-	scryClient = &Scry{
-		URL: "https://scry:10080",
-		c:   resty.New().SetBaseURL("http://scry:10080"),
-	}
-	return nil
 }
 
 func selectRelease(opt *SearchOptions, releases []*search.Release) (*search.Release, error) {
@@ -74,7 +76,7 @@ func selectRelease(opt *SearchOptions, releases []*search.Release) (*search.Rele
 }
 
 func Preferred(opt *SearchOptions, r *search.Release) bool {
-	for _, g := range cfg.DownloadsPreferred {
+	for _, g := range app.Config.DownloadsPreferred {
 		if r.Group == g {
 			return true
 		}
@@ -85,7 +87,7 @@ func Preferred(opt *SearchOptions, r *search.Release) bool {
 
 func Good(opt *SearchOptions, r *search.Release) bool {
 	group := false
-	for _, g := range cfg.DownloadsGroups {
+	for _, g := range app.Config.DownloadsGroups {
 		if r.Group == g {
 			group = true
 			break
@@ -160,7 +162,7 @@ func (s *Scry) Search(options *SearchOptions) (*search.ReleaseSearchResponse, er
 
 func (s *Scry) ScrySearchEpisode(ep *Medium) (*search.Release, error) {
 	series := &Series{}
-	err := db.Series.FindByID(ep.SeriesId, series)
+	err := app.DB.Series.FindByID(ep.SeriesId, series)
 	if err != nil {
 		return nil, err
 	}
@@ -208,7 +210,7 @@ func (s *Scry) ScrySearchEpisode(ep *Medium) (*search.Release, error) {
 		opt.Source = params.Source
 	}
 
-	resp, err := scryClient.Search(opt)
+	resp, err := app.Scry.Search(opt)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to search releases")
 	}

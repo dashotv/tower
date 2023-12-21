@@ -1,0 +1,10 @@
+name: downloading
+channel: tower.downloading
+receiver: false
+fields:
+  - name: downloads
+    type: "map[string]*Downloading"
+  - name: hashes
+    type: "map[string]string"
+  - name: metrics
+    type: "*flame.Metrics"

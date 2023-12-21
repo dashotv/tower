@@ -5,20 +5,15 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/dashotv/golem/web"
 )
 
 const releasePageSize = 25
 
-func ReleasesIndex(c *gin.Context) {
-	page, err := web.QueryDefaultInteger(c, "page", 1)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+func (a *Application) ReleasesIndex(c *gin.Context, page, limit int) {
+	if page == 0 {
+		page = 1
 	}
-
-	results, err := db.Release.Query().
+	results, err := app.DB.Release.Query().
 		Desc("published_at").
 		Desc("created_at").
 		Limit(releasePageSize).Skip((page - 1) * releasePageSize).
@@ -31,13 +26,13 @@ func ReleasesIndex(c *gin.Context) {
 	c.JSON(http.StatusOK, results)
 }
 
-func ReleasesCreate(c *gin.Context) {
+func (a *Application) ReleasesCreate(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func ReleasesShow(c *gin.Context, id string) {
+func (a *Application) ReleasesShow(c *gin.Context, id string) {
 	result := &Release{}
-	err := db.Release.Find(id, result)
+	err := app.DB.Release.Find(id, result)
 	if err != nil {
 		if err.Error() == "mongo: no documents in result" {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -50,15 +45,15 @@ func ReleasesShow(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, result)
 }
 
-func ReleasesUpdate(c *gin.Context, id string) {
+func (a *Application) ReleasesUpdate(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func ReleasesDelete(c *gin.Context, id string) {
+func (a *Application) ReleasesDelete(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func ReleasesSetting(c *gin.Context, id string) {
+func (a *Application) ReleasesSettings(c *gin.Context, id string) {
 	s := &Setting{}
 	err := c.BindJSON(s)
 	if err != nil {
@@ -66,7 +61,7 @@ func ReleasesSetting(c *gin.Context, id string) {
 		return
 	}
 
-	err = db.ReleaseSetting(id, s.Setting, s.Value)
+	err = app.DB.ReleaseSetting(id, s.Setting, s.Value)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -75,13 +70,13 @@ func ReleasesSetting(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"errors": false, "data": s})
 }
 
-func ReleasesPopular(c *gin.Context, interval string) {
-	log.Infof("ReleasesPopular: interval: %s", interval)
+func (a *Application) ReleasesPopular(c *gin.Context, interval string) {
+	app.Log.Infof("ReleasesPopular: interval: %s", interval)
 	out := map[string][]*Popular{}
 
 	for _, t := range releaseTypes {
 		results := make([]*Popular, 25)
-		ok, err := cache.Get(fmt.Sprintf("releases_popular_%s_%s", interval, t), &results)
+		ok, err := app.Cache.Get(fmt.Sprintf("releases_popular_%s_%s", interval, t), &results)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

@@ -1,0 +1,22 @@
+name: downloads
+path: /downloads
+rest: true
+routes:
+  - name: last
+    path: /last
+    method: GET
+  - name: medium
+    path: /:id/medium
+    method: GET
+    params:
+      - name: id
+        type: string
+  - name: recent
+    path: /recent
+    method: GET
+  - name: select
+    path: /:id/select
+    method: PUT
+    params:
+      - name: id
+        type: string

@@ -1,0 +1,16 @@
+name: movies
+path: /movies
+rest: true
+routes:
+    - name: refresh
+      path: /:id/refresh
+      method: PUT
+      params:
+        - name: id
+          type: string
+    - name: paths
+      path: /:id/paths
+      method: GET
+      params:
+        - name: id
+          type: string

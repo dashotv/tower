@@ -1,0 +1,6 @@
+name: users
+path: /users
+routes:
+    - name: index
+      path: /
+      method: GET

@@ -1,0 +1,10 @@
+name: requests
+channel: tower.requests
+receiver: false
+fields:
+  - name: event
+    type: string
+  - name: id
+    type: string
+  - name: request
+    type: "*Request"

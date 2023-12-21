@@ -1,0 +1,20 @@
+name: jobs
+path: /jobs
+routes:
+  - name: index
+    path: /
+    method: GET
+    params:
+      - name: page
+        type: int
+        query: true
+      - name: limit
+        type: int
+        query: true
+  - name: create
+    path: /
+    method: POST
+    params:
+      - name: job
+        type: string
+        query: true

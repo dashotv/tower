@@ -1,0 +1,2 @@
+name: plex_user_updates
+schedule: "0 30 11 * * *"

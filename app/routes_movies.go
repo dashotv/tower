@@ -12,20 +12,20 @@ import (
 	"github.com/dashotv/golem/web"
 )
 
-func MoviesIndex(c *gin.Context) {
+func (a *Application) MoviesIndex(c *gin.Context, page, limit int) {
 	page, err := web.QueryDefaultInteger(c, "page", 1)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	count, err := db.Movie.Count(bson.M{"_type": "Movie"})
+	count, err := app.DB.Movie.Count(bson.M{"_type": "Movie"})
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	q := db.Movie.Query()
+	q := app.DB.Movie.Query()
 	results, err := q.
 		Limit(pagesize).
 		Skip((page - 1) * pagesize).
@@ -52,7 +52,7 @@ func MoviesIndex(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
 }
 
-func MoviesCreate(c *gin.Context) {
+func (a *Application) MoviesCreate(c *gin.Context) {
 	r := &CreateRequest{}
 	c.BindJSON(r)
 	if r.ID == "" || r.Source == "" {
@@ -77,13 +77,13 @@ func MoviesCreate(c *gin.Context) {
 	}
 	m.ReleaseDate = d
 
-	err = db.Movie.Save(m)
+	err = app.DB.Movie.Save(m)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := workers.Enqueue(&TmdbUpdateMovie{m.ID.Hex(), true}); err != nil {
+	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: m.ID.Hex(), Images: true}); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -91,9 +91,9 @@ func MoviesCreate(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"error": false, "movie": m})
 }
 
-func MoviesShow(c *gin.Context, id string) {
+func (a *Application) MoviesShow(c *gin.Context, id string) {
 	m := &Movie{}
-	err := db.Movie.Find(id, m)
+	err := app.DB.Movie.Find(id, m)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -113,7 +113,7 @@ func MoviesShow(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, m)
 }
 
-func MoviesUpdate(c *gin.Context, id string) {
+func (a *Application) MoviesUpdate(c *gin.Context, id string) {
 	data := &Movie{}
 	err := c.BindJSON(&data)
 	if err != nil {
@@ -121,7 +121,7 @@ func MoviesUpdate(c *gin.Context, id string) {
 		return
 	}
 
-	err = db.MovieUpdate(id, data)
+	err = app.DB.MovieUpdate(id, data)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -130,8 +130,8 @@ func MoviesUpdate(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
 }
 
-func MoviesRefresh(c *gin.Context, id string) {
-	if err := workers.Enqueue(&TmdbUpdateMovie{id, true}); err != nil {
+func (a *Application) MoviesRefresh(c *gin.Context, id string) {
+	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: id, Images: true}); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -139,7 +139,7 @@ func MoviesRefresh(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func MoviesSetting(c *gin.Context, id string) {
+func (a *Application) MoviesSettings(c *gin.Context, id string) {
 	data := &Setting{}
 	err := c.BindJSON(&data)
 	if err != nil {
@@ -147,7 +147,7 @@ func MoviesSetting(c *gin.Context, id string) {
 		return
 	}
 
-	err = db.MovieSetting(id, data.Setting, data.Value)
+	err = app.DB.MovieSetting(id, data.Setting, data.Value)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -156,12 +156,12 @@ func MoviesSetting(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
 }
 
-func MoviesDelete(c *gin.Context, id string) {
+func (a *Application) MoviesDelete(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func MoviesPaths(c *gin.Context, id string) {
-	results, err := db.MoviePaths(id)
+func (a *Application) MoviesPaths(c *gin.Context, id string) {
+	results, err := app.DB.MoviePaths(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

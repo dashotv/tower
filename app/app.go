@@ -1,56 +1,107 @@
 package app
 
-var initialized bool
-var db *Connector
+import (
+	"fmt"
 
-type SetupFunc func() error
+	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.uber.org/zap"
 
-func Start() error {
-	err := setup(
-		setupConfig,
-		setupLogger,
-		setupDb,
-		setupServer,
-		setupCache,
-		setupWorkers,
-		setupEvents,
-		setupPlex,
-		setupTmdb,
-		setupTvdb,
-		setupScry,
-		setupFlame,
-		setupNotifier,
-		setupFanart,
-	)
-	if err != nil {
-		if log != nil {
-			log.Errorf("setup failed: %s", err)
-		}
-		return err
-	}
+	"github.com/dashotv/minion"
+	"github.com/dashotv/tmdb"
+	"github.com/dashotv/tvdb"
+)
 
-	initialized = true
-	log.Info("initialized: ", initialized)
-	// log.Debugf("config: %+v", cfg)
+var app *Application
 
-	return server.Start()
+type setupFunc func(app *Application) error
+type healthFunc func(app *Application) error
+
+var initializers = []setupFunc{setupConfig, setupLogger}
+var healthchecks = map[string]healthFunc{}
+
+type Application struct {
+	Config *Config
+	Log    *zap.SugaredLogger
+
+	//golem:template:app/app_partial_definitions
+	// DO NOT EDIT. This section is managed by github.com/dashotv/golem.
+	// Routes
+	Engine  *gin.Engine
+	Default *gin.RouterGroup
+	Router  *gin.RouterGroup
+
+	// Models
+	DB *Connector
+
+	// Events
+	Events *Events
+
+	// Workers
+	Workers *minion.Minion
+
+	//Cache
+	Cache *Cache
+
+	//golem:template:app/app_partial_definitions
+
+	Fanart *Fanart
+	Flame  *Flame
+	Scry   *Scry
+	Plex   *Plex
+	Tmdb   *tmdb.Client
+	Tvdb   *tvdb.Client
 }
 
-func setup(fs ...SetupFunc) error {
-	for _, f := range fs {
-		if err := f(); err != nil {
+func Start() error {
+	if app != nil {
+		return errors.New("application already started")
+	}
+
+	app = &Application{}
+
+	for _, f := range initializers {
+		// fmt.Printf("running initializer %s\n", runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name())
+		if err := f(app); err != nil {
 			return err
 		}
 	}
 
+	app.DB.Episode.SetQueryDefaults([]bson.M{{"_type": "Episode"}})
+	app.DB.Movie.SetQueryDefaults([]bson.M{{"_type": "Movie"}})
+	app.DB.Series.SetQueryDefaults([]bson.M{{"_type": "Series"}})
+
+	app.Workers.Subscribe(app.MinionNotification)
+
+	app.Log.Info("starting tower...")
+
+	//golem:template:app/app_partial_start
+	// DO NOT EDIT. This section is managed by github.com/dashotv/golem.
+	go app.Events.Start()
+
+	go func() {
+		app.Log.Infof("starting workers (%d)...", app.Config.MinionConcurrency)
+		app.Workers.Start()
+	}()
+
+	app.Routes()
+	app.Log.Info("starting routes...")
+	if err := app.Engine.Run(fmt.Sprintf(":%d", app.Config.Port)); err != nil {
+		return errors.Wrap(err, "starting router")
+	}
+
+	//golem:template:app/app_partial_start
+
 	return nil
 }
 
-func setupDb() (err error) {
-	db, err = NewConnector()
-	if err != nil {
-		return err
+func (a *Application) Health() (map[string]bool, error) {
+	resp := make(map[string]bool)
+	for n, f := range healthchecks {
+		err := f(a)
+		resp[n] = err == nil
 	}
 
-	return nil
+	return resp, nil
 }

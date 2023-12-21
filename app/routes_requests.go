@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RequestsIndex(c *gin.Context) {
-	list, err := db.Request.Query().Desc("created_at").Run()
+func (a *Application) RequestsIndex(c *gin.Context, page, limit int) {
+	list, err := app.DB.Request.Query().Desc("created_at").Run()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -15,13 +15,25 @@ func RequestsIndex(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-func RequestsShow(c *gin.Context, id string) {
+func (a *Application) RequestsShow(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"message": "RequestsShow"})
 }
 
-func RequestsUpdate(c *gin.Context, id string) {
+func (a *Application) RequestsCreate(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "RequestsCreate"})
+}
+
+func (a *Application) RequestsSettings(c *gin.Context, id string) {
+	c.JSON(http.StatusOK, gin.H{"message": "RequestsSettings"})
+}
+
+func (a *Application) RequestsDelete(c *gin.Context, id string) {
+	c.JSON(http.StatusOK, gin.H{"message": "RequestsDelete"})
+}
+
+func (a *Application) RequestsUpdate(c *gin.Context, id string) {
 	req := &Request{}
-	err := db.Request.Find(id, req)
+	err := app.DB.Request.Find(id, req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -34,13 +46,13 @@ func RequestsUpdate(c *gin.Context, id string) {
 	}
 
 	req.Status = updated.Status
-	if err := db.Request.Update(req); err != nil {
+	if err := app.DB.Request.Update(req); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	if updated.Status == "approved" {
-		if err := workers.Enqueue(&CreateMediaFromRequests{}); err != nil {
+		if err := app.Workers.Enqueue(&CreateMediaFromRequests{}); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}

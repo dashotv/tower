@@ -11,58 +11,8 @@ import (
 	"github.com/dashotv/minion"
 )
 
-type MediaPaths struct {
-	ID string // medium
-}
-
-func (j *MediaPaths) Kind() string { return "MediaPaths" }
-func (j *MediaPaths) Work(ctx context.Context, job *minion.Job[*MediaPaths]) error {
-	m := &Medium{}
-	if err := db.Medium.Find(job.Args.ID, m); err != nil {
-		return errors.Wrap(err, "find medium")
-	}
-
-	queuedPaths := map[string]int{}
-
-	for _, p := range m.Paths {
-		if queuedPaths[p.LocalPath()] == 0 {
-			workers.Log.Debugf("path import: %s", p.LocalPath())
-			if err := workers.Enqueue(&PathImport{m.ID.Hex(), p.Id.Hex(), p.LocalPath()}); err != nil {
-				return errors.Wrap(err, "enqueue path import")
-			}
-			queuedPaths[p.LocalPath()]++
-		}
-	}
-
-	if m.Type == "Series" {
-		eps, err := db.Episode.Query().
-			Where("series_id", m.ID).
-			Desc("season_number").Desc("episode_number").Desc("absolute_number").
-			Limit(-1).
-			Run()
-		if err != nil {
-			return errors.Wrap(err, "find episodes")
-		}
-
-		for _, e := range eps {
-			if len(e.Paths) > 0 {
-				for _, p := range e.Paths {
-					if queuedPaths[p.LocalPath()] == 0 {
-						workers.Log.Debugf("path import: %s", p.LocalPath())
-						if err := workers.Enqueue(&PathImport{e.ID.Hex(), p.Id.Hex(), p.LocalPath()}); err != nil {
-							return errors.Wrap(err, "enqueue path import")
-						}
-						queuedPaths[p.LocalPath()]++
-					}
-				}
-			}
-		}
-	}
-
-	return nil
-}
-
 type PathImport struct {
+	minion.WorkerDefaults[*PathImport]
 	ID     string // medium
 	PathID string // path
 	Title  string
@@ -71,7 +21,7 @@ type PathImport struct {
 func (j *PathImport) Kind() string { return "PathImport" }
 func (j *PathImport) Work(ctx context.Context, job *minion.Job[*PathImport]) error {
 	m := &Medium{}
-	if err := db.Medium.Find(job.Args.ID, m); err != nil {
+	if err := app.DB.Medium.Find(job.Args.ID, m); err != nil {
 		return errors.Wrap(err, "find medium")
 	}
 
@@ -109,12 +59,64 @@ func (j *PathImport) Work(ctx context.Context, job *minion.Job[*PathImport]) err
 			path.Resolution = v.Height()
 			path.Bitrate = v.Bitrate()
 		} else {
-			workers.Log.Warnf("failed to get video info: %s", err)
+			app.Workers.Log.Warnf("failed to get video info: %s", err)
 		}
 	}
 
-	if err := db.Medium.Save(m); err != nil {
+	if err := app.DB.Medium.Save(m); err != nil {
 		return errors.Wrap(err, "save path")
+	}
+
+	return nil
+}
+
+type MediaPaths struct {
+	minion.WorkerDefaults[*MediaPaths]
+	ID string // medium
+}
+
+func (j *MediaPaths) Kind() string { return "MediaPaths" }
+func (j *MediaPaths) Work(ctx context.Context, job *minion.Job[*MediaPaths]) error {
+	m := &Medium{}
+	if err := app.DB.Medium.Find(job.Args.ID, m); err != nil {
+		return errors.Wrap(err, "find medium")
+	}
+
+	queuedPaths := map[string]int{}
+
+	for _, p := range m.Paths {
+		if queuedPaths[p.LocalPath()] == 0 {
+			app.Workers.Log.Debugf("path import: %s", p.LocalPath())
+			if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: p.Id.Hex(), Title: p.LocalPath()}); err != nil {
+				return errors.Wrap(err, "enqueue path import")
+			}
+			queuedPaths[p.LocalPath()]++
+		}
+	}
+
+	if m.Type == "Series" {
+		eps, err := app.DB.Episode.Query().
+			Where("series_id", m.ID).
+			Desc("season_number").Desc("episode_number").Desc("absolute_number").
+			Limit(-1).
+			Run()
+		if err != nil {
+			return errors.Wrap(err, "find episodes")
+		}
+
+		for _, e := range eps {
+			if len(e.Paths) > 0 {
+				for _, p := range e.Paths {
+					if queuedPaths[p.LocalPath()] == 0 {
+						app.Workers.Log.Debugf("path import: %s", p.LocalPath())
+						if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: p.Id.Hex(), Title: p.LocalPath()}); err != nil {
+							return errors.Wrap(err, "enqueue path import")
+						}
+						queuedPaths[p.LocalPath()]++
+					}
+				}
+			}
+		}
 	}
 
 	return nil

@@ -1,6 +1,8 @@
 package app
 
-import "time"
+import (
+	"time"
+)
 
 var notifier *Notifier
 
@@ -13,15 +15,15 @@ type NotifierLog struct{}
 type NotifierNotice struct{}
 
 func (n *Notifier) notice(level, title, message string) {
-	e := &EventTowerNotice{
+	e := &EventNotices{
 		Time:    time.Now().String(),
 		Event:   "notice",
 		Class:   title,
 		Level:   level,
 		Message: message,
 	}
-	if err := events.Send("tower.notices", e); err != nil {
-		log.Errorf("sending notice: %s", err)
+	if err := app.Events.Send("tower.notices", e); err != nil {
+		app.Log.Errorf("sending notice: %s", err)
 	}
 }
 func (n *Notifier) log(level, title, message string) {
@@ -31,10 +33,10 @@ func (n *Notifier) log(level, title, message string) {
 		Facility: title,
 	}
 	l.CreatedAt = time.Now()
-	if err := db.Message.Save(l); err != nil {
-		events.Log.Errorf("error saving log: %s", err)
+	if err := app.DB.Message.Save(l); err != nil {
+		app.Events.Log.Errorf("error saving log: %s", err)
 	}
-	events.Send("tower.logs", &EventTowerLog{Event: "new", ID: l.ID.Hex(), Log: l})
+	app.Events.Send("tower.logs", &EventLogs{Event: "new", Id: l.ID.Hex(), Log: l})
 }
 
 func (n *Notifier) Notify(level, title, message string) {

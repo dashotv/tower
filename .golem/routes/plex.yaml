@@ -1,0 +1,12 @@
+name: plex
+path: /plex
+routes:
+    - name: auth
+      path: /auth
+      method: GET
+    - name: index
+      path: /
+      method: GET
+    - name: update
+      path: /update
+      method: GET

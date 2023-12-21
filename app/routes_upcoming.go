@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UpcomingIndex(c *gin.Context) {
-	episodes, err := db.Upcoming()
+func (a *Application) UpcomingIndex(c *gin.Context) {
+	episodes, err := app.DB.Upcoming()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

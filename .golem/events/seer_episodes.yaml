@@ -1,0 +1,6 @@
+name: seer_episodes
+channel: seer.episodes
+receiver: true
+existing_payload: EventSeerEpisode
+proxy_to: tower.episodes
+proxy_type: EventEpisodes

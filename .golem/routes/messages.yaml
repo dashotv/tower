@@ -1,0 +1,6 @@
+name: messages
+path: /messages
+routes:
+  - name: index
+    path: /
+    method: GET

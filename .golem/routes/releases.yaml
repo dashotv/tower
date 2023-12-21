@@ -1,0 +1,10 @@
+name: releases
+path: /releases
+rest: true
+routes:
+    - name: popular
+      path: /popular/:interval
+      method: GET
+      params:
+        - name: interval
+          type: string

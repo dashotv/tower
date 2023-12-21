@@ -1,0 +1,6 @@
+name: seer_downloads
+channel: seer.downloads
+receiver: true
+existing_payload: EventSeerDownload
+proxy_to: tower.downloads
+proxy_type: EventDownloads

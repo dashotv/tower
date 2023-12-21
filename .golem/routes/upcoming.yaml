@@ -1,0 +1,6 @@
+name: upcoming
+path: /upcoming
+routes:
+    - name: index
+      path: /
+      method: GET

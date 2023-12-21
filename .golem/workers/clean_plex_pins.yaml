@@ -1,0 +1,2 @@
+name: clean_plex_pins
+schedule: "0 0 11 * * *"

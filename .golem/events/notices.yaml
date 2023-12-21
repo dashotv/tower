@@ -1,0 +1,14 @@
+name: notices
+channel: tower.notices
+receiver: false
+fields:
+  - name: event
+    type: string
+  - name: time
+    type: string
+  - name: class
+    type: string
+  - name: level
+    type: string
+  - name: message
+    type: string

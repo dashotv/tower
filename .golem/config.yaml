@@ -1,0 +1,17 @@
+version: "2.0"
+name: tower
+repo: github.com/dashotv/tower
+package: app
+output: app
+plugins:
+  models: true
+  routes: true
+  workers: true
+  cache: true
+  events: true
+definitions:
+  models: .golem/models
+  routes: .golem/routes
+  events: .golem/events
+  workers: .golem/workers
+  queues: .golem/queues

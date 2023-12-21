@@ -1,0 +1,6 @@
+name: seer_logs
+channel: seer.logs
+receiver: true
+existing_payload: EventSeerLog
+proxy_to: tower.logs
+proxy_type: EventLogs

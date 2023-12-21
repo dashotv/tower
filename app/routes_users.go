@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UsersIndex(c *gin.Context) {
-	users, err := db.User.Query().Run()
+func (a *Application) UsersIndex(c *gin.Context) {
+	users, err := app.DB.User.Query().Run()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

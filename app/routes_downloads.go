@@ -10,8 +10,8 @@ import (
 	"github.com/dashotv/golem/web"
 )
 
-func DownloadsIndex(c *gin.Context) {
-	results, err := db.ActiveDownloads()
+func (a *Application) DownloadsIndex(c *gin.Context, page, limit int) {
+	results, err := app.DB.ActiveDownloads()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -20,9 +20,9 @@ func DownloadsIndex(c *gin.Context) {
 	c.JSON(http.StatusOK, results)
 }
 
-func DownloadsLast(c *gin.Context) {
+func (a *Application) DownloadsLast(c *gin.Context) {
 	var t int
-	_, err := cache.Get("seer_downloads", &t)
+	_, err := app.Cache.Get("seer_downloads", &t)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -35,7 +35,7 @@ type DownloadRequest struct {
 	MediumId string `json:"medium_id"`
 }
 
-func DownloadsCreate(c *gin.Context) {
+func (a *Application) DownloadsCreate(c *gin.Context) {
 	data := &DownloadRequest{}
 	err := c.BindJSON(data)
 	if err != nil {
@@ -55,21 +55,21 @@ func DownloadsCreate(c *gin.Context) {
 	}
 
 	d := &Download{MediumId: id, Status: "searching"}
-	err = db.Download.Save(d)
+	err = app.DB.Download.Save(d)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	m := &Medium{}
-	err = db.Medium.Find(data.MediumId, m)
+	err = app.DB.Medium.Find(data.MediumId, m)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	m.Downloaded = true
-	err = db.Medium.Update(m)
+	err = app.DB.Medium.Update(m)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -78,21 +78,21 @@ func DownloadsCreate(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"error": false, "id": d.ID.Hex()})
 }
 
-func DownloadsShow(c *gin.Context, id string) {
+func (a *Application) DownloadsShow(c *gin.Context, id string) {
 	result := &Download{}
-	err := db.Download.Find(id, result)
+	err := app.DB.Download.Find(id, result)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	list := []*Download{result}
-	db.processDownloads(list)
+	app.DB.processDownloads(list)
 
 	c.JSON(http.StatusOK, result)
 }
 
-func DownloadsUpdate(c *gin.Context, id string) {
+func (a *Application) DownloadsUpdate(c *gin.Context, id string) {
 	data := &Download{}
 	err := c.BindJSON(data)
 	if err != nil {
@@ -100,7 +100,7 @@ func DownloadsUpdate(c *gin.Context, id string) {
 		return
 	}
 
-	err = db.Download.Update(data)
+	err = app.DB.Download.Update(data)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -108,14 +108,14 @@ func DownloadsUpdate(c *gin.Context, id string) {
 
 	if data.Status == "deleted" {
 		m := &Medium{}
-		err = db.Medium.Find(data.MediumId.Hex(), m)
+		err = app.DB.Medium.Find(data.MediumId.Hex(), m)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
 		m.Downloaded = false
-		err = db.Medium.Update(m)
+		err = app.DB.Medium.Update(m)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -125,7 +125,7 @@ func DownloadsUpdate(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, data)
 }
 
-func DownloadsSetting(c *gin.Context, id string) {
+func (a *Application) DownloadsSettings(c *gin.Context, id string) {
 	data := &Setting{}
 	err := c.BindJSON(data)
 	if err != nil {
@@ -133,7 +133,7 @@ func DownloadsSetting(c *gin.Context, id string) {
 		return
 	}
 
-	err = db.DownloadSetting(id, data.Setting, data.Value)
+	err = app.DB.DownloadSetting(id, data.Setting, data.Value)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -142,24 +142,24 @@ func DownloadsSetting(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
 }
 
-func DownloadsDelete(c *gin.Context, id string) {
+func (a *Application) DownloadsDelete(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func DownloadsRecent(c *gin.Context) {
+func (a *Application) DownloadsRecent(c *gin.Context) {
 	page, err := web.QueryDefaultInteger(c, "page", 1)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	count, err := db.Series.Count(bson.M{})
+	count, err := app.DB.Series.Count(bson.M{})
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	q := db.Download.Query()
+	q := app.DB.Download.Query()
 	results, err := q.Where("status", "done").
 		Desc("updated_at").Desc("created_at").
 		Skip((page - 1) * pagesize).
@@ -170,7 +170,7 @@ func DownloadsRecent(c *gin.Context) {
 		return
 	}
 
-	db.processDownloads(results)
+	app.DB.processDownloads(results)
 
 	c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
 }
@@ -180,7 +180,7 @@ type DownloadSelector struct {
 	Num      int
 }
 
-func DownloadsSelect(c *gin.Context, id string) {
+func (a *Application) DownloadsSelect(c *gin.Context, id string) {
 	data := &DownloadSelector{}
 	err := c.BindJSON(&data)
 	if err != nil {
@@ -188,7 +188,7 @@ func DownloadsSelect(c *gin.Context, id string) {
 		return
 	}
 
-	err = db.DownloadSelect(id, data.MediumId, data.Num)
+	err = app.DB.DownloadSelect(id, data.MediumId, data.Num)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -197,16 +197,16 @@ func DownloadsSelect(c *gin.Context, id string) {
 	c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
 }
 
-func DownloadsMedium(c *gin.Context, id string) {
+func (a *Application) DownloadsMedium(c *gin.Context, id string) {
 	download := &Download{}
-	err := db.Download.Find(id, download)
+	err := app.DB.Download.Find(id, download)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	list := []*Download{download}
-	db.processDownloads(list)
+	app.DB.processDownloads(list)
 
 	if download.Medium == nil {
 		c.JSON(http.StatusOK, gin.H{"errors": false})
@@ -214,7 +214,7 @@ func DownloadsMedium(c *gin.Context, id string) {
 	}
 
 	if download.Medium.Type == "Series" {
-		SeriesSeasonEpisodesAll(c, download.MediumId.Hex())
+		a.SeriesSeasonEpisodesAll(c, download.MediumId.Hex())
 		return
 	}
 

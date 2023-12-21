@@ -1,0 +1,10 @@
+name: jobs
+channel: tower.jobs
+receiver: false
+fields:
+  - name: event
+    type: string
+  - name: id
+    type: string
+  - name: job
+    type: "*Minion"

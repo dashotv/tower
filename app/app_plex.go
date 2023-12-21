@@ -13,30 +13,30 @@ const (
 	applicationJson = "application/json"
 )
 
-var plex *Plex
-var headers map[string]string
+func init() {
+	initializers = append(initializers, setupPlex)
+}
 
-func setupPlex() error {
-	plex = &Plex{
+func setupPlex(app *Application) error {
+	plex := &Plex{
 		URL: &PlexURLs{
-			PlexTV:   cfg.PlexTvURL,
-			Server:   cfg.PlexServerURL,
-			Metadata: cfg.PlexMetaURL,
+			PlexTV:   app.Config.PlexTvURL,
+			Server:   app.Config.PlexServerURL,
+			Metadata: app.Config.PlexMetaURL,
 		},
 		Clients:    &PlexClients{},
-		Identifier: cfg.PlexClientIdentifier,
-		Product:    cfg.PlexAppName,
-		Device:     cfg.PlexDevice,
-	}
-
-	headers = map[string]string{
-		"Plex-Container-Size":      "50",
-		"X-Plex-Container-Start":   "0",
-		"X-Plex-Product":           cfg.PlexAppName,
-		"X-Plex-Client-Identifier": cfg.PlexDevice,
-		"strong":                   "true",
-		"Accept":                   applicationJson,
-		"ContentType":              applicationJson,
+		Identifier: app.Config.PlexClientIdentifier,
+		Product:    app.Config.PlexAppName,
+		Device:     app.Config.PlexDevice,
+		Headers: map[string]string{
+			"Plex-Container-Size":      "50",
+			"X-Plex-Container-Start":   "0",
+			"X-Plex-Product":           app.Config.PlexAppName,
+			"X-Plex-Client-Identifier": app.Config.PlexDevice,
+			"strong":                   "true",
+			"Accept":                   applicationJson,
+			"ContentType":              applicationJson,
+		},
 	}
 
 	plex.Clients.PlexTV = resty.New().SetBaseURL(plex.URL.PlexTV)
@@ -47,9 +47,10 @@ func setupPlex() error {
 	data.Set("strong", "true")
 	data.Set("X-Plex-Client-Identifier", plex.Identifier)
 	data.Set("X-Plex-Product", plex.Product)
-	data.Set("X-Plex-Token", cfg.PlexToken)
+	data.Set("X-Plex-Token", app.Config.PlexToken)
 	plex.data = data
 
+	app.Plex = plex
 	return nil
 }
 
@@ -69,18 +70,19 @@ type Plex struct {
 	Identifier string
 	Product    string
 	Device     string
+	Headers    map[string]string
 	data       url.Values
 }
 
 func (p *Plex) plextv() *resty.Request {
-	return p.Clients.PlexTV.R().SetHeaders(headers)
+	return p.Clients.PlexTV.R().SetHeaders(p.Headers)
 }
 
 //	func (p *Plex) server() *resty.Request {
-//		return p.Clients.Server.R().SetHeaders(headers)
+//		return p.Clients.Server.R().SetHeaders(p.Headers)
 //	}
 func (p *Plex) metadata() *resty.Request {
-	return p.Clients.Metadata.R().SetHeaders(headers)
+	return p.Clients.Metadata.R().SetHeaders(p.Headers)
 }
 
 // CreatePin returns a new pin from the plex api
@@ -93,7 +95,7 @@ func (p *Plex) CreatePin() (*Pin, error) {
 	if !resp.IsSuccess() {
 		return nil, errors.Errorf("failed to create pin: %s", resp.Status())
 	}
-	server.Log.Debugf("create pin body: %s", resp.String())
+	app.Log.Debugf("create pin body: %s", resp.String())
 	return pin, nil
 }
 
@@ -117,7 +119,7 @@ func (p *Plex) CheckPin(pin *Pin) (bool, error) {
 	pin.Product = newPin.Product
 	pin.Identifier = newPin.Identifier
 
-	err = db.Pin.Update(pin)
+	err = app.DB.Pin.Update(pin)
 	if err != nil {
 		return false, errors.Wrap(err, "failed to update token")
 	}
@@ -144,7 +146,7 @@ func (p *Plex) getAuthUrl(pin *Pin) string {
 	data := url.Values{}
 	data.Set("clientID", p.Identifier)
 	data.Set("code", pin.Code)
-	data.Set("forwardUrl", fmt.Sprintf("%s/auth?pin=%d", cfg.Plex, pin.Pin))
+	data.Set("forwardUrl", fmt.Sprintf("%s/auth?pin=%d", app.Config.Plex, pin.Pin))
 	data.Set("context[device][product]", p.Product)
 	data.Set("context[device][version]", "0.1.0")
 	data.Set("context[device][deviceName]", p.Device)

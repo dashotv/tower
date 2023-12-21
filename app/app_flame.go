@@ -11,15 +11,17 @@ import (
 	"github.com/dashotv/flame/qbt"
 )
 
-var flameClient *Flame
+func init() {
+	initializers = append(initializers, setupFlame)
+}
 
 type Flame struct {
 	URL string
 	c   *resty.Client
 }
 
-func setupFlame() error {
-	flameClient = &Flame{
+func setupFlame(app *Application) error {
+	app.Flame = &Flame{
 		URL: "http://flame:9001",
 		c:   resty.New().SetBaseURL("http://flame:9001"),
 	}
