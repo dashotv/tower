@@ -25,11 +25,26 @@ func (j *PathImport) Work(ctx context.Context, job *minion.Job[*PathImport]) err
 		return errors.Wrap(err, "find medium")
 	}
 
-	list := lo.Filter(m.Paths, func(p *Path, i int) bool {
+	paths := m.Paths
+	if m.Type == "Series" {
+		eps, err := app.DB.Episode.Query().
+			Where("series_id", m.ID).
+			Limit(-1).
+			Run()
+		if err != nil {
+			return errors.Wrap(err, "find episodes")
+		}
+
+		for _, e := range eps {
+			paths = append(paths, e.Paths...)
+		}
+	}
+
+	list := lo.Filter(paths, func(p *Path, i int) bool {
 		return p.Id.Hex() == job.Args.PathID
 	})
 	if len(list) == 0 {
-		return errors.New("path not found")
+		return errors.New("no matching path in list")
 	}
 	if len(list) > 1 {
 		return errors.New("multiple paths found")

@@ -1,8 +1,9 @@
 name: path_import
+queue: paths
 fields:
-    - name: id
-      type: string
-    - name: path_id
-      type: string
-    - name: title
-      type: string
+  - name: id
+    type: string
+  - name: path_id
+    type: string
+  - name: title
+    type: string

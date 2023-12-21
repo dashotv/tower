@@ -43,6 +43,8 @@ func setupWorkers(app *Application) error {
 	// an example of the subscription function and the basic setup instructions
 	// are included at the end of this file.
 
+	m.Queue("paths", 3, 3, 0)
+
 	if err := minion.Register[*CleanPlexPins](m, &CleanPlexPins{}); err != nil {
 		return errors.Wrap(err, "registering worker: clean_plex_pins (CleanPlexPins)")
 	}
@@ -79,7 +81,7 @@ func setupWorkers(app *Application) error {
 		return errors.Wrap(err, "registering worker: media_paths (MediaPaths)")
 	}
 
-	if err := minion.Register[*PathImport](m, &PathImport{}); err != nil {
+	if err := minion.RegisterWithQueue[*PathImport](m, &PathImport{}, "paths"); err != nil {
 		return errors.Wrap(err, "registering worker: path_import (PathImport)")
 	}
 
