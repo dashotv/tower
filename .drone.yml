@@ -11,13 +11,15 @@ steps:
   - name: publish
     image: plugins/docker
     settings:
+      registry: docker.dasho.tv
       username:
-        from_secret: dockerhub_username
+        from_secret: docker_dasho_username
       password:
-        from_secret: dockerhub_password
-      repo: dashotv/tower
+        from_secret: docker_dasho_password
+      repo: docker.dasho.tv/dashotv/tower
       tags:
         - latest
+        - ${DRONE_BUILD_NUMBER}
   - name: deploy
     image: appleboy/drone-ssh
     settings:
