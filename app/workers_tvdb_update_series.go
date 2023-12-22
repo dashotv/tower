@@ -77,7 +77,7 @@ func (j *TvdbUpdateSeries) Work(ctx context.Context, job *minion.Job[*TvdbUpdate
 	if err := app.DB.Series.Update(series); err != nil {
 		return errors.Wrap(err, "updating series")
 	}
-	if job.Args.JustMedia {
+	if !job.Args.JustMedia {
 		if err := TvdbUpdateSeriesCover(series.ID.Hex(), int64(sid)); err != nil {
 			app.Log.Warnf("failed to update cover: %s", err)
 		}
