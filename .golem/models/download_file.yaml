@@ -7,6 +7,8 @@ fields:
   - name: medium_id
     type: primitive.ObjectID
   - name: medium
-    type: '*Medium'
+    type: "*Medium"
   - name: num
     type: int
+    json: num
+    bson: num

@@ -210,7 +210,7 @@ type DownloadFile struct { // struct
 	Id       primitive.ObjectID `bson:"_id" json:"id,omitempty"`
 	MediumId primitive.ObjectID `bson:"medium_id,omitempty" json:"medium_id,omitempty"`
 	Medium   *Medium            `bson:"medium,omitempty" json:"medium,omitempty"`
-	Num      int                `bson:"num,omitempty" json:"num,omitempty"`
+	Num      int                `bson:"num" json:"num"`
 }
 
 type Episode struct { // model
