@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"os"
+	"time"
 
 	vidio "github.com/AlexEidt/Vidio"
 	"github.com/pkg/errors"
@@ -18,7 +19,8 @@ type PathImport struct {
 	Title  string
 }
 
-func (j *PathImport) Kind() string { return "PathImport" }
+func (j *PathImport) Kind() string                                       { return "PathImport" }
+func (j *PathImport) Timeout(job *minion.Job[*PathImport]) time.Duration { return 300 * time.Second }
 func (j *PathImport) Work(ctx context.Context, job *minion.Job[*PathImport]) error {
 	m := &Medium{}
 	if err := app.DB.Medium.Find(job.Args.ID, m); err != nil {
