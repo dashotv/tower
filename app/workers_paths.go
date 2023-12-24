@@ -99,6 +99,7 @@ func (j *MediaPaths) Work(ctx context.Context, job *minion.Job[*MediaPaths]) err
 
 	queuedPaths := map[string]int{}
 
+	newPaths := []*Path{}
 	for _, p := range m.Paths {
 		if queuedPaths[p.LocalPath()] == 0 {
 			app.Workers.Log.Debugf("path import: %s", p.LocalPath())
@@ -106,7 +107,12 @@ func (j *MediaPaths) Work(ctx context.Context, job *minion.Job[*MediaPaths]) err
 				return errors.Wrap(err, "enqueue path import")
 			}
 			queuedPaths[p.LocalPath()]++
+			newPaths = append(newPaths, p)
 		}
+	}
+	m.Paths = newPaths
+	if err := app.DB.Medium.Save(m); err != nil {
+		return errors.Wrap(err, "save medium")
 	}
 
 	if m.Type == "Series" {
@@ -121,6 +127,7 @@ func (j *MediaPaths) Work(ctx context.Context, job *minion.Job[*MediaPaths]) err
 
 		for _, e := range eps {
 			if len(e.Paths) > 0 {
+				newPaths := []*Path{}
 				for _, p := range e.Paths {
 					if queuedPaths[p.LocalPath()] == 0 {
 						app.Workers.Log.Debugf("path import: %s", p.LocalPath())
@@ -128,7 +135,12 @@ func (j *MediaPaths) Work(ctx context.Context, job *minion.Job[*MediaPaths]) err
 							return errors.Wrap(err, "enqueue path import")
 						}
 						queuedPaths[p.LocalPath()]++
+						newPaths = append(newPaths, p)
 					}
+				}
+				e.Paths = newPaths
+				if err := app.DB.Episode.Save(e); err != nil {
+					return errors.Wrap(err, "save episode")
 				}
 			}
 		}
