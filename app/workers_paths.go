@@ -64,11 +64,11 @@ func (j *PathImport) Work(ctx context.Context, job *minion.Job[*PathImport]) err
 	path.Size = int(stat.Size())
 
 	if path.IsVideo() {
-		sum, err := sumFile(path.LocalPath())
-		if err != nil {
-			return errors.Wrap(err, "sum file")
+		if sum, err := sumFile(path.LocalPath()); err == nil {
+			path.Checksum = sum
+		} else {
+			app.Workers.Log.Errorf("failed to checksum file: %s", err)
 		}
-		path.Checksum = sum
 
 		if v, err := vidio.NewVideo(path.LocalPath()); err == nil {
 			path.Resolution = v.Height()
