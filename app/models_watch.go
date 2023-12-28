@@ -13,7 +13,7 @@ func (c *Connector) MediumWatched(id primitive.ObjectID) bool {
 }
 
 func (c *Connector) Watches(mediumId, username string) ([]*Watch, error) {
-	query := c.Watch.Query().Desc("watched_at")
+	query := c.Watch.Query().Limit(100).Desc("watched_at")
 	if username != "" {
 		query = query.Where("username", username)
 	}
@@ -61,7 +61,17 @@ func (c *Connector) Watches(mediumId, username string) ([]*Watch, error) {
 		}
 		w.Medium = m
 		if m.Type == "Episode" {
-			m.Display = fmt.Sprintf("%dx%d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)
+			s := &Series{}
+			if err := c.Series.FindByID(m.SeriesId, s); err != nil {
+				return nil, err
+			}
+
+			m.Title = s.Display
+			if s.Kind == "anime" {
+				m.Display = fmt.Sprintf("%02dx%02d #%03d %s", m.SeasonNumber, m.EpisodeNumber, m.AbsoluteNumber, m.Title)
+			} else {
+				m.Display = fmt.Sprintf("%02dx%02d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)
+			}
 		}
 	}
 
