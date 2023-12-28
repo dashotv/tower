@@ -9,11 +9,9 @@ import (
 )
 
 func (d *Download) Created(ctx context.Context) error {
-	app.DB.Log.Debugf("Download Created: %s", d.ID.Hex())
 	return app.Events.Send("tower.downloads", &EventDownloads{"created", d.ID.Hex(), d})
 }
 func (d *Download) Updated(ctx context.Context, result *mongo.UpdateResult) error {
-	app.DB.Log.Debugf("Download Updated: %s", d.ID.Hex())
 	return app.Events.Send("tower.downloads", &EventDownloads{"updated", d.ID.Hex(), d})
 }
 func (d *Download) Saving() error {
@@ -56,10 +54,22 @@ func (e *Episode) Saving() error {
 }
 
 func (m *Movie) Created(ctx context.Context) error {
-	return app.Events.Send("tower.movies", &EventMovies{"created", m.ID.Hex(), m})
+	go func() {
+		app.DB.processMovies([]*Movie{m})
+		if err := app.Events.Send("tower.movies", &EventMovies{"created", m.ID.Hex(), m}); err != nil {
+			app.DB.Log.Errorf("error updating movie: %s", err)
+		}
+	}()
+	return nil
 }
 func (m *Movie) Updated(ctx context.Context, result *mongo.UpdateResult) error {
-	return app.Events.Send("tower.movies", &EventMovies{"updated", m.ID.Hex(), m})
+	go func() {
+		app.DB.processMovies([]*Movie{m})
+		if err := app.Events.Send("tower.movies", &EventMovies{"updated", m.ID.Hex(), m}); err != nil {
+			app.DB.Log.Errorf("error updating movie: %s", err)
+		}
+	}()
+	return nil
 }
 func (m *Movie) Saving() error {
 	// Call the DefaultModel Saving hook
@@ -100,10 +110,22 @@ func (m *Movie) Saving() error {
 	return nil
 }
 func (s *Series) Created(ctx context.Context) error {
-	return app.Events.Send("tower.series", &EventSeries{"created", s.ID.Hex(), s})
+	go func() {
+		app.DB.processSeries(s)
+		if err := app.Events.Send("tower.series", &EventSeries{"created", s.ID.Hex(), s}); err != nil {
+			app.DB.Log.Errorf("error updating series: %s", err)
+		}
+	}()
+	return nil
 }
 func (s *Series) Updated(ctx context.Context, result *mongo.UpdateResult) error {
-	return app.Events.Send("tower.series", &EventSeries{"updated", s.ID.Hex(), s})
+	go func() {
+		app.DB.processSeries(s)
+		if err := app.Events.Send("tower.series", &EventSeries{"updated", s.ID.Hex(), s}); err != nil {
+			app.DB.Log.Errorf("error updating series: %s", err)
+		}
+	}()
+	return nil
 }
 func (s *Series) Saving() error {
 	// Call the DefaultModel Saving hook

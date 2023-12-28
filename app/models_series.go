@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strconv"
 
@@ -9,6 +10,19 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+func (c *Connector) processSeries(s *Series) {
+	for _, p := range s.Paths {
+		if p.Type == "cover" {
+			s.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+			continue
+		}
+		if p.Type == "background" {
+			s.Background = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+			continue
+		}
+	}
+}
 
 func (c *Connector) SeriesActive() ([]*Series, error) {
 	return c.Series.Query().
