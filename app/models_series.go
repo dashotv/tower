@@ -11,6 +11,24 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+func (s *Series) GetCover() *Path {
+	for _, p := range s.Paths {
+		if p.Type == "cover" {
+			return p
+		}
+	}
+	return nil
+}
+
+func (s *Series) GetBackground() *Path {
+	for _, p := range s.Paths {
+		if p.Type == "background" {
+			return p
+		}
+	}
+	return nil
+}
+
 func (c *Connector) processSeries(s *Series) {
 	for _, p := range s.Paths {
 		if p.Type == "cover" {

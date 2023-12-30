@@ -154,6 +154,8 @@ func (a *Application) Routes() {
 	series.GET("/:id/seasons/all", a.SeriesSeasonEpisodesAllHandler)
 	series.GET("/:id/seasons/:season", a.SeriesSeasonEpisodesHandler)
 	series.GET("/:id/watches", a.SeriesWatchesHandler)
+	series.GET("/:id/covers", a.SeriesCoversHandler)
+	series.GET("/:id/backgrounds", a.SeriesBackgroundsHandler)
 
 	upcoming := a.Router.Group("/upcoming")
 	upcoming.GET("/", a.UpcomingIndexHandler)
@@ -440,6 +442,14 @@ func (a *Application) SeriesSeasonEpisodesHandler(c *gin.Context) {
 func (a *Application) SeriesWatchesHandler(c *gin.Context) {
 	id := c.Param("id")
 	a.SeriesWatches(c, id)
+}
+func (a *Application) SeriesCoversHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.SeriesCovers(c, id)
+}
+func (a *Application) SeriesBackgroundsHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.SeriesBackgrounds(c, id)
 }
 
 // Upcoming (/upcoming)

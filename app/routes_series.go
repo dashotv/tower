@@ -3,9 +3,12 @@ package app
 import (
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -161,6 +164,26 @@ func (a *Application) SeriesUpdate(c *gin.Context, id string) {
 		return
 	}
 
+	if !strings.HasPrefix(data.Cover, "/media-images") {
+		cover := data.GetCover()
+		if cover != nil && cover.Remote != data.Cover {
+			if err := app.Workers.Enqueue(&TvdbUpdateSeriesImage{ID: id, Type: "cover", Path: data.Cover, Ratio: posterRatio}); err != nil {
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+		}
+	}
+
+	if !strings.HasPrefix(data.Background, "/media-images") {
+		background := data.GetBackground()
+		if background != nil && background.Remote != data.Background {
+			if err := app.Workers.Enqueue(&TvdbUpdateSeriesImage{ID: id, Type: "background", Path: data.Background, Ratio: backgroundRatio}); err != nil {
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+		}
+	}
+
 	err = app.DB.SeriesUpdate(id, data)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -256,4 +279,68 @@ func (a *Application) SeriesRefresh(c *gin.Context, id string) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"error": false})
+}
+
+func (a *Application) SeriesCovers(c *gin.Context, id string) {
+	series, err := a.DB.Series.Get(id, &Series{})
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": errors.Wrap(err, "getting series").Error()})
+		return
+	}
+
+	if series == nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "series not found"})
+		return
+	}
+
+	if series.Source != "tvdb" {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "series not from tvdb"})
+		return
+	}
+
+	tvdbid, err := strconv.Atoi(series.SourceId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": errors.Wrap(err, "converting tvdb id").Error()})
+		return
+	}
+
+	resp, err := app.TvdbSeriesCovers(int64(tvdbid))
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"error": false, "covers": resp})
+}
+
+func (a *Application) SeriesBackgrounds(c *gin.Context, id string) {
+	series, err := a.DB.Series.Get(id, &Series{})
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": errors.Wrap(err, "getting series").Error()})
+		return
+	}
+
+	if series == nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "series not found"})
+		return
+	}
+
+	if series.Source != "tvdb" {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "series not from tvdb"})
+		return
+	}
+
+	tvdbid, err := strconv.Atoi(series.SourceId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": errors.Wrap(err, "converting tvdb id").Error()})
+		return
+	}
+
+	resp, err := app.TvdbSeriesBackgrounds(int64(tvdbid))
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"error": false, "backgrounds": resp})
 }
