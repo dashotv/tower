@@ -7,7 +7,7 @@ require (
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/dashotv/flame v0.8.1
-	github.com/dashotv/golem v0.11.2
+	github.com/dashotv/golem v0.11.3
 	github.com/dashotv/grimoire v0.4.3
 	github.com/dashotv/mercury v0.3.2
 	github.com/dashotv/minion v0.3.0
@@ -30,7 +30,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	go.mongodb.org/mongo-driver v1.13.1
 	go.uber.org/zap v1.26.0
-	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848
+	golang.org/x/exp v0.0.0-20231226003508-02704c960a9b
 	golang.org/x/term v0.15.0
 )
 

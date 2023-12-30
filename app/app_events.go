@@ -290,57 +290,57 @@ func (e *Events) doSend(topic EventsTopic, data any) error {
 }
 
 type EventDownloading struct { // downloading
-	Downloads map[string]*Downloading `bson:"downloads,omitempty" json:"downloads,omitempty"`
-	Hashes    map[string]string       `bson:"hashes,omitempty" json:"hashes,omitempty"`
-	Metrics   *flame.Metrics          `bson:"metrics,omitempty" json:"metrics,omitempty"`
+	Downloads map[string]*Downloading `bson:"downloads" json:"downloads"`
+	Hashes    map[string]string       `bson:"hashes" json:"hashes"`
+	Metrics   *flame.Metrics          `bson:"metrics" json:"metrics"`
 }
 
 type EventDownloads struct { // downloads
-	Event    string    `bson:"event,omitempty" json:"event,omitempty"`
-	Id       string    `bson:"id,omitempty" json:"id,omitempty"`
-	Download *Download `bson:"download,omitempty" json:"download,omitempty"`
+	Event    string    `bson:"event" json:"event"`
+	Id       string    `bson:"id" json:"id"`
+	Download *Download `bson:"download" json:"download"`
 }
 
 type EventEpisodes struct { // episodes
-	Event   string   `bson:"event,omitempty" json:"event,omitempty"`
-	Id      string   `bson:"id,omitempty" json:"id,omitempty"`
-	Episode *Episode `bson:"episode,omitempty" json:"episode,omitempty"`
+	Event   string   `bson:"event" json:"event"`
+	Id      string   `bson:"id" json:"id"`
+	Episode *Episode `bson:"episode" json:"episode"`
 }
 
 type EventJobs struct { // jobs
-	Event string  `bson:"event,omitempty" json:"event,omitempty"`
-	Id    string  `bson:"id,omitempty" json:"id,omitempty"`
-	Job   *Minion `bson:"job,omitempty" json:"job,omitempty"`
+	Event string  `bson:"event" json:"event"`
+	Id    string  `bson:"id" json:"id"`
+	Job   *Minion `bson:"job" json:"job"`
 }
 
 type EventLogs struct { // logs
-	Event string   `bson:"event,omitempty" json:"event,omitempty"`
-	Id    string   `bson:"id,omitempty" json:"id,omitempty"`
-	Log   *Message `bson:"log,omitempty" json:"log,omitempty"`
+	Event string   `bson:"event" json:"event"`
+	Id    string   `bson:"id" json:"id"`
+	Log   *Message `bson:"log" json:"log"`
 }
 
 type EventMovies struct { // movies
-	Event string `bson:"event,omitempty" json:"event,omitempty"`
-	Id    string `bson:"id,omitempty" json:"id,omitempty"`
-	Movie *Movie `bson:"movie,omitempty" json:"movie,omitempty"`
+	Event string `bson:"event" json:"event"`
+	Id    string `bson:"id" json:"id"`
+	Movie *Movie `bson:"movie" json:"movie"`
 }
 
 type EventNotices struct { // notices
-	Event   string `bson:"event,omitempty" json:"event,omitempty"`
-	Time    string `bson:"time,omitempty" json:"time,omitempty"`
-	Class   string `bson:"class,omitempty" json:"class,omitempty"`
-	Level   string `bson:"level,omitempty" json:"level,omitempty"`
-	Message string `bson:"message,omitempty" json:"message,omitempty"`
+	Event   string `bson:"event" json:"event"`
+	Time    string `bson:"time" json:"time"`
+	Class   string `bson:"class" json:"class"`
+	Level   string `bson:"level" json:"level"`
+	Message string `bson:"message" json:"message"`
 }
 
 type EventRequests struct { // requests
-	Event   string   `bson:"event,omitempty" json:"event,omitempty"`
-	Id      string   `bson:"id,omitempty" json:"id,omitempty"`
-	Request *Request `bson:"request,omitempty" json:"request,omitempty"`
+	Event   string   `bson:"event" json:"event"`
+	Id      string   `bson:"id" json:"id"`
+	Request *Request `bson:"request" json:"request"`
 }
 
 type EventSeries struct { // series
-	Event  string  `bson:"event,omitempty" json:"event,omitempty"`
-	Id     string  `bson:"id,omitempty" json:"id,omitempty"`
-	Series *Series `bson:"series,omitempty" json:"series,omitempty"`
+	Event  string  `bson:"event" json:"event"`
+	Id     string  `bson:"id" json:"id"`
+	Series *Series `bson:"series" json:"series"`
 }

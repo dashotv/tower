@@ -106,8 +106,8 @@ github.com/cpuguy83/go-md2man v1.0.10/go.mod h1:SmD6nW6nTyfqj6ABTjUi3V3JVMnlJmwc
 github.com/cpuguy83/go-md2man/v2 v2.0.3/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/dashotv/flame v0.8.1 h1:K7XkObEu5fomDwqvoyibW3bJJ4f1AzmTHSUkVC6vYbc=
 github.com/dashotv/flame v0.8.1/go.mod h1:UrmbLLStAu1IxJxDHKMoQXi6KFiogAKuNiUqoJ1hjd8=
-github.com/dashotv/golem v0.11.2 h1:BHsV/WPvAaA4e8jYKTZATrqs6PHgVhuQj7zMdYWMlH4=
-github.com/dashotv/golem v0.11.2/go.mod h1:C7njDensxr/gfJhRAw+3sXrnxEVVGi5B8RTsNk/BTIo=
+github.com/dashotv/golem v0.11.3 h1:+WHMMjcLLcPwHGHusWxoJLuCDxQGGbVIQaoI1OMckug=
+github.com/dashotv/golem v0.11.3/go.mod h1:C7njDensxr/gfJhRAw+3sXrnxEVVGi5B8RTsNk/BTIo=
 github.com/dashotv/grimoire v0.4.3 h1:cRRrdiwdjqtViU2SadGYy5TkBKAEhpd+5WA7xAcb3VY=
 github.com/dashotv/grimoire v0.4.3/go.mod h1:q76AxToGXZ4acrFIt+ZyCrupxeymiamJzlXO6qtSHzM=
 github.com/dashotv/mercury v0.3.2 h1:88bvWsp5l823wTR1XbIB+LBiAFeCRZfe+JyIKf4nV/0=
@@ -570,8 +570,8 @@ golang.org/x/crypto v0.14.0/go.mod h1:MVFd36DqK4CsrnJYDkBA3VC4m2GkXAM0PvzMCn4JQf
 golang.org/x/crypto v0.17.0 h1:r8bRNjWL3GshPW3gkd+RpvzWrZAwPS49OmTGZ/uhM4k=
 golang.org/x/crypto v0.17.0/go.mod h1:gCAAfMLgwOJRpTjQ2zCCt2OcSfYMTeZVSRtQlPC7Nq4=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
-golang.org/x/exp v0.0.0-20231219180239-dc181d75b848 h1:+iq7lrkxmFNBM7xx+Rae2W6uyPfhPeDWD+n+JgppptE=
-golang.org/x/exp v0.0.0-20231219180239-dc181d75b848/go.mod h1:iRJReGqOEeBhDZGkGbynYwcHlctCvnjTYIamk7uXpHI=
+golang.org/x/exp v0.0.0-20231226003508-02704c960a9b h1:kLiC65FbiHWFAOu+lxwNPujcsl8VYyTYYEZnsOO1WK4=
+golang.org/x/exp v0.0.0-20231226003508-02704c960a9b/go.mod h1:iRJReGqOEeBhDZGkGbynYwcHlctCvnjTYIamk7uXpHI=
 golang.org/x/image v0.0.0-20190703141733-d6a02ce849c9/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
 golang.org/x/image v0.14.0 h1:tNgSxAFe3jC4uYqvZdTr84SZoM1KfwdC9SKIFrLjFn4=
 golang.org/x/image v0.14.0/go.mod h1:HUYqC05R2ZcZ3ejNQsIHQDQiwWM4JBqmm6MKANTp4LE=

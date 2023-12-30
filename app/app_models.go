@@ -193,23 +193,23 @@ type Download struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	MediumId  primitive.ObjectID `bson:"medium_id,omitempty" json:"medium_id,omitempty"`
-	Auto      bool               `bson:"auto,omitempty" json:"auto,omitempty"`
-	Multi     bool               `bson:"multi,omitempty" json:"multi,omitempty"`
-	Force     bool               `bson:"force,omitempty" json:"force,omitempty"`
-	Url       string             `bson:"url,omitempty" json:"url,omitempty"`
-	ReleaseId string             `bson:"tdo_id" json:"release_id,omitempty"`
-	Thash     string             `bson:"thash,omitempty" json:"thash,omitempty"`
-	Selected  string             `bson:"selected,omitempty" json:"selected,omitempty"`
-	Status    string             `bson:"status,omitempty" json:"status,omitempty"`
+	MediumId  primitive.ObjectID `bson:"medium_id" json:"medium_id"`
+	Auto      bool               `bson:"auto" json:"auto"`
+	Multi     bool               `bson:"multi" json:"multi"`
+	Force     bool               `bson:"force" json:"force"`
+	Url       string             `bson:"url" json:"url"`
+	ReleaseId string             `bson:"tdo_id" json:"release_id"`
+	Thash     string             `bson:"thash" json:"thash"`
+	Selected  string             `bson:"selected" json:"selected"`
+	Status    string             `bson:"status" json:"status"`
 	Files     []*DownloadFile    `bson:"download_files" json:"download_files"`
-	Medium    *Medium            `bson:"-" json:"medium,omitempty"`
+	Medium    *Medium            `bson:"-" json:"medium"`
 }
 
 type DownloadFile struct { // struct
-	Id       primitive.ObjectID `bson:"_id" json:"id,omitempty"`
-	MediumId primitive.ObjectID `bson:"medium_id,omitempty" json:"medium_id,omitempty"`
-	Medium   *Medium            `bson:"medium,omitempty" json:"medium,omitempty"`
+	Id       primitive.ObjectID `bson:"_id" json:"id"`
+	MediumId primitive.ObjectID `bson:"medium_id" json:"medium_id"`
+	Medium   *Medium            `bson:"medium" json:"medium"`
 	Num      int                `bson:"num" json:"num"`
 }
 
@@ -218,28 +218,28 @@ type Episode struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Type           string             `bson:"_type" json:"type,omitempty"`
-	SeriesId       primitive.ObjectID `bson:"series_id,omitempty" json:"series_id,omitempty"`
-	SourceId       string             `bson:"source_id,omitempty" json:"source_id,omitempty"`
-	Title          string             `bson:"title,omitempty" json:"title,omitempty"`
-	Description    string             `bson:"description,omitempty" json:"description,omitempty"`
-	Directory      string             `bson:"directory,omitempty" json:"directory,omitempty"`
-	Search         string             `bson:"search,omitempty" json:"search,omitempty"`
-	SeasonNumber   int                `bson:"season_number,omitempty" json:"season_number,omitempty"`
-	EpisodeNumber  int                `bson:"episode_number,omitempty" json:"episode_number,omitempty"`
-	AbsoluteNumber int                `bson:"absolute_number,omitempty" json:"absolute_number,omitempty"`
-	Downloaded     bool               `bson:"downloaded,omitempty" json:"downloaded,omitempty"`
-	Completed      bool               `bson:"completed,omitempty" json:"completed,omitempty"`
-	Skipped        bool               `bson:"skipped,omitempty" json:"skipped,omitempty"`
-	ReleaseDate    time.Time          `bson:"release_date,omitempty" json:"release_date,omitempty"`
-	Paths          []*Path            `bson:"paths,omitempty" json:"paths,omitempty"`
-	Cover          string             `bson:"-" json:"cover,omitempty"`
-	Background     string             `bson:"-" json:"background,omitempty"`
-	Watched        bool               `bson:"-" json:"watched,omitempty"`
-	Active         bool               `bson:"-" json:"active,omitempty"`
-	Favorite       bool               `bson:"-" json:"favorite,omitempty"`
-	Unwatched      int                `bson:"-" json:"unwatched,omitempty"`
-	Display        string             `bson:"-" json:"display,omitempty"`
+	Type           string             `bson:"_type" json:"type"`
+	SeriesId       primitive.ObjectID `bson:"series_id" json:"series_id"`
+	SourceId       string             `bson:"source_id" json:"source_id"`
+	Title          string             `bson:"title" json:"title"`
+	Description    string             `bson:"description" json:"description"`
+	Directory      string             `bson:"directory" json:"directory"`
+	Search         string             `bson:"search" json:"search"`
+	SeasonNumber   int                `bson:"season_number" json:"season_number"`
+	EpisodeNumber  int                `bson:"episode_number" json:"episode_number"`
+	AbsoluteNumber int                `bson:"absolute_number" json:"absolute_number"`
+	Downloaded     bool               `bson:"downloaded" json:"downloaded"`
+	Completed      bool               `bson:"completed" json:"completed"`
+	Skipped        bool               `bson:"skipped" json:"skipped"`
+	ReleaseDate    time.Time          `bson:"release_date" json:"release_date"`
+	Paths          []*Path            `bson:"paths,omitempty" json:"paths"`
+	Cover          string             `bson:"-" json:"cover"`
+	Background     string             `bson:"-" json:"background"`
+	Watched        bool               `bson:"-" json:"watched"`
+	Active         bool               `bson:"-" json:"active"`
+	Favorite       bool               `bson:"-" json:"favorite"`
+	Unwatched      int                `bson:"-" json:"unwatched"`
+	Display        string             `bson:"-" json:"display"`
 }
 
 type Feed struct { // model
@@ -247,12 +247,12 @@ type Feed struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Name      string    `bson:"name,omitempty" json:"name,omitempty"`
-	Url       string    `bson:"url,omitempty" json:"url,omitempty"`
-	Source    string    `bson:"source,omitempty" json:"source,omitempty"`
-	Type      string    `bson:"type,omitempty" json:"type,omitempty"`
-	Active    bool      `bson:"active,omitempty" json:"active,omitempty"`
-	Processed time.Time `bson:"processed,omitempty" json:"processed,omitempty"`
+	Name      string    `bson:"name" json:"name"`
+	Url       string    `bson:"url" json:"url"`
+	Source    string    `bson:"source" json:"source"`
+	Type      string    `bson:"type" json:"type"`
+	Active    bool      `bson:"active" json:"active"`
+	Processed time.Time `bson:"processed" json:"processed"`
 }
 
 type Medium struct { // model
@@ -260,33 +260,33 @@ type Medium struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Type           string             `bson:"_type" json:"type,omitempty"`
-	Kind           primitive.Symbol   `bson:"kind,omitempty" json:"kind,omitempty"`
-	Source         string             `bson:"source,omitempty" json:"source,omitempty"`
-	SourceId       string             `bson:"source_id,omitempty" json:"source_id,omitempty"`
-	ImdbId         string             `bson:"imdb_id,omitempty" json:"imdb_id,omitempty"`
-	Title          string             `bson:"title,omitempty" json:"title,omitempty"`
-	Description    string             `bson:"description,omitempty" json:"description,omitempty"`
-	Display        string             `bson:"display,omitempty" json:"display,omitempty"`
-	Directory      string             `bson:"directory,omitempty" json:"directory,omitempty"`
-	Search         string             `bson:"search,omitempty" json:"search,omitempty"`
-	SearchParams   *SearchParams      `bson:"search_params,omitempty" json:"search_params,omitempty"`
-	Active         bool               `bson:"active,omitempty" json:"active,omitempty"`
-	Downloaded     bool               `bson:"downloaded,omitempty" json:"downloaded,omitempty"`
-	Completed      bool               `bson:"completed,omitempty" json:"completed,omitempty"`
-	Skipped        bool               `bson:"skipped,omitempty" json:"skipped,omitempty"`
-	Watched        bool               `bson:"watched,omitempty" json:"watched,omitempty"`
-	Broken         bool               `bson:"broken,omitempty" json:"broken,omitempty"`
-	Favorite       bool               `bson:"favorite,omitempty" json:"favorite,omitempty"`
-	Unwatched      int                `bson:"unwatched,omitempty" json:"unwatched,omitempty"`
-	ReleaseDate    time.Time          `bson:"release_date,omitempty" json:"release_date,omitempty"`
-	Paths          []*Path            `bson:"paths,omitempty" json:"paths,omitempty"`
-	Cover          string             `bson:"-" json:"cover,omitempty"`
-	Background     string             `bson:"-" json:"background,omitempty"`
-	SeriesId       primitive.ObjectID `bson:"series_id,omitempty" json:"series_id,omitempty"`
-	SeasonNumber   int                `bson:"season_number,omitempty" json:"season_number,omitempty"`
-	EpisodeNumber  int                `bson:"episode_number,omitempty" json:"episode_number,omitempty"`
-	AbsoluteNumber int                `bson:"absolute_number,omitempty" json:"absolute_number,omitempty"`
+	Type           string             `bson:"_type" json:"type"`
+	Kind           primitive.Symbol   `bson:"kind" json:"kind"`
+	Source         string             `bson:"source" json:"source"`
+	SourceId       string             `bson:"source_id" json:"source_id"`
+	ImdbId         string             `bson:"imdb_id" json:"imdb_id"`
+	Title          string             `bson:"title" json:"title"`
+	Description    string             `bson:"description" json:"description"`
+	Display        string             `bson:"display" json:"display"`
+	Directory      string             `bson:"directory" json:"directory"`
+	Search         string             `bson:"search" json:"search"`
+	SearchParams   *SearchParams      `bson:"search_params" json:"search_params"`
+	Active         bool               `bson:"active" json:"active"`
+	Downloaded     bool               `bson:"downloaded" json:"downloaded"`
+	Completed      bool               `bson:"completed" json:"completed"`
+	Skipped        bool               `bson:"skipped" json:"skipped"`
+	Watched        bool               `bson:"watched" json:"watched"`
+	Broken         bool               `bson:"broken" json:"broken"`
+	Favorite       bool               `bson:"favorite" json:"favorite"`
+	Unwatched      int                `bson:"unwatched" json:"unwatched"`
+	ReleaseDate    time.Time          `bson:"release_date" json:"release_date"`
+	Paths          []*Path            `bson:"paths,omitempty" json:"paths"`
+	Cover          string             `bson:"-" json:"cover"`
+	Background     string             `bson:"-" json:"background"`
+	SeriesId       primitive.ObjectID `bson:"series_id" json:"series_id"`
+	SeasonNumber   int                `bson:"season_number" json:"season_number"`
+	EpisodeNumber  int                `bson:"episode_number" json:"episode_number"`
+	AbsoluteNumber int                `bson:"absolute_number" json:"absolute_number"`
 }
 
 type Message struct { // model
@@ -294,9 +294,9 @@ type Message struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Level    string `bson:"level,omitempty" json:"level,omitempty"`
-	Facility string `bson:"facility,omitempty" json:"facility,omitempty"`
-	Message  string `bson:"message,omitempty" json:"message,omitempty"`
+	Level    string `bson:"level" json:"level"`
+	Facility string `bson:"facility" json:"facility"`
+	Message  string `bson:"message" json:"message"`
 }
 
 type Minion struct { // model
@@ -304,18 +304,18 @@ type Minion struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Kind     string           `bson:"kind,omitempty" json:"kind,omitempty"`
-	Args     string           `bson:"args,omitempty" json:"args,omitempty"`
-	Status   string           `bson:"status,omitempty" json:"status,omitempty"`
-	Attempts []*MinionAttempt `bson:"attempts,omitempty" json:"attempts,omitempty"`
+	Kind     string           `bson:"kind" json:"kind"`
+	Args     string           `bson:"args" json:"args"`
+	Status   string           `bson:"status" json:"status"`
+	Attempts []*MinionAttempt `bson:"attempts" json:"attempts"`
 }
 
 type MinionAttempt struct { // struct
-	StartedAt  time.Time `bson:"started_at,omitempty" json:"started_at,omitempty"`
-	Duration   float64   `bson:"duration,omitempty" json:"duration,omitempty"`
-	Status     string    `bson:"status,omitempty" json:"status,omitempty"`
-	Error      string    `bson:"error,omitempty" json:"error,omitempty"`
-	Stacktrace []string  `bson:"stacktrace,omitempty" json:"stacktrace,omitempty"`
+	StartedAt  time.Time `bson:"started_at" json:"started_at"`
+	Duration   float64   `bson:"duration" json:"duration"`
+	Status     string    `bson:"status" json:"status"`
+	Error      string    `bson:"error" json:"error"`
+	Stacktrace []string  `bson:"stacktrace" json:"stacktrace"`
 }
 
 type Movie struct { // model
@@ -323,43 +323,43 @@ type Movie struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Type         string           `bson:"_type" json:"type,omitempty"`
-	Kind         primitive.Symbol `bson:"kind,omitempty" json:"kind,omitempty"`
-	Source       string           `bson:"source,omitempty" json:"source,omitempty"`
-	SourceId     string           `bson:"source_id,omitempty" json:"source_id,omitempty"`
-	ImdbId       string           `bson:"imdb_id,omitempty" json:"imdb_id,omitempty"`
-	Title        string           `bson:"title,omitempty" json:"title,omitempty"`
-	Description  string           `bson:"description,omitempty" json:"description,omitempty"`
-	Slug         string           `bson:"slug,omitempty" json:"slug,omitempty"`
-	Text         []string         `bson:"text,omitempty" json:"text,omitempty"`
-	Display      string           `bson:"display,omitempty" json:"display,omitempty"`
-	Directory    string           `bson:"directory,omitempty" json:"directory,omitempty"`
-	Search       string           `bson:"search,omitempty" json:"search,omitempty"`
-	SearchParams *SearchParams    `bson:"search_params,omitempty" json:"search_params,omitempty"`
-	Active       bool             `bson:"active,omitempty" json:"active,omitempty"`
-	Downloaded   bool             `bson:"downloaded,omitempty" json:"downloaded,omitempty"`
-	Completed    bool             `bson:"completed,omitempty" json:"completed,omitempty"`
-	Skipped      bool             `bson:"skipped,omitempty" json:"skipped,omitempty"`
-	Watched      bool             `bson:"watched,omitempty" json:"watched,omitempty"`
-	Broken       bool             `bson:"broken,omitempty" json:"broken,omitempty"`
-	Favorite     bool             `bson:"favorite,omitempty" json:"favorite,omitempty"`
-	ReleaseDate  time.Time        `bson:"release_date,omitempty" json:"release_date,omitempty"`
-	Paths        []*Path          `bson:"paths,omitempty" json:"paths,omitempty"`
-	Cover        string           `bson:"-" json:"cover,omitempty"`
-	Background   string           `bson:"-" json:"background,omitempty"`
+	Type         string           `bson:"_type" json:"type"`
+	Kind         primitive.Symbol `bson:"kind" json:"kind"`
+	Source       string           `bson:"source" json:"source"`
+	SourceId     string           `bson:"source_id" json:"source_id"`
+	ImdbId       string           `bson:"imdb_id" json:"imdb_id"`
+	Title        string           `bson:"title" json:"title"`
+	Description  string           `bson:"description" json:"description"`
+	Slug         string           `bson:"slug" json:"slug"`
+	Text         []string         `bson:"text" json:"text"`
+	Display      string           `bson:"display" json:"display"`
+	Directory    string           `bson:"directory" json:"directory"`
+	Search       string           `bson:"search" json:"search"`
+	SearchParams *SearchParams    `bson:"search_params" json:"search_params"`
+	Active       bool             `bson:"active" json:"active"`
+	Downloaded   bool             `bson:"downloaded" json:"downloaded"`
+	Completed    bool             `bson:"completed" json:"completed"`
+	Skipped      bool             `bson:"skipped" json:"skipped"`
+	Watched      bool             `bson:"watched" json:"watched"`
+	Broken       bool             `bson:"broken" json:"broken"`
+	Favorite     bool             `bson:"favorite" json:"favorite"`
+	ReleaseDate  time.Time        `bson:"release_date" json:"release_date"`
+	Paths        []*Path          `bson:"paths,omitempty" json:"paths"`
+	Cover        string           `bson:"-" json:"cover"`
+	Background   string           `bson:"-" json:"background"`
 }
 
 type Path struct { // struct
-	Id         primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	Type       primitive.Symbol   `bson:"type,omitempty" json:"type,omitempty"`
-	Remote     string             `bson:"remote,omitempty" json:"remote,omitempty"`
-	Local      string             `bson:"local,omitempty" json:"local,omitempty"`
-	Extension  string             `bson:"extension,omitempty" json:"extension,omitempty"`
-	Size       int                `bson:"size,omitempty" json:"size,omitempty"`
-	Resolution int                `bson:"resolution,omitempty" json:"resolution,omitempty"`
-	Bitrate    int                `bson:"bitrate,omitempty" json:"bitrate,omitempty"`
-	Checksum   string             `bson:"checksum,omitempty" json:"checksum,omitempty"`
-	UpdatedAt  time.Time          `bson:"updated_at,omitempty" json:"updated_at,omitempty"`
+	Id         primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Type       primitive.Symbol   `bson:"type" json:"type"`
+	Remote     string             `bson:"remote" json:"remote"`
+	Local      string             `bson:"local" json:"local"`
+	Extension  string             `bson:"extension" json:"extension"`
+	Size       int                `bson:"size" json:"size"`
+	Resolution int                `bson:"resolution" json:"resolution"`
+	Bitrate    int                `bson:"bitrate" json:"bitrate"`
+	Checksum   string             `bson:"checksum" json:"checksum"`
+	UpdatedAt  time.Time          `bson:"updated_at" json:"updated_at"`
 }
 
 type Pin struct { // model
@@ -367,11 +367,11 @@ type Pin struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Pin        int    `bson:"pin,omitempty" json:"id"`
-	Code       string `bson:"code,omitempty" json:"code,omitempty"`
-	Token      string `bson:"token,omitempty" json:"authToken"`
-	Product    string `bson:"product,omitempty" json:"product,omitempty"`
-	Identifier string `bson:"identifier,omitempty" json:"clientIdentifier"`
+	Pin        int    `bson:"pin" json:"id"`
+	Code       string `bson:"code" json:"code"`
+	Token      string `bson:"token" json:"authToken"`
+	Product    string `bson:"product" json:"product"`
+	Identifier string `bson:"identifier" json:"clientIdentifier"`
 }
 
 type Release struct { // model
@@ -379,31 +379,31 @@ type Release struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Type        string    `bson:"type,omitempty" json:"type,omitempty"`
-	Source      string    `bson:"source,omitempty" json:"source,omitempty"`
-	Raw         string    `bson:"raw,omitempty" json:"raw,omitempty"`
-	Title       string    `bson:"title,omitempty" json:"title,omitempty"`
-	Description string    `bson:"description,omitempty" json:"description,omitempty"`
-	Size        string    `bson:"size,omitempty" json:"size,omitempty"`
-	View        string    `bson:"view,omitempty" json:"view,omitempty"`
-	Download    string    `bson:"download,omitempty" json:"download,omitempty"`
-	Infohash    string    `bson:"infohash,omitempty" json:"infohash,omitempty"`
-	Name        string    `bson:"name,omitempty" json:"name,omitempty"`
-	Season      int       `bson:"season,omitempty" json:"season,omitempty"`
-	Episode     int       `bson:"episode,omitempty" json:"episode,omitempty"`
-	Volume      int       `bson:"volume,omitempty" json:"volume,omitempty"`
-	Checksum    string    `bson:"checksum,omitempty" json:"checksum,omitempty"`
-	Group       string    `bson:"group,omitempty" json:"group,omitempty"`
-	Author      string    `bson:"author,omitempty" json:"author,omitempty"`
-	Verified    bool      `bson:"verified,omitempty" json:"verified,omitempty"`
-	Widescreen  bool      `bson:"widescreen,omitempty" json:"widescreen,omitempty"`
-	Uncensored  bool      `bson:"uncensored,omitempty" json:"uncensored,omitempty"`
-	Bluray      bool      `bson:"bluray,omitempty" json:"bluray,omitempty"`
-	Nzb         bool      `bson:"nzb,omitempty" json:"nzb,omitempty"`
-	Resolution  string    `bson:"resolution,omitempty" json:"resolution,omitempty"`
-	Encoding    string    `bson:"encoding,omitempty" json:"encoding,omitempty"`
-	Quality     string    `bson:"quality,omitempty" json:"quality,omitempty"`
-	PublishedAt time.Time `bson:"published_at,omitempty" json:"published_at,omitempty"`
+	Type        string    `bson:"type" json:"type"`
+	Source      string    `bson:"source" json:"source"`
+	Raw         string    `bson:"raw" json:"raw"`
+	Title       string    `bson:"title" json:"title"`
+	Description string    `bson:"description" json:"description"`
+	Size        string    `bson:"size" json:"size"`
+	View        string    `bson:"view" json:"view"`
+	Download    string    `bson:"download" json:"download"`
+	Infohash    string    `bson:"infohash" json:"infohash"`
+	Name        string    `bson:"name" json:"name"`
+	Season      int       `bson:"season" json:"season"`
+	Episode     int       `bson:"episode" json:"episode"`
+	Volume      int       `bson:"volume" json:"volume"`
+	Checksum    string    `bson:"checksum" json:"checksum"`
+	Group       string    `bson:"group" json:"group"`
+	Author      string    `bson:"author" json:"author"`
+	Verified    bool      `bson:"verified" json:"verified"`
+	Widescreen  bool      `bson:"widescreen" json:"widescreen"`
+	Uncensored  bool      `bson:"uncensored" json:"uncensored"`
+	Bluray      bool      `bson:"bluray" json:"bluray"`
+	Nzb         bool      `bson:"nzb" json:"nzb"`
+	Resolution  string    `bson:"resolution" json:"resolution"`
+	Encoding    string    `bson:"encoding" json:"encoding"`
+	Quality     string    `bson:"quality" json:"quality"`
+	PublishedAt time.Time `bson:"published_at" json:"published_at"`
 }
 
 type Request struct { // model
@@ -411,23 +411,23 @@ type Request struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Title    string `bson:"title,omitempty" json:"title,omitempty"`
-	User     string `bson:"user,omitempty" json:"user,omitempty"`
-	Type     string `bson:"type,omitempty" json:"type,omitempty"`
-	Source   string `bson:"source,omitempty" json:"source,omitempty"`
-	SourceId string `bson:"source_id,omitempty" json:"source_id,omitempty"`
-	Status   string `bson:"status,omitempty" json:"status,omitempty"`
+	Title    string `bson:"title" json:"title"`
+	User     string `bson:"user" json:"user"`
+	Type     string `bson:"type" json:"type"`
+	Source   string `bson:"source" json:"source"`
+	SourceId string `bson:"source_id" json:"source_id"`
+	Status   string `bson:"status" json:"status"`
 }
 
 type SearchParams struct { // struct
-	Type       string `bson:"type,omitempty" json:"type,omitempty"`
-	Verified   bool   `bson:"verified,omitempty" json:"verified,omitempty"`
-	Group      string `bson:"group,omitempty" json:"group,omitempty"`
-	Author     string `bson:"author,omitempty" json:"author,omitempty"`
-	Resolution int    `bson:"resolution,omitempty" json:"resolution,omitempty"`
-	Source     string `bson:"source,omitempty" json:"source,omitempty"`
-	Uncensored bool   `bson:"uncensored,omitempty" json:"uncensored,omitempty"`
-	Bluray     bool   `bson:"bluray,omitempty" json:"bluray,omitempty"`
+	Type       string `bson:"type" json:"type"`
+	Verified   bool   `bson:"verified" json:"verified"`
+	Group      string `bson:"group" json:"group"`
+	Author     string `bson:"author" json:"author"`
+	Resolution int    `bson:"resolution" json:"resolution"`
+	Source     string `bson:"source" json:"source"`
+	Uncensored bool   `bson:"uncensored" json:"uncensored"`
+	Bluray     bool   `bson:"bluray" json:"bluray"`
 }
 
 type Series struct { // model
@@ -435,36 +435,36 @@ type Series struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Type          string           `bson:"_type" json:"type,omitempty"`
-	Kind          primitive.Symbol `bson:"kind,omitempty" json:"kind,omitempty"`
-	Source        string           `bson:"source,omitempty" json:"source,omitempty"`
-	SourceId      string           `bson:"source_id,omitempty" json:"source_id,omitempty"`
-	ImdbId        string           `bson:"imdb_id,omitempty" json:"imdb_id,omitempty"`
-	Title         string           `bson:"title,omitempty" json:"title,omitempty"`
-	Description   string           `bson:"description,omitempty" json:"description,omitempty"`
-	Slug          string           `bson:"slug,omitempty" json:"slug,omitempty"`
-	Text          []string         `bson:"text,omitempty" json:"text,omitempty"`
-	Display       string           `bson:"display,omitempty" json:"display,omitempty"`
-	Directory     string           `bson:"directory,omitempty" json:"directory,omitempty"`
-	Search        string           `bson:"search,omitempty" json:"search,omitempty"`
-	SearchParams  *SearchParams    `bson:"search_params,omitempty" json:"search_params,omitempty"`
-	Status        string           `bson:"status,omitempty" json:"status,omitempty"`
-	Active        bool             `bson:"active,omitempty" json:"active,omitempty"`
-	Downloaded    bool             `bson:"downloaded,omitempty" json:"downloaded,omitempty"`
-	Completed     bool             `bson:"completed,omitempty" json:"completed,omitempty"`
-	Skipped       bool             `bson:"skipped,omitempty" json:"skipped,omitempty"`
-	Watched       bool             `bson:"watched,omitempty" json:"watched,omitempty"`
-	Broken        bool             `bson:"broken,omitempty" json:"broken,omitempty"`
-	Favorite      bool             `bson:"favorite,omitempty" json:"favorite,omitempty"`
-	Unwatched     int              `bson:"-" json:"unwatched,omitempty"`
-	ReleaseDate   time.Time        `bson:"release_date,omitempty" json:"release_date,omitempty"`
-	Paths         []*Path          `bson:"paths,omitempty" json:"paths,omitempty"`
-	Cover         string           `bson:"-" json:"cover,omitempty"`
-	Background    string           `bson:"-" json:"background,omitempty"`
-	CurrentSeason int              `bson:"-" json:"currentSeason,omitempty"`
-	Seasons       []int            `bson:"-" json:"seasons,omitempty"`
-	Episodes      []*Episode       `bson:"-" json:"episodes,omitempty"`
-	Watches       []*Watch         `bson:"-" json:"watches,omitempty"`
+	Type          string           `bson:"_type" json:"type"`
+	Kind          primitive.Symbol `bson:"kind" json:"kind"`
+	Source        string           `bson:"source" json:"source"`
+	SourceId      string           `bson:"source_id" json:"source_id"`
+	ImdbId        string           `bson:"imdb_id" json:"imdb_id"`
+	Title         string           `bson:"title" json:"title"`
+	Description   string           `bson:"description" json:"description"`
+	Slug          string           `bson:"slug" json:"slug"`
+	Text          []string         `bson:"text" json:"text"`
+	Display       string           `bson:"display" json:"display"`
+	Directory     string           `bson:"directory" json:"directory"`
+	Search        string           `bson:"search" json:"search"`
+	SearchParams  *SearchParams    `bson:"search_params" json:"search_params"`
+	Status        string           `bson:"status" json:"status"`
+	Active        bool             `bson:"active" json:"active"`
+	Downloaded    bool             `bson:"downloaded" json:"downloaded"`
+	Completed     bool             `bson:"completed" json:"completed"`
+	Skipped       bool             `bson:"skipped" json:"skipped"`
+	Watched       bool             `bson:"watched" json:"watched"`
+	Broken        bool             `bson:"broken" json:"broken"`
+	Favorite      bool             `bson:"favorite" json:"favorite"`
+	Unwatched     int              `bson:"-" json:"unwatched"`
+	ReleaseDate   time.Time        `bson:"release_date" json:"release_date"`
+	Paths         []*Path          `bson:"paths,omitempty" json:"paths"`
+	Cover         string           `bson:"-" json:"cover"`
+	Background    string           `bson:"-" json:"background"`
+	CurrentSeason int              `bson:"-" json:"currentSeason"`
+	Seasons       []int            `bson:"-" json:"seasons"`
+	Episodes      []*Episode       `bson:"-" json:"episodes"`
+	Watches       []*Watch         `bson:"-" json:"watches"`
 }
 
 type User struct { // model
@@ -472,12 +472,12 @@ type User struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Name  string `bson:"name,omitempty" json:"name,omitempty"`
-	Email string `bson:"email,omitempty" json:"email,omitempty"`
-	Token string `bson:"token,omitempty" json:"token,omitempty"`
-	Thumb string `bson:"thumb,omitempty" json:"thumb,omitempty"`
-	Home  bool   `bson:"home,omitempty" json:"home,omitempty"`
-	Admin bool   `bson:"admin,omitempty" json:"admin,omitempty"`
+	Name  string `bson:"name" json:"name"`
+	Email string `bson:"email" json:"email"`
+	Token string `bson:"token" json:"token"`
+	Thumb string `bson:"thumb" json:"thumb"`
+	Home  bool   `bson:"home" json:"home"`
+	Admin bool   `bson:"admin" json:"admin"`
 }
 
 type Watch struct { // model
@@ -485,9 +485,9 @@ type Watch struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Username  string             `bson:"username,omitempty" json:"username,omitempty"`
-	Player    string             `bson:"player,omitempty" json:"player,omitempty"`
-	WatchedAt time.Time          `bson:"watched_at,omitempty" json:"watched_at,omitempty"`
-	MediumId  primitive.ObjectID `bson:"medium_id,omitempty" json:"medium_id,omitempty"`
-	Medium    *Medium            `bson:"-" json:"medium,omitempty"`
+	Username  string             `bson:"username" json:"username"`
+	Player    string             `bson:"player" json:"player"`
+	WatchedAt time.Time          `bson:"watched_at" json:"watched_at"`
+	MediumId  primitive.ObjectID `bson:"medium_id" json:"medium_id"`
+	Medium    *Medium            `bson:"-" json:"medium"`
 }
