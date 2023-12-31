@@ -11,6 +11,7 @@ import (
 
 	flame "github.com/dashotv/flame/app"
 	"github.com/dashotv/mercury"
+	"github.com/dashotv/minion"
 )
 
 func init() {
@@ -59,6 +60,7 @@ type Events struct {
 	SeerLogs      chan *EventSeerLog
 	SeerNotices   chan *EventSeerNotice
 	Series        chan *EventSeries
+	Stats         chan *minion.Stats
 }
 
 func NewEvents(app *Application) (*Events, error) {
@@ -86,6 +88,7 @@ func NewEvents(app *Application) (*Events, error) {
 		SeerLogs:      make(chan *EventSeerLog),
 		SeerNotices:   make(chan *EventSeerNotice),
 		Series:        make(chan *EventSeries),
+		Stats:         make(chan *minion.Stats),
 	}
 
 	if err := e.Merc.Sender("tower.downloading", e.Downloading); err != nil {
@@ -145,6 +148,10 @@ func NewEvents(app *Application) (*Events, error) {
 	}
 
 	if err := e.Merc.Sender("tower.series", e.Series); err != nil {
+		return nil, err
+	}
+
+	if err := e.Merc.Sender("tower.stats", e.Stats); err != nil {
 		return nil, err
 	}
 	return e, nil
@@ -283,6 +290,13 @@ func (e *Events) doSend(topic EventsTopic, data any) error {
 			return errors.Errorf("events.send: wrong data type: %t", data)
 		}
 		e.Series <- m
+
+	case "tower.stats":
+		m, ok := data.(*minion.Stats)
+		if !ok {
+			return errors.Errorf("events.send: wrong data type: %t", data)
+		}
+		e.Stats <- m
 	default:
 		e.Log.Warnf("events.send: unknown topic: %s", topic)
 	}

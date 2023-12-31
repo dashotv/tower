@@ -73,6 +73,7 @@ func Start() error {
 	app.DB.Series.SetQueryDefaults([]bson.M{{"_type": "Series"}})
 
 	app.Workers.Subscribe(app.MinionNotification)
+	app.Workers.SubscribeStats(app.MinionStats)
 
 	app.Log.Info("starting tower...")
 

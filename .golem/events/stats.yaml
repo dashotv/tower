@@ -1,0 +1,4 @@
+name: stats
+channel: tower.stats
+receiver: false
+existing_payload: minion.Stats

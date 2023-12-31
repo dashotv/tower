@@ -46,3 +46,7 @@ func (a *Application) MinionNotification(n *minion.Notification) {
 	}
 	a.Events.Send("tower.jobs", &EventJobs{"updated", j.ID.Hex(), j})
 }
+
+func (a *Application) MinionStats(stats minion.Stats) {
+	a.Events.Send("tower.stats", &stats)
+}
