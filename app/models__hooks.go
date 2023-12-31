@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -155,7 +156,12 @@ func (s *Series) Saving() error {
 	if s.Search == "" {
 		s.Search = path(s.Title)
 	} else {
-		s.Search = path(s.Search)
+		e := strings.Split(s.Search, ":")
+		p := path(e[0])
+		if len(e) > 1 {
+			p = p + ":" + e[1]
+		}
+		s.Search = p
 	}
 	if s.Directory == "" {
 		s.Directory = path(s.Title)
