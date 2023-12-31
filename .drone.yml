@@ -3,11 +3,11 @@ type: docker
 name: default
 
 steps:
-  - name: build
-    image: golang
-    commands:
-      # - go test -v ./...
-      - go build
+  # - name: build
+  #   image: golang
+  #   commands:
+  #     # - go test -v ./...
+  #     - go build
   - name: publish
     image: plugins/docker
     settings:
