@@ -41,20 +41,6 @@ func (a *Application) JobsCreate(c *gin.Context, job string) {
 	c.JSON(http.StatusOK, j)
 }
 
-func (a *Application) JobsCancel(c *gin.Context, id string) {
-	filter := bson.M{"_id": id}
-	if id == string(minion.StatusPending) {
-		filter = bson.M{"status": minion.StatusPending}
-	}
-
-	if _, err := app.DB.Minion.Collection.UpdateMany(context.Background(), filter, bson.M{"$set": bson.M{"status": "canceled"}}); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"error": false})
-}
-
 func (a *Application) JobsDelete(c *gin.Context, id string, hard bool) {
 	filter := bson.M{"_id": id}
 	if id == string(minion.StatusPending) && !hard {
@@ -73,7 +59,7 @@ func (a *Application) JobsDelete(c *gin.Context, id string, hard bool) {
 			return
 		}
 	} else {
-		if _, err := app.DB.Minion.Collection.UpdateMany(context.Background(), filter, bson.M{"$set": bson.M{"status": "canceled"}}); err != nil {
+		if _, err := app.DB.Minion.Collection.UpdateMany(context.Background(), filter, bson.M{"$set": bson.M{"status": minion.StatusCancelled}}); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
