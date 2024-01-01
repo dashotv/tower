@@ -66,10 +66,6 @@ func setupWorkers(app *Application) error {
 		return errors.Wrap(err, "scheduling worker: cleanup_logs (CleanupLogs)")
 	}
 
-	if err := minion.RegisterWithQueue[*CleanupPaths](m, &CleanupPaths{}, "paths"); err != nil {
-		return errors.Wrap(err, "registering worker: cleanup_paths (CleanupPaths)")
-	}
-
 	if err := minion.Register[*CreateMediaFromRequests](m, &CreateMediaFromRequests{}); err != nil {
 		return errors.Wrap(err, "registering worker: create_media_from_requests (CreateMediaFromRequests)")
 	}

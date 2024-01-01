@@ -27,22 +27,7 @@ func (j *PathImport) Work(ctx context.Context, job *minion.Job[*PathImport]) err
 		return errors.Wrap(err, "find medium")
 	}
 
-	paths := m.Paths
-	if m.Type == "Series" {
-		eps, err := app.DB.Episode.Query().
-			Where("series_id", m.ID).
-			Limit(-1).
-			Run()
-		if err != nil {
-			return errors.Wrap(err, "find episodes")
-		}
-
-		for _, e := range eps {
-			paths = append(paths, e.Paths...)
-		}
-	}
-
-	list := lo.Filter(paths, func(p *Path, i int) bool {
+	list := lo.Filter(m.Paths, func(p *Path, i int) bool {
 		return p.Id.Hex() == job.Args.PathID
 	})
 	if len(list) == 0 {
@@ -99,12 +84,17 @@ func (j *MediaPaths) Work(ctx context.Context, job *minion.Job[*MediaPaths]) err
 		return errors.Wrap(err, "find medium")
 	}
 
+	err := j.Cleanup(m)
+	if err != nil {
+		return errors.Wrap(err, "cleanup")
+	}
+
 	queuedPaths := map[string]int{}
 
 	newPaths := []*Path{}
 	for _, p := range m.Paths {
 		if queuedPaths[p.LocalPath()] == 0 {
-			app.Workers.Log.Debugf("path import: %s", p.LocalPath())
+			// app.Workers.Log.Debugf("path import: %s", p.LocalPath())
 			if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: p.Id.Hex(), Title: p.LocalPath()}); err != nil {
 				return errors.Wrap(err, "enqueue path import")
 			}
@@ -132,8 +122,8 @@ func (j *MediaPaths) Work(ctx context.Context, job *minion.Job[*MediaPaths]) err
 				newPaths := []*Path{}
 				for _, p := range e.Paths {
 					if queuedPaths[p.LocalPath()] == 0 {
-						app.Workers.Log.Debugf("path import: %s", p.LocalPath())
-						if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: p.Id.Hex(), Title: p.LocalPath()}); err != nil {
+						// app.Workers.Log.Debugf("path import: %s", p.LocalPath())
+						if err := app.Workers.Enqueue(&PathImport{ID: e.ID.Hex(), PathID: p.Id.Hex(), Title: p.LocalPath()}); err != nil {
 							return errors.Wrap(err, "enqueue path import")
 						}
 						queuedPaths[p.LocalPath()]++
@@ -151,18 +141,7 @@ func (j *MediaPaths) Work(ctx context.Context, job *minion.Job[*MediaPaths]) err
 	return nil
 }
 
-type CleanupPaths struct {
-	minion.WorkerDefaults[*CleanupPaths]
-	ID string // medium
-}
-
-func (j *CleanupPaths) Kind() string { return "CleanupPaths" }
-func (j *CleanupPaths) Work(ctx context.Context, job *minion.Job[*CleanupPaths]) error {
-	m := &Medium{}
-	if err := app.DB.Medium.Find(job.Args.ID, m); err != nil {
-		return errors.Wrap(err, "find medium")
-	}
-
+func (j *MediaPaths) Cleanup(m *Medium) error {
 	paths := []*Path{}
 	for _, p := range m.Paths {
 		if p.Exists() {

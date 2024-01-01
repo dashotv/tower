@@ -18,3 +18,12 @@ routes:
       - name: job
         type: string
         query: true
+  - name: delete
+    path: /:id
+    method: DELETE
+    params:
+      - name: id
+        type: string
+      - name: hard
+        type: bool
+        query: true

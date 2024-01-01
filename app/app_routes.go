@@ -105,6 +105,7 @@ func (a *Application) Routes() {
 	jobs := a.Router.Group("/jobs")
 	jobs.GET("/", a.JobsIndexHandler)
 	jobs.POST("/", a.JobsCreateHandler)
+	jobs.DELETE("/:id", a.JobsDeleteHandler)
 
 	messages := a.Router.Group("/messages")
 	messages.GET("/", a.MessagesIndexHandler)
@@ -285,6 +286,11 @@ func (a *Application) JobsIndexHandler(c *gin.Context) {
 func (a *Application) JobsCreateHandler(c *gin.Context) {
 	job := QueryString(c, "job")
 	a.JobsCreate(c, job)
+}
+func (a *Application) JobsDeleteHandler(c *gin.Context) {
+	id := c.Param("id")
+	hard := QueryBool(c, "hard")
+	a.JobsDelete(c, id, hard)
 }
 
 // Messages (/messages)

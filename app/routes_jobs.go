@@ -1,9 +1,13 @@
 package app
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
+
+	"github.com/dashotv/minion"
 )
 
 func (a *Application) JobsIndex(c *gin.Context, page int, limit int) {
@@ -35,4 +39,45 @@ func (a *Application) JobsCreate(c *gin.Context, job string) {
 	}
 
 	c.JSON(http.StatusOK, j)
+}
+
+func (a *Application) JobsCancel(c *gin.Context, id string) {
+	filter := bson.M{"_id": id}
+	if id == string(minion.StatusPending) {
+		filter = bson.M{"status": minion.StatusPending}
+	}
+
+	if _, err := app.DB.Minion.Collection.UpdateMany(context.Background(), filter, bson.M{"$set": bson.M{"status": "canceled"}}); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"error": false})
+}
+
+func (a *Application) JobsDelete(c *gin.Context, id string, hard bool) {
+	filter := bson.M{"_id": id}
+	if id == string(minion.StatusPending) && !hard {
+		filter = bson.M{"status": minion.StatusPending}
+	}
+	if id == string(minion.StatusFailed) && hard {
+		filter = bson.M{"status": minion.StatusFailed}
+	}
+	if id == string(minion.StatusCancelled) && hard {
+		filter = bson.M{"status": minion.StatusCancelled}
+	}
+
+	if hard {
+		if _, err := app.DB.Minion.Collection.DeleteMany(context.Background(), filter); err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	} else {
+		if _, err := app.DB.Minion.Collection.UpdateMany(context.Background(), filter, bson.M{"$set": bson.M{"status": "canceled"}}); err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"error": false})
 }
