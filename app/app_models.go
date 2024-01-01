@@ -307,6 +307,7 @@ type Minion struct { // model
 	Kind     string           `bson:"kind" json:"kind"`
 	Args     string           `bson:"args" json:"args"`
 	Status   string           `bson:"status" json:"status"`
+	Queue    string           `bson:"queue" json:"queue"`
 	Attempts []*MinionAttempt `bson:"attempts" json:"attempts"`
 }
 
