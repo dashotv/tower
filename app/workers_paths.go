@@ -150,3 +150,54 @@ func (j *MediaPaths) Work(ctx context.Context, job *minion.Job[*MediaPaths]) err
 
 	return nil
 }
+
+type CleanupPaths struct {
+	minion.WorkerDefaults[*CleanupPaths]
+	ID string // medium
+}
+
+func (j *CleanupPaths) Kind() string { return "CleanupPaths" }
+func (j *CleanupPaths) Work(ctx context.Context, job *minion.Job[*CleanupPaths]) error {
+	m := &Medium{}
+	if err := app.DB.Medium.Find(job.Args.ID, m); err != nil {
+		return errors.Wrap(err, "find medium")
+	}
+
+	paths := []*Path{}
+	for _, p := range m.Paths {
+		if p.Exists() {
+			paths = append(paths, p)
+		}
+	}
+
+	m.Paths = paths
+	if err := app.DB.Medium.Save(m); err != nil {
+		return errors.Wrap(err, "save medium")
+	}
+
+	if m.Type == "Series" {
+		eps, err := app.DB.Episode.Query().
+			Where("series_id", m.ID).
+			Limit(-1).
+			Run()
+		if err != nil {
+			return errors.Wrap(err, "find episodes")
+		}
+
+		for _, e := range eps {
+			paths := []*Path{}
+			for _, p := range e.Paths {
+				if p.Exists() {
+					paths = append(paths, p)
+				}
+			}
+
+			e.Paths = paths
+			if err := app.DB.Episode.Save(e); err != nil {
+				return errors.Wrap(err, "save episode")
+			}
+		}
+	}
+
+	return nil
+}

@@ -1,0 +1,5 @@
+name: cleanup_paths
+queue: paths
+fields:
+  - name: id
+    type: string
