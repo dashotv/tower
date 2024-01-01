@@ -49,7 +49,12 @@ func onSeerEpisodes(app *Application, msg *EventSeerEpisode) (*EventEpisodes, er
 }
 
 func onSeerLogs(app *Application, msg *EventSeerLog) (*EventLogs, error) {
-	l, err := app.DB.MessageCreate(msg.Level, msg.Message, msg.Facility, msg.Time)
+	level := msg.Level
+	if msg.Level == "info" {
+		level = "debug"
+	}
+
+	l, err := app.DB.MessageCreate(level, msg.Message, msg.Facility, msg.Time)
 	if err != nil {
 		app.Events.Log.Errorf("error saving log: %s", err)
 	}
