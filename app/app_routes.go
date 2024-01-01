@@ -109,6 +109,7 @@ func (a *Application) Routes() {
 
 	messages := a.Router.Group("/messages")
 	messages.GET("/", a.MessagesIndexHandler)
+	messages.POST("/", a.MessagesCreateHandler)
 
 	movies := a.Router.Group("/movies")
 	movies.GET("/", a.MoviesIndexHandler)
@@ -296,6 +297,9 @@ func (a *Application) JobsDeleteHandler(c *gin.Context) {
 // Messages (/messages)
 func (a *Application) MessagesIndexHandler(c *gin.Context) {
 	a.MessagesIndex(c)
+}
+func (a *Application) MessagesCreateHandler(c *gin.Context) {
+	a.MessagesCreate(c)
 }
 
 // Movies (/movies)

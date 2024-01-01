@@ -4,3 +4,6 @@ routes:
   - name: index
     path: /
     method: GET
+  - name: create
+    path: /
+    method: POST
