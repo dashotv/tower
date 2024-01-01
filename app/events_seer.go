@@ -65,7 +65,11 @@ func onSeerNotices(app *Application, msg *EventSeerNotice) (*EventNotices, error
 	if msg.Message == "processing downloads" {
 		app.Cache.Set("seer_downloads", time.Now().Unix())
 	}
-	l, err := app.DB.MessageCreate(msg.Level, msg.Message, msg.Class, time.Now())
+	level := msg.Level
+	if msg.Level == "info" {
+		level = "debug"
+	}
+	l, err := app.DB.MessageCreate(level, msg.Message, msg.Class, time.Now())
 	if err != nil {
 		app.Events.Log.Errorf("error saving log: %s", err)
 	}
