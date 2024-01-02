@@ -79,6 +79,22 @@ func (j *TvdbUpdateSeriesEpisodes) Work(ctx context.Context, job *minion.Job[*Tv
 			episode.ReleaseDate = time.Unix(0, 0)
 		}
 
+		if series.Kind == "anime" {
+			resp, err := app.Tvdb.GetEpisodeExtended(tvdb.Int64Value(e.ID), nil)
+			if err != nil {
+				return errors.Wrap(err, "getting episodes")
+			}
+			if resp.Data == nil {
+				return errors.New("no episode data")
+			}
+			for _, ee := range resp.Data.Seasons {
+				if tvdb.StringValue(ee.Type.Type) == "absolute" {
+					episode.AbsoluteNumber = int(tvdb.Int64Value(resp.Data.Number))
+					break
+				}
+			}
+		}
+
 		if err := app.DB.Episode.Save(episode); err != nil {
 			return errors.Wrap(err, fmt.Sprintf("updating episode %s %d/%d", id, episode.SeasonNumber, episode.EpisodeNumber))
 		}
