@@ -50,6 +50,10 @@ func (j *PathImport) Work(ctx context.Context, job *minion.Job[*PathImport]) err
 	path.UpdatedAt = stat.ModTime()
 	path.Size = int(stat.Size())
 
+	if path.IsVideo() && lo.Contains(app.Config.ExtensionsSubtitles, path.Extension) {
+		path.Type = "subtitle"
+	}
+
 	if path.IsVideo() {
 		if sum, err := sumFile(path.LocalPath()); err == nil {
 			path.Checksum = sum
@@ -144,6 +148,9 @@ func (j *MediaPaths) Work(ctx context.Context, job *minion.Job[*MediaPaths]) err
 func (j *MediaPaths) Cleanup(m *Medium) error {
 	paths := []*Path{}
 	for _, p := range m.Paths {
+		if p.IsVideo() && lo.Contains(app.Config.ExtensionsSubtitles, p.Extension) {
+			p.Type = "subtitle"
+		}
 		if p.Exists() {
 			paths = append(paths, p)
 		}
@@ -166,6 +173,9 @@ func (j *MediaPaths) Cleanup(m *Medium) error {
 		for _, e := range eps {
 			paths := []*Path{}
 			for _, p := range e.Paths {
+				if p.IsVideo() && lo.Contains(app.Config.ExtensionsSubtitles, p.Extension) {
+					p.Type = "subtitle"
+				}
 				if p.Exists() {
 					paths = append(paths, p)
 				}
