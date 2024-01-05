@@ -4,10 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	"github.com/dashotv/golem/web"
 )
 
 func (a *Application) DownloadsIndex(c *gin.Context, page, limit int) {
@@ -147,32 +144,20 @@ func (a *Application) DownloadsDelete(c *gin.Context, id string) {
 }
 
 func (a *Application) DownloadsRecent(c *gin.Context) {
-	page, err := web.QueryDefaultInteger(c, "page", 1)
+	mid := QueryString(c, "medium_id")
+	page, err := QueryDefaultInteger(c, "page", 1)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	count, err := app.DB.Series.Count(bson.M{})
+	results, total, err := app.DB.RecentDownloads(mid, page)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	q := app.DB.Download.Query()
-	results, err := q.Where("status", "done").
-		Desc("updated_at").Desc("created_at").
-		Skip((page - 1) * pagesize).
-		Limit(pagesize).
-		Run()
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	app.DB.processDownloads(results)
-
-	c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
+	c.JSON(http.StatusOK, gin.H{"count": total, "results": results})
 }
 
 type DownloadSelector struct {

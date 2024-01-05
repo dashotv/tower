@@ -64,19 +64,45 @@ func (c *Connector) ActiveDownloads() ([]*Download, error) {
 	return list, nil
 }
 
-func (c *Connector) RecentDownloads(page int) ([]*Download, error) {
-	q := c.Download.Query()
-	list, err := q.Where("status", "done").
+func (c *Connector) RecentDownloads(mid string, page int) ([]*Download, int64, error) {
+	total, err := app.DB.Download.Query().Where("status", "done").Count()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	q := app.DB.Download.Query()
+
+	if mid != "" {
+		m, err := c.Medium.Get(mid, &Medium{})
+		if err != nil {
+			return nil, 0, err
+		}
+
+		ids := []primitive.ObjectID{m.ID}
+		if m.Type == "Series" {
+			eps, err := c.SeriesSeasonEpisodesAll(m.ID.Hex())
+			if err != nil {
+				return nil, 0, err
+			}
+			for _, e := range eps {
+				ids = append(ids, e.ID)
+			}
+		}
+
+		q = q.In("medium_id", ids)
+	}
+
+	results, err := q.Where("status", "done").
 		Desc("updated_at").Desc("created_at").
 		Skip((page - 1) * pagesize).
 		Limit(pagesize).
 		Run()
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	c.processDownloads(list)
-	return list, nil
+	app.DB.processDownloads(results)
+	return results, total, nil
 }
 
 func (c *Connector) DownloadByStatus(status string) ([]*Download, error) {
