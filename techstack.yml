@@ -1,7 +1,8 @@
 repo_name: dashotv/tower
-report_id: 71d679d130d86ba609fe989e96ebf827
+report_id: 582675f20135e47871df694a9216ed82
+version: 0.1
 repo_type: Public
-timestamp: '2023-12-14T10:04:28+00:00'
+timestamp: '2024-01-05T09:04:52+00:00'
 requested_by: shawncatz
 provider: github
 branch: main
@@ -17,6 +18,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Languages
   image_url: https://img.stackshare.io/service/1005/O6AczwfV_400x400.png
+  detection_source_url: https://github.com/dashotv/tower
   detection_source: Repo Metadata
 - name: Echo
   description: High performance, extensible, minimalist Go web framework
@@ -27,6 +29,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Microframeworks (Backend)
   image_url: https://img.stackshare.io/service/4996/9P0MlumU_400x400.jpg
+  detection_source_url: https://github.com/dashotv/tower/blob/main/go.mod
   detection_source: go.mod
   last_updated_by: Shawn Catanzarite
   last_updated_on: 2020-08-01 21:19:37.000000000 Z
@@ -39,6 +42,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Frameworks (Full Stack)
   image_url: https://img.stackshare.io/service/4221/7894478.png
+  detection_source_url: https://github.com/dashotv/tower/blob/main/go.mod
   detection_source: go.mod
   last_updated_by: Shawn Catanzarite
   last_updated_on: 2023-12-02 01:05:01.000000000 Z
@@ -50,6 +54,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Serialization Frameworks
   image_url: https://img.stackshare.io/service/4393/ma2jqJKH_400x400.png
+  detection_source_url: https://github.com/dashotv/tower/blob/main/go.mod
   detection_source: go.mod
   last_updated_by: Shawn Catanzarite
   last_updated_on: 2023-09-25 02:54:28.000000000 Z
@@ -61,6 +66,7 @@ tools:
   category: Data Stores
   sub_category: Databases
   image_url: https://img.stackshare.io/service/1030/leaf-360x360.png
+  detection_source_url: https://github.com/dashotv/tower/blob/main/app/app_tmdb.go
   detection_source: app/app_tmdb.go
   last_updated_by: Shawn Catanzarite
   last_updated_on: 2023-11-05 02:37:15.000000000 Z
@@ -73,6 +79,7 @@ tools:
   category: Data Stores
   sub_category: In-Memory Databases
   image_url: https://img.stackshare.io/service/1031/default_cbce472cd134adc6688572f999e9122b9657d4ba.png
+  detection_source_url: https://github.com/dashotv/tower/blob/main/go.mod
   detection_source: go.mod
   last_updated_by: Shawn Catanzarite
   last_updated_on: 2023-12-02 01:05:01.000000000 Z
@@ -85,6 +92,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Virtual Machine Platforms & Containers
   image_url: https://img.stackshare.io/service/586/n4u37v9t_400x400.png
+  detection_source_url: https://github.com/dashotv/tower
   detection_source: Repo Metadata
 - name: Drone.io
   description: Open source continuous integration platform built on Docker
@@ -94,6 +102,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Continuous Integration
   image_url: https://img.stackshare.io/service/668/R_wMcCqN_400x400.png
+  detection_source_url: https://github.com/dashotv/tower/blob/main/.drone.yml
   detection_source: ".drone.yml"
   last_updated_by: Shawn Catanzarite
   last_updated_on: 2022-10-23 21:09:03.000000000 Z
@@ -105,6 +114,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Version Control System
   image_url: https://img.stackshare.io/service/1046/git.png
+  detection_source_url: https://github.com/dashotv/tower
   detection_source: Repo Metadata
 - name: Testify
   description: A toolkit with common assertions and mocks that plays nicely with the
@@ -116,6 +126,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Go Testing
   image_url: https://img.stackshare.io/service/8695/stretchr.png
+  detection_source_url: https://github.com/dashotv/tower/blob/main/go.mod
   detection_source: go.mod
   last_updated_by: Shawn Catanzarite
   last_updated_on: 2023-12-02 01:05:01.000000000 Z
@@ -156,6 +167,7 @@ tools:
   category: Libraries
   sub_category: Go Modules Packages
   image_url: https://img.stackshare.io/package/go-packages/image.png
+  detection_source_url: https://github.com/dashotv/tower/blob/main/go.mod
   detection_source: go.mod
   last_updated_by: Shawn Catanzarite
   last_updated_on: 2022-08-06 09:21:52.000000000 Z
@@ -287,6 +299,7 @@ tools:
   category: Libraries
   sub_category: Go Modules Packages
   image_url: https://img.stackshare.io/package/go-packages/image.png
+  detection_source_url: https://github.com/dashotv/tower/blob/main/go.mod
   detection_source: go.mod
   last_updated_by: Shawn Catanzarite
   last_updated_on: 2023-12-04 19:24:29.000000000 Z
