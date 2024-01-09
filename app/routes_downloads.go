@@ -25,7 +25,7 @@ func (a *Application) DownloadsLast(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"last": t})
+	c.JSON(http.StatusOK, gin.H{"error": false, "last": t})
 }
 
 type DownloadRequest struct {

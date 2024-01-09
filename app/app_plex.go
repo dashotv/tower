@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 )
 
 const (
@@ -36,6 +37,7 @@ func setupPlex(app *Application) error {
 			"strong":                   "true",
 			"Accept":                   applicationJson,
 			"ContentType":              applicationJson,
+			"X-Plex-Token":             app.Config.PlexToken,
 		},
 	}
 
@@ -77,10 +79,9 @@ type Plex struct {
 func (p *Plex) plextv() *resty.Request {
 	return p.Clients.PlexTV.R().SetHeaders(p.Headers)
 }
-
-//	func (p *Plex) server() *resty.Request {
-//		return p.Clients.Server.R().SetHeaders(p.Headers)
-//	}
+func (p *Plex) server() *resty.Request {
+	return p.Clients.Server.R().SetHeaders(p.Headers)
+}
 func (p *Plex) metadata() *resty.Request {
 	return p.Clients.Metadata.R().SetHeaders(p.Headers)
 }
@@ -181,6 +182,514 @@ Plex Pin response:
 	"newRegistration": null // set after auth
 }
 */
+/*
+{
+        "allowSync": true,
+        "art": "/:/resources/show-fanart.jpg",
+        "composite": "/library/sections/2/composite/1704818054",
+        "filters": true,
+        "refreshing": true,
+        "thumb": "/:/resources/show.png",
+        "key": "2",
+        "type": "show",
+        "title": "TV Shows",
+        "agent": "tv.plex.agents.series",
+        "scanner": "Plex TV Series",
+        "language": "en-US",
+        "uuid": "e35a54e6-79ff-4cde-98c6-c05c1a09c821",
+        "updatedAt": 1704818112,
+        "createdAt": 1384056048,
+        "scannedAt": 1704818054,
+        "content": true,
+        "directory": true,
+        "contentChangedAt": 41632394,
+        "hidden": 0,
+        "Location": [
+          {
+            "id": 29,
+            "path": "/mnt/media/tv"
+          }
+        ]
+      },
+*/
+type PlexLibraryLocation struct {
+	ID   int64  `json:"id"`
+	Path string `json:"path"`
+}
+
+type PlexLibrary struct {
+	AllowSync        bool                   `json:"allowSync"`
+	Art              string                 `json:"art"`
+	Composite        string                 `json:"composite"`
+	Filters          bool                   `json:"filters"`
+	Refreshing       bool                   `json:"refreshing"`
+	Thumb            string                 `json:"thumb"`
+	Key              string                 `json:"key"`
+	Type             string                 `json:"type"`
+	Title            string                 `json:"title"`
+	Agent            string                 `json:"agent"`
+	Scanner          string                 `json:"scanner"`
+	Language         string                 `json:"language"`
+	UUID             string                 `json:"uuid"`
+	UpdatedAt        int64                  `json:"updatedAt"`
+	CreatedAt        int64                  `json:"createdAt"`
+	ScannedAt        int64                  `json:"scannedAt"`
+	Content          bool                   `json:"content"`
+	Directory        bool                   `json:"directory"`
+	ContentChangedAt int64                  `json:"contentChangedAt"`
+	Hidden           int64                  `json:"hidden"`
+	Locations        []*PlexLibraryLocation `json:"Location"`
+}
+
+type PlexLibraries struct {
+	MediaContainer struct {
+		Size        int64          `json:"size"`
+		Directories []*PlexLibrary `json:"Directory"`
+	} `json:"MediaContainer"`
+}
+
+func (p *Plex) GetLibraries() ([]*PlexLibrary, error) {
+	dest := &PlexLibraries{}
+	resp, err := p.server().SetResult(dest).SetFormDataFromValues(p.data).Get("/library/sections")
+	if err != nil {
+		return nil, err
+	}
+	if !resp.IsSuccess() {
+		return nil, errors.Errorf("failed to get libraries: %s", resp.Status())
+	}
+
+	return dest.MediaContainer.Directories, nil
+}
+
+func (p *Plex) Search(query, section string) ([]SearchMetadata, error) {
+	dest := &PlexSearch{}
+	path := fmt.Sprintf("/library/sections/%s/search", section)
+
+	params := url.Values{}
+	params.Set("X-Plex-Token", app.Config.PlexToken)
+	params.Set("title", query)
+	params.Set("type", "2")
+	params.Set("limit", "25")
+
+	resp, err := p.server().SetResult(dest).
+		SetQueryParamsFromValues(params).
+		Get(path)
+	if err != nil {
+		return nil, err
+	}
+	if !resp.IsSuccess() {
+		return nil, errors.Errorf("failed to get search: %s", resp.Status())
+	}
+
+	// app.Log.Debugf("search req url: %s", resp.Request.URL)
+	// app.Log.Debugf("search result: %s", resp.String())
+	return dest.MediaContainer.Metadata, nil
+}
+
+type PlexSearch struct {
+	MediaContainer struct {
+		Size         int64            `json:"size"`
+		SectionID    int64            `json:"sectionID"`
+		AllowSync    bool             `json:"allowSync"`
+		Art          string           `json:"art"`
+		Identifier   string           `json:"identifier"`
+		SectionTitle string           `json:"librarySectionTitle"`
+		SectionUUID  string           `json:"librarySectionUUID"`
+		Title        string           `json:"title1"`
+		Subtitle     string           `json:"title2"`
+		Metadata     []SearchMetadata `json:"Metadata,omitempty"`
+	} `json:"MediaContainer"`
+}
+
+type SearchMetadata struct {
+	LibrarySectionTitle   string     `json:"librarySectionTitle"`
+	Score                 string     `json:"score"`
+	RatingKey             string     `json:"ratingKey"`
+	Key                   string     `json:"key"`
+	GUID                  string     `json:"guid"`
+	Slug                  *string    `json:"slug,omitempty"`
+	Studio                *string    `json:"studio,omitempty"`
+	Type                  string     `json:"type"`
+	Title                 string     `json:"title"`
+	LibrarySectionID      int64      `json:"librarySectionID"`
+	LibrarySectionKey     string     `json:"librarySectionKey"`
+	ContentRating         string     `json:"contentRating"`
+	Summary               string     `json:"summary"`
+	Index                 *int64     `json:"index,omitempty"`
+	AudienceRating        *float64   `json:"audienceRating,omitempty"`
+	ViewCount             *int64     `json:"viewCount,omitempty"`
+	LastViewedAt          *int64     `json:"lastViewedAt,omitempty"`
+	Year                  *int64     `json:"year,omitempty"`
+	Tagline               *string    `json:"tagline,omitempty"`
+	Thumb                 string     `json:"thumb"`
+	Art                   string     `json:"art"`
+	Theme                 *string    `json:"theme,omitempty"`
+	Duration              int64      `json:"duration"`
+	OriginallyAvailableAt string     `json:"originallyAvailableAt"`
+	LeafCount             *int64     `json:"leafCount,omitempty"`
+	ViewedLeafCount       *int64     `json:"viewedLeafCount,omitempty"`
+	ChildCount            *int64     `json:"childCount,omitempty"`
+	AddedAt               int64      `json:"addedAt"`
+	UpdatedAt             int64      `json:"updatedAt"`
+	AudienceRatingImage   *string    `json:"audienceRatingImage,omitempty"`
+	Genre                 []Country  `json:"Genre,omitempty"`
+	Country               []Country  `json:"Country,omitempty"`
+	Role                  []Country  `json:"Role,omitempty"`
+	Location              []Location `json:"Location,omitempty"`
+	SkipCount             *int64     `json:"skipCount,omitempty"`
+	SeasonCount           *int64     `json:"seasonCount,omitempty"`
+	Field                 []Field    `json:"Field,omitempty"`
+	Rating                *float64   `json:"rating,omitempty"`
+	PrimaryExtraKey       *string    `json:"primaryExtraKey,omitempty"`
+	RatingImage           *string    `json:"ratingImage,omitempty"`
+	Media                 []Media    `json:"Media,omitempty"`
+	Director              []Country  `json:"Director,omitempty"`
+	Writer                []Country  `json:"Writer,omitempty"`
+	ChapterSource         *string    `json:"chapterSource,omitempty"`
+	ParentRatingKey       *string    `json:"parentRatingKey,omitempty"`
+	GrandparentRatingKey  *string    `json:"grandparentRatingKey,omitempty"`
+	ParentGUID            *string    `json:"parentGuid,omitempty"`
+	GrandparentGUID       *string    `json:"grandparentGuid,omitempty"`
+	TitleSort             *string    `json:"titleSort,omitempty"`
+	GrandparentKey        *string    `json:"grandparentKey,omitempty"`
+	ParentKey             *string    `json:"parentKey,omitempty"`
+	GrandparentTitle      *string    `json:"grandparentTitle,omitempty"`
+	ParentTitle           *string    `json:"parentTitle,omitempty"`
+	OriginalTitle         *string    `json:"originalTitle,omitempty"`
+	ParentIndex           *int64     `json:"parentIndex,omitempty"`
+	ParentYear            *int64     `json:"parentYear,omitempty"`
+	ParentThumb           *string    `json:"parentThumb,omitempty"`
+	GrandparentThumb      *string    `json:"grandparentThumb,omitempty"`
+	GrandparentArt        *string    `json:"grandparentArt,omitempty"`
+	GrandparentTheme      *string    `json:"grandparentTheme,omitempty"`
+	GrandparentSlug       *string    `json:"grandparentSlug,omitempty"`
+}
+
+type Country struct {
+	Tag string `json:"tag"`
+}
+
+type Field struct {
+	Locked bool   `json:"locked"`
+	Name   string `json:"name"`
+}
+
+type Location struct {
+	Path string `json:"path"`
+}
+
+type Media struct {
+	ID                    int64   `json:"id"`
+	Duration              int64   `json:"duration"`
+	Bitrate               int64   `json:"bitrate"`
+	Width                 int64   `json:"width"`
+	Height                int64   `json:"height"`
+	AspectRatio           float64 `json:"aspectRatio"`
+	AudioChannels         int64   `json:"audioChannels"`
+	AudioCodec            string  `json:"audioCodec"`
+	VideoCodec            string  `json:"videoCodec"`
+	VideoResolution       string  `json:"videoResolution"`
+	Container             string  `json:"container"`
+	VideoFrameRate        string  `json:"videoFrameRate"`
+	AudioProfile          *string `json:"audioProfile,omitempty"`
+	VideoProfile          string  `json:"videoProfile"`
+	Part                  []Part  `json:"Part"`
+	OptimizedForStreaming *int64  `json:"optimizedForStreaming,omitempty"`
+	Has64BitOffsets       *bool   `json:"has64bitOffsets,omitempty"`
+}
+
+type Part struct {
+	ID                    int64   `json:"id"`
+	Key                   string  `json:"key"`
+	Duration              int64   `json:"duration"`
+	File                  string  `json:"file"`
+	Size                  int64   `json:"size"`
+	AudioProfile          *string `json:"audioProfile,omitempty"`
+	Container             string  `json:"container"`
+	VideoProfile          string  `json:"videoProfile"`
+	Has64BitOffsets       *bool   `json:"has64bitOffsets,omitempty"`
+	OptimizedForStreaming *bool   `json:"optimizedForStreaming,omitempty"`
+}
+
+type Style string
+
+const (
+	Shelf Style = "shelf"
+)
+
+//
+// type Hub struct {
+// 	Title         string        `json:"title"`
+// 	Type          string        `json:"type"`
+// 	HubIdentifier string        `json:"hubIdentifier"`
+// 	Context       string        `json:"context"`
+// 	Size          int64         `json:"size"`
+// 	More          bool          `json:"more"`
+// 	Style         Style         `json:"style"`
+// 	Metadata      []HubMetadata `json:"Metadata,omitempty"`
+// 	Directory     []Directory   `json:"Directory,omitempty"`
+// }
+//
+// type Directory struct {
+// 	Key                 string `json:"key"`
+// 	LibrarySectionID    int64  `json:"librarySectionID"`
+// 	LibrarySectionKey   string `json:"librarySectionKey"`
+// 	LibrarySectionTitle string `json:"librarySectionTitle"`
+// 	LibrarySectionType  int64  `json:"librarySectionType"`
+// 	Reason              string `json:"reason"`
+// 	ReasonID            int64  `json:"reasonID"`
+// 	ReasonTitle         string `json:"reasonTitle"`
+// 	Score               string `json:"score"`
+// 	Type                string `json:"type"`
+// 	ID                  int64  `json:"id"`
+// 	Filter              string `json:"filter"`
+// 	Tag                 string `json:"tag"`
+// 	TagType             int64  `json:"tagType"`
+// 	Thumb               string `json:"thumb"`
+// 	Art                 string `json:"art"`
+// 	Count               int64  `json:"count"`
+// 	GUID                string `json:"guid"`
+// 	Summary             string `json:"summary"`
+// }
+
+type PlexCollectionCreate struct {
+	MediaContainer struct {
+		Directory []struct {
+			RatingKey string `json:"ratingKey"`
+			Key       string `json:"key"`
+			Guid      string `json:"guid"`
+			Type      string `json:"type"`
+			Title     string `json:"title"`
+			Subtype   string `json:"subtype"`
+			Summary   string `json:"summary"`
+			Thumb     string `json:"thumb"`
+			AddedAt   int64  `json:"addedAt"`
+			UpdatedAt int64  `json:"updatedAt"`
+		} `json:"Metadata"`
+	} `json:"MediaContainer"`
+}
+
+func (p *Plex) CreateCollection(title, section, mediaType, firstKey string) (*PlexCollectionCreate, error) {
+	data := url.Values{}
+	data.Set("X-Plex-Token", app.Config.PlexToken)
+	data.Set("title", title)
+	data.Set("sectionId", section)
+	data.Set("type", mediaType)
+	data.Set("smart", "0")
+	data.Set("uri", fmt.Sprintf("server://%s/com.plexapp.plugins.library/library/metadata/%s", app.Config.PlexMachineIdentifier, firstKey))
+
+	dest := &PlexCollectionCreate{}
+	resp, err := p.server().
+		SetResult(dest).
+		SetQueryParamsFromValues(data).
+		Post("/library/collections")
+	if err != nil {
+		return nil, err
+	}
+	app.Log.Debugf("create collection req url: %s", resp.Request.URL)
+	app.Log.Debugf("create collection response: %s", resp.String())
+	if !resp.IsSuccess() {
+		return nil, errors.Errorf("failed to create collection: %s", resp.Status())
+	}
+
+	return dest, nil
+}
+
+type PlexLibrariesCollectionResponse struct {
+	MediaContainer struct {
+		Size         int64             `json:"size"`
+		AllowSync    bool              `json:"allowSync"`
+		Identifier   string            `json:"identifier"`
+		LibraryID    int64             `json:"librarySectionID"`
+		LibraryTitle string            `json:"librarySectionTitle"`
+		LibraryUUID  string            `json:"librarySectionUUID"`
+		Title        string            `json:"title1"`
+		Subtitle     string            `json:"title2"`
+		Metadata     []*PlexCollection `json:"Metadata,omitempty"`
+	} `json:"MediaContainer"`
+}
+
+type PlexCollectionResponse struct {
+	MediaContainer struct {
+		Size         int64             `json:"size"`
+		AllowSync    bool              `json:"allowSync"`
+		Identifier   string            `json:"identifier"`
+		LibraryID    int64             `json:"librarySectionID"`
+		LibraryTitle string            `json:"librarySectionTitle"`
+		LibraryUUID  string            `json:"librarySectionUUID"`
+		Title        string            `json:"title1"`
+		Subtitle     string            `json:"title2"`
+		Directory    []*PlexCollection `json:"Metadata,omitempty"`
+	} `json:"MediaContainer"`
+}
+type PlexCollection struct {
+	RatingKey    string                 `json:"ratingKey"`
+	Key          string                 `json:"key"`
+	GUID         string                 `json:"guid"`
+	Type         string                 `json:"type"`
+	Title        string                 `json:"title"`
+	LibraryID    int64                  `json:"librarySectionID"`
+	LibraryTitle string                 `json:"librarySectionTitle"`
+	LibraryKey   string                 `json:"librarySectionKey"`
+	Subtype      string                 `json:"subtype"`
+	Summary      string                 `json:"summary"`
+	Thumb        string                 `json:"thumb"`
+	AddedAt      int64                  `json:"addedAt"`
+	UpdatedAt    int64                  `json:"updatedAt"`
+	ChildCount   string                 `json:"childCount"`
+	MaxYear      string                 `json:"maxYear"`
+	MinYear      string                 `json:"minYear"`
+	Children     []*PlexCollectionChild `json:"children,omitempty"`
+}
+type PlexCollectionChildrenResponse struct {
+	MediaContainer struct {
+		Size      int64                  `json:"size"`
+		Directory []*PlexCollectionChild `json:"Metadata,omitempty"`
+	} `json:"MediaContainer"`
+}
+type PlexCollectionChild struct {
+	RatingKey    string `json:"ratingKey"`
+	Key          string `json:"key"`
+	GUID         string `json:"guid"`
+	Type         string `json:"type"`
+	Title        string `json:"title"`
+	LibraryID    int64  `json:"librarySectionID"`
+	LibraryTitle string `json:"librarySectionTitle"`
+	LibraryKey   string `json:"librarySectionKey"`
+	Summary      string `json:"summary"`
+	Thumb        string `json:"thumb"`
+	AddedAt      int64  `json:"addedAt"`
+	UpdatedAt    int64  `json:"updatedAt"`
+}
+
+func (p *Plex) ListCollections(section string) ([]*PlexCollection, error) {
+	data := url.Values{}
+	data.Set("X-Plex-Token", app.Config.PlexToken)
+
+	dest := &PlexLibrariesCollectionResponse{}
+	resp, err := p.server().
+		SetResult(dest).
+		SetQueryParamsFromValues(p.data).
+		Get("/library/sections/" + section + "/collections")
+	if err != nil {
+		return nil, err
+	}
+	if !resp.IsSuccess() {
+		return nil, errors.Errorf("failed to get collections: %s", resp.Status())
+	}
+
+	return dest.MediaContainer.Metadata, nil
+}
+
+func (p *Plex) GetCollection(ratingKey string) (*PlexCollection, error) {
+	data := url.Values{}
+	data.Set("X-Plex-Token", app.Config.PlexToken)
+
+	dest := &PlexCollectionResponse{}
+	resp, err := p.server().
+		SetResult(dest).
+		SetQueryParamsFromValues(p.data).
+		Get("/library/collections/" + ratingKey)
+	if err != nil {
+		return nil, err
+	}
+	if !resp.IsSuccess() {
+		return nil, errors.Errorf("failed to update collection: %s", resp.Status())
+	}
+	if len(dest.MediaContainer.Directory) != 1 {
+		return nil, errors.Errorf("api response found %d directories, wanted 1", len(dest.MediaContainer.Directory))
+	}
+
+	children, err := p.GetCollectionChildren(ratingKey)
+	if err != nil {
+		return nil, err
+	}
+
+	r := dest.MediaContainer.Directory[0]
+	r.Children = children
+
+	return r, nil
+}
+
+func (p *Plex) GetCollectionChildren(ratingKey string) ([]*PlexCollectionChild, error) {
+	data := url.Values{}
+	data.Set("X-Plex-Token", app.Config.PlexToken)
+
+	dest := &PlexCollectionChildrenResponse{}
+	resp, err := p.server().
+		SetResult(dest).
+		SetQueryParamsFromValues(p.data).
+		Get("/library/collections/" + ratingKey + "/children")
+	if err != nil {
+		return nil, err
+	}
+	if !resp.IsSuccess() {
+		return nil, errors.Errorf("failed to get collection children: %s", resp.Status())
+	}
+
+	// app.Log.Debugf("collection children: %s", resp.String())
+
+	return dest.MediaContainer.Directory, nil
+}
+
+func (p *Plex) UpdateCollection(section, ratingKey string, keys []string) error {
+	existing, err := p.GetCollection(ratingKey)
+	if err != nil {
+		return err
+	}
+
+	existingKeys := lo.Map(existing.Children, func(c *PlexCollectionChild, i int) string {
+		return c.RatingKey
+	})
+
+	add, remove := lo.Difference(keys, existingKeys)
+	if len(add) > 0 {
+		app.Log.Debugf("adding %d items to collection: %+v", len(add), add)
+		for _, k := range add {
+			if err := p.addCollectionItem(ratingKey, k); err != nil {
+				return err
+			}
+		}
+	}
+	if len(remove) > 0 {
+		app.Log.Debugf("removing %d items from collection: %+v", len(remove), remove)
+	}
+
+	return nil
+}
+
+func (p *Plex) addCollectionItem(ratingKey, newKey string) error {
+	data := url.Values{}
+	data.Set("X-Plex-Token", app.Config.PlexToken)
+	data.Set("uri", fmt.Sprintf("server://%s/com.plexapp.plugins.library/library/metadata/%s", app.Config.PlexMachineIdentifier, newKey))
+
+	resp, err := p.server().
+		SetQueryParamsFromValues(data).
+		Put("/library/collections/" + ratingKey + "/items")
+	app.Log.Debugf("addCollectionItem req url: %s", resp.Request.URL)
+	app.Log.Debugf("addCollectionItem result: %s", resp.String())
+	if err != nil {
+		return err
+	}
+	if !resp.IsSuccess() {
+		return errors.Errorf("failed to add to collection: %s", resp.Status())
+	}
+
+	return nil
+}
+
+// func (p *Plex) GetCollections(token string) (*PlexCollections, error) {
+// 	dest := &PlexCollections{}
+// 	resp, err := p.metadata().SetResult(dest).SetHeader("X-Plex-Token", token).Get("/library/sections")
+// 	if err != nil {
+// 		return dest, err
+// 	}
+// 	if !resp.IsSuccess() {
+// 		return dest, errors.Errorf("failed to get collections: %s", resp.Status())
+// 	}
+//
+// 	return dest, nil
+// }
 
 type WatchlistOpts struct {
 	Filter string // all, or ???
@@ -375,10 +884,6 @@ type PlexWatchlistDetail struct {
 			Studio                []Country  `json:"Studio"`
 		} `json:"Metadata"`
 	} `json:"MediaContainer"`
-}
-
-type Country struct {
-	Tag string `json:"tag"`
 }
 
 type Director struct {

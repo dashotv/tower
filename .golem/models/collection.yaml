@@ -1,0 +1,13 @@
+name: collection
+type: model
+fields:
+  - name: name
+    type: string
+  - name: library
+    type: string
+  - name: rating_key
+    type: string
+  - name: synced_at
+    type: time.Time
+  - name: media
+    type: "[]*CollectionMedia"

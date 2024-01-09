@@ -1,12 +1,39 @@
 name: plex
 path: /plex
 routes:
-    - name: auth
-      path: /auth
-      method: GET
-    - name: index
-      path: /
-      method: GET
-    - name: update
-      path: /update
-      method: GET
+  - name: auth
+    path: /auth
+    method: GET
+  - name: index
+    path: /
+    method: GET
+  - name: update
+    path: /update
+    method: GET
+  - name: search
+    path: /search
+    method: GET
+    params:
+      - name: query
+        type: string
+        query: true
+      - name: section
+        type: string
+        query: true
+  - name: libraries
+    path: /libraries
+    method: GET
+  - name: collectionsIndex
+    path: /libraries/:section/collections
+    method: GET
+    params:
+      - name: section
+        type: string
+  - name: collectionsShow
+    path: /libraries/:section/collections/:ratingKey
+    method: GET
+    params:
+      - name: section
+        type: string
+      - name: ratingKey
+        type: string

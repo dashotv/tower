@@ -78,6 +78,14 @@ func (a *Application) Routes() {
 	a.Default.GET("/", a.indexHandler)
 	a.Default.GET("/health", a.healthHandler)
 
+	collections := a.Router.Group("/collections")
+	collections.GET("/", a.CollectionsIndexHandler)
+	collections.POST("/", a.CollectionsCreateHandler)
+	collections.GET("/:id", a.CollectionsShowHandler)
+	collections.PUT("/:id", a.CollectionsUpdateHandler)
+	collections.PATCH("/:id", a.CollectionsSettingsHandler)
+	collections.DELETE("/:id", a.CollectionsDeleteHandler)
+
 	downloads := a.Router.Group("/downloads")
 	downloads.GET("/", a.DownloadsIndexHandler)
 	downloads.POST("/", a.DownloadsCreateHandler)
@@ -125,6 +133,10 @@ func (a *Application) Routes() {
 	plex.GET("/auth", a.PlexAuthHandler)
 	plex.GET("/", a.PlexIndexHandler)
 	plex.GET("/update", a.PlexUpdateHandler)
+	plex.GET("/search", a.PlexSearchHandler)
+	plex.GET("/libraries", a.PlexLibrariesHandler)
+	plex.GET("/libraries/:section/collections", a.PlexCollectionsIndexHandler)
+	plex.GET("/libraries/:section/collections/:ratingKey", a.PlexCollectionsShowHandler)
 
 	releases := a.Router.Group("/releases")
 	releases.GET("/", a.ReleasesIndexHandler)
@@ -174,19 +186,20 @@ func (a *Application) indexHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"name": "tower",
 		"routes": gin.H{
-			"downloads": "/downloads",
-			"episodes":  "/episodes",
-			"feeds":     "/feeds",
-			"jobs":      "/jobs",
-			"messages":  "/messages",
-			"movies":    "/movies",
-			"plex":      "/plex",
-			"releases":  "/releases",
-			"requests":  "/requests",
-			"series":    "/series",
-			"upcoming":  "/upcoming",
-			"users":     "/users",
-			"watches":   "/watches",
+			"collections": "/collections",
+			"downloads":   "/downloads",
+			"episodes":    "/episodes",
+			"feeds":       "/feeds",
+			"jobs":        "/jobs",
+			"messages":    "/messages",
+			"movies":      "/movies",
+			"plex":        "/plex",
+			"releases":    "/releases",
+			"requests":    "/requests",
+			"series":      "/series",
+			"upcoming":    "/upcoming",
+			"users":       "/users",
+			"watches":     "/watches",
 		},
 	})
 }
@@ -200,6 +213,32 @@ func (a *Application) healthHandler(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"name": "tower", "health": health})
+}
+
+// Collections (/collections)
+func (a *Application) CollectionsIndexHandler(c *gin.Context) {
+	page := QueryInt(c, "page")
+	limit := QueryInt(c, "limit")
+	a.CollectionsIndex(c, page, limit)
+}
+func (a *Application) CollectionsCreateHandler(c *gin.Context) {
+	a.CollectionsCreate(c)
+}
+func (a *Application) CollectionsShowHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.CollectionsShow(c, id)
+}
+func (a *Application) CollectionsUpdateHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.CollectionsUpdate(c, id)
+}
+func (a *Application) CollectionsSettingsHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.CollectionsSettings(c, id)
+}
+func (a *Application) CollectionsDeleteHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.CollectionsDelete(c, id)
 }
 
 // Downloads (/downloads)
@@ -345,6 +384,23 @@ func (a *Application) PlexIndexHandler(c *gin.Context) {
 }
 func (a *Application) PlexUpdateHandler(c *gin.Context) {
 	a.PlexUpdate(c)
+}
+func (a *Application) PlexSearchHandler(c *gin.Context) {
+	query := QueryString(c, "query")
+	section := QueryString(c, "section")
+	a.PlexSearch(c, query, section)
+}
+func (a *Application) PlexLibrariesHandler(c *gin.Context) {
+	a.PlexLibraries(c)
+}
+func (a *Application) PlexCollectionsIndexHandler(c *gin.Context) {
+	section := c.Param("section")
+	a.PlexCollectionsIndex(c, section)
+}
+func (a *Application) PlexCollectionsShowHandler(c *gin.Context) {
+	section := c.Param("section")
+	ratingKey := c.Param("ratingKey")
+	a.PlexCollectionsShow(c, section, ratingKey)
 }
 
 // Releases (/releases)

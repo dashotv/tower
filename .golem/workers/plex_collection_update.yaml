@@ -1,0 +1,4 @@
+name: plex_collection_update
+fields:
+    - name: id
+      type: string

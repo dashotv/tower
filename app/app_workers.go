@@ -85,6 +85,10 @@ func setupWorkers(app *Application) error {
 		return errors.Wrap(err, "registering worker: path_import (PathImport)")
 	}
 
+	if err := minion.Register[*PlexCollectionUpdate](m, &PlexCollectionUpdate{}); err != nil {
+		return errors.Wrap(err, "registering worker: plex_collection_update (PlexCollectionUpdate)")
+	}
+
 	if err := minion.Register[*PlexPinToUsers](m, &PlexPinToUsers{}); err != nil {
 		return errors.Wrap(err, "registering worker: plex_pin_to_users (PlexPinToUsers)")
 	}

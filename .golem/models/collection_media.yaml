@@ -1,0 +1,7 @@
+name: collection_media
+type: struct
+fields:
+  - name: rating_key
+    type: string
+  - name: title
+    type: string
