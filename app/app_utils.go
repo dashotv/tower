@@ -20,6 +20,13 @@ import (
 func QueryString(c *gin.Context, name string) string {
 	return c.Query(name)
 }
+func QueryDefaultString(c *gin.Context, name, def string) string {
+	v := c.Query(name)
+	if v == "" {
+		return def
+	}
+	return v
+}
 
 // QueryInt retrieves an integer param from the gin request querystring
 func QueryInt(c *gin.Context, name string) int {

@@ -9,7 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -19,18 +18,47 @@ func (a *Application) SeriesIndex(c *gin.Context, page, limit int) {
 	if page == 0 {
 		page = 1
 	}
+	if limit == 0 {
+		limit = pagesize
+	}
 
-	count, err := app.DB.Series.Count(bson.M{"_type": "Series"})
+	kind := QueryString(c, "type")
+	source := QueryString(c, "source")
+	active := QueryBool(c, "active")
+	favorite := QueryBool(c, "favorite")
+	broken := QueryBool(c, "broken")
+
+	q := app.DB.Series.Query()
+	if kind != "" {
+		q = q.Where("kind", kind)
+	}
+	if source != "" {
+		q = q.Where("source", source)
+	}
+	if active {
+		q = q.Where("active", true)
+	}
+	if favorite {
+		q = q.Where("favorite", true)
+	}
+	if broken {
+		q = q.Where("broken", true)
+	}
+
+	count, err := q.Count()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	q := app.DB.Series.Query()
 	results, err := q.
-		Limit(pagesize).
-		Skip((page - 1) * pagesize).
+		Limit(limit).
+		Skip((page - 1) * limit).
 		Desc("created_at").Run()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	for _, s := range results {
 		unwatched, err := app.DB.SeriesUserUnwatched(s)
@@ -50,11 +78,6 @@ func (a *Application) SeriesIndex(c *gin.Context, page, limit int) {
 				continue
 			}
 		}
-	}
-
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
