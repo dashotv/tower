@@ -15,7 +15,7 @@ type PlexUserUpdates struct {
 
 func (j *PlexUserUpdates) Kind() string { return "PlexUserUpdates" }
 func (j *PlexUserUpdates) Work(ctx context.Context, job *minion.Job[*PlexUserUpdates]) error {
-	app.Log.Debugf("updating users")
+	// app.Log.Debugf("updating users")
 
 	users, err := app.DB.User.Query().NotEqual("token", "").Run()
 	if err != nil {

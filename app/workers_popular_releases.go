@@ -17,7 +17,7 @@ type PopularReleases struct {
 
 func (j *PopularReleases) Kind() string { return "PopularReleases" }
 func (j *PopularReleases) Work(ctx context.Context, job *minion.Job[*PopularReleases]) error {
-	app.Log.Named("popular_releases").Debug("popular releases")
+	// app.Log.Named("popular_releases").Debug("popular releases")
 	limit := 25
 	intervals := map[string]int{
 		"daily":   1,

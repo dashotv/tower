@@ -15,7 +15,7 @@ type PlexPinToUsers struct {
 
 func (j *PlexPinToUsers) Kind() string { return "PlexPinToUsers" }
 func (j *PlexPinToUsers) Work(ctx context.Context, job *minion.Job[*PlexPinToUsers]) error {
-	app.Log.Debugf("creating users from authenticated pins")
+	// app.Log.Debugf("creating users from authenticated pins")
 
 	pins, err := app.DB.Pin.Query().Run()
 	if err != nil {

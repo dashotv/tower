@@ -16,7 +16,7 @@ type PlexWatchlistUpdates struct {
 
 func (j *PlexWatchlistUpdates) Kind() string { return "PlexWatchlistUpdates" }
 func (j *PlexWatchlistUpdates) Work(ctx context.Context, job *minion.Job[*PlexWatchlistUpdates]) error {
-	app.Log.Debugf("creating requests from watchlists")
+	// app.Log.Debugf("creating requests from watchlists")
 
 	users, err := app.DB.User.Query().NotEqual("token", "").Run()
 	if err != nil {
@@ -51,12 +51,12 @@ func (j *PlexWatchlistUpdates) Work(ctx context.Context, job *minion.Job[*PlexWa
 			if m != nil {
 				continue
 			}
-			app.Log.Debugf("PlexUserUpdates: NOT FOUND: %s: %s", dm.Title, dm.Type)
+			// app.Log.Debugf("PlexUserUpdates: NOT FOUND: %s: %s", dm.Title, dm.Type)
 			err = createRequest(u.Name, dm.Title, dm.Type, dm.GUID)
 			if err != nil {
 				return errors.Wrap(err, "creating request")
 			}
-			app.Log.Infof("PlexUserUpdates: REQUESTED: %s: %s", dm.Title, dm.Type)
+			// app.Log.Infof("PlexUserUpdates: REQUESTED: %s: %s", dm.Title, dm.Type)
 		}
 	}
 	return nil
