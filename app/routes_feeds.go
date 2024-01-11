@@ -20,7 +20,20 @@ func (a *Application) FeedsIndex(c *gin.Context, page, limit int) {
 }
 
 func (a *Application) FeedsCreate(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"error": false})
+	data := &Feed{}
+	err := c.BindJSON(&data)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = app.DB.Feed.Save(data)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"error": false, "id": data.ID.Hex(), "feed": data})
 }
 
 func (a *Application) FeedsShow(c *gin.Context, id string) {
