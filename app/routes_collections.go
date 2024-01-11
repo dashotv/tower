@@ -90,6 +90,13 @@ func (a *Application) CollectionsDelete(c *gin.Context, id string) {
 		return
 	}
 
+	if col.RatingKey != "" {
+		if err := app.Plex.DeleteCollection(col.RatingKey); err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
 	err = a.DB.Collection.Delete(col)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})

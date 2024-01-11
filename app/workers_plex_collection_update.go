@@ -28,7 +28,7 @@ func (j *PlexCollectionUpdate) Work(ctx context.Context, job *minion.Job[*PlexCo
 		return nil
 	}
 	if c.RatingKey == "" {
-		resp, err := app.Plex.CreateCollection(c.Name, c.Library, "2", c.Media[0].RatingKey)
+		resp, err := app.Plex.CreateCollection(c.Name, c.Library, c.Media[0].RatingKey)
 		if err != nil {
 			return err
 		}

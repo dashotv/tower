@@ -13,6 +13,11 @@ const (
 	applicationXml  = "application/xml"
 	applicationJson = "application/json"
 )
+const (
+	PlexLibraryTypeUnknown = iota
+	PlexLibraryTypeMovie
+	PlexLibraryTypeShow
+)
 
 func init() {
 	initializers = append(initializers, setupPlex)
@@ -261,15 +266,62 @@ func (p *Plex) GetLibraries() ([]*PlexLibrary, error) {
 	return dest.MediaContainer.Directories, nil
 }
 
+func (p *Plex) LibraryType(section string) (int, error) {
+	t, err := p.LibraryTypeName(section)
+	if err != nil {
+		return 0, err
+	}
+	if t == "" {
+		return 0, errors.Errorf("library section %s not found", section)
+	}
+
+	id := p.LibraryTypeID(t)
+	if id == PlexLibraryTypeUnknown {
+		return 0, errors.Errorf("library section %s unknown", section)
+	}
+
+	return id, nil
+}
+
+func (p *Plex) LibraryTypeName(section string) (string, error) {
+	resp, err := p.GetLibraries()
+	if err != nil {
+		return "", err
+	}
+	for _, r := range resp {
+		if r.Key == section {
+			return r.Type, nil
+		}
+	}
+	return "", errors.Errorf("library section %s not found", section)
+}
+
+func (p *Plex) LibraryTypeID(t string) int {
+	switch t {
+	case "movie":
+		return PlexLibraryTypeMovie
+	case "show":
+		return PlexLibraryTypeShow
+	default:
+		return PlexLibraryTypeUnknown
+	}
+}
+
 func (p *Plex) Search(query, section string) ([]SearchMetadata, error) {
+	id, err := p.LibraryType(section)
+	if err != nil {
+		return nil, err
+	}
+
 	dest := &PlexSearch{}
 	path := fmt.Sprintf("/library/sections/%s/search", section)
 
 	params := url.Values{}
 	params.Set("X-Plex-Token", app.Config.PlexToken)
 	params.Set("title", query)
-	params.Set("type", "2")
+	params.Set("type", fmt.Sprintf("%d", id))
 	params.Set("limit", "25")
+	params.Set("sort", "createdAt:desc")
 
 	resp, err := p.server().SetResult(dest).
 		SetQueryParamsFromValues(params).
@@ -469,12 +521,17 @@ type PlexCollectionCreate struct {
 	} `json:"MediaContainer"`
 }
 
-func (p *Plex) CreateCollection(title, section, mediaType, firstKey string) (*PlexCollectionCreate, error) {
+func (p *Plex) CreateCollection(title, section, firstKey string) (*PlexCollectionCreate, error) {
+	id, err := p.LibraryType(section)
+	if err != nil {
+		return nil, err
+	}
+
 	data := url.Values{}
 	data.Set("X-Plex-Token", app.Config.PlexToken)
 	data.Set("title", title)
 	data.Set("sectionId", section)
-	data.Set("type", mediaType)
+	data.Set("type", fmt.Sprintf("%d", id))
 	data.Set("smart", "0")
 	data.Set("uri", fmt.Sprintf("server://%s/com.plexapp.plugins.library/library/metadata/%s", app.Config.PlexMachineIdentifier, firstKey))
 
@@ -560,6 +617,23 @@ type PlexCollectionChild struct {
 	Thumb        string `json:"thumb"`
 	AddedAt      int64  `json:"addedAt"`
 	UpdatedAt    int64  `json:"updatedAt"`
+}
+
+func (p *Plex) DeleteCollection(ratingKey string) error {
+	data := url.Values{}
+	data.Set("X-Plex-Token", app.Config.PlexToken)
+
+	resp, err := p.server().
+		SetQueryParamsFromValues(data).
+		Delete(fmt.Sprintf("/library/collections/%s", ratingKey))
+	if err != nil {
+		return err
+	}
+	if !resp.IsSuccess() {
+		return errors.Errorf("failed to delete collection: %s", resp.Status())
+	}
+
+	return nil
 }
 
 func (p *Plex) ListCollections(section string) ([]*PlexCollection, error) {
@@ -653,6 +727,11 @@ func (p *Plex) UpdateCollection(section, ratingKey string, keys []string) error 
 	}
 	if len(remove) > 0 {
 		app.Log.Debugf("removing %d items from collection: %+v", len(remove), remove)
+		for _, k := range remove {
+			if err := p.removeCollectionItem(ratingKey, k); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
@@ -673,6 +752,26 @@ func (p *Plex) addCollectionItem(ratingKey, newKey string) error {
 	}
 	if !resp.IsSuccess() {
 		return errors.Errorf("failed to add to collection: %s", resp.Status())
+	}
+
+	return nil
+}
+
+func (p *Plex) removeCollectionItem(ratingKey, rmKey string) error {
+	data := url.Values{}
+	data.Set("X-Plex-Token", app.Config.PlexToken)
+	data.Set("excludeAllLeaves", "1")
+
+	resp, err := p.server().
+		SetQueryParamsFromValues(data).
+		Delete(fmt.Sprintf("/library/collections/%s/children/%s", ratingKey, rmKey))
+	app.Log.Debugf("removeCollectionItem req url: %s", resp.Request.URL)
+	app.Log.Debugf("removeCollectionItem result: %s", resp.String())
+	if err != nil {
+		return err
+	}
+	if !resp.IsSuccess() {
+		return errors.Errorf("failed to remove from collection: %s", resp.Status())
 	}
 
 	return nil
