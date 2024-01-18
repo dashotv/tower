@@ -106,10 +106,14 @@ func (p *Plex) CreatePin() (*Pin, error) {
 }
 
 func (p *Plex) CheckPin(pin *Pin) (bool, error) {
+	params := url.Values{}
+	params.Set("code", pin.Code)
+	params.Set("X-Plex-Client-Identifier", app.Config.PlexClientIdentifier)
+
 	newPin := &Pin{}
 	resp, err := p.plextv().SetResult(newPin).
 		SetHeader("code", pin.Code).
-		SetQueryParamsFromValues(url.Values{"code": {pin.Code}}).
+		SetQueryParamsFromValues(params).
 		Get(fmt.Sprintf("/pins/%d", pin.Pin))
 	if err != nil {
 		return false, errors.Wrap(err, "failed to make request")
