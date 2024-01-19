@@ -155,6 +155,16 @@ func (a *Application) Routes() {
 	requests.PATCH("/:id", a.RequestsSettingsHandler)
 	requests.DELETE("/:id", a.RequestsDeleteHandler)
 
+	runic := a.Router.Group("/runic")
+	runic.GET("/", a.RunicIndexHandler)
+	runic.POST("/", a.RunicCreateHandler)
+	runic.GET("/:id", a.RunicShowHandler)
+	runic.PUT("/:id", a.RunicUpdateHandler)
+	runic.PATCH("/:id", a.RunicSettingsHandler)
+	runic.DELETE("/:id", a.RunicDeleteHandler)
+	runic.GET("/:id/search", a.RunicSearchHandler)
+	runic.GET("/:id/read", a.RunicReadHandler)
+
 	series := a.Router.Group("/series")
 	series.GET("/", a.SeriesIndexHandler)
 	series.POST("/", a.SeriesCreateHandler)
@@ -196,6 +206,7 @@ func (a *Application) indexHandler(c *gin.Context) {
 			"plex":        "/plex",
 			"releases":    "/releases",
 			"requests":    "/requests",
+			"runic":       "/runic",
 			"series":      "/series",
 			"upcoming":    "/upcoming",
 			"users":       "/users",
@@ -457,6 +468,42 @@ func (a *Application) RequestsSettingsHandler(c *gin.Context) {
 func (a *Application) RequestsDeleteHandler(c *gin.Context) {
 	id := c.Param("id")
 	a.RequestsDelete(c, id)
+}
+
+// Runic (/runic)
+func (a *Application) RunicIndexHandler(c *gin.Context) {
+	page := QueryInt(c, "page")
+	limit := QueryInt(c, "limit")
+	a.RunicIndex(c, page, limit)
+}
+func (a *Application) RunicCreateHandler(c *gin.Context) {
+	a.RunicCreate(c)
+}
+func (a *Application) RunicShowHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.RunicShow(c, id)
+}
+func (a *Application) RunicUpdateHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.RunicUpdate(c, id)
+}
+func (a *Application) RunicSettingsHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.RunicSettings(c, id)
+}
+func (a *Application) RunicDeleteHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.RunicDelete(c, id)
+}
+func (a *Application) RunicSearchHandler(c *gin.Context) {
+	id := c.Param("id")
+	q := QueryString(c, "q")
+	t := QueryString(c, "t")
+	a.RunicSearch(c, id, q, t)
+}
+func (a *Application) RunicReadHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.RunicRead(c, id)
 }
 
 // Series (/series)

@@ -1,0 +1,22 @@
+name: runic
+path: /runic
+rest: true
+routes:
+  - name: search
+    path: /:id/search
+    method: GET
+    params:
+      - name: id
+        type: string
+      - name: q
+        type: string
+        query: true
+      - name: t
+        type: string
+        query: true
+  - name: read
+    path: /:id/read
+    method: GET
+    params:
+      - name: id
+        type: string

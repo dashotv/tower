@@ -1,6 +1,6 @@
 module github.com/dashotv/tower
 
-go 1.21.3
+go 1.21.5
 
 require (
 	github.com/AlexEidt/Vidio v1.5.1
@@ -11,6 +11,7 @@ require (
 	github.com/dashotv/grimoire v0.4.3
 	github.com/dashotv/mercury v0.3.2
 	github.com/dashotv/minion v0.3.2
+	github.com/dashotv/runic v0.1.3
 	github.com/dashotv/scry v0.0.0-20231229215934-5ab6a66ca665
 	github.com/dashotv/tmdb v0.2.0
 	github.com/dashotv/tvdb v0.3.0
