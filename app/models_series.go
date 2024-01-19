@@ -66,23 +66,34 @@ func (c *Connector) SeriesUnwatchedByID(id string) (int, error) {
 }
 
 func (c *Connector) SeriesUnwatched(s *Series, user string) (int, error) {
-	list, err := c.Episode.Query().
+	// get all episodes for series
+	eps, err := c.Episode.Query().
 		Where("series_id", s.ID).
-		GreaterThan("season_number", 0).
+		Where("skipped", false).
 		Where("completed", true).
+		GreaterThan("season_number", 0).
 		Limit(-1).
 		Run()
 	if err != nil {
 		return 0, err
 	}
 
-	grouped := lo.GroupBy(list, func(e *Episode) primitive.ObjectID {
-		return e.ID
+	// get ids of all episodes who have videos
+	grouped := lo.GroupBy(eps, func(e *Episode) primitive.ObjectID {
+		for _, p := range e.Paths {
+			if p.Type == "video" {
+				return e.ID
+			}
+		}
+		return primitive.NilObjectID
 	})
 	ids := lo.Keys(grouped)
+	ids = lo.Filter(ids, func(id primitive.ObjectID, i int) bool {
+		return id != primitive.NilObjectID
+	})
 	ids = lo.Uniq[primitive.ObjectID](ids)
 
-	// get watches for those ids
+	// get unique watches for those ids
 	q := c.Watch.Query()
 	if user != "" {
 		q = q.Where("username", user)
@@ -93,7 +104,7 @@ func (c *Connector) SeriesUnwatched(s *Series, user string) (int, error) {
 	}
 
 	grpwatches := lo.GroupBy(watches, func(e *Watch) primitive.ObjectID {
-		return e.ID
+		return e.MediumId
 	})
 	wids := lo.Keys(grpwatches)
 	wids = lo.Uniq[primitive.ObjectID](wids)
@@ -168,6 +179,7 @@ func (c *Connector) SeriesSeasonEpisodes(id string, season string) ([]*Episode, 
 
 	for _, e := range eps {
 		e.Watched = c.MediumWatched(e.ID)
+		e.WatchedAny = c.MediumWatchedAny(e.ID)
 	}
 
 	return eps, nil
@@ -185,7 +197,7 @@ func (c *Connector) SeriesSeasonEpisodesAll(id string) ([]*Episode, error) {
 		Asc("season_number").
 		Asc("episode_number").
 		Asc("absolute_number").
-		Limit(1000).
+		Limit(-1).
 		Run()
 	if err != nil {
 		return nil, err

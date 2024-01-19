@@ -264,6 +264,7 @@ type Episode struct { // model
 	Cover          string             `bson:"-" json:"cover"`
 	Background     string             `bson:"-" json:"background"`
 	Watched        bool               `bson:"-" json:"watched"`
+	WatchedAny     bool               `bson:"-" json:"watched_any"`
 	Active         bool               `bson:"-" json:"active"`
 	Favorite       bool               `bson:"-" json:"favorite"`
 	Unwatched      int                `bson:"-" json:"unwatched"`
@@ -486,6 +487,7 @@ type Series struct { // model
 	Broken        bool             `bson:"broken" json:"broken"`
 	Favorite      bool             `bson:"favorite" json:"favorite"`
 	Unwatched     int              `bson:"-" json:"unwatched"`
+	UnwatchedAll  int              `bson:"-" json:"unwatched_all"`
 	ReleaseDate   time.Time        `bson:"release_date" json:"release_date"`
 	Paths         []*Path          `bson:"paths,omitempty" json:"paths"`
 	Cover         string           `bson:"-" json:"cover"`

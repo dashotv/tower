@@ -67,6 +67,12 @@ func (a *Application) SeriesIndex(c *gin.Context, page, limit int) {
 			return
 		}
 		s.Unwatched = unwatched
+		unwatchedall, err := app.DB.SeriesUnwatched(s, "")
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		s.UnwatchedAll = unwatchedall
 
 		for _, p := range s.Paths {
 			if p.Type == "cover" {
@@ -143,6 +149,12 @@ func (a *Application) SeriesShow(c *gin.Context, id string) {
 		return
 	}
 	result.Unwatched = unwatched
+	unwatchedall, err := app.DB.SeriesUnwatched(result, "")
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	result.UnwatchedAll = unwatchedall
 
 	for _, p := range result.Paths {
 		if p.Type == "cover" {

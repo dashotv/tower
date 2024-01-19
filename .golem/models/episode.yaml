@@ -47,6 +47,9 @@ fields:
   - name: watched
     type: bool
     bson: "-"
+  - name: watched_any
+    type: bool
+    bson: "-"
   # Series-related fields
   - name: active
     type: bool

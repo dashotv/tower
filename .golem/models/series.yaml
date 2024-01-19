@@ -50,6 +50,9 @@ fields:
   - name: unwatched
     type: int
     bson: "-"
+  - name: unwatched_all
+    type: int
+    bson: "-"
   - name: release_date
     type: time.Time
   - name: paths
