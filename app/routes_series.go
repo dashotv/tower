@@ -97,7 +97,7 @@ func (a *Application) SeriesCreate(c *gin.Context) {
 		return
 	}
 
-	app.Log.Debugf("series create: %+v", r)
+	a.Log.Debugf("series create: %+v", r)
 	s := &Series{
 		Type:         "Series",
 		SourceId:     r.ID,
@@ -108,16 +108,17 @@ func (a *Application) SeriesCreate(c *gin.Context) {
 		SearchParams: &SearchParams{Resolution: 1080, Verified: true, Type: "tv"},
 	}
 
-	if r.Kind == "anime" {
+	if r.Kind == "anime" || r.Kind == "ecchi" || r.Kind == "donghua" {
 		s.SearchParams.Type = "anime"
 	}
 
 	d, err := time.Parse("2006-01-02", r.Date)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		a.Log.Debugf("error parsing date: %s", err.Error())
+		s.ReleaseDate = time.Unix(0, 0)
+	} else {
+		s.ReleaseDate = d
 	}
-	s.ReleaseDate = d
 
 	err = app.DB.Series.Save(s)
 	if err != nil {
