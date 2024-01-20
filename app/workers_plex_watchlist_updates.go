@@ -9,6 +9,8 @@ import (
 	"github.com/dashotv/minion"
 )
 
+var requestDefaultStatus = "approved"
+
 // PlexWatchlistUpdates updates watchlist from plex
 type PlexWatchlistUpdates struct {
 	minion.WorkerDefaults[*PlexWatchlistUpdates]
@@ -59,7 +61,8 @@ func (j *PlexWatchlistUpdates) Work(ctx context.Context, job *minion.Job[*PlexWa
 			// app.Log.Infof("PlexUserUpdates: REQUESTED: %s: %s", dm.Title, dm.Type)
 		}
 	}
-	return nil
+
+	return app.Workers.Enqueue(&CreateMediaFromRequests{})
 }
 
 func createRequest(user, title, t string, guids []GUID) error {
@@ -93,6 +96,7 @@ func createMovieRequest(user, title string, guids []GUID) error {
 		Source:   "tmdb",
 		SourceId: source_id,
 		Type:     "movie",
+		Status:   requestDefaultStatus,
 	}
 
 	err = app.DB.Request.Save(req)
@@ -123,6 +127,7 @@ func createShowRequest(user, title string, guids []GUID) error {
 		Source:   "tvdb",
 		SourceId: source_id,
 		Type:     "series",
+		Status:   requestDefaultStatus,
 	}
 
 	err = app.DB.Request.Save(req)
