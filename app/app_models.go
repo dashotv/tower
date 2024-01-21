@@ -259,6 +259,7 @@ type Episode struct { // model
 	Downloaded     bool               `bson:"downloaded" json:"downloaded"`
 	Completed      bool               `bson:"completed" json:"completed"`
 	Skipped        bool               `bson:"skipped" json:"skipped"`
+	Missing        *time.Time         `bson:"missing" json:"missing"`
 	ReleaseDate    time.Time          `bson:"release_date" json:"release_date"`
 	Paths          []*Path            `bson:"paths,omitempty" json:"paths"`
 	Cover          string             `bson:"-" json:"cover"`

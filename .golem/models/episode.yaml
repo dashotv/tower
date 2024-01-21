@@ -31,6 +31,8 @@ fields:
     type: bool
   - name: skipped
     type: bool
+  - name: missing
+    type: "*time.Time"
   - name: release_date
     type: time.Time
   - name: paths
