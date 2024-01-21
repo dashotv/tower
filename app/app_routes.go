@@ -101,6 +101,7 @@ func (a *Application) Routes() {
 	episodes := a.Router.Group("/episodes")
 	episodes.PATCH("/:id", a.EpisodesSettingHandler)
 	episodes.PUT("/:id", a.EpisodesUpdateHandler)
+	episodes.POST("/settings", a.EpisodesSettingsHandler)
 
 	feeds := a.Router.Group("/feeds")
 	feeds.GET("/", a.FeedsIndexHandler)
@@ -300,6 +301,9 @@ func (a *Application) EpisodesSettingHandler(c *gin.Context) {
 func (a *Application) EpisodesUpdateHandler(c *gin.Context) {
 	id := c.Param("id")
 	a.EpisodesUpdate(c, id)
+}
+func (a *Application) EpisodesSettingsHandler(c *gin.Context) {
+	a.EpisodesSettings(c)
 }
 
 // Feeds (/feeds)

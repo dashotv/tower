@@ -1,15 +1,18 @@
 name: episodes
 path: /episodes
 routes:
-    - name: setting
-      path: /:id
-      method: PATCH
-      params:
-        - name: id
-          type: string
-    - name: update
-      path: /:id
-      method: PUT
-      params:
-        - name: id
-          type: string
+  - name: setting
+    path: /:id
+    method: PATCH
+    params:
+      - name: id
+        type: string
+  - name: update
+    path: /:id
+    method: PUT
+    params:
+      - name: id
+        type: string
+  - name: settings
+    path: /settings
+    method: POST
