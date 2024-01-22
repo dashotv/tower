@@ -270,6 +270,8 @@ type Episode struct { // model
 	Favorite       bool               `bson:"-" json:"favorite"`
 	Unwatched      int                `bson:"-" json:"unwatched"`
 	Display        string             `bson:"-" json:"display"`
+	Kind           primitive.Symbol   `bson:"-" json:"kind"`
+	Source         string             `bson:"-" json:"source"`
 }
 
 type Feed struct { // model

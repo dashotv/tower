@@ -142,6 +142,9 @@ func (c *Connector) processSeriesEpisode(s *Series, e *Episode) {
 	e.Active = s.Active
 	e.Favorite = s.Favorite
 	e.Title = s.Title
+	e.Kind = s.Kind
+	e.Source = s.Source
+	e.SourceId = s.SourceId
 	for _, p := range s.Paths {
 		if p.Type == "cover" {
 			e.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)

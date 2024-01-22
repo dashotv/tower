@@ -65,3 +65,9 @@ fields:
   - name: display
     type: string
     bson: "-"
+  - name: kind
+    type: primitive.Symbol
+    bson: "-"
+  - name: source
+    type: string
+    bson: "-"
