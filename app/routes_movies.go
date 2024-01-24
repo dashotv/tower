@@ -6,26 +6,46 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	"github.com/dashotv/golem/web"
 )
 
 func (a *Application) MoviesIndex(c *gin.Context, page, limit int) {
-	page, err := web.QueryDefaultInteger(c, "page", 1)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+	if page == 0 {
+		page = 1
+	}
+	if limit == 0 {
+		limit = pagesize
 	}
 
-	count, err := app.DB.Movie.Count(bson.M{"_type": "Movie"})
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	kind := QueryString(c, "kind")
+	source := QueryString(c, "source")
+	completed := QueryBool(c, "completed")
+	downloaded := QueryBool(c, "downloaded")
+	broken := QueryBool(c, "broken")
 
 	q := app.DB.Movie.Query()
+	if kind != "" {
+		q = q.Where("kind", kind)
+	}
+	if source != "" {
+		q = q.Where("source", source)
+	}
+	if completed {
+		q = q.Where("completed", true)
+	}
+	if downloaded {
+		q = q.Where("downloaded", true)
+	}
+	if broken {
+		q = q.Where("broken", true)
+	}
+
+	count, err := q.Count()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	results, err := q.
 		Limit(pagesize).
 		Skip((page - 1) * pagesize).
