@@ -3,6 +3,8 @@ package app
 import (
 	"net/http"
 	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -51,7 +53,23 @@ func (a *Application) RunicShow(c *gin.Context, id string) {
 }
 
 func (a *Application) RunicRead(c *gin.Context, id string) {
-	results, err := a.Runic.Read(id, []int{5000})
+	cats := strings.Split(QueryDefaultString(c, "categories", ""), ",")
+	catsInt := make([]int, 0)
+	for _, cat := range cats {
+		if cat == "" {
+			continue
+		}
+
+		i, err := strconv.Atoi(cat)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		catsInt = append(catsInt, i)
+	}
+
+	results, err := a.Runic.Read(id, catsInt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
