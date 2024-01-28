@@ -36,6 +36,7 @@ type Connector struct {
 	Download   *grimoire.Store[*Download]
 	Episode    *grimoire.Store[*Episode]
 	Feed       *grimoire.Store[*Feed]
+	Indexer    *grimoire.Store[*Indexer]
 	Medium     *grimoire.Store[*Medium]
 	Message    *grimoire.Store[*Message]
 	Minion     *grimoire.Store[*Minion]
@@ -84,6 +85,15 @@ func NewConnector(app *Application) (*Connector, error) {
 		return nil, err
 	}
 	feed, err := grimoire.New[*Feed](s.URI, s.Database, s.Collection)
+	if err != nil {
+		return nil, err
+	}
+
+	s, err = app.Config.ConnectionFor("indexer")
+	if err != nil {
+		return nil, err
+	}
+	indexer, err := grimoire.New[*Indexer](s.URI, s.Database, s.Collection)
 	if err != nil {
 		return nil, err
 	}
@@ -184,6 +194,7 @@ func NewConnector(app *Application) (*Connector, error) {
 		Download:   download,
 		Episode:    episode,
 		Feed:       feed,
+		Indexer:    indexer,
 		Medium:     medium,
 		Message:    message,
 		Minion:     minion,
@@ -285,6 +296,23 @@ type Feed struct { // model
 	Type      string    `bson:"type" json:"type"`
 	Active    bool      `bson:"active" json:"active"`
 	Processed time.Time `bson:"processed" json:"processed"`
+}
+
+type Indexer struct { // model
+	grimoire.Document `bson:",inline"` // includes default model settings
+	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
+	Name        string           `bson:"name" json:"name"`
+	Url         string           `bson:"url" json:"url"`
+	Active      bool             `bson:"active" json:"active"`
+	Categories  map[string][]int `bson:"categories" json:"categories"`
+	ProcessedAt time.Time        `bson:"processed_at" json:"processed_at"`
+}
+
+type IndexerCategories struct { // struct
+	Kind       string `bson:"kind" json:"kind"`
+	Categories []int  `bson:"categories" json:"categories"`
 }
 
 type Medium struct { // model

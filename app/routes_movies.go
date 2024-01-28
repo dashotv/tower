@@ -13,9 +13,6 @@ func (a *Application) MoviesIndex(c *gin.Context, page, limit int) {
 	if page == 0 {
 		page = 1
 	}
-	if limit == 0 {
-		limit = pagesize
-	}
 
 	kind := QueryString(c, "kind")
 	source := QueryString(c, "source")

@@ -2,9 +2,12 @@ package app
 
 import (
 	"net/http"
+	"sort"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+
+	"github.com/dashotv/runic"
 )
 
 type RunicSourceSimple struct {
@@ -14,21 +17,21 @@ type RunicSourceSimple struct {
 }
 
 func (a *Application) RunicIndex(c *gin.Context, page int, limit int) {
-	out := make([]*RunicSourceSimple, 0)
+	out := make([]*runic.Source, 0)
+
 	list := a.Runic.Sources()
+	sort.Strings(list)
+
 	for _, n := range list {
 		s, ok := a.Runic.Source(n)
 		if !ok {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": errors.New("indexer does not exist")})
 			return
 		}
-		out = append(out, &RunicSourceSimple{s.Name, s.Type, s.URL})
+		out = append(out, s)
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"error":   false,
-		"results": out,
-	})
+	c.JSON(http.StatusOK, gin.H{"error": false, "results": out})
 }
 
 func (a *Application) RunicCreate(c *gin.Context) {
@@ -44,10 +47,7 @@ func (a *Application) RunicShow(c *gin.Context, id string) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"error":  false,
-		"source": s,
-	})
+	c.JSON(http.StatusOK, gin.H{"error": false, "source": s})
 }
 
 func (a *Application) RunicRead(c *gin.Context, id string) {

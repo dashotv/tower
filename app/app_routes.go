@@ -111,6 +111,14 @@ func (a *Application) Routes() {
 	feeds.PATCH("/:id", a.FeedsSettingsHandler)
 	feeds.DELETE("/:id", a.FeedsDeleteHandler)
 
+	indexers := a.Router.Group("/indexers")
+	indexers.GET("/", a.IndexersIndexHandler)
+	indexers.POST("/", a.IndexersCreateHandler)
+	indexers.GET("/:id", a.IndexersShowHandler)
+	indexers.PUT("/:id", a.IndexersUpdateHandler)
+	indexers.PATCH("/:id", a.IndexersSettingsHandler)
+	indexers.DELETE("/:id", a.IndexersDeleteHandler)
+
 	jobs := a.Router.Group("/jobs")
 	jobs.GET("/", a.JobsIndexHandler)
 	jobs.POST("/", a.JobsCreateHandler)
@@ -201,6 +209,7 @@ func (a *Application) indexHandler(c *gin.Context) {
 			"downloads":   "/downloads",
 			"episodes":    "/episodes",
 			"feeds":       "/feeds",
+			"indexers":    "/indexers",
 			"jobs":        "/jobs",
 			"messages":    "/messages",
 			"movies":      "/movies",
@@ -330,6 +339,32 @@ func (a *Application) FeedsSettingsHandler(c *gin.Context) {
 func (a *Application) FeedsDeleteHandler(c *gin.Context) {
 	id := c.Param("id")
 	a.FeedsDelete(c, id)
+}
+
+// Indexers (/indexers)
+func (a *Application) IndexersIndexHandler(c *gin.Context) {
+	page := QueryInt(c, "page")
+	limit := QueryInt(c, "limit")
+	a.IndexersIndex(c, page, limit)
+}
+func (a *Application) IndexersCreateHandler(c *gin.Context) {
+	a.IndexersCreate(c)
+}
+func (a *Application) IndexersShowHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.IndexersShow(c, id)
+}
+func (a *Application) IndexersUpdateHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.IndexersUpdate(c, id)
+}
+func (a *Application) IndexersSettingsHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.IndexersSettings(c, id)
+}
+func (a *Application) IndexersDeleteHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.IndexersDelete(c, id)
 }
 
 // Jobs (/jobs)

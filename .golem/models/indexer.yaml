@@ -1,0 +1,13 @@
+name: indexer
+type: model
+fields:
+  - name: name
+    type: string
+  - name: url
+    type: string
+  - name: active
+    type: bool
+  - name: categories
+    type: "map[string][]int"
+  - name: processed_at
+    type: time.Time

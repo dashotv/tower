@@ -7,11 +7,10 @@ require (
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/dashotv/flame v0.8.1
-	github.com/dashotv/golem v0.11.3
 	github.com/dashotv/grimoire v0.4.3
 	github.com/dashotv/mercury v0.3.2
 	github.com/dashotv/minion v0.3.2
-	github.com/dashotv/runic v0.1.4
+	github.com/dashotv/runic v0.1.5
 	github.com/dashotv/scry v0.0.0-20231229215934-5ab6a66ca665
 	github.com/dashotv/tmdb v0.2.0
 	github.com/dashotv/tvdb v0.3.0
@@ -55,6 +54,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
+	github.com/dashotv/golem v0.11.3 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/deepmap/oapi-codegen v1.16.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
