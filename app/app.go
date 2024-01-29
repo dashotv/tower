@@ -9,7 +9,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/dashotv/minion"
-	"github.com/dashotv/runic"
 	"github.com/dashotv/tmdb"
 	"github.com/dashotv/tvdb"
 )
@@ -53,7 +52,6 @@ type Application struct {
 	Plex   *Plex
 	Tmdb   *tmdb.Client
 	Tvdb   *tvdb.Client
-	Runic  *runic.Runic
 }
 
 func Start() error {

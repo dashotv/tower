@@ -111,14 +111,6 @@ func (a *Application) Routes() {
 	feeds.PATCH("/:id", a.FeedsSettingsHandler)
 	feeds.DELETE("/:id", a.FeedsDeleteHandler)
 
-	indexers := a.Router.Group("/indexers")
-	indexers.GET("/", a.IndexersIndexHandler)
-	indexers.POST("/", a.IndexersCreateHandler)
-	indexers.GET("/:id", a.IndexersShowHandler)
-	indexers.PUT("/:id", a.IndexersUpdateHandler)
-	indexers.PATCH("/:id", a.IndexersSettingsHandler)
-	indexers.DELETE("/:id", a.IndexersDeleteHandler)
-
 	jobs := a.Router.Group("/jobs")
 	jobs.GET("/", a.JobsIndexHandler)
 	jobs.POST("/", a.JobsCreateHandler)
@@ -164,16 +156,6 @@ func (a *Application) Routes() {
 	requests.PATCH("/:id", a.RequestsSettingsHandler)
 	requests.DELETE("/:id", a.RequestsDeleteHandler)
 
-	runic := a.Router.Group("/runic")
-	runic.GET("/", a.RunicIndexHandler)
-	runic.POST("/", a.RunicCreateHandler)
-	runic.GET("/:id", a.RunicShowHandler)
-	runic.PUT("/:id", a.RunicUpdateHandler)
-	runic.PATCH("/:id", a.RunicSettingsHandler)
-	runic.DELETE("/:id", a.RunicDeleteHandler)
-	runic.GET("/:id/search", a.RunicSearchHandler)
-	runic.GET("/:id/read", a.RunicReadHandler)
-
 	series := a.Router.Group("/series")
 	series.GET("/", a.SeriesIndexHandler)
 	series.POST("/", a.SeriesCreateHandler)
@@ -209,14 +191,12 @@ func (a *Application) indexHandler(c *gin.Context) {
 			"downloads":   "/downloads",
 			"episodes":    "/episodes",
 			"feeds":       "/feeds",
-			"indexers":    "/indexers",
 			"jobs":        "/jobs",
 			"messages":    "/messages",
 			"movies":      "/movies",
 			"plex":        "/plex",
 			"releases":    "/releases",
 			"requests":    "/requests",
-			"runic":       "/runic",
 			"series":      "/series",
 			"upcoming":    "/upcoming",
 			"users":       "/users",
@@ -339,32 +319,6 @@ func (a *Application) FeedsSettingsHandler(c *gin.Context) {
 func (a *Application) FeedsDeleteHandler(c *gin.Context) {
 	id := c.Param("id")
 	a.FeedsDelete(c, id)
-}
-
-// Indexers (/indexers)
-func (a *Application) IndexersIndexHandler(c *gin.Context) {
-	page := QueryInt(c, "page")
-	limit := QueryInt(c, "limit")
-	a.IndexersIndex(c, page, limit)
-}
-func (a *Application) IndexersCreateHandler(c *gin.Context) {
-	a.IndexersCreate(c)
-}
-func (a *Application) IndexersShowHandler(c *gin.Context) {
-	id := c.Param("id")
-	a.IndexersShow(c, id)
-}
-func (a *Application) IndexersUpdateHandler(c *gin.Context) {
-	id := c.Param("id")
-	a.IndexersUpdate(c, id)
-}
-func (a *Application) IndexersSettingsHandler(c *gin.Context) {
-	id := c.Param("id")
-	a.IndexersSettings(c, id)
-}
-func (a *Application) IndexersDeleteHandler(c *gin.Context) {
-	id := c.Param("id")
-	a.IndexersDelete(c, id)
 }
 
 // Jobs (/jobs)
@@ -507,42 +461,6 @@ func (a *Application) RequestsSettingsHandler(c *gin.Context) {
 func (a *Application) RequestsDeleteHandler(c *gin.Context) {
 	id := c.Param("id")
 	a.RequestsDelete(c, id)
-}
-
-// Runic (/runic)
-func (a *Application) RunicIndexHandler(c *gin.Context) {
-	page := QueryInt(c, "page")
-	limit := QueryInt(c, "limit")
-	a.RunicIndex(c, page, limit)
-}
-func (a *Application) RunicCreateHandler(c *gin.Context) {
-	a.RunicCreate(c)
-}
-func (a *Application) RunicShowHandler(c *gin.Context) {
-	id := c.Param("id")
-	a.RunicShow(c, id)
-}
-func (a *Application) RunicUpdateHandler(c *gin.Context) {
-	id := c.Param("id")
-	a.RunicUpdate(c, id)
-}
-func (a *Application) RunicSettingsHandler(c *gin.Context) {
-	id := c.Param("id")
-	a.RunicSettings(c, id)
-}
-func (a *Application) RunicDeleteHandler(c *gin.Context) {
-	id := c.Param("id")
-	a.RunicDelete(c, id)
-}
-func (a *Application) RunicSearchHandler(c *gin.Context) {
-	id := c.Param("id")
-	q := QueryString(c, "q")
-	t := QueryString(c, "t")
-	a.RunicSearch(c, id, q, t)
-}
-func (a *Application) RunicReadHandler(c *gin.Context) {
-	id := c.Param("id")
-	a.RunicRead(c, id)
 }
 
 // Series (/series)

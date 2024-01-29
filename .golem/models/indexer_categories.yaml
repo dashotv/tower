@@ -1,7 +1,0 @@
-name: indexer_categories
-type: struct
-fields:
-  - name: kind
-    type: string
-  - name: categories
-    type: "[]int"
