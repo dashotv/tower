@@ -141,7 +141,10 @@ func (c *Connector) processSeriesEpisode(s *Series, e *Episode) {
 	e.Directory = s.Directory
 	e.Active = s.Active
 	e.Favorite = s.Favorite
-	e.Title = s.Title
+	e.Title = s.Display
+	if e.Title == "" {
+		e.Title = s.Title
+	}
 	e.Kind = s.Kind
 	e.Source = s.Source
 	e.SourceId = s.SourceId
