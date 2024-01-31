@@ -5,15 +5,39 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/dashotv/tower/internal/plex"
 )
+
+func plexPinToPin(pin *plex.Pin) *Pin {
+	return &Pin{
+		Pin:        pin.ID,
+		Code:       pin.Code,
+		Product:    pin.Product,
+		Identifier: pin.Identifier,
+		Token:      pin.Token,
+	}
+}
+
+func pinToPlexPin(pin *Pin) *plex.Pin {
+	return &plex.Pin{
+		ID:         pin.Pin,
+		Code:       pin.Code,
+		Product:    pin.Product,
+		Identifier: pin.Identifier,
+		Token:      pin.Token,
+	}
+}
 
 func (a *Application) PlexIndex(c *gin.Context) {
 	// get pin
-	pin, err := app.Plex.CreatePin()
+	plexPin, err := app.Plex.CreatePin()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	pin := plexPinToPin(plexPin)
 
 	app.Log.Debugf("PlexIndex: saving pin %+v", pin)
 	err = app.DB.Pin.Save(pin)
@@ -22,8 +46,7 @@ func (a *Application) PlexIndex(c *gin.Context) {
 		return
 	}
 
-	authUrl := app.Plex.getAuthUrl(pin)
-	// c.JSON(200, gin.H{"pin": pin, "authUrl": authUrl})
+	authUrl := app.Plex.GetAuthUrl(app.Config.Plex, plexPin)
 	c.Redirect(302, authUrl)
 }
 
@@ -45,8 +68,8 @@ func (a *Application) PlexAuth(c *gin.Context) {
 		return
 	}
 
-	pin := list[0]
-	ok, err := app.Plex.CheckPin(pin)
+	plexPin := pinToPlexPin(list[0])
+	ok, err := app.Plex.CheckPin(plexPin)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -55,11 +78,6 @@ func (a *Application) PlexAuth(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "something went wrong..."})
 		return
 	}
-
-	// TODO: get user from token (myplex api), then scheduled job to handle watchlist?
-	//app.Workers.Enqueue(runJob(&MinionJob{Name: "PlexAuth"}, func() error {
-	// 	return nil
-	// }))
 
 	if err := app.Workers.Enqueue(&PlexPinToUsers{}); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

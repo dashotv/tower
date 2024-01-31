@@ -10,6 +10,7 @@ import (
 
 	"github.com/dashotv/minion"
 	"github.com/dashotv/tmdb"
+	"github.com/dashotv/tower/internal/plex"
 	"github.com/dashotv/tvdb"
 )
 
@@ -49,7 +50,7 @@ type Application struct {
 	Fanart *Fanart
 	Flame  *Flame
 	Scry   *Scry
-	Plex   *Plex
+	Plex   *plex.Client
 	Tmdb   *tmdb.Client
 	Tvdb   *tvdb.Client
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/dashotv/minion"
+	"github.com/dashotv/tower/internal/plex"
 )
 
 var requestDefaultStatus = "approved"
@@ -65,7 +66,7 @@ func (j *PlexWatchlistUpdates) Work(ctx context.Context, job *minion.Job[*PlexWa
 	return app.Workers.Enqueue(&CreateMediaFromRequests{})
 }
 
-func createRequest(user, title, t string, guids []GUID) error {
+func createRequest(user, title, t string, guids []plex.GUID) error {
 	switch t {
 	case "movie":
 		return createMovieRequest(user, title, guids)
@@ -76,7 +77,7 @@ func createRequest(user, title, t string, guids []GUID) error {
 	}
 }
 
-func createMovieRequest(user, title string, guids []GUID) error {
+func createMovieRequest(user, title string, guids []plex.GUID) error {
 	source_id := guidToSourceID("tmdb", guids)
 	if source_id == "" {
 		return errors.New("createMovieRequest: no tmdb guid")
@@ -107,7 +108,7 @@ func createMovieRequest(user, title string, guids []GUID) error {
 	return nil
 }
 
-func createShowRequest(user, title string, guids []GUID) error {
+func createShowRequest(user, title string, guids []plex.GUID) error {
 	source_id := guidToSourceID("tvdb", guids)
 	if source_id == "" {
 		return errors.New("createShowRequest: no tvdb guid")
@@ -137,7 +138,7 @@ func createShowRequest(user, title string, guids []GUID) error {
 	return nil
 }
 
-func guidToSourceID(source string, guids []GUID) string {
+func guidToSourceID(source string, guids []plex.GUID) string {
 	for _, g := range guids {
 		s := strings.Split(g.ID, "://")
 		if s[0] == source {
@@ -148,7 +149,7 @@ func guidToSourceID(source string, guids []GUID) string {
 	return ""
 }
 
-func findMediaByGUIDs(list []GUID) (*Medium, error) {
+func findMediaByGUIDs(list []plex.GUID) (*Medium, error) {
 	for _, g := range list {
 		s := strings.Split(g.ID, "://")
 		list, err := app.DB.Medium.Query().Where("source", s[0]).Where("source_id", s[1]).Run()
