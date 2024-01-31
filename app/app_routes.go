@@ -111,6 +111,9 @@ func (a *Application) Routes() {
 	feeds.PATCH("/:id", a.FeedsSettingsHandler)
 	feeds.DELETE("/:id", a.FeedsDeleteHandler)
 
+	hooks := a.Router.Group("/hooks")
+	hooks.GET("/plex", a.HooksPlexHandler)
+
 	jobs := a.Router.Group("/jobs")
 	jobs.GET("/", a.JobsIndexHandler)
 	jobs.POST("/", a.JobsCreateHandler)
@@ -191,6 +194,7 @@ func (a *Application) indexHandler(c *gin.Context) {
 			"downloads":   "/downloads",
 			"episodes":    "/episodes",
 			"feeds":       "/feeds",
+			"hooks":       "/hooks",
 			"jobs":        "/jobs",
 			"messages":    "/messages",
 			"movies":      "/movies",
@@ -319,6 +323,11 @@ func (a *Application) FeedsSettingsHandler(c *gin.Context) {
 func (a *Application) FeedsDeleteHandler(c *gin.Context) {
 	id := c.Param("id")
 	a.FeedsDelete(c, id)
+}
+
+// Hooks (/hooks)
+func (a *Application) HooksPlexHandler(c *gin.Context) {
+	a.HooksPlex(c)
 }
 
 // Jobs (/jobs)

@@ -1,0 +1,6 @@
+name: hooks
+path: /hooks
+routes:
+    - name: plex
+      path: /plex
+      method: GET
