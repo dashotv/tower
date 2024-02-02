@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"net/http"
 	"sort"
 	"strconv"
@@ -194,7 +195,7 @@ func (a *Application) PlexStuff(c *gin.Context) {
 				LibraryTitle: child.LibraryTitle,
 				LibraryKey:   child.LibraryKey,
 				Summary:      child.Summary,
-				Thumb:        child.Thumb,
+				Thumb:        fmt.Sprintf("%s%s?X-Plex-Token=%s", a.Config.PlexServerURL, child.Thumb, a.Config.PlexToken),
 				Total:        metadata.Leaves,
 				Viewed:       metadata.Viewed,
 				LastViewedAt: metadata.LastViewedAt,
