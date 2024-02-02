@@ -37,3 +37,12 @@ routes:
         type: string
       - name: ratingKey
         type: string
+  - name: stuff
+    path: /stuff
+    method: GET
+  - name: metadata
+    path: /metadata/:key
+    method: GET
+    params:
+      - name: key
+        type: string
