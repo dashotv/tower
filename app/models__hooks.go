@@ -103,9 +103,9 @@ func (m *Movie) Saving() error {
 		m.Search = path(m.Search)
 	}
 	if m.Directory == "" {
-		m.Directory = path(m.Title)
+		m.Directory = directory(m.Title)
 	} else {
-		m.Directory = path(m.Directory)
+		m.Directory = directory(m.Directory)
 	}
 
 	return nil
@@ -164,9 +164,9 @@ func (s *Series) Saving() error {
 		s.Search = p
 	}
 	if s.Directory == "" {
-		s.Directory = path(s.Title)
+		s.Directory = directory(s.Title)
 	} else {
-		s.Directory = path(s.Directory)
+		s.Directory = directory(s.Directory)
 	}
 
 	return nil
