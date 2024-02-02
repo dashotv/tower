@@ -1,6 +1,7 @@
 package plex
 
 import (
+	"crypto/tls"
 	"net/url"
 
 	"github.com/go-resty/resty/v2"
@@ -56,7 +57,7 @@ func New(opt *ClientOptions) *Client {
 	data.Set("X-Plex-Token", c.Token)
 	c.data = data
 
-	c.server = resty.New().SetBaseURL(c.URL)
+	c.server = resty.New().SetBaseURL(c.URL).SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	c.plextv = resty.New().SetBaseURL(c.PlexTVURL)
 	c.metadata = resty.New().SetBaseURL(c.MetadataURL)
 
