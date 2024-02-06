@@ -35,6 +35,8 @@ type PlexLeavesMetadata struct {
 	ParentTitle      string   `json:"parentTitle"`
 	GrandparentTitle string   `json:"grandparentTitle"`
 	Index            int      `json:"index"`
+	AddedAt          int64    `json:"addedAt"`
+	UpdatedAt        int64    `json:"updatedAt"`
 	Media            []*Media `json:"Media"`
 }
 

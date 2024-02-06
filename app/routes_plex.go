@@ -211,8 +211,8 @@ func (a *Application) PlexStuff(c *gin.Context) {
 				Total:        metadata.Leaves,
 				Viewed:       metadata.Viewed,
 				LastViewedAt: metadata.LastViewedAt,
-				AddedAt:      child.AddedAt,
-				UpdatedAt:    child.UpdatedAt,
+				AddedAt:      unwatched.AddedAt,
+				UpdatedAt:    unwatched.UpdatedAt,
 			}
 			if unwatched != nil {
 				stuff.Next = unwatched.RatingKey
@@ -223,7 +223,7 @@ func (a *Application) PlexStuff(c *gin.Context) {
 	sorter := &stuffSorter{
 		list: list,
 		by: func(p1, p2 *Stuff) bool {
-			return p1.LastViewedAt > p2.LastViewedAt
+			return p1.AddedAt > p2.AddedAt
 		},
 	}
 	sort.Sort(sorter)
