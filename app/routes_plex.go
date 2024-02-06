@@ -5,8 +5,10 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/samber/lo"
 
 	"github.com/dashotv/tower/internal/plex"
 )
@@ -145,6 +147,8 @@ type Stuff struct {
 	Thumb        string `json:"thumb"`
 	Total        int    `json:"total"`
 	Viewed       int    `json:"viewed"`
+	Link         string `json:"link"`
+	Next         string `json:"next"`
 	LastViewedAt int64  `json:"lastViewedAt"`
 	AddedAt      int64  `json:"addedAt"`
 	UpdatedAt    int64  `json:"updatedAt"`
@@ -185,6 +189,13 @@ func (a *Application) PlexStuff(c *gin.Context) {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
+
+			unwatched, err := a.Plex.GetSeriesEpisodesUnwatched(child.RatingKey)
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
 			stuff := &Stuff{
 				RatingKey:    child.RatingKey,
 				Key:          child.Key,
@@ -195,12 +206,16 @@ func (a *Application) PlexStuff(c *gin.Context) {
 				LibraryTitle: child.LibraryTitle,
 				LibraryKey:   child.LibraryKey,
 				Summary:      child.Summary,
+				Link:         fmt.Sprintf("https://app.plex.tv/desktop/#!/server/%s/details?key=%s?X-Plex-Token=%s", a.Config.PlexMachineIdentifier, child.Key, a.Config.PlexToken),
 				Thumb:        fmt.Sprintf("%s%s?X-Plex-Token=%s", a.Config.PlexServerURL, child.Thumb, a.Config.PlexToken),
 				Total:        metadata.Leaves,
 				Viewed:       metadata.Viewed,
 				LastViewedAt: metadata.LastViewedAt,
 				AddedAt:      child.AddedAt,
 				UpdatedAt:    child.UpdatedAt,
+			}
+			if unwatched != nil {
+				stuff.Next = unwatched.RatingKey
 			}
 			list = append(list, stuff)
 		}
@@ -223,4 +238,51 @@ func (a *Application) PlexMetadata(c *gin.Context, key string) {
 		return
 	}
 	c.JSON(http.StatusOK, resp)
+}
+
+func (a *Application) PlexClients(c *gin.Context) {
+	list, err := a.Plex.GetClients()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
+func (a *Application) PlexDevices(c *gin.Context) {
+	list, err := a.Plex.GetDevices()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, list)
+}
+
+func (a *Application) PlexResources(c *gin.Context) {
+	provides := QueryString(c, "provides")
+	if provides == "" {
+		provides = "player"
+	}
+
+	list, err := a.Plex.GetResources()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// filter by provides
+	filtered := lo.Filter(list, func(r *plex.Resource, i int) bool {
+		provided := strings.Split(r.Provides, ",")
+		return lo.Contains(provided, provides)
+	})
+
+	c.JSON(http.StatusOK, filtered)
+}
+func (a *Application) PlexPlay(c *gin.Context, ratingKey, player string) {
+	err := a.Plex.Play(player, ratingKey)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.String(http.StatusOK, "Playing...")
 }

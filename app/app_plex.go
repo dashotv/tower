@@ -12,7 +12,8 @@ func setupPlex(app *Application) error {
 	p := plex.New(&plex.ClientOptions{
 		URL:               app.Config.PlexServerURL,
 		Token:             app.Config.PlexToken,
-		MachineIdentifier: app.Config.PlexClientIdentifier,
+		Debug:             false,
+		MachineIdentifier: app.Config.PlexMachineIdentifier,
 		ClientIdentifier:  app.Config.PlexClientIdentifier,
 		Product:           app.Config.PlexAppName,
 		Device:            app.Config.PlexDevice,

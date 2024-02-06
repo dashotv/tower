@@ -25,6 +25,7 @@ func New(opt *ClientOptions) *Client {
 	c := &Client{
 		URL:               opt.URL,
 		Token:             opt.Token,
+		Debug:             opt.Debug,
 		MachineIdentifier: opt.MachineIdentifier,
 		ClientIdentifier:  opt.ClientIdentifier,
 		Product:           opt.Product,
@@ -57,9 +58,9 @@ func New(opt *ClientOptions) *Client {
 	data.Set("X-Plex-Token", c.Token)
 	c.data = data
 
-	c.server = resty.New().SetBaseURL(c.URL).SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	c.plextv = resty.New().SetBaseURL(c.PlexTVURL)
-	c.metadata = resty.New().SetBaseURL(c.MetadataURL)
+	c.server = resty.New().SetDebug(c.Debug).SetBaseURL(c.URL).SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	c.plextv = resty.New().SetDebug(c.Debug).SetBaseURL(c.PlexTVURL)
+	c.metadata = resty.New().SetDebug(c.Debug).SetBaseURL(c.MetadataURL)
 
 	return c
 }
@@ -67,6 +68,7 @@ func New(opt *ClientOptions) *Client {
 type ClientOptions struct {
 	URL   string
 	Token string
+	Debug bool
 
 	MachineIdentifier string
 	ClientIdentifier  string
@@ -80,6 +82,7 @@ type ClientOptions struct {
 type Client struct {
 	URL   string
 	Token string
+	Debug bool
 
 	MachineIdentifier string
 	ClientIdentifier  string
@@ -118,40 +121,4 @@ func (p *Client) GetUser(token string) (*PlexUser, error) {
 	}
 
 	return user, nil
-}
-
-type PlexLibraryMetadataContainer struct {
-	MediaContainer struct {
-		Size     int64                  `json:"size"`
-		Metadata []*PlexLibraryMetadata `json:"Metadata"`
-	} `json:"MediaContainer"`
-}
-type PlexLibraryMetadata struct {
-	Key          string `json:"key"`
-	RatingKey    string `json:"ratingKey"`
-	Leaves       int    `json:"leafCount"`
-	Viewed       int    `json:"viewedLeafCount"`
-	LastViewedAt int64  `json:"lastViewedAt"`
-}
-
-func (p *Client) GetMetadataByKey(key string) (string, error) {
-	resp, err := p._server().SetFormDataFromValues(p.data).Get("/library/metadata/" + key)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to make request")
-	}
-	if !resp.IsSuccess() {
-		return "", errors.Errorf("failed to get metadata: %s", resp.Status())
-	}
-	return resp.String(), nil
-}
-func (p *Client) GetViewedByKey(key string) (*PlexLibraryMetadata, error) {
-	m := &PlexLibraryMetadataContainer{}
-	resp, err := p._server().SetResult(m).SetFormDataFromValues(p.data).Get("/library/metadata/" + key)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to make request")
-	}
-	if !resp.IsSuccess() {
-		return nil, errors.Errorf("failed to get viewed: %s", resp.Status())
-	}
-	return m.MediaContainer.Metadata[0], nil
 }

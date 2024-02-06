@@ -143,6 +143,10 @@ func (a *Application) Routes() {
 	plex.GET("/libraries/:section/collections/:ratingKey", a.PlexCollectionsShowHandler)
 	plex.GET("/stuff", a.PlexStuffHandler)
 	plex.GET("/metadata/:key", a.PlexMetadataHandler)
+	plex.GET("/clients", a.PlexClientsHandler)
+	plex.GET("/devices", a.PlexDevicesHandler)
+	plex.GET("/resources", a.PlexResourcesHandler)
+	plex.GET("/play", a.PlexPlayHandler)
 
 	releases := a.Router.Group("/releases")
 	releases.GET("/", a.ReleasesIndexHandler)
@@ -423,6 +427,20 @@ func (a *Application) PlexStuffHandler(c *gin.Context) {
 func (a *Application) PlexMetadataHandler(c *gin.Context) {
 	key := c.Param("key")
 	a.PlexMetadata(c, key)
+}
+func (a *Application) PlexClientsHandler(c *gin.Context) {
+	a.PlexClients(c)
+}
+func (a *Application) PlexDevicesHandler(c *gin.Context) {
+	a.PlexDevices(c)
+}
+func (a *Application) PlexResourcesHandler(c *gin.Context) {
+	a.PlexResources(c)
+}
+func (a *Application) PlexPlayHandler(c *gin.Context) {
+	ratingKey := QueryString(c, "ratingKey")
+	player := QueryString(c, "player")
+	a.PlexPlay(c, ratingKey, player)
 }
 
 // Releases (/releases)
