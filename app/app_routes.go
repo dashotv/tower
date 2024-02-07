@@ -147,6 +147,7 @@ func (a *Application) Routes() {
 	plex.GET("/devices", a.PlexDevicesHandler)
 	plex.GET("/resources", a.PlexResourcesHandler)
 	plex.GET("/play", a.PlexPlayHandler)
+	plex.GET("/sessions", a.PlexSessionsHandler)
 
 	releases := a.Router.Group("/releases")
 	releases.GET("/", a.ReleasesIndexHandler)
@@ -441,6 +442,9 @@ func (a *Application) PlexPlayHandler(c *gin.Context) {
 	ratingKey := QueryString(c, "ratingKey")
 	player := QueryString(c, "player")
 	a.PlexPlay(c, ratingKey, player)
+}
+func (a *Application) PlexSessionsHandler(c *gin.Context) {
+	a.PlexSessions(c)
 }
 
 // Releases (/releases)

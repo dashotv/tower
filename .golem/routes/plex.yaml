@@ -65,3 +65,6 @@ routes:
         - name: player
           type: string
           query: true
+    - name: sessions
+      path: /sessions
+      method: GET
