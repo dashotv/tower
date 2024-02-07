@@ -239,10 +239,10 @@ func (p *Client) UpdateCollection(section, ratingKey string, keys []string) erro
 
 func (p *Client) addCollectionItem(ratingKey, newKey string) error {
 	data := url.Values{}
-	data.Set("X-Plex-Token", p.Token)
 	data.Set("uri", fmt.Sprintf("server://%s/com.plexapp.plugins.library/library/metadata/%s", p.MachineIdentifier, newKey))
 
 	resp, err := p._server().
+		SetHeaders(p.Headers).
 		SetQueryParamsFromValues(data).
 		Put("/library/collections/" + ratingKey + "/items")
 	if err != nil {
