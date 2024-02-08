@@ -6,10 +6,33 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (p *Client) GetClients() (map[string]any, error) {
-	clients := map[string]any{}
-	resp, err := p._server().SetResult(clients).
-		SetHeaders(p.Headers).Get("/clients")
+type ClientsResponse struct {
+	MediaContainer struct {
+		Size   int64           `json:"size"`
+		Server []*ServerClient `json:"Server"`
+	} `json:"MediaContainer"`
+}
+
+type ServerClient struct {
+	Name                 string `json:"name"`
+	Host                 string `json:"host"`
+	Address              string `json:"address"`
+	Port                 int64  `json:"port"`
+	MachineIdentifier    string `json:"machineIdentifier"`
+	Version              string `json:"version"`
+	Protocol             string `json:"protocol"`
+	Product              string `json:"product"`
+	DeviceClass          string `json:"deviceClass"`
+	ProtocolVersion      string `json:"protocolVersion"`
+	ProtocolCapabilities string `json:"protocolCapabilities"`
+}
+
+func (p *Client) GetClients() (*ClientsResponse, error) {
+	clients := &ClientsResponse{}
+	resp, err := p._server().
+		SetResult(clients).
+		SetHeaders(p.Headers).
+		Get("/clients")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to make request")
 	}

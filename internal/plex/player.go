@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (p *Client) Play(player, ratingKey string) error {
+func (p *Client) Play(ratingKey, player string) error {
 	queue, err := p.playCreateQueue(ratingKey)
 	if err != nil {
 		return errors.Wrap(err, "failed to create queue")
@@ -16,7 +16,7 @@ func (p *Client) Play(player, ratingKey string) error {
 		return errors.New("failed to create queue")
 	}
 
-	return p.playQueue(queue.MediaContainer.ID, player, ratingKey)
+	return p.playQueue(queue.MediaContainer.ID, ratingKey, player)
 }
 
 type PlexQueue struct {
@@ -43,7 +43,9 @@ func (p *Client) playQueue(queueID int64, ratingKey, player string) error {
 	params.Set("type", "video")
 	params.Set("containerKey", fmt.Sprintf("/playQueues/%d", queueID))
 	params.Set("key", "/library/metadata/"+ratingKey)
-	resp, err := p._server().SetHeaders(p.Headers).
+	resp, err := p._server().
+		// SetDebug(true).
+		SetHeaders(p.Headers).
 		SetHeader("X-Plex-Target-Client-Identifier", player).
 		SetQueryParamsFromValues(params).
 		Get("/player/playback/playMedia")
@@ -51,7 +53,7 @@ func (p *Client) playQueue(queueID int64, ratingKey, player string) error {
 		return errors.Wrap(err, "failed to make request")
 	}
 	if !resp.IsSuccess() {
-		return errors.Errorf("failed to play: %s", resp.Status())
+		return errors.Errorf("failed to play: %s: %s", resp.Status(), resp.String())
 	}
 	return nil
 }
