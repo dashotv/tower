@@ -12,6 +12,7 @@ import (
 	flame "github.com/dashotv/flame/app"
 	"github.com/dashotv/mercury"
 	"github.com/dashotv/minion"
+	"github.com/dashotv/tower/internal/plex"
 )
 
 func init() {
@@ -53,6 +54,7 @@ type Events struct {
 	Logs          chan *EventLogs
 	Movies        chan *EventMovies
 	Notices       chan *EventNotices
+	PlexSessions  chan *EventPlexSessions
 	Releases      chan *Release
 	Requests      chan *EventRequests
 	SeerDownloads chan *EventSeerDownload
@@ -81,6 +83,7 @@ func NewEvents(app *Application) (*Events, error) {
 		Logs:          make(chan *EventLogs),
 		Movies:        make(chan *EventMovies),
 		Notices:       make(chan *EventNotices),
+		PlexSessions:  make(chan *EventPlexSessions),
 		Releases:      make(chan *Release),
 		Requests:      make(chan *EventRequests),
 		SeerDownloads: make(chan *EventSeerDownload),
@@ -120,6 +123,10 @@ func NewEvents(app *Application) (*Events, error) {
 	}
 
 	if err := e.Merc.Sender("tower.notices", e.Notices); err != nil {
+		return nil, err
+	}
+
+	if err := e.Merc.Sender("tower.plex_sessions", e.PlexSessions); err != nil {
 		return nil, err
 	}
 
@@ -270,6 +277,13 @@ func (e *Events) doSend(topic EventsTopic, data any) error {
 		}
 		e.Notices <- m
 
+	case "tower.plex_sessions":
+		m, ok := data.(*EventPlexSessions)
+		if !ok {
+			return errors.Errorf("events.send: wrong data type: %t", data)
+		}
+		e.PlexSessions <- m
+
 	case "tower.index.releases":
 		m, ok := data.(*Release)
 		if !ok {
@@ -345,6 +359,10 @@ type EventNotices struct { // notices
 	Class   string `bson:"class" json:"class"`
 	Level   string `bson:"level" json:"level"`
 	Message string `bson:"message" json:"message"`
+}
+
+type EventPlexSessions struct { // plex_sessions
+	Sessions []*plex.PlexSessionMetadata `bson:"sessions" json:"sessions"`
 }
 
 type EventRequests struct { // requests

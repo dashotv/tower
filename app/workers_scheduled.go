@@ -9,9 +9,20 @@ import (
 
 func init() {
 	initializers = append(initializers, func(app *Application) error {
+		app.Workers.ScheduleFunc("*/5 * * * * *", "plex_session_updates", PlexSessionUpdates)
 		app.Workers.ScheduleFunc("0 */15 * * * *", "PopularReleases", PopularReleases)
 		return nil
 	})
+}
+
+func PlexSessionUpdates() error {
+	sessions, err := app.Plex.GetSessions()
+	if err != nil {
+		app.Log.Named("PlexSessionUpdates").Error(err)
+		return err
+	}
+
+	return app.Events.Send("tower.plex_sessions", &EventPlexSessions{sessions})
 }
 
 func PopularReleases() error {
