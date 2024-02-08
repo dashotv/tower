@@ -1,23 +1,20 @@
 package app
 
 import (
-	"context"
 	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
-
-	"github.com/dashotv/minion"
 )
 
-// PopularReleases updates the popular releases cache
-type PopularReleases struct {
-	minion.WorkerDefaults[*PopularReleases]
+func init() {
+	initializers = append(initializers, func(app *Application) error {
+		app.Workers.ScheduleFunc("0 */15 * * * *", "PopularReleases", PopularReleases)
+		return nil
+	})
 }
 
-func (j *PopularReleases) Kind() string { return "PopularReleases" }
-func (j *PopularReleases) Work(ctx context.Context, job *minion.Job[*PopularReleases]) error {
-	// app.Log.Named("popular_releases").Debug("popular releases")
+func PopularReleases() error {
 	limit := 25
 	intervals := map[string]int{
 		"daily":   1,

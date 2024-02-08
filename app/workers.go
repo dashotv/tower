@@ -7,7 +7,6 @@ import (
 var workersList = map[string]minion.Payload{
 	"CleanupLogs":             &CleanupLogs{},
 	"CleanupJobs":             &CleanupJobs{},
-	"PopularReleases":         &PopularReleases{},
 	"CleanPlexPins":           &CleanPlexPins{},
 	"PlexPinToUsers":          &PlexPinToUsers{},
 	"PlexUserUpdates":         &PlexUserUpdates{},

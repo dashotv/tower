@@ -107,13 +107,6 @@ func setupWorkers(app *Application) error {
 		return errors.Wrap(err, "scheduling worker: plex_watchlist_updates (PlexWatchlistUpdates)")
 	}
 
-	if err := minion.Register[*PopularReleases](m, &PopularReleases{}); err != nil {
-		return errors.Wrap(err, "registering worker: popular_releases (PopularReleases)")
-	}
-	if _, err := m.Schedule("0 */5 * * * *", &PopularReleases{}); err != nil {
-		return errors.Wrap(err, "scheduling worker: popular_releases (PopularReleases)")
-	}
-
 	if err := minion.Register[*TmdbUpdateAll](m, &TmdbUpdateAll{}); err != nil {
 		return errors.Wrap(err, "registering worker: tmdb_update_all (TmdbUpdateAll)")
 	}
