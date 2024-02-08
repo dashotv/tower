@@ -74,7 +74,7 @@ func (p *Client) playCreateQueue(ratingKey string) (*PlexQueue, error) {
 	if !resp.IsSuccess() {
 		return nil, errors.Errorf("failed to play: %s", resp.Status())
 	}
-	fmt.Printf("queue: %s\n", resp.String())
-	fmt.Printf("queue: %+v\n", q)
+	// fmt.Printf("queue: %s\n", resp.String())
+	// fmt.Printf("queue: %+v\n", q)
 	return q, nil
 }
