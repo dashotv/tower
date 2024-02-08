@@ -1,0 +1,7 @@
+name: combination
+type: model
+fields:
+  - name: name
+    type: string
+  - name: collections
+    type: "[]string"

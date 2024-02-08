@@ -86,6 +86,14 @@ func (a *Application) Routes() {
 	collections.PATCH("/:id", a.CollectionsSettingsHandler)
 	collections.DELETE("/:id", a.CollectionsDeleteHandler)
 
+	combinations := a.Router.Group("/combinations")
+	combinations.GET("/", a.CombinationsIndexHandler)
+	combinations.POST("/", a.CombinationsCreateHandler)
+	combinations.GET("/:id", a.CombinationsShowHandler)
+	combinations.PUT("/:id", a.CombinationsUpdateHandler)
+	combinations.PATCH("/:id", a.CombinationsSettingsHandler)
+	combinations.DELETE("/:id", a.CombinationsDeleteHandler)
+
 	downloads := a.Router.Group("/downloads")
 	downloads.GET("/", a.DownloadsIndexHandler)
 	downloads.POST("/", a.DownloadsCreateHandler)
@@ -141,7 +149,6 @@ func (a *Application) Routes() {
 	plex.GET("/libraries", a.PlexLibrariesHandler)
 	plex.GET("/libraries/:section/collections", a.PlexCollectionsIndexHandler)
 	plex.GET("/libraries/:section/collections/:ratingKey", a.PlexCollectionsShowHandler)
-	plex.GET("/stuff", a.PlexStuffHandler)
 	plex.GET("/metadata/:key", a.PlexMetadataHandler)
 	plex.GET("/clients", a.PlexClientsHandler)
 	plex.GET("/devices", a.PlexDevicesHandler)
@@ -197,21 +204,22 @@ func (a *Application) indexHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"name": "tower",
 		"routes": gin.H{
-			"collections": "/collections",
-			"downloads":   "/downloads",
-			"episodes":    "/episodes",
-			"feeds":       "/feeds",
-			"hooks":       "/hooks",
-			"jobs":        "/jobs",
-			"messages":    "/messages",
-			"movies":      "/movies",
-			"plex":        "/plex",
-			"releases":    "/releases",
-			"requests":    "/requests",
-			"series":      "/series",
-			"upcoming":    "/upcoming",
-			"users":       "/users",
-			"watches":     "/watches",
+			"collections":  "/collections",
+			"combinations": "/combinations",
+			"downloads":    "/downloads",
+			"episodes":     "/episodes",
+			"feeds":        "/feeds",
+			"hooks":        "/hooks",
+			"jobs":         "/jobs",
+			"messages":     "/messages",
+			"movies":       "/movies",
+			"plex":         "/plex",
+			"releases":     "/releases",
+			"requests":     "/requests",
+			"series":       "/series",
+			"upcoming":     "/upcoming",
+			"users":        "/users",
+			"watches":      "/watches",
 		},
 	})
 }
@@ -251,6 +259,32 @@ func (a *Application) CollectionsSettingsHandler(c *gin.Context) {
 func (a *Application) CollectionsDeleteHandler(c *gin.Context) {
 	id := c.Param("id")
 	a.CollectionsDelete(c, id)
+}
+
+// Combinations (/combinations)
+func (a *Application) CombinationsIndexHandler(c *gin.Context) {
+	page := QueryInt(c, "page")
+	limit := QueryInt(c, "limit")
+	a.CombinationsIndex(c, page, limit)
+}
+func (a *Application) CombinationsCreateHandler(c *gin.Context) {
+	a.CombinationsCreate(c)
+}
+func (a *Application) CombinationsShowHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.CombinationsShow(c, id)
+}
+func (a *Application) CombinationsUpdateHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.CombinationsUpdate(c, id)
+}
+func (a *Application) CombinationsSettingsHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.CombinationsSettings(c, id)
+}
+func (a *Application) CombinationsDeleteHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.CombinationsDelete(c, id)
 }
 
 // Downloads (/downloads)
@@ -421,9 +455,6 @@ func (a *Application) PlexCollectionsShowHandler(c *gin.Context) {
 	section := c.Param("section")
 	ratingKey := c.Param("ratingKey")
 	a.PlexCollectionsShow(c, section, ratingKey)
-}
-func (a *Application) PlexStuffHandler(c *gin.Context) {
-	a.PlexStuff(c)
 }
 func (a *Application) PlexMetadataHandler(c *gin.Context) {
 	key := c.Param("key")

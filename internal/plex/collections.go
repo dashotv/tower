@@ -175,7 +175,6 @@ func (p *Client) GetCollection(ratingKey string) (*PlexCollection, error) {
 	if len(dest.MediaContainer.Directory) != 1 {
 		return nil, errors.Errorf("api response found %d directories, wanted 1", len(dest.MediaContainer.Directory))
 	}
-
 	children, err := p.GetCollectionChildren(ratingKey)
 	if err != nil {
 		return nil, err
@@ -202,9 +201,7 @@ func (p *Client) GetCollectionChildren(ratingKey string) ([]*PlexCollectionChild
 	if !resp.IsSuccess() {
 		return nil, errors.Errorf("failed to get collection children: %s", resp.Status())
 	}
-
-	// app.Log.Debugf("collection children: %s", resp.String())
-
+	// fmt.Printf("collection: %s\n", resp.String())
 	return dest.MediaContainer.Directory, nil
 }
 

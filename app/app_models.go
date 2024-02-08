@@ -31,21 +31,22 @@ func checkDb(app *Application) (err error) {
 }
 
 type Connector struct {
-	Log        *zap.SugaredLogger
-	Collection *grimoire.Store[*Collection]
-	Download   *grimoire.Store[*Download]
-	Episode    *grimoire.Store[*Episode]
-	Feed       *grimoire.Store[*Feed]
-	Medium     *grimoire.Store[*Medium]
-	Message    *grimoire.Store[*Message]
-	Minion     *grimoire.Store[*Minion]
-	Movie      *grimoire.Store[*Movie]
-	Pin        *grimoire.Store[*Pin]
-	Release    *grimoire.Store[*Release]
-	Request    *grimoire.Store[*Request]
-	Series     *grimoire.Store[*Series]
-	User       *grimoire.Store[*User]
-	Watch      *grimoire.Store[*Watch]
+	Log         *zap.SugaredLogger
+	Collection  *grimoire.Store[*Collection]
+	Combination *grimoire.Store[*Combination]
+	Download    *grimoire.Store[*Download]
+	Episode     *grimoire.Store[*Episode]
+	Feed        *grimoire.Store[*Feed]
+	Medium      *grimoire.Store[*Medium]
+	Message     *grimoire.Store[*Message]
+	Minion      *grimoire.Store[*Minion]
+	Movie       *grimoire.Store[*Movie]
+	Pin         *grimoire.Store[*Pin]
+	Release     *grimoire.Store[*Release]
+	Request     *grimoire.Store[*Request]
+	Series      *grimoire.Store[*Series]
+	User        *grimoire.Store[*User]
+	Watch       *grimoire.Store[*Watch]
 }
 
 func NewConnector(app *Application) (*Connector, error) {
@@ -57,6 +58,15 @@ func NewConnector(app *Application) (*Connector, error) {
 		return nil, err
 	}
 	collection, err := grimoire.New[*Collection](s.URI, s.Database, s.Collection)
+	if err != nil {
+		return nil, err
+	}
+
+	s, err = app.Config.ConnectionFor("combination")
+	if err != nil {
+		return nil, err
+	}
+	combination, err := grimoire.New[*Combination](s.URI, s.Database, s.Collection)
 	if err != nil {
 		return nil, err
 	}
@@ -179,21 +189,22 @@ func NewConnector(app *Application) (*Connector, error) {
 	}
 
 	c := &Connector{
-		Log:        app.Log.Named("db"),
-		Collection: collection,
-		Download:   download,
-		Episode:    episode,
-		Feed:       feed,
-		Medium:     medium,
-		Message:    message,
-		Minion:     minion,
-		Movie:      movie,
-		Pin:        pin,
-		Release:    release,
-		Request:    request,
-		Series:     series,
-		User:       user,
-		Watch:      watch,
+		Log:         app.Log.Named("db"),
+		Collection:  collection,
+		Combination: combination,
+		Download:    download,
+		Episode:     episode,
+		Feed:        feed,
+		Medium:      medium,
+		Message:     message,
+		Minion:      minion,
+		Movie:       movie,
+		Pin:         pin,
+		Release:     release,
+		Request:     request,
+		Series:      series,
+		User:        user,
+		Watch:       watch,
 	}
 
 	return c, nil
@@ -214,6 +225,15 @@ type Collection struct { // model
 type CollectionMedia struct { // struct
 	RatingKey string `bson:"rating_key" json:"rating_key"`
 	Title     string `bson:"title" json:"title"`
+}
+
+type Combination struct { // model
+	grimoire.Document `bson:",inline"` // includes default model settings
+	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
+	Name        string   `bson:"name" json:"name"`
+	Collections []string `bson:"collections" json:"collections"`
 }
 
 type Download struct { // model
