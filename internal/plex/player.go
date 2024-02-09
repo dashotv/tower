@@ -19,6 +19,25 @@ func (p *Client) Play(ratingKey, player string) error {
 	return p.playQueue(queue.MediaContainer.ID, ratingKey, player)
 }
 
+func (p *Client) Stop(session string) error {
+	params := url.Values{}
+	params.Set("sessionId", session)
+	params.Set("reason", "")
+
+	resp, err := p._server().
+		SetHeaders(p.Headers).
+		SetQueryParamsFromValues(params).
+		Get("/status/sessions/terminate")
+	if err != nil {
+		return errors.Wrap(err, "failed to make request")
+	}
+	if !resp.IsSuccess() {
+		return errors.Errorf("failed to play: %s", resp.Status())
+	}
+
+	return nil
+}
+
 type PlexQueue struct {
 	MediaContainer struct {
 		Size            int64  `json:"size"`

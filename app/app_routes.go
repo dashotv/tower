@@ -155,6 +155,7 @@ func (a *Application) Routes() {
 	plex.GET("/resources", a.PlexResourcesHandler)
 	plex.GET("/play", a.PlexPlayHandler)
 	plex.GET("/sessions", a.PlexSessionsHandler)
+	plex.GET("/stop", a.PlexStopHandler)
 
 	releases := a.Router.Group("/releases")
 	releases.GET("/", a.ReleasesIndexHandler)
@@ -476,6 +477,10 @@ func (a *Application) PlexPlayHandler(c *gin.Context) {
 }
 func (a *Application) PlexSessionsHandler(c *gin.Context) {
 	a.PlexSessions(c)
+}
+func (a *Application) PlexStopHandler(c *gin.Context) {
+	session := QueryString(c, "session")
+	a.PlexStop(c, session)
 }
 
 // Releases (/releases)

@@ -1,67 +1,74 @@
 name: plex
 path: /plex
 routes:
-  - name: auth
-    path: /auth
-    method: GET
-  - name: index
-    path: /
-    method: GET
-  - name: update
-    path: /update
-    method: GET
-  - name: search
-    path: /search
-    method: GET
-    params:
-      - name: query
-        type: string
-        query: true
-      - name: section
-        type: string
-        query: true
-  - name: libraries
-    path: /libraries
-    method: GET
-  - name: collectionsIndex
-    path: /libraries/:section/collections
-    method: GET
-    params:
-      - name: section
-        type: string
-  - name: collectionsShow
-    path: /libraries/:section/collections/:ratingKey
-    method: GET
-    params:
-      - name: section
-        type: string
-      - name: ratingKey
-        type: string
-  - name: metadata
-    path: /metadata/:key
-    method: GET
-    params:
-      - name: key
-        type: string
-  - name: clients
-    path: /clients
-    method: GET
-  - name: devices
-    path: /devices
-    method: GET
-  - name: resources
-    path: /resources
-    method: GET
-  - name: play
-    path: /play
-    method: GET
-    params:
-      - name: ratingKey
-        type: string
-        query: true
-      - name: player
-        type: string
-        query: true
-  - name: sessions
-    path: /sessions
-    method: GET
+    - name: auth
+      path: /auth
+      method: GET
+    - name: index
+      path: /
+      method: GET
+    - name: update
+      path: /update
+      method: GET
+    - name: search
+      path: /search
+      method: GET
+      params:
+        - name: query
+          type: string
+          query: true
+        - name: section
+          type: string
+          query: true
+    - name: libraries
+      path: /libraries
+      method: GET
+    - name: collectionsIndex
+      path: /libraries/:section/collections
+      method: GET
+      params:
+        - name: section
+          type: string
+    - name: collectionsShow
+      path: /libraries/:section/collections/:ratingKey
+      method: GET
+      params:
+        - name: section
+          type: string
+        - name: ratingKey
+          type: string
+    - name: metadata
+      path: /metadata/:key
+      method: GET
+      params:
+        - name: key
+          type: string
+    - name: clients
+      path: /clients
+      method: GET
+    - name: devices
+      path: /devices
+      method: GET
+    - name: resources
+      path: /resources
+      method: GET
+    - name: play
+      path: /play
+      method: GET
+      params:
+        - name: ratingKey
+          type: string
+          query: true
+        - name: player
+          type: string
+          query: true
+    - name: sessions
+      path: /sessions
+      method: GET
+    - name: stop
+      path: /stop
+      method: GET
+      params:
+        - name: session
+          type: string
+          query: true

@@ -188,6 +188,14 @@ func (a *Application) PlexPlay(c *gin.Context, ratingKey, player string) {
 	}
 	c.JSON(http.StatusOK, gin.H{"errors": "false"})
 }
+func (a *Application) PlexStop(c *gin.Context, session string) {
+	err := a.Plex.Stop(session)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"errors": "false"})
+}
 func (a *Application) PlexSessions(c *gin.Context) {
 	list, err := a.Plex.GetSessions()
 	if err != nil {
