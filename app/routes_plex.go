@@ -175,7 +175,7 @@ func (a *Application) PlexResources(c *gin.Context) {
 	// filter by provides
 	filtered := lo.Filter(list, func(r *plex.Resource, i int) bool {
 		provided := strings.Split(r.Provides, ",")
-		return lo.Contains(provided, provides)
+		return lo.Contains(provided, provides) && r.Name != "iPhone"
 	})
 
 	c.JSON(http.StatusOK, filtered)
