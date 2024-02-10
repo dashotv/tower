@@ -65,18 +65,18 @@ var pathCharRegex = regexp.MustCompile(`[^a-zA-Z0-9]+`)
 var pathExtraRegex = regexp.MustCompile(`\{(\w+)-(\d+)\}`)
 
 func path(title string) string {
-	fmt.Printf("path: %s\n", title)
+	// fmt.Printf("path: %s\n", title)
 	var s string
 	s = pathQuoteRegex.ReplaceAllString(title, "$1")
 	s = strings.ToLower(s)
 	s = pathCharRegex.ReplaceAllString(s, " ")
 	s = strings.TrimSpace(s)
-	fmt.Printf("path: %s\n", s)
+	// fmt.Printf("path: %s\n", s)
 	return s
 }
 
 func directory(title string) string {
-	fmt.Printf("directory: %s\n", title)
+	// fmt.Printf("directory: %s\n", title)
 	s := title
 	var extra string
 	if matches := pathExtraRegex.FindStringSubmatch(title); len(matches) > 0 {
@@ -87,7 +87,7 @@ func directory(title string) string {
 	if extra != "" {
 		s = s + extra
 	}
-	fmt.Printf("directory: %s\n", s)
+	// fmt.Printf("directory: %s\n", s)
 	return s
 }
 
