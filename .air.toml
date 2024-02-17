@@ -5,7 +5,7 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "./tmp/main"
-  cmd = "( [ ! -e '/tmp/installed' ] && apt update && apt install -y ffmpeg && touch /tmp/installed ); go build -o ./tmp/main ."
+  cmd = "go build -o ./tmp/main ."
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
   exclude_file = []
