@@ -20,3 +20,9 @@ routes:
     params:
       - name: id
         type: string
+  - name: torrent
+    path: /:id/torrent
+    method: GET
+    params:
+      - name: id
+        type: string

@@ -105,6 +105,7 @@ func (a *Application) Routes() {
 	downloads.GET("/:id/medium", a.DownloadsMediumHandler)
 	downloads.GET("/recent", a.DownloadsRecentHandler)
 	downloads.PUT("/:id/select", a.DownloadsSelectHandler)
+	downloads.GET("/:id/torrent", a.DownloadsTorrentHandler)
 
 	episodes := a.Router.Group("/episodes")
 	episodes.PATCH("/:id", a.EpisodesSettingHandler)
@@ -326,6 +327,10 @@ func (a *Application) DownloadsRecentHandler(c *gin.Context) {
 func (a *Application) DownloadsSelectHandler(c *gin.Context) {
 	id := c.Param("id")
 	a.DownloadsSelect(c, id)
+}
+func (a *Application) DownloadsTorrentHandler(c *gin.Context) {
+	id := c.Param("id")
+	a.DownloadsTorrent(c, id)
 }
 
 // Episodes (/episodes)

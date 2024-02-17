@@ -2,6 +2,7 @@ package app
 
 import (
 	"net/http"
+	"regexp"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -204,4 +205,28 @@ func (a *Application) DownloadsMedium(c *gin.Context, id string) {
 	}
 
 	c.JSON(http.StatusOK, []*Medium{download.Medium})
+}
+
+var thashIsTorrent = regexp.MustCompile(`^[a-f0-9]{40}$`)
+
+func (a *Application) DownloadsTorrent(c *gin.Context, id string) {
+	download := &Download{}
+	err := app.DB.Download.Find(id, download)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if download.Thash == "" || thashIsTorrent.MatchString(download.Thash) == false {
+		c.JSON(http.StatusOK, gin.H{"errors": false, "message": "No torrent hash available"})
+		return
+	}
+
+	torrent, err := app.Flame.Torrent(download.Thash)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, torrent)
 }
