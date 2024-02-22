@@ -149,6 +149,10 @@ func (c *Connector) processDownloads(list []*Download) {
 
 			m.Source = s.Source
 			m.SourceId = s.SourceId
+			m.Search = s.Search
+			if m.Search == "" {
+				m.Search = s.Title
+			}
 			m.SearchParams = s.SearchParams
 			m.Directory = s.Directory
 			m.Active = s.Active
