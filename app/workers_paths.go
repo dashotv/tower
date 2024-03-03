@@ -14,9 +14,9 @@ import (
 
 type PathImport struct {
 	minion.WorkerDefaults[*PathImport]
-	ID     string // medium
-	PathID string // path
-	Title  string
+	ID     string `bson:"id" json:"id"`           // medium
+	PathID string `bson:"path_id" json:"path_id"` // path
+	Title  string `bson:"title" json:"title"`
 }
 
 func (j *PathImport) Kind() string                                       { return "PathImport" }
