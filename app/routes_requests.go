@@ -4,58 +4,54 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
-func (a *Application) RequestsIndex(c *gin.Context, page, limit int) {
+func (a *Application) RequestsIndex(c echo.Context, page, limit int) error {
 	list, err := app.DB.Request.Query().Desc("created_at").Run()
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
-	c.JSON(http.StatusOK, list)
+	return c.JSON(http.StatusOK, list)
 }
 
-func (a *Application) RequestsShow(c *gin.Context, id string) {
-	c.JSON(http.StatusOK, gin.H{"message": "RequestsShow"})
+func (a *Application) RequestsShow(c echo.Context, id string) error {
+	return c.JSON(http.StatusOK, gin.H{"message": "RequestsShow"})
 }
 
-func (a *Application) RequestsCreate(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "RequestsCreate"})
+func (a *Application) RequestsCreate(c echo.Context) error {
+	return c.JSON(http.StatusOK, gin.H{"message": "RequestsCreate"})
 }
 
-func (a *Application) RequestsSettings(c *gin.Context, id string) {
-	c.JSON(http.StatusOK, gin.H{"message": "RequestsSettings"})
+func (a *Application) RequestsSettings(c echo.Context, id string) error {
+	return c.JSON(http.StatusOK, gin.H{"message": "RequestsSettings"})
 }
 
-func (a *Application) RequestsDelete(c *gin.Context, id string) {
-	c.JSON(http.StatusOK, gin.H{"message": "RequestsDelete"})
+func (a *Application) RequestsDelete(c echo.Context, id string) error {
+	return c.JSON(http.StatusOK, gin.H{"message": "RequestsDelete"})
 }
 
-func (a *Application) RequestsUpdate(c *gin.Context, id string) {
+func (a *Application) RequestsUpdate(c echo.Context, id string) error {
 	req := &Request{}
 	err := app.DB.Request.Find(id, req)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	updated := &Request{}
-	if err := c.BindJSON(updated); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+	if err := c.Bind(updated); err != nil {
+		return err
 	}
 
 	req.Status = updated.Status
 	if err := app.DB.Request.Update(req); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	if updated.Status == "approved" {
 		if err := app.Workers.Enqueue(&CreateMediaFromRequests{}); err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
+			return err
 		}
 	}
-	c.JSON(http.StatusOK, req)
+	return c.JSON(http.StatusOK, req)
 }

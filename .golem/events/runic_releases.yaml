@@ -1,0 +1,4 @@
+name: runic_releases
+channel: runic.releases
+receiver: true
+existing_payload: runic.Release

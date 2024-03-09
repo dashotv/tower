@@ -4,63 +4,60 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
-func (a *Application) CombinationsIndex(c *gin.Context, page int, limit int) {
+func (a *Application) CombinationsIndex(c echo.Context, page int, limit int) error {
 	list, err := a.DB.CombinationList(page, limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": true, "msg": err.Error()})
-		return
+		return c.JSON(http.StatusInternalServerError, gin.H{"error": true, "msg": err.Error()})
 	}
 
-	c.JSON(http.StatusOK, list)
+	return c.JSON(http.StatusOK, list)
 }
 
-func (a *Application) CombinationsCreate(c *gin.Context) {
+func (a *Application) CombinationsCreate(c echo.Context) error {
 	combination := &Combination{}
-	if err := c.BindJSON(combination); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": true, "msg": err.Error()})
-		return
+	if err := c.Bind(combination); err != nil {
+		return c.JSON(http.StatusBadRequest, gin.H{"error": true, "msg": err.Error()})
 	}
 
 	if err := a.DB.Combination.Save(combination); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": true, "msg": err.Error()})
-		return
+		return c.JSON(http.StatusInternalServerError, gin.H{"error": true, "msg": err.Error()})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"error": false})
+	return c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func (a *Application) CombinationsShow(c *gin.Context, name string) {
+func (a *Application) CombinationsShow(c echo.Context, name string) error {
 	list, err := a.DB.CombinationChildren(name)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": true, "msg": err.Error()})
-		return
+		return c.JSON(http.StatusInternalServerError, gin.H{"error": true, "msg": err.Error()})
 	}
 
-	c.JSON(http.StatusOK, list)
+	return c.JSON(http.StatusOK, list)
 }
 
-func (a *Application) CombinationsUpdate(c *gin.Context, id string) {
+func (a *Application) CombinationsUpdate(c echo.Context, id string) error {
 	// asssuming this is a CRUD route, get the subject from the database
 	// subject, err := a.DB.Combinations.Get(id)
-	c.JSON(http.StatusOK, gin.H{
+	return c.JSON(http.StatusOK, gin.H{
 		"error": false,
 	})
 }
 
-func (a *Application) CombinationsSettings(c *gin.Context, id string) {
+func (a *Application) CombinationsSettings(c echo.Context, id string) error {
 	// asssuming this is a CRUD route, get the subject from the database
 	// subject, err := a.DB.Combinations.Get(id)
-	c.JSON(http.StatusOK, gin.H{
+	return c.JSON(http.StatusOK, gin.H{
 		"error": false,
 	})
 }
 
-func (a *Application) CombinationsDelete(c *gin.Context, id string) {
+func (a *Application) CombinationsDelete(c echo.Context, id string) error {
 	// asssuming this is a CRUD route, get the subject from the database
 	// subject, err := a.DB.Combinations.Get(id)
-	c.JSON(http.StatusOK, gin.H{
+	return c.JSON(http.StatusOK, gin.H{
 		"error": false,
 	})
 }

@@ -2,16 +2,19 @@
 package app
 
 import (
+	"context"
+	"fmt"
 	"net/http"
-	"time"
 
-	ginzap "github.com/gin-contrib/zap"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"go.infratographer.com/x/echox/echozap"
 )
 
 func init() {
 	initializers = append(initializers, setupRoutes)
 	healthchecks["routes"] = checkRoutes
+	starters = append(starters, startRoutes)
 }
 
 func checkRoutes(app *Application) error {
@@ -19,22 +22,29 @@ func checkRoutes(app *Application) error {
 	return nil
 }
 
+func startRoutes(ctx context.Context, app *Application) error {
+	go func() {
+		app.Routes()
+		app.Log.Info("starting routes...")
+		if err := app.Engine.Start(fmt.Sprintf(":%d", app.Config.Port)); err != nil {
+			app.Log.Errorf("routes: %s", err)
+		}
+	}()
+	return nil
+}
+
 func setupRoutes(app *Application) error {
-	if app.Config.Mode == "release" {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
 	logger := app.Log.Named("routes").Desugar()
+	e := echo.New()
+	e.HideBanner = true
+	e.Use(middleware.Recover())
+	e.Use(echozap.Middleware(logger))
 
-	app.Engine = gin.New()
-	app.Engine.Use(
-		ginzap.Ginzap(logger, time.RFC3339, true),
-		ginzap.RecoveryWithZap(logger, true),
-	)
+	app.Engine = e
 	// unauthenticated routes
-	app.Default = app.Engine.Group("/")
+	app.Default = app.Engine.Group("")
 	// authenticated routes (if enabled, otherwise same as default)
-	app.Router = app.Engine.Group("/")
+	app.Router = app.Engine.Group("")
 
 	// if app.Config.Auth {
 	// 	clerkSecret := app.Config.ClerkSecretKey
@@ -57,7 +67,7 @@ func setupRoutes(app *Application) error {
 // also add this import: "github.com/clerkinc/clerk-sdk-go/clerk"
 //
 // requireSession wraps the clerk.RequireSession middleware
-// func requireSession(client clerk.Client) gin.HandlerFunc {
+// func requireSession(client clerk.Client) HandlerFunc {
 // 	requireActiveSession := clerk.RequireSessionV2(client)
 // 	return func(gctx *gin.Context) {
 // 		var skip = true
@@ -67,7 +77,7 @@ func setupRoutes(app *Application) error {
 // 		requireActiveSession(handler).ServeHTTP(gctx.Writer, gctx.Request)
 // 		switch {
 // 		case skip:
-// 			gctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "session required"})
+// 			gctx.AbortWithStatusJSON(http.StatusBadRequest, H{"error": "session required"})
 // 		default:
 // 			gctx.Next()
 // 		}
@@ -202,10 +212,10 @@ func (a *Application) Routes() {
 
 }
 
-func (a *Application) indexHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
+func (a *Application) indexHandler(c echo.Context) error {
+	return c.JSON(http.StatusOK, H{
 		"name": "tower",
-		"routes": gin.H{
+		"routes": H{
 			"collections":  "/collections",
 			"combinations": "/combinations",
 			"downloads":    "/downloads",
@@ -226,396 +236,393 @@ func (a *Application) indexHandler(c *gin.Context) {
 	})
 }
 
-func (a *Application) healthHandler(c *gin.Context) {
+func (a *Application) healthHandler(c echo.Context) error {
 	health, err := a.Health()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-		return
+		return err
 	}
-	c.JSON(http.StatusOK, gin.H{"name": "tower", "health": health})
+	return c.JSON(http.StatusOK, H{"name": "tower", "health": health})
 }
 
 // Collections (/collections)
-func (a *Application) CollectionsIndexHandler(c *gin.Context) {
+func (a *Application) CollectionsIndexHandler(c echo.Context) error {
 	page := QueryInt(c, "page")
 	limit := QueryInt(c, "limit")
-	a.CollectionsIndex(c, page, limit)
+	return a.CollectionsIndex(c, page, limit)
 }
-func (a *Application) CollectionsCreateHandler(c *gin.Context) {
-	a.CollectionsCreate(c)
+func (a *Application) CollectionsCreateHandler(c echo.Context) error {
+	return a.CollectionsCreate(c)
 }
-func (a *Application) CollectionsShowHandler(c *gin.Context) {
+func (a *Application) CollectionsShowHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.CollectionsShow(c, id)
+	return a.CollectionsShow(c, id)
 }
-func (a *Application) CollectionsUpdateHandler(c *gin.Context) {
+func (a *Application) CollectionsUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.CollectionsUpdate(c, id)
+	return a.CollectionsUpdate(c, id)
 }
-func (a *Application) CollectionsSettingsHandler(c *gin.Context) {
+func (a *Application) CollectionsSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.CollectionsSettings(c, id)
+	return a.CollectionsSettings(c, id)
 }
-func (a *Application) CollectionsDeleteHandler(c *gin.Context) {
+func (a *Application) CollectionsDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.CollectionsDelete(c, id)
+	return a.CollectionsDelete(c, id)
 }
 
 // Combinations (/combinations)
-func (a *Application) CombinationsIndexHandler(c *gin.Context) {
+func (a *Application) CombinationsIndexHandler(c echo.Context) error {
 	page := QueryInt(c, "page")
 	limit := QueryInt(c, "limit")
-	a.CombinationsIndex(c, page, limit)
+	return a.CombinationsIndex(c, page, limit)
 }
-func (a *Application) CombinationsCreateHandler(c *gin.Context) {
-	a.CombinationsCreate(c)
+func (a *Application) CombinationsCreateHandler(c echo.Context) error {
+	return a.CombinationsCreate(c)
 }
-func (a *Application) CombinationsShowHandler(c *gin.Context) {
+func (a *Application) CombinationsShowHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.CombinationsShow(c, id)
+	return a.CombinationsShow(c, id)
 }
-func (a *Application) CombinationsUpdateHandler(c *gin.Context) {
+func (a *Application) CombinationsUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.CombinationsUpdate(c, id)
+	return a.CombinationsUpdate(c, id)
 }
-func (a *Application) CombinationsSettingsHandler(c *gin.Context) {
+func (a *Application) CombinationsSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.CombinationsSettings(c, id)
+	return a.CombinationsSettings(c, id)
 }
-func (a *Application) CombinationsDeleteHandler(c *gin.Context) {
+func (a *Application) CombinationsDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.CombinationsDelete(c, id)
+	return a.CombinationsDelete(c, id)
 }
 
 // Downloads (/downloads)
-func (a *Application) DownloadsIndexHandler(c *gin.Context) {
+func (a *Application) DownloadsIndexHandler(c echo.Context) error {
 	page := QueryInt(c, "page")
 	limit := QueryInt(c, "limit")
-	a.DownloadsIndex(c, page, limit)
+	return a.DownloadsIndex(c, page, limit)
 }
-func (a *Application) DownloadsCreateHandler(c *gin.Context) {
-	a.DownloadsCreate(c)
+func (a *Application) DownloadsCreateHandler(c echo.Context) error {
+	return a.DownloadsCreate(c)
 }
-func (a *Application) DownloadsShowHandler(c *gin.Context) {
+func (a *Application) DownloadsShowHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.DownloadsShow(c, id)
+	return a.DownloadsShow(c, id)
 }
-func (a *Application) DownloadsUpdateHandler(c *gin.Context) {
+func (a *Application) DownloadsUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.DownloadsUpdate(c, id)
+	return a.DownloadsUpdate(c, id)
 }
-func (a *Application) DownloadsSettingsHandler(c *gin.Context) {
+func (a *Application) DownloadsSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.DownloadsSettings(c, id)
+	return a.DownloadsSettings(c, id)
 }
-func (a *Application) DownloadsDeleteHandler(c *gin.Context) {
+func (a *Application) DownloadsDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.DownloadsDelete(c, id)
+	return a.DownloadsDelete(c, id)
 }
-func (a *Application) DownloadsLastHandler(c *gin.Context) {
-	a.DownloadsLast(c)
+func (a *Application) DownloadsLastHandler(c echo.Context) error {
+	return a.DownloadsLast(c)
 }
-func (a *Application) DownloadsMediumHandler(c *gin.Context) {
+func (a *Application) DownloadsMediumHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.DownloadsMedium(c, id)
+	return a.DownloadsMedium(c, id)
 }
-func (a *Application) DownloadsRecentHandler(c *gin.Context) {
-	a.DownloadsRecent(c)
+func (a *Application) DownloadsRecentHandler(c echo.Context) error {
+	return a.DownloadsRecent(c)
 }
-func (a *Application) DownloadsSelectHandler(c *gin.Context) {
+func (a *Application) DownloadsSelectHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.DownloadsSelect(c, id)
+	return a.DownloadsSelect(c, id)
 }
-func (a *Application) DownloadsTorrentHandler(c *gin.Context) {
+func (a *Application) DownloadsTorrentHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.DownloadsTorrent(c, id)
+	return a.DownloadsTorrent(c, id)
 }
 
 // Episodes (/episodes)
-func (a *Application) EpisodesSettingHandler(c *gin.Context) {
+func (a *Application) EpisodesSettingHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.EpisodesSetting(c, id)
+	return a.EpisodesSetting(c, id)
 }
-func (a *Application) EpisodesUpdateHandler(c *gin.Context) {
+func (a *Application) EpisodesUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.EpisodesUpdate(c, id)
+	return a.EpisodesUpdate(c, id)
 }
-func (a *Application) EpisodesSettingsHandler(c *gin.Context) {
-	a.EpisodesSettings(c)
+func (a *Application) EpisodesSettingsHandler(c echo.Context) error {
+	return a.EpisodesSettings(c)
 }
 
 // Feeds (/feeds)
-func (a *Application) FeedsIndexHandler(c *gin.Context) {
+func (a *Application) FeedsIndexHandler(c echo.Context) error {
 	page := QueryInt(c, "page")
 	limit := QueryInt(c, "limit")
-	a.FeedsIndex(c, page, limit)
+	return a.FeedsIndex(c, page, limit)
 }
-func (a *Application) FeedsCreateHandler(c *gin.Context) {
-	a.FeedsCreate(c)
+func (a *Application) FeedsCreateHandler(c echo.Context) error {
+	return a.FeedsCreate(c)
 }
-func (a *Application) FeedsShowHandler(c *gin.Context) {
+func (a *Application) FeedsShowHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.FeedsShow(c, id)
+	return a.FeedsShow(c, id)
 }
-func (a *Application) FeedsUpdateHandler(c *gin.Context) {
+func (a *Application) FeedsUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.FeedsUpdate(c, id)
+	return a.FeedsUpdate(c, id)
 }
-func (a *Application) FeedsSettingsHandler(c *gin.Context) {
+func (a *Application) FeedsSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.FeedsSettings(c, id)
+	return a.FeedsSettings(c, id)
 }
-func (a *Application) FeedsDeleteHandler(c *gin.Context) {
+func (a *Application) FeedsDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.FeedsDelete(c, id)
+	return a.FeedsDelete(c, id)
 }
 
 // Hooks (/hooks)
-func (a *Application) HooksPlexHandler(c *gin.Context) {
-	a.HooksPlex(c)
+func (a *Application) HooksPlexHandler(c echo.Context) error {
+	return a.HooksPlex(c)
 }
 
 // Jobs (/jobs)
-func (a *Application) JobsIndexHandler(c *gin.Context) {
+func (a *Application) JobsIndexHandler(c echo.Context) error {
 	page := QueryInt(c, "page")
 	limit := QueryInt(c, "limit")
-	a.JobsIndex(c, page, limit)
+	return a.JobsIndex(c, page, limit)
 }
-func (a *Application) JobsCreateHandler(c *gin.Context) {
+func (a *Application) JobsCreateHandler(c echo.Context) error {
 	job := QueryString(c, "job")
-	a.JobsCreate(c, job)
+	return a.JobsCreate(c, job)
 }
-func (a *Application) JobsDeleteHandler(c *gin.Context) {
+func (a *Application) JobsDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
 	hard := QueryBool(c, "hard")
-	a.JobsDelete(c, id, hard)
+	return a.JobsDelete(c, id, hard)
 }
 
 // Messages (/messages)
-func (a *Application) MessagesIndexHandler(c *gin.Context) {
-	a.MessagesIndex(c)
+func (a *Application) MessagesIndexHandler(c echo.Context) error {
+	return a.MessagesIndex(c)
 }
-func (a *Application) MessagesCreateHandler(c *gin.Context) {
-	a.MessagesCreate(c)
+func (a *Application) MessagesCreateHandler(c echo.Context) error {
+	return a.MessagesCreate(c)
 }
 
 // Movies (/movies)
-func (a *Application) MoviesIndexHandler(c *gin.Context) {
+func (a *Application) MoviesIndexHandler(c echo.Context) error {
 	page := QueryInt(c, "page")
 	limit := QueryInt(c, "limit")
-	a.MoviesIndex(c, page, limit)
+	return a.MoviesIndex(c, page, limit)
 }
-func (a *Application) MoviesCreateHandler(c *gin.Context) {
-	a.MoviesCreate(c)
+func (a *Application) MoviesCreateHandler(c echo.Context) error {
+	return a.MoviesCreate(c)
 }
-func (a *Application) MoviesShowHandler(c *gin.Context) {
+func (a *Application) MoviesShowHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.MoviesShow(c, id)
+	return a.MoviesShow(c, id)
 }
-func (a *Application) MoviesUpdateHandler(c *gin.Context) {
+func (a *Application) MoviesUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.MoviesUpdate(c, id)
+	return a.MoviesUpdate(c, id)
 }
-func (a *Application) MoviesSettingsHandler(c *gin.Context) {
+func (a *Application) MoviesSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.MoviesSettings(c, id)
+	return a.MoviesSettings(c, id)
 }
-func (a *Application) MoviesDeleteHandler(c *gin.Context) {
+func (a *Application) MoviesDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.MoviesDelete(c, id)
+	return a.MoviesDelete(c, id)
 }
-func (a *Application) MoviesRefreshHandler(c *gin.Context) {
+func (a *Application) MoviesRefreshHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.MoviesRefresh(c, id)
+	return a.MoviesRefresh(c, id)
 }
-func (a *Application) MoviesPathsHandler(c *gin.Context) {
+func (a *Application) MoviesPathsHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.MoviesPaths(c, id)
+	return a.MoviesPaths(c, id)
 }
 
 // Plex (/plex)
-func (a *Application) PlexAuthHandler(c *gin.Context) {
-	a.PlexAuth(c)
+func (a *Application) PlexAuthHandler(c echo.Context) error {
+	return a.PlexAuth(c)
 }
-func (a *Application) PlexIndexHandler(c *gin.Context) {
-	a.PlexIndex(c)
+func (a *Application) PlexIndexHandler(c echo.Context) error {
+	return a.PlexIndex(c)
 }
-func (a *Application) PlexUpdateHandler(c *gin.Context) {
-	a.PlexUpdate(c)
+func (a *Application) PlexUpdateHandler(c echo.Context) error {
+	return a.PlexUpdate(c)
 }
-func (a *Application) PlexSearchHandler(c *gin.Context) {
+func (a *Application) PlexSearchHandler(c echo.Context) error {
 	query := QueryString(c, "query")
 	section := QueryString(c, "section")
-	a.PlexSearch(c, query, section)
+	return a.PlexSearch(c, query, section)
 }
-func (a *Application) PlexLibrariesHandler(c *gin.Context) {
-	a.PlexLibraries(c)
+func (a *Application) PlexLibrariesHandler(c echo.Context) error {
+	return a.PlexLibraries(c)
 }
-func (a *Application) PlexCollectionsIndexHandler(c *gin.Context) {
+func (a *Application) PlexCollectionsIndexHandler(c echo.Context) error {
 	section := c.Param("section")
-	a.PlexCollectionsIndex(c, section)
+	return a.PlexCollectionsIndex(c, section)
 }
-func (a *Application) PlexCollectionsShowHandler(c *gin.Context) {
+func (a *Application) PlexCollectionsShowHandler(c echo.Context) error {
 	section := c.Param("section")
 	ratingKey := c.Param("ratingKey")
-	a.PlexCollectionsShow(c, section, ratingKey)
+	return a.PlexCollectionsShow(c, section, ratingKey)
 }
-func (a *Application) PlexMetadataHandler(c *gin.Context) {
+func (a *Application) PlexMetadataHandler(c echo.Context) error {
 	key := c.Param("key")
-	a.PlexMetadata(c, key)
+	return a.PlexMetadata(c, key)
 }
-func (a *Application) PlexClientsHandler(c *gin.Context) {
-	a.PlexClients(c)
+func (a *Application) PlexClientsHandler(c echo.Context) error {
+	return a.PlexClients(c)
 }
-func (a *Application) PlexDevicesHandler(c *gin.Context) {
-	a.PlexDevices(c)
+func (a *Application) PlexDevicesHandler(c echo.Context) error {
+	return a.PlexDevices(c)
 }
-func (a *Application) PlexResourcesHandler(c *gin.Context) {
-	a.PlexResources(c)
+func (a *Application) PlexResourcesHandler(c echo.Context) error {
+	return a.PlexResources(c)
 }
-func (a *Application) PlexPlayHandler(c *gin.Context) {
+func (a *Application) PlexPlayHandler(c echo.Context) error {
 	ratingKey := QueryString(c, "ratingKey")
 	player := QueryString(c, "player")
-	a.PlexPlay(c, ratingKey, player)
+	return a.PlexPlay(c, ratingKey, player)
 }
-func (a *Application) PlexSessionsHandler(c *gin.Context) {
-	a.PlexSessions(c)
+func (a *Application) PlexSessionsHandler(c echo.Context) error {
+	return a.PlexSessions(c)
 }
-func (a *Application) PlexStopHandler(c *gin.Context) {
+func (a *Application) PlexStopHandler(c echo.Context) error {
 	session := QueryString(c, "session")
-	a.PlexStop(c, session)
+	return a.PlexStop(c, session)
 }
 
 // Releases (/releases)
-func (a *Application) ReleasesIndexHandler(c *gin.Context) {
+func (a *Application) ReleasesIndexHandler(c echo.Context) error {
 	page := QueryInt(c, "page")
 	limit := QueryInt(c, "limit")
-	a.ReleasesIndex(c, page, limit)
+	return a.ReleasesIndex(c, page, limit)
 }
-func (a *Application) ReleasesCreateHandler(c *gin.Context) {
-	a.ReleasesCreate(c)
+func (a *Application) ReleasesCreateHandler(c echo.Context) error {
+	return a.ReleasesCreate(c)
 }
-func (a *Application) ReleasesShowHandler(c *gin.Context) {
+func (a *Application) ReleasesShowHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.ReleasesShow(c, id)
+	return a.ReleasesShow(c, id)
 }
-func (a *Application) ReleasesUpdateHandler(c *gin.Context) {
+func (a *Application) ReleasesUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.ReleasesUpdate(c, id)
+	return a.ReleasesUpdate(c, id)
 }
-func (a *Application) ReleasesSettingsHandler(c *gin.Context) {
+func (a *Application) ReleasesSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.ReleasesSettings(c, id)
+	return a.ReleasesSettings(c, id)
 }
-func (a *Application) ReleasesDeleteHandler(c *gin.Context) {
+func (a *Application) ReleasesDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.ReleasesDelete(c, id)
+	return a.ReleasesDelete(c, id)
 }
-func (a *Application) ReleasesPopularHandler(c *gin.Context) {
+func (a *Application) ReleasesPopularHandler(c echo.Context) error {
 	interval := c.Param("interval")
-	a.ReleasesPopular(c, interval)
+	return a.ReleasesPopular(c, interval)
 }
 
 // Requests (/requests)
-func (a *Application) RequestsIndexHandler(c *gin.Context) {
+func (a *Application) RequestsIndexHandler(c echo.Context) error {
 	page := QueryInt(c, "page")
 	limit := QueryInt(c, "limit")
-	a.RequestsIndex(c, page, limit)
+	return a.RequestsIndex(c, page, limit)
 }
-func (a *Application) RequestsCreateHandler(c *gin.Context) {
-	a.RequestsCreate(c)
+func (a *Application) RequestsCreateHandler(c echo.Context) error {
+	return a.RequestsCreate(c)
 }
-func (a *Application) RequestsShowHandler(c *gin.Context) {
+func (a *Application) RequestsShowHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.RequestsShow(c, id)
+	return a.RequestsShow(c, id)
 }
-func (a *Application) RequestsUpdateHandler(c *gin.Context) {
+func (a *Application) RequestsUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.RequestsUpdate(c, id)
+	return a.RequestsUpdate(c, id)
 }
-func (a *Application) RequestsSettingsHandler(c *gin.Context) {
+func (a *Application) RequestsSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.RequestsSettings(c, id)
+	return a.RequestsSettings(c, id)
 }
-func (a *Application) RequestsDeleteHandler(c *gin.Context) {
+func (a *Application) RequestsDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.RequestsDelete(c, id)
+	return a.RequestsDelete(c, id)
 }
 
 // Series (/series)
-func (a *Application) SeriesIndexHandler(c *gin.Context) {
+func (a *Application) SeriesIndexHandler(c echo.Context) error {
 	page := QueryInt(c, "page")
 	limit := QueryInt(c, "limit")
-	a.SeriesIndex(c, page, limit)
+	return a.SeriesIndex(c, page, limit)
 }
-func (a *Application) SeriesCreateHandler(c *gin.Context) {
-	a.SeriesCreate(c)
+func (a *Application) SeriesCreateHandler(c echo.Context) error {
+	return a.SeriesCreate(c)
 }
-func (a *Application) SeriesShowHandler(c *gin.Context) {
+func (a *Application) SeriesShowHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.SeriesShow(c, id)
+	return a.SeriesShow(c, id)
 }
-func (a *Application) SeriesUpdateHandler(c *gin.Context) {
+func (a *Application) SeriesUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.SeriesUpdate(c, id)
+	return a.SeriesUpdate(c, id)
 }
-func (a *Application) SeriesSettingsHandler(c *gin.Context) {
+func (a *Application) SeriesSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.SeriesSettings(c, id)
+	return a.SeriesSettings(c, id)
 }
-func (a *Application) SeriesDeleteHandler(c *gin.Context) {
+func (a *Application) SeriesDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.SeriesDelete(c, id)
+	return a.SeriesDelete(c, id)
 }
-func (a *Application) SeriesCurrentSeasonHandler(c *gin.Context) {
+func (a *Application) SeriesCurrentSeasonHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.SeriesCurrentSeason(c, id)
+	return a.SeriesCurrentSeason(c, id)
 }
-func (a *Application) SeriesPathsHandler(c *gin.Context) {
+func (a *Application) SeriesPathsHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.SeriesPaths(c, id)
+	return a.SeriesPaths(c, id)
 }
-func (a *Application) SeriesRefreshHandler(c *gin.Context) {
+func (a *Application) SeriesRefreshHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.SeriesRefresh(c, id)
+	return a.SeriesRefresh(c, id)
 }
-func (a *Application) SeriesSeasonEpisodesAllHandler(c *gin.Context) {
+func (a *Application) SeriesSeasonEpisodesAllHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.SeriesSeasonEpisodesAll(c, id)
+	return a.SeriesSeasonEpisodesAll(c, id)
 }
-func (a *Application) SeriesSeasonEpisodesHandler(c *gin.Context) {
+func (a *Application) SeriesSeasonEpisodesHandler(c echo.Context) error {
 	id := c.Param("id")
 	season := c.Param("season")
-	a.SeriesSeasonEpisodes(c, id, season)
+	return a.SeriesSeasonEpisodes(c, id, season)
 }
-func (a *Application) SeriesWatchesHandler(c *gin.Context) {
+func (a *Application) SeriesWatchesHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.SeriesWatches(c, id)
+	return a.SeriesWatches(c, id)
 }
-func (a *Application) SeriesCoversHandler(c *gin.Context) {
+func (a *Application) SeriesCoversHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.SeriesCovers(c, id)
+	return a.SeriesCovers(c, id)
 }
-func (a *Application) SeriesBackgroundsHandler(c *gin.Context) {
+func (a *Application) SeriesBackgroundsHandler(c echo.Context) error {
 	id := c.Param("id")
-	a.SeriesBackgrounds(c, id)
+	return a.SeriesBackgrounds(c, id)
 }
 
 // Upcoming (/upcoming)
-func (a *Application) UpcomingIndexHandler(c *gin.Context) {
-	a.UpcomingIndex(c)
+func (a *Application) UpcomingIndexHandler(c echo.Context) error {
+	return a.UpcomingIndex(c)
 }
 
 // Users (/users)
-func (a *Application) UsersIndexHandler(c *gin.Context) {
-	a.UsersIndex(c)
+func (a *Application) UsersIndexHandler(c echo.Context) error {
+	return a.UsersIndex(c)
 }
 
 // Watches (/watches)
-func (a *Application) WatchesIndexHandler(c *gin.Context) {
+func (a *Application) WatchesIndexHandler(c echo.Context) error {
 	medium_id := QueryString(c, "medium_id")
 	username := QueryString(c, "username")
-	a.WatchesIndex(c, medium_id, username)
+	return a.WatchesIndex(c, medium_id, username)
 }

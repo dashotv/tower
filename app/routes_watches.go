@@ -3,15 +3,14 @@ package app
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
-func (a *Application) WatchesIndex(c *gin.Context, mediumId, username string) {
+func (a *Application) WatchesIndex(c echo.Context, mediumId, username string) error {
 	watches, err := app.DB.Watches(mediumId, username)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, watches)
+	return c.JSON(http.StatusOK, watches)
 }

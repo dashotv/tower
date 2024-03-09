@@ -3,47 +3,41 @@ package app
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
-func (a *Application) MessagesIndex(c *gin.Context) {
+func (a *Application) MessagesIndex(c echo.Context) error {
 	page, err := QueryDefaultInteger(c, "page", 1)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	limit, err := QueryDefaultInteger(c, "limit", 250)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	list, err := app.DB.Message.Query().Desc("created_at").Skip((page - 1) * limit).Limit(limit).Run()
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, list)
+	return c.JSON(http.StatusOK, list)
 }
 
-func (a *Application) MessagesCreate(c *gin.Context) {
+func (a *Application) MessagesCreate(c echo.Context) error {
 	m := &Message{}
-	if err := c.BindJSON(m); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+	if err := c.Bind(m); err != nil {
+		return err
 	}
 
 	if err := app.DB.Message.Save(m); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	if err := a.Events.Send("tower.logs", &EventLogs{Event: "new", Id: m.ID.Hex(), Log: m}); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, m)
+	return c.JSON(http.StatusOK, m)
 }

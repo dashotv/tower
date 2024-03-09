@@ -2,6 +2,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -12,12 +13,14 @@ import (
 	flame "github.com/dashotv/flame/app"
 	"github.com/dashotv/mercury"
 	"github.com/dashotv/minion"
+	runic "github.com/dashotv/runic/app"
 	"github.com/dashotv/tower/internal/plex"
 )
 
 func init() {
 	initializers = append(initializers, setupEvents)
 	healthchecks["events"] = checkEvents
+	starters = append(starters, startEvents)
 }
 
 type EventsChannel string
@@ -30,6 +33,11 @@ func setupEvents(app *Application) error {
 	}
 
 	app.Events = events
+	return nil
+}
+
+func startEvents(ctx context.Context, app *Application) error {
+	go app.Events.Start()
 	return nil
 }
 
@@ -57,6 +65,7 @@ type Events struct {
 	PlexSessions  chan *EventPlexSessions
 	Releases      chan *Release
 	Requests      chan *EventRequests
+	RunicReleases chan *runic.Release
 	SeerDownloads chan *EventSeerDownload
 	SeerEpisodes  chan *EventSeerEpisode
 	SeerLogs      chan *EventSeerLog
@@ -86,6 +95,7 @@ func NewEvents(app *Application) (*Events, error) {
 		PlexSessions:  make(chan *EventPlexSessions),
 		Releases:      make(chan *Release),
 		Requests:      make(chan *EventRequests),
+		RunicReleases: make(chan *runic.Release),
 		SeerDownloads: make(chan *EventSeerDownload),
 		SeerEpisodes:  make(chan *EventSeerEpisode),
 		SeerLogs:      make(chan *EventSeerLog),
@@ -138,6 +148,10 @@ func NewEvents(app *Application) (*Events, error) {
 		return nil, err
 	}
 
+	if err := e.Merc.Receiver("runic.releases", e.RunicReleases); err != nil {
+		return nil, err
+	}
+
 	if err := e.Merc.Receiver("seer.downloads", e.SeerDownloads); err != nil {
 		return nil, err
 	}
@@ -177,6 +191,9 @@ func (e *Events) Start() error {
 					continue
 				}
 				e.Send("tower.downloading", v)
+			case m := <-e.RunicReleases:
+				onRunicReleases(e.App, m)
+
 			case m := <-e.SeerDownloads:
 				v, err := onSeerDownloads(e.App, m)
 				if err != nil {

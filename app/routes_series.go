@@ -8,13 +8,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const pagesize = 42
 
-func (a *Application) SeriesIndex(c *gin.Context, page, limit int) {
+func (a *Application) SeriesIndex(c echo.Context, page, limit int) error {
 	if page == 0 {
 		page = 1
 	}
@@ -47,8 +48,7 @@ func (a *Application) SeriesIndex(c *gin.Context, page, limit int) {
 
 	count, err := q.Count()
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	results, err := q.
@@ -56,21 +56,18 @@ func (a *Application) SeriesIndex(c *gin.Context, page, limit int) {
 		Skip((page - 1) * limit).
 		Desc("created_at").Run()
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	for _, s := range results {
 		unwatched, err := app.DB.SeriesUserUnwatched(s)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+			return err
 		}
 		s.Unwatched = unwatched
 		unwatchedall, err := app.DB.SeriesUnwatched(s, "")
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+			return err
 		}
 		s.UnwatchedAll = unwatchedall
 
@@ -86,15 +83,14 @@ func (a *Application) SeriesIndex(c *gin.Context, page, limit int) {
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
+	return c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
 }
 
-func (a *Application) SeriesCreate(c *gin.Context) {
+func (a *Application) SeriesCreate(c echo.Context) error {
 	r := &CreateRequest{}
-	c.BindJSON(r)
+	c.Bind(r)
 	if r.ID == "" || r.Source == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "id and source are required"})
-		return
+		return errors.New("id and source are required")
 	}
 
 	a.Log.Debugf("series create: %+v", r)
@@ -122,38 +118,33 @@ func (a *Application) SeriesCreate(c *gin.Context) {
 
 	err = app.DB.Series.Save(s)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	if err := app.Workers.Enqueue(&TvdbUpdateSeries{ID: s.ID.Hex()}); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{"error": false, "series": s})
+	return c.JSON(http.StatusOK, gin.H{"error": false, "series": s})
 }
 
-func (a *Application) SeriesShow(c *gin.Context, id string) {
+func (a *Application) SeriesShow(c echo.Context, id string) error {
 	result := &Series{}
 	app.Log.Infof("series.show id=%s", id)
 	// cache this? have to figure out how to handle breaking cache
 	err := app.DB.Series.Find(id, result)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	unwatched, err := app.DB.SeriesUserUnwatched(result)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 	result.Unwatched = unwatched
 	unwatchedall, err := app.DB.SeriesUnwatched(result, "")
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 	result.UnwatchedAll = unwatchedall
 
@@ -171,41 +162,36 @@ func (a *Application) SeriesShow(c *gin.Context, id string) {
 	//Paths
 	result.Paths, err = app.DB.SeriesPaths(id)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	//Seasons
 	result.Seasons, err = app.DB.SeriesSeasons(id)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	//CurrentSeason
 	result.CurrentSeason, err = app.DB.SeriesCurrentSeason(id)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusOK, result)
 }
 
-func (a *Application) SeriesUpdate(c *gin.Context, id string) {
+func (a *Application) SeriesUpdate(c echo.Context, id string) error {
 	data := &Series{}
-	err := c.BindJSON(&data)
+	err := c.Bind(&data)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	if !strings.HasPrefix(data.Cover, "/media-images") {
 		cover := data.GetCover()
 		if cover != nil && cover.Remote != data.Cover {
 			if err := app.Workers.Enqueue(&TvdbUpdateSeriesImage{ID: id, Type: "cover", Path: data.Cover, Ratio: posterRatio}); err != nil {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
+				return err
 			}
 		}
 	}
@@ -214,169 +200,148 @@ func (a *Application) SeriesUpdate(c *gin.Context, id string) {
 		background := data.GetBackground()
 		if background != nil && background.Remote != data.Background {
 			if err := app.Workers.Enqueue(&TvdbUpdateSeriesImage{ID: id, Type: "background", Path: data.Background, Ratio: backgroundRatio}); err != nil {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
+				return err
 			}
 		}
 	}
 
 	err = app.DB.SeriesUpdate(id, data)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
+	return c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
 }
 
-func (a *Application) SeriesSettings(c *gin.Context, id string) {
+func (a *Application) SeriesSettings(c echo.Context, id string) error {
 	data := &Setting{}
-	err := c.BindJSON(&data)
+	err := c.Bind(&data)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	err = app.DB.SeriesSetting(id, data.Setting, data.Value)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
+	return c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
 }
 
-func (a *Application) SeriesDelete(c *gin.Context, id string) {
-	c.JSON(http.StatusOK, gin.H{"error": false})
+func (a *Application) SeriesDelete(c echo.Context, id string) error {
+	return c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func (a *Application) SeriesCurrentSeason(c *gin.Context, id string) {
+func (a *Application) SeriesCurrentSeason(c echo.Context, id string) error {
 	i, err := app.DB.SeriesCurrentSeason(id)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
-	c.JSON(http.StatusOK, gin.H{"current": i})
+	return c.JSON(http.StatusOK, gin.H{"current": i})
 }
 
-func (a *Application) SeriesSeasons(c *gin.Context, id string) {
+func (a *Application) SeriesSeasons(c echo.Context, id string) error {
 	results, err := app.DB.SeriesSeasons(id)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, results)
 }
 
-func (a *Application) SeriesSeasonEpisodesAll(c *gin.Context, id string) {
+func (a *Application) SeriesSeasonEpisodesAll(c echo.Context, id string) error {
 	results, err := app.DB.SeriesSeasonEpisodesAll(id)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, results)
 }
 
-func (a *Application) SeriesSeasonEpisodes(c *gin.Context, id string, season string) {
+func (a *Application) SeriesSeasonEpisodes(c echo.Context, id string, season string) error {
 	results, err := app.DB.SeriesSeasonEpisodes(id, season)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, results)
 }
 
-func (a *Application) SeriesPaths(c *gin.Context, id string) {
+func (a *Application) SeriesPaths(c echo.Context, id string) error {
 	results, err := app.DB.SeriesPaths(id)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, results)
 }
 
-func (a *Application) SeriesWatches(c *gin.Context, id string) {
+func (a *Application) SeriesWatches(c echo.Context, id string) error {
 	results, err := app.DB.SeriesWatches(id)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, results)
 }
 
-func (a *Application) SeriesRefresh(c *gin.Context, id string) {
+func (a *Application) SeriesRefresh(c echo.Context, id string) error {
 	if err := app.Workers.Enqueue(&TvdbUpdateSeries{ID: id}); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
-	c.JSON(http.StatusOK, gin.H{"error": false})
+	return c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func (a *Application) SeriesCovers(c *gin.Context, id string) {
+func (a *Application) SeriesCovers(c echo.Context, id string) error {
 	series, err := a.DB.Series.Get(id, &Series{})
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": errors.Wrap(err, "getting series").Error()})
-		return
+		return errors.Wrap(err, "getting series")
 	}
 
 	if series == nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "series not found"})
-		return
+		return errors.New("series not found")
 	}
 
 	if series.Source != "tvdb" {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "series not from tvdb"})
-		return
+		return errors.New("series not from tvdb")
 	}
 
 	tvdbid, err := strconv.Atoi(series.SourceId)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": errors.Wrap(err, "converting tvdb id").Error()})
-		return
+		return errors.Wrap(err, "converting tvdb id")
 	}
 
 	resp, err := app.TvdbSeriesCovers(int64(tvdbid))
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{"error": false, "covers": resp})
+	return c.JSON(http.StatusOK, gin.H{"error": false, "covers": resp})
 }
 
-func (a *Application) SeriesBackgrounds(c *gin.Context, id string) {
+func (a *Application) SeriesBackgrounds(c echo.Context, id string) error {
 	series, err := a.DB.Series.Get(id, &Series{})
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": errors.Wrap(err, "getting series").Error()})
-		return
+		errors.Wrap(err, "getting series")
 	}
 
 	if series == nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "series not found"})
-		return
+		return errors.New("series not found")
 	}
 
 	if series.Source != "tvdb" {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "series not from tvdb"})
-		return
+		return errors.New("series not from tvdb")
 	}
 
 	tvdbid, err := strconv.Atoi(series.SourceId)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": errors.Wrap(err, "converting tvdb id").Error()})
-		return
+		errors.Wrap(err, "converting tvdb id")
 	}
 
 	resp, err := app.TvdbSeriesBackgrounds(int64(tvdbid))
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{"error": false, "backgrounds": resp})
+	return c.JSON(http.StatusOK, gin.H{"error": false, "backgrounds": resp})
 }

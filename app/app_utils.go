@@ -2,6 +2,7 @@ package app
 
 import (
 	"crypto/md5"
+	"encoding/xml"
 	"fmt"
 	"io"
 	"os"
@@ -11,17 +12,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 )
 
 // QueryString retrieves a string param from the gin request querystring
-func QueryString(c *gin.Context, name string) string {
-	return c.Query(name)
+func QueryString(c echo.Context, name string) string {
+	return c.QueryParam(name)
 }
-func QueryDefaultString(c *gin.Context, name, def string) string {
-	v := c.Query(name)
+func QueryDefaultString(c echo.Context, name, def string) string {
+	v := c.QueryParam(name)
 	if v == "" {
 		return def
 	}
@@ -29,16 +30,16 @@ func QueryDefaultString(c *gin.Context, name, def string) string {
 }
 
 // QueryInt retrieves an integer param from the gin request querystring
-func QueryInt(c *gin.Context, name string) int {
-	v := c.Query(name)
+func QueryInt(c echo.Context, name string) int {
+	v := c.QueryParam(name)
 	i, _ := strconv.Atoi(v)
 	return i
 }
 
 // QueryDefaultInt retrieves an integer param from the gin request querystring
 // defaults to def argument if not found
-func QueryDefaultInteger(c *gin.Context, name string, def int) (int, error) {
-	v := c.Query(name)
+func QueryDefaultInteger(c echo.Context, name string, def int) (int, error) {
+	v := c.QueryParam(name)
 	if v == "" {
 		return def, nil
 	}
@@ -56,8 +57,8 @@ func QueryDefaultInteger(c *gin.Context, name string, def int) (int, error) {
 }
 
 // QueryBool retrieves a boolean param from the gin request querystring
-func QueryBool(c *gin.Context, name string) bool {
-	return c.Query(name) == "true"
+func QueryBool(c echo.Context, name string) bool {
+	return c.QueryParam(name) == "true"
 }
 
 var pathQuoteRegex = regexp.MustCompile(`'(\w{1,2})`)
@@ -73,6 +74,32 @@ func path(title string) string {
 	s = strings.TrimSpace(s)
 	// fmt.Printf("path: %s\n", s)
 	return s
+}
+
+// stolen from gin gonic
+// H is a shortcut for map[string]any
+type H map[string]any
+
+// MarshalXML allows type H to be used with xml.Marshal.
+func (h H) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	start.Name = xml.Name{
+		Space: "",
+		Local: "map",
+	}
+	if err := e.EncodeToken(start); err != nil {
+		return err
+	}
+	for key, value := range h {
+		elem := xml.StartElement{
+			Name: xml.Name{Space: "", Local: key},
+			Attr: []xml.Attr{},
+		}
+		if err := e.EncodeElement(value, elem); err != nil {
+			return err
+		}
+	}
+
+	return e.EncodeToken(xml.EndElement{Name: start.Name})
 }
 
 func directory(title string) string {

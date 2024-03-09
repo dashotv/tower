@@ -3,15 +3,14 @@ package app
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
-func (a *Application) UsersIndex(c *gin.Context) {
+func (a *Application) UsersIndex(c echo.Context) error {
 	users, err := app.DB.User.Query().Run()
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, users)
+	return c.JSON(http.StatusOK, users)
 }

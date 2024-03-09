@@ -6,10 +6,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func (a *Application) MoviesIndex(c *gin.Context, page, limit int) {
+func (a *Application) MoviesIndex(c echo.Context, page, limit int) error {
 	if page == 0 {
 		page = 1
 	}
@@ -39,8 +41,7 @@ func (a *Application) MoviesIndex(c *gin.Context, page, limit int) {
 
 	count, err := q.Count()
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	results, err := q.
@@ -48,8 +49,7 @@ func (a *Application) MoviesIndex(c *gin.Context, page, limit int) {
 		Skip((page - 1) * pagesize).
 		Desc("created_at").Run()
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	// TODO: do this with custom unmarshaling?
@@ -66,15 +66,14 @@ func (a *Application) MoviesIndex(c *gin.Context, page, limit int) {
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
+	return c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
 }
 
-func (a *Application) MoviesCreate(c *gin.Context) {
+func (a *Application) MoviesCreate(c echo.Context) error {
 	r := &CreateRequest{}
-	c.BindJSON(r)
+	c.Bind(r)
 	if r.ID == "" || r.Source == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "id and source are required"})
-		return
+		return errors.New("id and source are required")
 	}
 
 	m := &Movie{
@@ -89,31 +88,27 @@ func (a *Application) MoviesCreate(c *gin.Context) {
 
 	d, err := time.Parse("2006-01-02", r.Date)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 	m.ReleaseDate = d
 
 	err = app.DB.Movie.Save(m)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: m.ID.Hex()}); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{"error": false, "movie": m})
+	return c.JSON(http.StatusOK, gin.H{"error": false, "movie": m})
 }
 
-func (a *Application) MoviesShow(c *gin.Context, id string) {
+func (a *Application) MoviesShow(c echo.Context, id string) error {
 	m := &Movie{}
 	err := app.DB.Movie.Find(id, m)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	for _, p := range m.Paths {
@@ -127,62 +122,56 @@ func (a *Application) MoviesShow(c *gin.Context, id string) {
 		}
 	}
 
-	c.JSON(http.StatusOK, m)
+	return c.JSON(http.StatusOK, m)
 }
 
-func (a *Application) MoviesUpdate(c *gin.Context, id string) {
+func (a *Application) MoviesUpdate(c echo.Context, id string) error {
 	data := &Movie{}
-	err := c.BindJSON(&data)
+	err := c.Bind(&data)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	err = app.DB.MovieUpdate(id, data)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
+	return c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
 }
 
-func (a *Application) MoviesRefresh(c *gin.Context, id string) {
+func (a *Application) MoviesRefresh(c echo.Context, id string) error {
 	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: id}); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{"error": false})
+	return c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func (a *Application) MoviesSettings(c *gin.Context, id string) {
+func (a *Application) MoviesSettings(c echo.Context, id string) error {
 	data := &Setting{}
-	err := c.BindJSON(&data)
+	err := c.Bind(&data)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	err = app.DB.MovieSetting(id, data.Setting, data.Value)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
+	return c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
 }
 
-func (a *Application) MoviesDelete(c *gin.Context, id string) {
-	c.JSON(http.StatusOK, gin.H{"error": false})
+func (a *Application) MoviesDelete(c echo.Context, id string) error {
+	return c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func (a *Application) MoviesPaths(c *gin.Context, id string) {
+func (a *Application) MoviesPaths(c echo.Context, id string) error {
 	results, err := app.DB.MoviePaths(id)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, results)
 }

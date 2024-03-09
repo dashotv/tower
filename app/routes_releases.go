@@ -5,11 +5,13 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 )
 
 const releasePageSize = 25
 
-func (a *Application) ReleasesIndex(c *gin.Context, page, limit int) {
+func (a *Application) ReleasesIndex(c echo.Context, page, limit int) error {
 	if page == 0 {
 		page = 1
 	}
@@ -19,58 +21,55 @@ func (a *Application) ReleasesIndex(c *gin.Context, page, limit int) {
 		Limit(releasePageSize).Skip((page - 1) * releasePageSize).
 		Run()
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, results)
 }
 
-func (a *Application) ReleasesCreate(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"error": false})
+func (a *Application) ReleasesCreate(c echo.Context) error {
+	return c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func (a *Application) ReleasesShow(c *gin.Context, id string) {
+func (a *Application) ReleasesShow(c echo.Context, id string) error {
 	result := &Release{}
 	err := app.DB.Release.Find(id, result)
 	if err != nil {
-		if err.Error() == "mongo: no documents in result" {
-			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		} else {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		}
-		return
+		// if err.Error() == "mongo: no documents in result" {
+		// 	c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		// } else {
+		// 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		// }
+		return err
 	}
 
-	c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusOK, result)
 }
 
-func (a *Application) ReleasesUpdate(c *gin.Context, id string) {
-	c.JSON(http.StatusOK, gin.H{"error": false})
+func (a *Application) ReleasesUpdate(c echo.Context, id string) error {
+	return c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func (a *Application) ReleasesDelete(c *gin.Context, id string) {
-	c.JSON(http.StatusOK, gin.H{"error": false})
+func (a *Application) ReleasesDelete(c echo.Context, id string) error {
+	return c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func (a *Application) ReleasesSettings(c *gin.Context, id string) {
+func (a *Application) ReleasesSettings(c echo.Context, id string) error {
 	s := &Setting{}
-	err := c.BindJSON(s)
+	err := c.Bind(s)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
 	err = app.DB.ReleaseSetting(id, s.Setting, s.Value)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{"errors": false, "data": s})
+	return c.JSON(http.StatusOK, gin.H{"errors": false, "data": s})
 }
 
-func (a *Application) ReleasesPopular(c *gin.Context, interval string) {
+func (a *Application) ReleasesPopular(c echo.Context, interval string) error {
 	app.Log.Infof("ReleasesPopular: interval: %s", interval)
 	out := map[string][]*Popular{}
 
@@ -78,15 +77,13 @@ func (a *Application) ReleasesPopular(c *gin.Context, interval string) {
 		results := make([]*Popular, 25)
 		ok, err := app.Cache.Get(fmt.Sprintf("releases_popular_%s_%s", interval, t), &results)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+			return err
 		}
 		if !ok {
-			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "not found"})
-			return
+			return errors.New("http.StatusNotFound")
 		}
 		out[t] = results
 	}
 
-	c.JSON(http.StatusOK, out)
+	return c.JSON(http.StatusOK, out)
 }
