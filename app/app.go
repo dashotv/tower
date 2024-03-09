@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.uber.org/zap"
 
 	"github.com/dashotv/minion"
@@ -68,6 +69,11 @@ func Setup() error {
 			return err
 		}
 	}
+
+	app.DB.Episode.SetQueryDefaults([]bson.M{{"_type": "Episode"}})
+	app.DB.Movie.SetQueryDefaults([]bson.M{{"_type": "Movie"}})
+	app.DB.Series.SetQueryDefaults([]bson.M{{"_type": "Series"}})
+	app.Workers.Subscribe(app.MinionNotification)
 
 	return nil
 }
