@@ -10,7 +10,7 @@ require (
 	github.com/dashotv/grimoire v0.5.1
 	github.com/dashotv/mercury v0.3.2
 	github.com/dashotv/minion v0.3.3
-	github.com/dashotv/runic v0.2.0
+	github.com/dashotv/runic v0.2.1
 	github.com/dashotv/scry v0.0.0-20231229215934-5ab6a66ca665
 	github.com/dashotv/tmdb v0.2.0
 	github.com/dashotv/tvdb v0.3.0
@@ -76,7 +76,6 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.19.0 // indirect
-	github.com/go-redis/redis v6.15.9+incompatible // indirect
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
