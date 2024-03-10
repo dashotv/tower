@@ -8,6 +8,8 @@ import (
 )
 
 func onRunicReleases(a *Application, msg *runic.Release) error {
+	log := a.Log.Named("runic.releases")
+
 	// handle *runic.Release
 	series, err := getSeriesBySearch(msg.Title)
 	if series == nil {
@@ -24,7 +26,7 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 		return err
 	}
 
-	a.Log.Named("runic.releases").Warnf("found: %s S%02dE%02d", msg.Title, msg.Season, msg.Episode)
+	log.Warnf("found: %s s%02de%02d", msg.Title, msg.Season, msg.Episode)
 
 	d := &Download{}
 	d.MediumId = episode.ID
@@ -50,7 +52,7 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 }
 
 func getSeriesBySearch(title string) (*Series, error) {
-	list, err := app.DB.Series.Query().Where("search", title).Run()
+	list, err := app.DB.Series.Query().Where("kind", "donghua").Where("search", title).Run()
 	if err != nil {
 		return nil, err
 	}
