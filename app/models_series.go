@@ -359,3 +359,45 @@ func (c *Connector) SeriesWatches(id string) ([]*Watch, error) {
 
 	return watches, nil
 }
+
+func (c *Connector) SeriesBySearch(title string) (*Series, error) {
+	q := c.Series.Query().Where("kind", "donghua")
+	list, err := q.Where("directory", title).Run()
+	if err != nil {
+		return nil, err
+	}
+	if len(list) == 1 {
+		return list[0], nil
+	}
+
+	list, err = q.Where("search", title).Run()
+	if err != nil {
+		return nil, err
+	}
+	if len(list) == 1 {
+		return list[0], nil
+	}
+
+	return nil, nil
+}
+
+func (c *Connector) SeriesEpisodeBy(s *Series, season, episode int) (*Episode, error) {
+	q := c.Episode.Query().Where("series_id", s.ID)
+	list, err := q.Where("season", season).Where("episode", episode).Run()
+	if err != nil {
+		return nil, err
+	}
+	if len(list) == 1 && !list[0].Completed && !list[0].Downloaded {
+		return list[0], nil
+	}
+
+	list, err = q.Where("absolute_number", episode).Run()
+	if err != nil {
+		return nil, err
+	}
+	if len(list) == 1 && !list[0].Completed && !list[0].Downloaded {
+		return list[0], nil
+	}
+
+	return nil, nil
+}

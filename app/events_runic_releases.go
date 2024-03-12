@@ -11,7 +11,7 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 	log := a.Log.Named("runic.releases")
 
 	// handle *runic.Release
-	series, err := getSeriesBySearch(msg.Title)
+	series, err := a.DB.SeriesBySearch(msg.Title)
 	if series == nil {
 		return err
 	}
@@ -21,7 +21,7 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 	// 	return nil, nil
 	// }
 
-	episode, err := getEpisodeBySeries(series, msg.Season, msg.Episode)
+	episode, err := app.DB.SeriesEpisodeBy(series, msg.Season, msg.Episode)
 	if episode == nil {
 		return err
 	}
@@ -49,36 +49,4 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 	}
 
 	return nil
-}
-
-func getSeriesBySearch(title string) (*Series, error) {
-	list, err := app.DB.Series.Query().Where("kind", "donghua").Where("search", title).Run()
-	if err != nil {
-		return nil, err
-	}
-	if len(list) != 1 {
-		return nil, nil
-	}
-
-	return list[0], nil
-}
-
-func getEpisodeBySeries(s *Series, season, episode int) (*Episode, error) {
-	list, err := app.DB.Episode.Query().Where("series_id", s.ID).Where("season", season).Where("episode", episode).Run()
-	if err != nil {
-		return nil, err
-	}
-	if len(list) == 1 {
-		return list[0], nil
-	}
-
-	list, err = app.DB.Episode.Query().Where("series_id", s.ID).Where("absolute_number", episode).Run()
-	if err != nil {
-		return nil, err
-	}
-	if len(list) == 1 && !list[0].Completed && !list[0].Downloaded {
-		return list[0], nil
-	}
-
-	return nil, nil
 }

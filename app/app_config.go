@@ -172,11 +172,13 @@ func (c *ConnectionSet) UnmarshalText(text []byte) error {
 	*c = make(map[string]*Connection)
 	for _, conn := range strings.Split(string(text), ";") {
 		kv := strings.Split(conn, "=")
-		vals := strings.Split(kv[1]+",,", ",")
-		(*c)[kv[0]] = &Connection{
-			URI:        vals[0],
-			Database:   vals[1],
-			Collection: vals[2],
+		if len(kv) > 1 {
+			vals := strings.Split(kv[1]+",,", ",")
+			(*c)[kv[0]] = &Connection{
+				URI:        vals[0],
+				Database:   vals[1],
+				Collection: vals[2],
+			}
 		}
 	}
 	return nil

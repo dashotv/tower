@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConnector_SeriesAllUnwatched(t *testing.T) {
@@ -20,4 +21,24 @@ func TestConnector_SeriesAllUnwatched(t *testing.T) {
 	got, err := c.SeriesUserUnwatched(series)
 	assert.NoError(t, err, "unwatched")
 	assert.Greater(t, got, 0, "unwatched")
+}
+
+func TestConnector_SeriesBySearch(t *testing.T) {
+	db := testConnector()
+	if db == nil {
+		t.Skip("No test connector")
+		return
+	}
+
+	cases := []struct{ title, expected string }{
+		{"the first order", "The First Order"},
+		{"yishi-zhi-zun", "Ancient Lords"},
+	}
+
+	for _, c := range cases {
+		series, err := db.SeriesBySearch(c.title)
+		require.NoError(t, err)
+		require.NotNil(t, series)
+		require.Equal(t, c.expected, series.Title)
+	}
 }
