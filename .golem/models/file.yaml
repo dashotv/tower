@@ -1,0 +1,11 @@
+name: file
+type: model
+fields:
+  - name: type
+    type: string
+  - name: path
+    type: string
+  - name: size
+    type: int64
+  - name: modified_at
+    type: int64

@@ -24,6 +24,8 @@ var workersList = map[string]minion.Payload{
 	"DownloadsProcess": &DownloadsProcess{},
 	"UpdateIndexes":    &UpdateIndexes{},
 	// "DownloadsFileMove":        &DownloadFileMover{},
+
+	"FileWalk": &FileWalk{},
 }
 
 // This allows you to notify other services as jobs change status.

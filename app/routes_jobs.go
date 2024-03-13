@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -26,9 +27,14 @@ func (a *Application) JobsIndex(c echo.Context, page int, limit int) error {
 }
 
 func (a *Application) JobsCreate(c echo.Context, job string) error {
-	j := workersList[job]
-	if j == nil {
-		return errors.New("invalid job: " + job)
+	a.Log.Debugf("JobsCreate: %s", job)
+	if job == "" {
+		return errors.New("missing job")
+	}
+
+	j, ok := workersList[job]
+	if !ok || j == nil {
+		return fmt.Errorf("unknown job: %s", job)
 	}
 
 	app.Log.Infof("Enqueuing job: %s", j.Kind())

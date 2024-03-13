@@ -37,6 +37,7 @@ type Connector struct {
 	Download    *grimoire.Store[*Download]
 	Episode     *grimoire.Store[*Episode]
 	Feed        *grimoire.Store[*Feed]
+	File        *grimoire.Store[*File]
 	Medium      *grimoire.Store[*Medium]
 	Message     *grimoire.Store[*Message]
 	Minion      *grimoire.Store[*Minion]
@@ -94,6 +95,15 @@ func NewConnector(app *Application) (*Connector, error) {
 		return nil, err
 	}
 	feed, err := grimoire.New[*Feed](s.URI, s.Database, s.Collection)
+	if err != nil {
+		return nil, err
+	}
+
+	s, err = app.Config.ConnectionFor("file")
+	if err != nil {
+		return nil, err
+	}
+	file, err := grimoire.New[*File](s.URI, s.Database, s.Collection)
 	if err != nil {
 		return nil, err
 	}
@@ -195,6 +205,7 @@ func NewConnector(app *Application) (*Connector, error) {
 		Download:    download,
 		Episode:     episode,
 		Feed:        feed,
+		File:        file,
 		Medium:      medium,
 		Message:     message,
 		Minion:      minion,
@@ -305,6 +316,17 @@ type Feed struct { // model
 	Type      string    `bson:"type" json:"type"`
 	Active    bool      `bson:"active" json:"active"`
 	Processed time.Time `bson:"processed" json:"processed"`
+}
+
+type File struct { // model
+	grimoire.Document `bson:",inline"` // includes default model settings
+	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
+	Type       string `bson:"type" json:"type"`
+	Path       string `bson:"path" json:"path"`
+	Size       int64  `bson:"size" json:"size"`
+	ModifiedAt int64  `bson:"modified_at" json:"modified_at"`
 }
 
 type Medium struct { // model
