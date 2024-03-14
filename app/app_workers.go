@@ -86,6 +86,10 @@ func setupWorkers(app *Application) error {
 		return errors.Wrap(err, "registering worker: downloads_process (DownloadsProcess)")
 	}
 
+	if err := minion.Register[*FileMatch](m, &FileMatch{}); err != nil {
+		return errors.Wrap(err, "registering worker: file_match (FileMatch)")
+	}
+
 	if err := minion.RegisterWithQueue[*FileWalk](m, &FileWalk{}, "paths"); err != nil {
 		return errors.Wrap(err, "registering worker: file_walk (FileWalk)")
 	}

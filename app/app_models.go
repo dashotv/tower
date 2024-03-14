@@ -323,10 +323,11 @@ type File struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Type       string `bson:"type" json:"type"`
-	Path       string `bson:"path" json:"path"`
-	Size       int64  `bson:"size" json:"size"`
-	ModifiedAt int64  `bson:"modified_at" json:"modified_at"`
+	Type       string             `bson:"type" json:"type"`
+	Path       string             `bson:"path" json:"path"`
+	Size       int64              `bson:"size" json:"size"`
+	ModifiedAt int64              `bson:"modified_at" json:"modified_at"`
+	MediumId   primitive.ObjectID `bson:"medium_id" json:"medium_id"`
 }
 
 type Medium struct { // model

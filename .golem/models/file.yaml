@@ -9,3 +9,5 @@ fields:
     type: int64
   - name: modified_at
     type: int64
+  - name: medium_id
+    type: primitive.ObjectID

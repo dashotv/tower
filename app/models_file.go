@@ -1,6 +1,18 @@
 package app
 
-import "fmt"
+import (
+	"fmt"
+	"path/filepath"
+	"strings"
+)
+
+func (f *File) Parts() (string, string, string) {
+	parts := strings.Split(f.Path, string(filepath.Separator))
+	if len(parts) < 6 {
+		return "", "", ""
+	}
+	return parts[3], parts[4], parts[5]
+}
 
 func (c *Connector) FileGet(id string) (*File, error) {
 	m := &File{}
