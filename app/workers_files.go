@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync/atomic"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -18,6 +19,9 @@ type FileWalk struct {
 }
 
 func (j *FileWalk) Kind() string { return "file_walk" }
+func (j *FileWalk) Timeout(job *minion.Job[*FileWalk]) time.Duration {
+	return 60 * time.Minute
+}
 func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
 	l := app.Log.Named("file_walk")
 	if !atomic.CompareAndSwapUint32(&walking, 0, 1) {
@@ -47,6 +51,9 @@ type FileMatch struct {
 }
 
 func (j *FileMatch) Kind() string { return "file_match" }
+func (j *FileMatch) Timeout(job *minion.Job[*FileMatch]) time.Duration {
+	return 60 * time.Minute
+}
 func (j *FileMatch) Work(ctx context.Context, job *minion.Job[*FileMatch]) error {
 	l := app.Log.Named("file_match")
 	q := app.DB.File.Query().In("medium_id", bson.A{nil, "", primitive.NilObjectID})
