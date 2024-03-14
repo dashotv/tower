@@ -8,10 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/samber/lo"
-
 	"github.com/dashotv/minion"
-	"github.com/dashotv/tower/internal/plex"
 )
 
 var walking uint32
@@ -35,10 +32,6 @@ func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
 		return fmt.Errorf("getting libraries: %w", err)
 	}
 
-	libs = lo.Filter(libs, func(lib *plex.PlexLibrary, i int) bool {
-		return lib.Locations[0].Path == "/mnt/media/movies4k" || lib.Locations[0].Path == "/mnt/media/ecchi"
-	})
-
 	w := newWalker(app.DB, l.Named("walker"), libs)
 	if err := w.Walk(); err != nil {
 		l.Errorw("walk", "error", err)
@@ -58,36 +51,42 @@ func (j *FileMatch) Work(ctx context.Context, job *minion.Job[*FileMatch]) error
 	l := app.Log.Named("file_match")
 	q := app.DB.File.Query().In("medium_id", bson.A{nil, "", primitive.NilObjectID})
 
-	count, err := q.Count()
+	total, err := q.Count()
 	if err != nil {
-		l.Errorw("count", "error", err)
+		l.Errorw("total", "error", err)
 		return fmt.Errorf("counting: %w", err)
 	}
-	l.Debugf("total: %d", count)
+	l.Debugf("total: %d", total)
 
-	list, err := q.Limit(25).Run()
-	if err != nil {
-		l.Errorw("query", "error", err)
-		return fmt.Errorf("querying: %w", err)
-	}
-
-	for _, f := range list {
-		l.Debugf("match: %s", f.Path)
-		m, err := app.DB.MediumByFile(f)
+	skip := 0
+	limit := 25
+	for skip < int(total) {
+		list, err := q.Limit(limit).Skip(skip).Run()
 		if err != nil {
-			l.Errorw("medium", "error", err)
-			continue
-		}
-		if m == nil {
-			l.Errorw("medium", "error", "not found")
-			continue
+			l.Errorw("query", "error", err)
+			return fmt.Errorf("querying: %w", err)
 		}
 
-		l.Debugf("found: %s", m.Title)
-		f.MediumId = m.ID
-		if err := app.DB.File.Save(f); err != nil {
-			l.Errorw("save", "error", err)
+		for _, f := range list {
+			l.Debugf("match: %s", f.Path)
+			m, err := app.DB.MediumByFile(f)
+			if err != nil {
+				l.Errorw("medium", "error", err)
+				continue
+			}
+			if m == nil {
+				l.Errorw("medium", "error", "not found")
+				continue
+			}
+
+			l.Debugf("found: %s", m.Title)
+			f.MediumId = m.ID
+			if err := app.DB.File.Save(f); err != nil {
+				l.Errorw("save", "error", err)
+			}
 		}
+		skip += limit
 	}
+
 	return nil
 }
