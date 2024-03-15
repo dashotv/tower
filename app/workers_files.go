@@ -75,21 +75,22 @@ func (j *FileMatch) Work(ctx context.Context, job *minion.Job[*FileMatch]) error
 		}
 
 		for _, f := range list {
-			l.Debugf("match: %s", f.Path)
+			// l.Debugf("match: %s", f.Path)
 			m, err := app.DB.MediumByFile(f)
 			if err != nil {
-				l.Errorw("medium", "error", err)
+				l.Warnw("medium", "error", err)
 				continue
 			}
 			if m == nil {
-				l.Errorw("medium", "error", "not found")
+				l.Warnw("medium", "error", "not found", "file", f.Path)
 				continue
 			}
 
-			l.Debugf("found: %s", m.Title)
+			// l.Debugf("found: %s", m.Title)
 			f.MediumId = m.ID
 			if err := app.DB.File.Save(f); err != nil {
-				l.Errorw("save", "error", err)
+				l.Errorf("save", "error", err)
+				return fmt.Errorf("saving: %w", err)
 			}
 		}
 		skip += limit

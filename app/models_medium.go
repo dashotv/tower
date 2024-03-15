@@ -3,11 +3,12 @@ package app
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
 var regexPathTv = regexp.MustCompile(`(?i)(?P<season>\d+)x(?P<episode>\d+)`)
-var regexPathAnime = regexp.MustCompile(`(?i)(?P<season>\d+)x(?P<episode>\d+)\s+#(?P<absolute>\d+)`)
+var regexPathAnime = regexp.MustCompile(`(?i)(?P<season>\d+)x(?P<episode>\d+)(?:\s+#(?P<absolute>\d+))*`)
 
 func (c *Connector) MediumByFile(f *File) (*Medium, error) {
 	kind, name, file := f.Parts()
@@ -21,7 +22,7 @@ func (c *Connector) MediumByFile(f *File) (*Medium, error) {
 	}
 
 	switch kind {
-	case "movies", "movies3d", "movies4k", "movies4h":
+	case "movies", "movies3d", "movies4k", "movies4h", "kids":
 		return c.MediumByFilePartsMovie(kind, name)
 	case "tv":
 		return c.MediumByFilePartsTv(kind, name, file)
@@ -60,12 +61,14 @@ func (c *Connector) MediumByFilePartsTv(kind, name, file string) (*Medium, error
 		return nil, fmt.Errorf("no matches found for file: %s: %v", file, matches)
 	}
 
-	list, err := c.Medium.Query().Where("_type", "Episode").Where("series_id", series[0].ID).Where("season_number", matches[1]).Where("episode_number", matches[2]).Run()
+	season, _ := strconv.Atoi(matches[1])
+	episode, _ := strconv.Atoi(matches[2])
+	list, err := c.Medium.Query().Where("_type", "Episode").Where("series_id", series[0].ID).Where("season_number", season).Where("episode_number", episode).Run()
 	if err != nil {
 		return nil, err
 	}
 	if len(list) == 0 {
-		return nil, nil
+		return nil, fmt.Errorf("not found: %s/%s/%s: %v", kind, name, file, matches)
 	}
 	if len(list) > 1 {
 		return nil, fmt.Errorf("more than one medium found for kind: %s, name: %s", kind, name)
@@ -79,23 +82,51 @@ func (c *Connector) MediumByFilePartsAnime(kind, name, file string) (*Medium, er
 		return nil, err
 	}
 	if len(series) != 1 {
-		return nil, fmt.Errorf("series not found for kind: %s, name: %s", kind, name)
+		return nil, fmt.Errorf("series not found: %s/%s/%s", kind, name, file)
 	}
 
 	matches := regexPathAnime.FindStringSubmatch(file)
 	if len(matches) != 4 {
-		return nil, fmt.Errorf("no matches found for file: %s: %v", file, matches)
+		return nil, fmt.Errorf("no matches: %s/%s/%s: %v", kind, name, file, matches)
 	}
 
-	list, err := c.Medium.Query().Where("_type", "Episode").Where("series_id", series[0].ID).Where("absolute_number", matches[3]).Run()
+	absolute, _ := strconv.Atoi(matches[3])
+	if absolute > 0 {
+		list, err := c.Medium.Query().Where("_type", "Episode").Where("series_id", series[0].ID).Where("absolute_number", absolute).Run()
+		if err != nil {
+			return nil, err
+		}
+		if len(list) > 1 {
+			c.Log.Warnf("more than one: %s/%s/%s: %d %d %+v", kind, name, file, absolute, list)
+			return nil, fmt.Errorf("more than one: %s/%s/%s: %v", kind, name, file, matches)
+		}
+		if len(list) == 1 {
+			return list[0], nil
+		}
+	}
+
+	season, _ := strconv.Atoi(matches[1])
+	if season != 1 {
+		return c.MediumByFilePartsTv(kind, name, file)
+	}
+
+	// absolute didn't work, try episode as absolute
+	episode, _ := strconv.Atoi(matches[2])
+	if episode == 0 {
+		return nil, fmt.Errorf("episode == 0: %s/%s/%s: %v", kind, name, file, matches)
+	}
+
+	list, err := c.Medium.Query().Where("_type", "Episode").Where("series_id", series[0].ID).Where("absolute_number", episode).Run()
 	if err != nil {
 		return nil, err
 	}
+
 	if len(list) == 0 {
-		return nil, nil
+		return c.MediumByFilePartsTv(kind, name, file)
 	}
 	if len(list) > 1 {
-		return nil, fmt.Errorf("more than one medium found for kind: %s, name: %s", kind, name)
+		c.Log.Warnf("more than one: %s/%s/%s: %d %d %+v", kind, name, file, absolute, episode, list)
+		return nil, fmt.Errorf("more than one: %s/%s/%s: %v", kind, name, file, matches)
 	}
 	return list[0], nil
 }
