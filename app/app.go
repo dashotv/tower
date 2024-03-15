@@ -74,6 +74,7 @@ func Setup() error {
 	app.DB.Movie.SetQueryDefaults([]bson.M{{"_type": "Movie"}})
 	app.DB.Series.SetQueryDefaults([]bson.M{{"_type": "Series"}})
 	app.Workers.Subscribe(app.MinionNotification)
+	app.Workers.SubscribeStats(app.MinionStats)
 
 	return nil
 }
