@@ -181,7 +181,7 @@ func (a *Application) DownloadsMedium(c echo.Context, id string) error {
 	}
 
 	if download.Medium.Type == "Series" {
-		a.SeriesSeasonEpisodesAll(c, download.MediumId.Hex())
+		return a.SeriesSeasonEpisodesAll(c, download.MediumId.Hex())
 	}
 
 	return c.JSON(http.StatusOK, []*Medium{download.Medium})
