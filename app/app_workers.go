@@ -85,7 +85,7 @@ func setupWorkers(app *Application) error {
 	if err := minion.Register[*DownloadsProcess](m, &DownloadsProcess{}); err != nil {
 		return errors.Wrap(err, "registering worker: downloads_process (DownloadsProcess)")
 	}
-	if _, err := m.Schedule("0 * * * * *", &DownloadsProcess{}); err != nil {
+	if _, err := m.Schedule("30 * * * * *", &DownloadsProcess{}); err != nil {
 		return errors.Wrap(err, "scheduling worker: downloads_process (DownloadsProcess)")
 	}
 

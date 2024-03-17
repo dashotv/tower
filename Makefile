@@ -19,6 +19,7 @@ server: generate
 	go run main.go server
 
 deps:
+	go install golang.org/x/tools/cmd/goimports@latest
 	go install github.com/dashotv/golem@latest
 
 docker:
