@@ -200,6 +200,18 @@ func FileCopy(srcpath, dstpath string) (err error) {
 	return err
 }
 
+func FileLink(srcpath, dstpath string) error {
+	if err := FileDir(dstpath); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+	return os.Link(srcpath, dstpath)
+}
+
+func FileDir(file string) error {
+	path := filepath.Dir(file)
+	return os.MkdirAll(path, 0755)
+}
+
 func shouldDownloadFile(name string) bool {
 	ext := strings.ToLower(filepath.Ext(name))
 	ext = ext[1:]

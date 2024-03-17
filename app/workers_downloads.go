@@ -20,10 +20,10 @@ func (j *DownloadsProcess) Work(ctx context.Context, job *minion.Job[*DownloadsP
 	app.Workers.Log.Debugf("DownloadsProcess: %s", job.ID)
 	notifier.Info("Downloads", "processing downloads")
 	funcs := []func() error{
-		j.Create,
-		j.Search,
+		// j.Create,
+		// j.Search,
 		j.Load,
-		j.Manage,
+		// j.Manage,
 		j.Move,
 	}
 
@@ -309,7 +309,7 @@ func (j *DownloadsProcess) Move() error {
 			}
 		}
 
-		if err := FileCopy(source, destination); err != nil {
+		if err := FileLink(source, destination); err != nil {
 			return errors.Wrap(err, "copy")
 		}
 
