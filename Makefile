@@ -22,7 +22,7 @@ deps:
 	go install github.com/dashotv/golem@latest
 
 docker:
-	docker build -t tower .
+	docker build -t tower-test .
 
 docker-run:
 	docker run --rm --name tower-test -p 19000:9000 tower
