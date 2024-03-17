@@ -87,9 +87,9 @@ func (j *TvdbUpdateSeries) Work(ctx context.Context, job *minion.Job[*TvdbUpdate
 		if err := app.Workers.Enqueue(&TvdbUpdateSeriesEpisodes{ID: series.ID.Hex()}); err != nil {
 			return errors.Wrap(err, "enqueuing series episodes")
 		}
-		if err := app.Workers.Enqueue(&MediaPaths{ID: id}); err != nil {
-			return errors.Wrap(err, "enqueuing media paths")
-		}
+		// if err := app.Workers.Enqueue(&MediaPaths{ID: id}); err != nil {
+		// 	return errors.Wrap(err, "enqueuing media paths")
+		// }
 	}
 
 	return nil
