@@ -42,3 +42,16 @@ func TestConnector_SeriesBySearch(t *testing.T) {
 		require.Equal(t, c.expected, series.Title)
 	}
 }
+
+func TestEvents_SeriesEpisodeByRunic(t *testing.T) {
+	err := appSetup()
+	require.NoError(t, err)
+
+	series, err := app.DB.SeriesBySearch("against the gods")
+	require.NoError(t, err)
+	require.NotNil(t, series)
+
+	e, err := app.DB.SeriesEpisodeBy(series, 1, 28)
+	require.NoError(t, err)
+	require.NotNil(t, e)
+}

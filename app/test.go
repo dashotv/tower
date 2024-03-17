@@ -1,10 +1,36 @@
 package app
 
 import (
+	"fmt"
 	"os"
+
+	_ "github.com/joho/godotenv/autoload"
 
 	"github.com/dashotv/grimoire"
 )
+
+func appSetup() error {
+	if app != nil {
+		fmt.Println("app already setup")
+		return nil
+	}
+
+	app = &Application{}
+	list := []func(*Application) error{
+		setupConfig,
+		setupLogger,
+		setupEvents,
+		setupDb,
+	}
+
+	for _, f := range list {
+		if err := f(app); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
 
 func testConnector() *Connector {
 	app := &Application{}

@@ -361,7 +361,7 @@ func (c *Connector) SeriesWatches(id string) ([]*Watch, error) {
 }
 
 func (c *Connector) SeriesBySearch(title string) (*Series, error) {
-	q := c.Series.Query().Where("kind", "donghua")
+	q := c.Series.Query().Where("kind", "donghua") // TODO: support all kinds
 	list, err := q.Where("directory", title).Run()
 	if err != nil {
 		return nil, err
@@ -382,12 +382,12 @@ func (c *Connector) SeriesBySearch(title string) (*Series, error) {
 }
 
 func (c *Connector) SeriesEpisodeBy(s *Series, season, episode int) (*Episode, error) {
-	q := c.Episode.Query().Where("series_id", s.ID)
-	list, err := q.Where("season", season).Where("episode", episode).Run()
+	q := c.Episode.Query().Where("series_id", s.ID).Where("completed", false).Where("downloaded", false).Where("skipped", false)
+	list, err := q.Where("season_number", season).Where("episode_number", episode).Run()
 	if err != nil {
 		return nil, err
 	}
-	if len(list) == 1 && !list[0].Completed && !list[0].Downloaded {
+	if len(list) == 1 {
 		return list[0], nil
 	}
 
@@ -395,7 +395,7 @@ func (c *Connector) SeriesEpisodeBy(s *Series, season, episode int) (*Episode, e
 	if err != nil {
 		return nil, err
 	}
-	if len(list) == 1 && !list[0].Completed && !list[0].Downloaded {
+	if len(list) == 1 {
 		return list[0], nil
 	}
 

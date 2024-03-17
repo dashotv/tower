@@ -10,7 +10,6 @@ import (
 func onRunicReleases(a *Application, msg *runic.Release) error {
 	log := a.Log.Named("runic.releases")
 
-	// handle *runic.Release
 	series, err := a.DB.SeriesBySearch(msg.Title)
 	if series == nil {
 		return err
@@ -18,8 +17,10 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 
 	// disable for now, because I want to see if the matching is working
 	// if !series.Active {
-	// 	return nil, nil
+	// 	return nil
 	// }
+
+	log.Infof("received: %s %02dx%02d", msg.Title, msg.Season, msg.Episode)
 
 	episode, err := app.DB.SeriesEpisodeBy(series, msg.Season, msg.Episode)
 	if episode == nil {
