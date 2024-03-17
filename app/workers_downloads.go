@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 
 	"github.com/dashotv/minion"
 )
@@ -246,6 +247,8 @@ func (j *DownloadsProcess) Move() error {
 		return errors.Wrap(err, "failed to get downloads")
 	}
 
+	moved := []string{}
+
 	for _, d := range list {
 		if d.Thash == "" {
 			continue
@@ -324,7 +327,22 @@ func (j *DownloadsProcess) Move() error {
 			return errors.Wrap(err, "failed to save download")
 		}
 
+		moved = append(moved, destination)
 		notifier.Success("Downloads::Completed", fmt.Sprintf("%s %s", d.Medium.Title, d.Medium.Display))
+	}
+
+	if len(moved) > 0 {
+		dirs := lo.Map(moved, func(s string, i int) string {
+			return filepath.Dir(s)
+		})
+		dirs = lo.Uniq(dirs)
+
+		for _, dir := range dirs {
+			err := app.Plex.RefreshLibraryPath(dir)
+			if err != nil {
+				return errors.Wrap(err, "failed to refresh library")
+			}
+		}
 	}
 
 	return nil

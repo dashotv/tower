@@ -1,6 +1,12 @@
 package plex
 
-import "github.com/pkg/errors"
+import (
+	"fmt"
+	"path/filepath"
+	"strings"
+
+	"github.com/pkg/errors"
+)
 
 /*
 	{
@@ -109,6 +115,42 @@ func (p *Client) LibraryTypeName(section string) (string, error) {
 		}
 	}
 	return "", errors.Errorf("library section %s not found", section)
+}
+
+func (p *Client) LibraryByPath(path string) (*PlexLibrary, error) {
+	resp, err := p.GetLibraries()
+	if err != nil {
+		return nil, err
+	}
+	for _, r := range resp {
+		for _, l := range r.Locations {
+			if l.Path == path {
+				return r, nil
+			}
+		}
+	}
+	return nil, errors.Errorf("library path %s not found", path)
+}
+
+func (p *Client) RefreshLibraryPath(path string) error {
+	l, err := p.LibraryByPath(filepath.Dir(path))
+	if err != nil {
+		return err
+	}
+
+	path = strings.ReplaceAll(path, " ", "+")
+
+	resp, err := p._server().
+		SetFormDataFromValues(p.data).
+		Get(fmt.Sprintf("/library/sections/%s/refresh?path=%s", l.Key, path))
+	if err != nil {
+		return err
+	}
+	if !resp.IsSuccess() {
+		return errors.Errorf("failed to refresh library: %s", resp.Status())
+	}
+
+	return nil
 }
 
 func (p *Client) LibraryTypeID(t string) int {
