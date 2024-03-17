@@ -18,7 +18,7 @@ type DownloadsProcess struct {
 
 func (j *DownloadsProcess) Kind() string { return "DownloadsProcess" }
 func (j *DownloadsProcess) Work(ctx context.Context, job *minion.Job[*DownloadsProcess]) error {
-	notifier.Info("Downloads", "processing downloads")
+	// notifier.Info("Downloads", "processing downloads")
 	funcs := []func() error{
 		// j.Create,
 		// j.Search,
