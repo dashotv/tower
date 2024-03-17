@@ -107,6 +107,10 @@ func (a *Application) DownloadsUpdate(c echo.Context, id string) error {
 		if err != nil {
 			return err
 		}
+	} else if data.Status == "loading" && (data.Url != "" || data.ReleaseId != "") {
+		if err := app.Workers.Enqueue(&DownloadsProcess{}); err != nil {
+			return err
+		}
 	}
 
 	return c.JSON(http.StatusOK, data)
