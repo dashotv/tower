@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	_ "github.com/joho/godotenv/autoload"
 
@@ -13,6 +14,11 @@ func appSetup() error {
 	if app != nil {
 		fmt.Println("app already setup")
 		return nil
+	}
+
+	err := envReplaceAll("host.docker.internal", "localhost", []string{"CONNECTIONS", "NATS_URL", "REDIS_ADDRESS", "MINION_URI"})
+	if err != nil {
+		return err
 	}
 
 	app = &Application{}
@@ -29,6 +35,15 @@ func appSetup() error {
 		}
 	}
 
+	return nil
+}
+
+func envReplaceAll(old, new string, vars []string) error {
+	for _, v := range vars {
+		if err := os.Setenv(v, strings.ReplaceAll(os.Getenv(v), old, new)); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -86,5 +101,8 @@ func testConnector() *Connector {
 		Series:   series,
 		Watch:    watch,
 	}
+
+	app.DB = c
+
 	return c
 }

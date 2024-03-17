@@ -23,7 +23,7 @@ func (j *DownloadsProcess) Work(ctx context.Context, job *minion.Job[*DownloadsP
 		// j.Create,
 		// j.Search,
 		j.Load,
-		// j.Manage,
+		j.Manage,
 		j.Move,
 	}
 
@@ -278,19 +278,28 @@ func (j *DownloadsProcess) Move() error {
 
 		tf := t.Files[0]
 		// df := d.Files[0]
-		kind := d.Medium.Kind
-		dir := d.Medium.Directory
 		ext := filepath.Ext(tf.Name)
 		if len(ext) > 0 {
 			ext = ext[1:]
 		}
 
+		// TODO: move to configurable templates
+		dest, err := Destination(d.Medium)
+		if err != nil {
+			return errors.Wrap(err, "failed to get destination")
+		}
+
 		source := fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, tf.Name)
-		file := strings.ToLower(fmt.Sprintf("%s/%s/%s %s.%s", kind, dir, dir, d.Medium.Display, ext))
+		file := strings.ToLower(fmt.Sprintf("%s.%s", dest, ext))
 		destination := fmt.Sprintf("%s/%s", app.Config.DirectoriesCompleted, file)
 
 		app.Workers.Log.Debugf("mover: %s", source)
 		app.Workers.Log.Debugf("    -> %s", destination)
+
+		if !app.Config.Production {
+			app.Workers.Log.Debugf("skipping move in dev mode")
+			continue
+		}
 
 		if !exists(source) {
 			return errors.Errorf("source does not exist: %s", source)
