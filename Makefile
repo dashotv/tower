@@ -34,7 +34,7 @@ docker-run:
 # $ docker run -it my_application --add-host 'DOCKER_HOST:$DOCKER_HOST'
 
 dotenv:
-	npx dotenv-vault local build
+	npx @dotenvx/dotenvx encrypt
 
 check-env:
 ifndef TEST_MONGODB_URL
