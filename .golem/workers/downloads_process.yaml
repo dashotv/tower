@@ -1,1 +1,2 @@
 name: downloads_process
+schedule: "0 * * * * *"
