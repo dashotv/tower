@@ -320,7 +320,7 @@ func (j *DownloadsProcess) Move() error {
 			}
 		}
 
-		if err := FileLink(source, destination); err != nil {
+		if err := FileLink(source, destination, d.Force); err != nil {
 			return errors.Wrap(err, "copy")
 		}
 

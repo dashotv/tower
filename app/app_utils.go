@@ -200,9 +200,18 @@ func FileCopy(srcpath, dstpath string) (err error) {
 	return err
 }
 
-func FileLink(srcpath, dstpath string) error {
+// FileLink creates hard link, if destination exists and force is true, it will remove the destination before linking
+func FileLink(srcpath, dstpath string, force bool) error {
 	if err := FileDir(dstpath); err != nil {
 		return fmt.Errorf("failed to create directory: %w", err)
+	}
+	if exists(dstpath) {
+		if !force {
+			return fmt.Errorf("destination exists, force false")
+		}
+		if err := os.Remove(dstpath); err != nil {
+			return fmt.Errorf("failed to remove destination: %w", err)
+		}
 	}
 	return os.Link(srcpath, dstpath)
 }
