@@ -22,8 +22,8 @@ type Flame struct {
 
 func setupFlame(app *Application) error {
 	app.Flame = &Flame{
-		URL: "http://flame:9001",
-		c:   resty.New().SetBaseURL("http://flame:9001"),
+		URL: "http://host.docker.internal:59001",
+		c:   resty.New().SetBaseURL("http://host.docker.internal:59001"),
 	}
 	return nil
 }
@@ -104,4 +104,19 @@ func (c *Flame) LoadTorrent(d *Download, url string) (string, error) {
 	}
 
 	return res.Infohash, nil
+}
+
+func (c *Flame) RemoveTorrent(thash string) error {
+	resp, err := c.c.R().
+		SetQueryParam("infohash", thash).
+		Get("/qbittorrents/remove")
+	if err != nil {
+		return errors.Wrap(err, "failed to remove torrent")
+	}
+	if resp.IsError() {
+		return errors.Errorf("failed to remove torrent: %s", resp.Status())
+	}
+
+	app.Log.Debugf("Flame::RemoveTorrent: %s", resp.Body())
+	return nil
 }

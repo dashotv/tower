@@ -335,6 +335,10 @@ func (j *DownloadsProcess) Move() error {
 			return errors.Wrap(err, "failed to save download")
 		}
 
+		if err := app.Flame.RemoveTorrent(d.Thash); err != nil {
+			return errors.Wrap(err, "failed to remove torrent")
+		}
+
 		moved = append(moved, destination)
 		notifier.Success("Downloads::Completed", fmt.Sprintf("%s %s", d.Medium.Title, d.Medium.Display))
 	}
