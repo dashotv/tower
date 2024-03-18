@@ -24,6 +24,7 @@ type Config struct {
 	Production            bool     `env:"PRODUCTION" envDefault:"false"`
 	Logger                string   `env:"LOGGER" envDefault:"dev"`
 	Port                  int      `env:"PORT" envDefault:"9000"`
+	FlameURL              string   `env:"FLAME_URL"`
 	Plex                  string   `env:"PLEX"`
 	PlexToken             string   `env:"PLEX_TOKEN"`
 	PlexAppName           string   `env:"PLEX_APP_NAME"`

@@ -22,8 +22,7 @@ type Flame struct {
 
 func setupFlame(app *Application) error {
 	app.Flame = &Flame{
-		URL: "http://host.docker.internal:59001",
-		c:   resty.New().SetBaseURL("http://host.docker.internal:59001"),
+		c: resty.New().SetBaseURL(app.Config.FlameURL),
 	}
 	return nil
 }

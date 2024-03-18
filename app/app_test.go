@@ -10,13 +10,15 @@ import (
 	"github.com/dashotv/grimoire"
 )
 
+var envVars = []string{"CONNECTIONS", "NATS_URL", "REDIS_ADDRESS", "MINION_URI", "FLAME_URL"}
+
 func appSetup() error {
 	if app != nil {
 		fmt.Println("app already setup")
 		return nil
 	}
 
-	err := envReplaceAll("host.docker.internal", "localhost", []string{"CONNECTIONS", "NATS_URL", "REDIS_ADDRESS", "MINION_URI"})
+	err := envReplaceAll("host.docker.internal", "localhost", envVars)
 	if err != nil {
 		return err
 	}
