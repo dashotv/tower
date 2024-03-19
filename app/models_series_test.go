@@ -47,11 +47,11 @@ func TestEvents_SeriesEpisodeByRunic(t *testing.T) {
 	err := appSetup()
 	require.NoError(t, err)
 
-	series, err := app.DB.SeriesBySearch("against the gods")
+	series, err := app.DB.SeriesBySearch("the age of cosmos exploration")
 	require.NoError(t, err)
 	require.NotNil(t, series)
 
-	e, err := app.DB.SeriesEpisodeBy(series, 1, 28)
+	e, err := app.DB.SeriesEpisodeBy(series, 1, 9)
 	require.NoError(t, err)
 	require.NotNil(t, e)
 }

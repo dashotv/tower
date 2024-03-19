@@ -32,6 +32,27 @@ func (c *Connector) MediumByFile(f *File) (*Medium, error) {
 		return nil, fmt.Errorf("unknown kind: %s", kind)
 	}
 }
+func (c *Connector) MediumBy(kind, name, file, ext string) (*Medium, bool, error) {
+	if list, err := c.Medium.Query().Where("paths.local", fmt.Sprintf("%s/%s/%s", kind, name, file)).Run(); err != nil {
+		return nil, false, err
+	} else if len(list) > 0 {
+		return list[0], true, nil
+	}
+
+	switch kind {
+	case "movies", "movies3d", "movies4k", "movies4h", "kids":
+		m, err := c.MediumByFilePartsMovie(kind, name)
+		return m, false, err
+	case "tv":
+		m, err := c.MediumByFilePartsTv(kind, name, file)
+		return m, false, err
+	case "anime", "donghua", "ecchi":
+		m, err := c.MediumByFilePartsAnime(kind, name, file)
+		return m, false, err
+	default:
+		return nil, false, fmt.Errorf("unknown kind: %s", kind)
+	}
+}
 
 func (c *Connector) MediumByFilePartsMovie(kind, name string) (*Medium, error) {
 	list, err := c.Medium.Query().Where("_type", "Movie").Where("kind", kind).Where("directory", name).Run()

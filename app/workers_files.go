@@ -3,14 +3,17 @@ package app
 import (
 	"context"
 	"fmt"
+	"io/fs"
+	"path/filepath"
 	"sync/atomic"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/samber/lo"
 
 	"github.com/dashotv/minion"
 )
+
+var KINDS = []string{"movies", "movies3d", "movies4k", "movies4h", "kids", "tv", "anime", "donghua", "ecchi"}
 
 var walking uint32
 
@@ -55,45 +58,75 @@ func (j *FileMatch) Timeout(job *minion.Job[*FileMatch]) time.Duration {
 	return 60 * time.Minute
 }
 func (j *FileMatch) Work(ctx context.Context, job *minion.Job[*FileMatch]) error {
-	l := app.Log.Named("file_match")
-	q := app.DB.File.Query().In("medium_id", bson.A{nil, "", primitive.NilObjectID})
+	l := app.Log.Named("files.match")
 
-	total, err := q.Count()
-	if err != nil {
-		l.Errorw("total", "error", err)
-		return fmt.Errorf("counting: %w", err)
-	}
-	l.Debugf("total: %d", total)
+	start := time.Now()
+	found := 0
+	missing := 0
+	existing := 0
+	defer func() {
+		l.Debugf("duration: %d, found: %d, existing: %d, missing: %d", time.Since(start), found, existing, missing)
+	}()
 
-	skip := 0
-	limit := 25
-	for skip < int(total) {
-		list, err := q.Limit(limit).Skip(skip).Run()
-		if err != nil {
-			l.Errorw("query", "error", err)
-			return fmt.Errorf("querying: %w", err)
-		}
-
-		for _, f := range list {
-			// l.Debugf("match: %s", f.Path)
-			m, err := app.DB.MediumByFile(f)
+	for _, kind := range KINDS {
+		dir := filepath.Join(app.Config.DirectoriesCompleted, kind)
+		l.Infof("walking: %s", dir)
+		err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
-				l.Warnw("medium", "error", err)
-				continue
+				l.Errorw("walk", "error", err)
+				return fmt.Errorf("walking: %w", err)
+			}
+
+			if d.IsDir() {
+				return nil
+			}
+
+			if filepath.Base(path)[0] == '.' {
+				return nil
+			}
+
+			ext := filepath.Ext(path)
+			if ext == "" || !lo.Contains(app.Config.ExtensionsVideo, ext[1:]) {
+				return nil
+			}
+
+			kind, name, file, ext, err := pathParts(path)
+			if err != nil {
+				l.Errorw("parts", "error", err)
+				return nil
+			}
+			local := fmt.Sprintf("%s/%s/%s", kind, name, file)
+
+			m, ok, err := app.DB.MediumBy(kind, name, file, ext)
+			if err != nil {
+				l.Errorw("medium", "error", err)
+				return nil
+			}
+			if ok {
+				existing += 1
+				return nil
 			}
 			if m == nil {
-				l.Warnw("medium", "error", "not found", "file", f.Path)
-				continue
+				missing += 1
+				l.Warnw("medium", "not found", local)
+				return nil
 			}
 
-			// l.Debugf("found: %s", m.Title)
-			f.MediumId = m.ID
-			if err := app.DB.File.Save(f); err != nil {
-				l.Errorf("save", "error", err)
+			// l.Warnw("found", "path", path)
+			found += 1
+
+			m.Paths = append(m.Paths, &Path{Type: "video", Local: local, Extension: ext})
+			if err := app.DB.Medium.Save(m); err != nil {
+				l.Errorw("save", "error", err)
 				return fmt.Errorf("saving: %w", err)
 			}
+
+			return nil
+		})
+		if err != nil {
+			l.Errorw("walk", "error", err)
+			return fmt.Errorf("walking: %w", err)
 		}
-		skip += limit
 	}
 
 	return nil

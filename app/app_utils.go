@@ -126,6 +126,23 @@ func exists(path string) bool {
 	}
 }
 
+func pathParts(path string) (string, string, string, string, error) {
+	path = strings.Replace(path, app.Config.DirectoriesCompleted+"/", "", 1)
+	parts := strings.Split(path, "/")
+	if len(parts) < 3 {
+		return "", "", "", "", fmt.Errorf("not enough parts")
+	}
+
+	kind, name, file := parts[0], parts[1], parts[2]
+	f := strings.Split(file, ".")
+
+	if len(f) < 2 {
+		return "", "", "", "", fmt.Errorf("no extension")
+	}
+
+	return kind, name, f[0], f[1], nil
+}
+
 func sumFile(path string) (string, error) {
 	f, err := os.Open(path)
 	if err != nil {
