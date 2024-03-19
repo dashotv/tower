@@ -260,7 +260,8 @@ func (j *DownloadsProcess) Move() error {
 
 		t, err := app.Flame.Torrent(d.Thash)
 		if err != nil {
-			return errors.Wrap(err, "failed to get torrent")
+			app.Log.Named("downloads.manage").Errorf("failed to get torrent: %s", err)
+			continue
 		}
 
 		if t.Progress < 100 {
@@ -376,7 +377,8 @@ func (j *DownloadsProcess) Move() error {
 //
 // 	t, err := flameClient.Torrent(d.Thash)
 // 	if err != nil {
-// 		return errors.Wrap(err, "failed to get torrent")
+// 		app.Log.Named("downloads.manage").Errorf("failed to get torrent: %s", err)
+// 		continue
 // 	}
 //
 // 	tf := t.Files[0]
