@@ -1,4 +1,5 @@
 name: "PathCleanup"
+queue: paths
 fields:
   - name: id
     type: string

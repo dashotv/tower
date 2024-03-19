@@ -54,7 +54,7 @@ func setupWorkers(app *Application) error {
 
 	m.Queue("paths", 3, 3, 0)
 
-	if err := minion.Register[*PathCleanup](m, &PathCleanup{}); err != nil {
+	if err := minion.RegisterWithQueue[*PathCleanup](m, &PathCleanup{}, "paths"); err != nil {
 		return errors.Wrap(err, "registering worker: PathCleanup (PathCleanup)")
 	}
 
