@@ -1,0 +1,4 @@
+name: "PathCleanup"
+fields:
+  - name: id
+    type: string

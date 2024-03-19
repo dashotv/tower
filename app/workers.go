@@ -27,6 +27,8 @@ var workersList = map[string]minion.Payload{
 
 	"FileWalk":  &FileWalk{},
 	"FileMatch": &FileMatch{},
+
+	"PathCleanupAll": &PathCleanupAll{},
 }
 
 // This allows you to notify other services as jobs change status.

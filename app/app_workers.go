@@ -54,6 +54,17 @@ func setupWorkers(app *Application) error {
 
 	m.Queue("paths", 3, 3, 0)
 
+	if err := minion.Register[*PathCleanup](m, &PathCleanup{}); err != nil {
+		return errors.Wrap(err, "registering worker: PathCleanup (PathCleanup)")
+	}
+
+	if err := minion.Register[*PathCleanupAll](m, &PathCleanupAll{}); err != nil {
+		return errors.Wrap(err, "registering worker: PathCleanupAll (PathCleanupAll)")
+	}
+	if _, err := m.Schedule("0 0 10 * * *", &PathCleanupAll{}); err != nil {
+		return errors.Wrap(err, "scheduling worker: PathCleanupAll (PathCleanupAll)")
+	}
+
 	if err := minion.Register[*CleanPlexPins](m, &CleanPlexPins{}); err != nil {
 		return errors.Wrap(err, "registering worker: clean_plex_pins (CleanPlexPins)")
 	}
