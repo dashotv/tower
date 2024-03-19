@@ -21,12 +21,18 @@ func (a *Application) JobsIndex(c echo.Context, page int, limit int) error {
 		skip = (page - 1) * limit
 	}
 
-	count, err := app.DB.Minion.Query().Count()
+	status := c.QueryParam("status")
+	q := app.DB.Minion.Query()
+	if status != "" {
+		q = q.Where("status", status)
+	}
+
+	count, err := q.Count()
 	if err != nil {
 		return err
 	}
 
-	list, err := app.DB.Minion.Query().Skip(skip).Limit(limit).Desc("created_at").Run()
+	list, err := q.Skip(skip).Limit(limit).Desc("created_at").Run()
 	if err != nil {
 		return err
 	}
