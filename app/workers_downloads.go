@@ -182,7 +182,7 @@ func (j *DownloadsProcess) Load() error {
 func (j *DownloadsProcess) Manage() error {
 	list, err := app.DB.DownloadByStatus("managing")
 	if err != nil {
-		return errors.Wrap(err, "failed to get downloads")
+		return fmt.Errorf("failed to get downloads: %w", err)
 	}
 
 	for _, d := range list {
@@ -196,7 +196,8 @@ func (j *DownloadsProcess) Manage() error {
 
 		t, err := app.Flame.Torrent(d.Thash)
 		if err != nil {
-			return errors.Wrap(err, "failed to get torrent")
+			app.Log.Named("downloads.manage").Errorf("failed to get torrent: %s", err)
+			continue
 		}
 
 		if len(t.Files) == 0 {
