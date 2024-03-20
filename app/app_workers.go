@@ -61,7 +61,7 @@ func setupWorkers(app *Application) error {
 	if err := minion.Register[*PathCleanupAll](m, &PathCleanupAll{}); err != nil {
 		return errors.Wrap(err, "registering worker: PathCleanupAll (PathCleanupAll)")
 	}
-	if _, err := m.Schedule("0 0 10 * * *", &PathCleanupAll{}); err != nil {
+	if _, err := m.Schedule("0 0 10 * * 0", &PathCleanupAll{}); err != nil {
 		return errors.Wrap(err, "scheduling worker: PathCleanupAll (PathCleanupAll)")
 	}
 
