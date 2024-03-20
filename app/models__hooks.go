@@ -172,6 +172,27 @@ func (s *Series) Saving() error {
 	return nil
 }
 
+func (m *Medium) Saving() error {
+	// Call the DefaultModel Saving hook
+	if err := m.DefaultModel.Saving(); err != nil {
+		return err
+	}
+
+	if m.Paths == nil {
+		m.Paths = []*Path{}
+	}
+	for _, p := range m.Paths {
+		if p.Id.IsZero() {
+			p.Id = primitive.NewObjectID()
+		}
+		if p.UpdatedAt.IsZero() {
+			p.UpdatedAt = time.Now()
+		}
+	}
+
+	return nil
+}
+
 func (t *Release) Updated(ctx context.Context, result *mongo.UpdateResult) error {
 	return app.Events.Send("tower.index.releases", t)
 }

@@ -126,6 +126,20 @@ func exists(path string) bool {
 	}
 }
 
+func fileType(file string) string {
+	ext := filepath.Ext(file)
+	if ext == "" {
+		return ""
+	}
+	if lo.Contains(app.Config.ExtensionsVideo, ext[1:]) {
+		return "video"
+	}
+	if lo.Contains(app.Config.ExtensionsSubtitles, ext[1:]) {
+		return "subtitle"
+	}
+	return ""
+}
+
 func pathParts(path string) (string, string, string, string, error) {
 	path = strings.Replace(path, app.Config.DirectoriesCompleted+"/", "", 1)
 	parts := strings.Split(path, "/")

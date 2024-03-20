@@ -38,7 +38,7 @@ func (c *Connector) MediumByFile(f *File) (*Medium, error) {
 	}
 }
 func (c *Connector) MediumBy(kind, name, file, ext string) (*Medium, bool, error) {
-	if list, err := c.Medium.Query().Where("paths.local", fmt.Sprintf("%s/%s/%s", kind, name, file)).Run(); err != nil {
+	if list, err := c.Medium.Query().Where("paths.local", fmt.Sprintf("%s/%s/%s", kind, name, file)).Where("paths.extension", ext).Run(); err != nil {
 		return nil, false, err
 	} else if len(list) > 0 {
 		return list[0], true, nil

@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/samber/lo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/minion"
 )
@@ -130,8 +130,9 @@ func (j *FileMatchDir) Work(ctx context.Context, job *minion.Job[*FileMatchDir])
 			return nil
 		}
 
-		ext := filepath.Ext(path)
-		if ext == "" || !lo.Contains(app.Config.ExtensionsVideo, ext[1:]) {
+		filetype := fileType(path)
+		if filetype == "" {
+			l.Warnf("path: unknown type: %s", path)
 			return nil
 		}
 
@@ -155,7 +156,7 @@ func (j *FileMatchDir) Work(ctx context.Context, job *minion.Job[*FileMatchDir])
 			return nil
 		}
 
-		m.Paths = append(m.Paths, &Path{Type: "video", Local: local, Extension: ext})
+		m.Paths = append(m.Paths, &Path{Type: primitive.Symbol(filetype), Local: local, Extension: ext})
 		if err := app.DB.Medium.Save(m); err != nil {
 			l.Errorw("save", "error", err)
 			return fmt.Errorf("saving: %w", err)
