@@ -60,74 +60,112 @@ func (j *FileMatch) Timeout(job *minion.Job[*FileMatch]) time.Duration {
 func (j *FileMatch) Work(ctx context.Context, job *minion.Job[*FileMatch]) error {
 	l := app.Log.Named("files.match")
 
-	start := time.Now()
-	found := 0
-	missing := 0
-	existing := 0
-	defer func() {
-		l.Debugf("duration: %d, found: %d, existing: %d, missing: %d", time.Since(start), found, existing, missing)
-	}()
-
 	for _, kind := range KINDS {
 		dir := filepath.Join(app.Config.DirectoriesCompleted, kind)
-		l.Infof("walking: %s", dir)
-		err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
-			if err != nil {
-				l.Errorw("walk", "error", err)
-				return fmt.Errorf("walking: %w", err)
-			}
+		if err := app.Workers.Enqueue(&FileMatchDir{Dir: dir}); err != nil {
+			l.Errorw("enqueue", "error", err)
+			return fmt.Errorf("enqueue: %w", err)
+		}
+	}
 
-			if d.IsDir() {
-				return nil
-			}
+	return nil
+}
 
-			if filepath.Base(path)[0] == '.' {
-				return nil
-			}
+type FileMatchMedium struct {
+	minion.WorkerDefaults[*FileMatchMedium]
+	ID string
+}
 
-			ext := filepath.Ext(path)
-			if ext == "" || !lo.Contains(app.Config.ExtensionsVideo, ext[1:]) {
-				return nil
-			}
+func (j *FileMatchMedium) Kind() string { return "file_match_medium" }
+func (j *FileMatchMedium) Timeout(job *minion.Job[*FileMatchMedium]) time.Duration {
+	return 60 * time.Minute
+}
+func (j *FileMatchMedium) Work(ctx context.Context, job *minion.Job[*FileMatchMedium]) error {
+	l := app.Log.Named("files.match.medium")
 
-			kind, name, file, ext, err := pathParts(path)
-			if err != nil {
-				l.Errorw("parts", "error", err)
-				return nil
-			}
-			local := fmt.Sprintf("%s/%s/%s", kind, name, file)
+	m := &Medium{}
+	if err := app.DB.Medium.Find(job.Args.ID, m); err != nil {
+		l.Errorw("find", "error", err)
+		return fmt.Errorf("finding: %w", err)
+	}
 
-			m, ok, err := app.DB.MediumBy(kind, name, file, ext)
-			if err != nil {
-				l.Errorw("medium", "error", err)
-				return nil
-			}
-			if ok {
-				existing += 1
-				return nil
-			}
-			if m == nil {
-				missing += 1
-				l.Warnw("medium", "not found", local)
-				return nil
-			}
+	dest := m.Destination()
+	dir := filepath.Join(app.Config.DirectoriesCompleted, dest)
+	if err := app.Workers.Enqueue(&FileMatchDir{Dir: dir}); err != nil {
+		l.Errorw("enqueue", "error", err)
+		return fmt.Errorf("enqueue: %w", err)
+	}
 
-			// l.Warnw("found", "path", path)
-			found += 1
+	return nil
+}
 
-			m.Paths = append(m.Paths, &Path{Type: "video", Local: local, Extension: ext})
-			if err := app.DB.Medium.Save(m); err != nil {
-				l.Errorw("save", "error", err)
-				return fmt.Errorf("saving: %w", err)
-			}
+type FileMatchDir struct {
+	minion.WorkerDefaults[*FileMatchDir]
+	Dir string
+}
 
-			return nil
-		})
+func (j *FileMatchDir) Kind() string { return "file_match_dir" }
+func (j *FileMatchDir) Timeout(job *minion.Job[*FileMatchDir]) time.Duration {
+	return 60 * time.Minute
+}
+func (j *FileMatchDir) Work(ctx context.Context, job *minion.Job[*FileMatchDir]) error {
+	dir := job.Args.Dir
+	l := app.Log.Named("files.match.dir").With("dir", dir)
+	l.Debugf("running")
+
+	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			l.Errorw("walk", "error", err)
 			return fmt.Errorf("walking: %w", err)
 		}
-	}
 
+		if d.IsDir() {
+			if path != dir {
+				return app.Workers.Enqueue(&FileMatchDir{Dir: path})
+			}
+			return nil
+		}
+
+		if filepath.Base(path)[0] == '.' {
+			return nil
+		}
+
+		ext := filepath.Ext(path)
+		if ext == "" || !lo.Contains(app.Config.ExtensionsVideo, ext[1:]) {
+			return nil
+		}
+
+		kind, name, file, ext, err := pathParts(path)
+		if err != nil {
+			l.Errorw("parts", "error", err)
+			return nil
+		}
+		local := fmt.Sprintf("%s/%s/%s", kind, name, file)
+
+		m, ok, err := app.DB.MediumBy(kind, name, file, ext)
+		if err != nil {
+			l.Errorw("medium", "error", err)
+			return nil
+		}
+		if ok {
+			return nil
+		}
+		if m == nil {
+			l.Warnw("medium", "not found", local)
+			return nil
+		}
+
+		m.Paths = append(m.Paths, &Path{Type: "video", Local: local, Extension: ext})
+		if err := app.DB.Medium.Save(m); err != nil {
+			l.Errorw("save", "error", err)
+			return fmt.Errorf("saving: %w", err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		l.Errorw("walk", "error", err)
+		return fmt.Errorf("walking: %w", err)
+	}
 	return nil
 }

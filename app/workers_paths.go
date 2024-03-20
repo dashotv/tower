@@ -114,6 +114,28 @@ func (j *PathCleanup) Work(ctx context.Context, job *minion.Job[*PathCleanup]) e
 		return errors.Wrap(err, "save medium")
 	}
 
+	if m.Type == "Series" {
+		q := app.DB.Episode.Query().Where("series_id", m.ID)
+
+		count, err := q.Count()
+		if err != nil {
+			return errors.Wrap(err, "count episodes")
+		}
+
+		for skip := 0; skip < int(count); skip += 100 {
+			eps, err := q.Limit(100).Skip(skip).Run()
+			if err != nil {
+				return errors.Wrap(err, "find episodes")
+			}
+
+			for _, e := range eps {
+				if err := app.Workers.Enqueue(&MediaPaths{ID: e.ID.Hex()}); err != nil {
+					return errors.Wrap(err, "enqueue media paths")
+				}
+			}
+		}
+	}
+
 	return nil
 }
 

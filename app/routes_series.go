@@ -345,3 +345,24 @@ func (a *Application) SeriesBackgrounds(c echo.Context, id string) error {
 
 	return c.JSON(http.StatusOK, gin.H{"error": false, "backgrounds": resp})
 }
+
+func seriesJob(name string, id string) error {
+	switch name {
+	case "refresh":
+		return app.Workers.Enqueue(&TvdbUpdateSeries{ID: id})
+	case "paths":
+		return app.Workers.Enqueue(&PathCleanup{ID: id})
+	case "files":
+		return app.Workers.Enqueue(&FileMatchMedium{ID: id})
+	default:
+		return fmt.Errorf("unknown job: %s", name)
+	}
+}
+
+func (a *Application) SeriesJobs(c echo.Context, id string, name string) error {
+	if err := seriesJob(name, id); err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, gin.H{"error": false})
+}

@@ -1,0 +1,4 @@
+name: file_match_dir
+fields:
+  - name: dir
+    type: string

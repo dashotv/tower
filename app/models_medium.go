@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -9,6 +10,10 @@ import (
 
 var regexPathTv = regexp.MustCompile(`(?i)(?P<season>\d+)x(?P<episode>\d+)`)
 var regexPathAnime = regexp.MustCompile(`(?i)(?P<season>\d+)x(?P<episode>\d+)(?:\s+#(?P<absolute>\d+))*`)
+
+func (m *Medium) Destination() string {
+	return filepath.Join(string(m.Kind), m.Directory)
+}
 
 func (c *Connector) MediumByFile(f *File) (*Medium, error) {
 	kind, name, file := f.Parts()

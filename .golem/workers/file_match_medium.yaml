@@ -1,0 +1,4 @@
+name: file_match_medium
+fields:
+  - name: id
+    type: string

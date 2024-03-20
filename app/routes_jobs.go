@@ -32,7 +32,7 @@ func (a *Application) JobsIndex(c echo.Context, page int, limit int) error {
 		return err
 	}
 
-	list, err := q.Skip(skip).Limit(limit).Desc("created_at").Run()
+	list, err := q.Skip(skip).Limit(limit).Desc("updated_at").Run()
 	if err != nil {
 		return err
 	}

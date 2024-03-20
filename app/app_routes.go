@@ -200,6 +200,7 @@ func (a *Application) Routes() {
 	series.GET("/:id/watches", a.SeriesWatchesHandler)
 	series.GET("/:id/covers", a.SeriesCoversHandler)
 	series.GET("/:id/backgrounds", a.SeriesBackgroundsHandler)
+	series.POST("/:id/jobs", a.SeriesJobsHandler)
 
 	upcoming := a.Router.Group("/upcoming")
 	upcoming.GET("/", a.UpcomingIndexHandler)
@@ -608,6 +609,11 @@ func (a *Application) SeriesCoversHandler(c echo.Context) error {
 func (a *Application) SeriesBackgroundsHandler(c echo.Context) error {
 	id := c.Param("id")
 	return a.SeriesBackgrounds(c, id)
+}
+func (a *Application) SeriesJobsHandler(c echo.Context) error {
+	id := c.Param("id")
+	name := QueryString(c, "name")
+	return a.SeriesJobs(c, id, name)
 }
 
 // Upcoming (/upcoming)

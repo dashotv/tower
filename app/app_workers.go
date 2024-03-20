@@ -107,6 +107,14 @@ func setupWorkers(app *Application) error {
 		return errors.Wrap(err, "scheduling worker: file_match (FileMatch)")
 	}
 
+	if err := minion.Register[*FileMatchDir](m, &FileMatchDir{}); err != nil {
+		return errors.Wrap(err, "registering worker: file_match_dir (FileMatchDir)")
+	}
+
+	if err := minion.Register[*FileMatchMedium](m, &FileMatchMedium{}); err != nil {
+		return errors.Wrap(err, "registering worker: file_match_medium (FileMatchMedium)")
+	}
+
 	if err := minion.RegisterWithQueue[*FileWalk](m, &FileWalk{}, "paths"); err != nil {
 		return errors.Wrap(err, "registering worker: file_walk (FileWalk)")
 	}
