@@ -156,6 +156,7 @@ func (j *FileMatchDir) Work(ctx context.Context, job *minion.Job[*FileMatchDir])
 			return nil
 		}
 
+		m.Completed = true
 		m.Paths = append(m.Paths, &Path{Type: primitive.Symbol(filetype), Local: local, Extension: ext})
 		if err := app.DB.Medium.Save(m); err != nil {
 			l.Errorw("save", "error", err)
