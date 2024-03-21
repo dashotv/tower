@@ -21,7 +21,7 @@ type TvdbUpdateSeriesEpisodes struct {
 
 func (j *TvdbUpdateSeriesEpisodes) Kind() string { return "TvdbUpdateSeriesEpisodes" }
 func (j *TvdbUpdateSeriesEpisodes) Work(ctx context.Context, job *minion.Job[*TvdbUpdateSeriesEpisodes]) error {
-	log := app.Log.Named("TvdbUpdateSeriesEpisodes")
+	// log := app.Log.Named("TvdbUpdateSeriesEpisodes")
 	// app.Log.Info("updating series episodes")
 
 	id := job.Args.ID
@@ -91,8 +91,8 @@ func (j *TvdbUpdateSeriesEpisodes) Work(ctx context.Context, job *minion.Job[*Tv
 				if tvdb.StringValue(ee.Type.Type) == "absolute" {
 					n := int(tvdb.Int64Value(resp.Data.Number))
 					if episode.SeasonNumber == 1 || n != episode.EpisodeNumber {
-						log.Debugf("updating absolute number %d -> %d", episode.AbsoluteNumber, n)
-						episode.AbsoluteNumber = int(tvdb.Int64Value(resp.Data.Number))
+						// log.Debugf("updating absolute number %d -> %d", episode.AbsoluteNumber, n)
+						episode.AbsoluteNumber = n
 					}
 					break
 				}
