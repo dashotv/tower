@@ -33,7 +33,7 @@ func destinationEpisode(m *Medium) (string, error) {
 
 	out := ""
 
-	if s.Kind == "anime" && m.AbsoluteNumber > 0 {
+	if isAnimeKind(string(s.Kind)) && m.AbsoluteNumber > 0 {
 		out = fmt.Sprintf("%s/%s/%s - %02dx%02d #%03d", s.Kind, s.Directory, s.Directory, m.SeasonNumber, m.EpisodeNumber, m.AbsoluteNumber)
 	} else {
 		out = fmt.Sprintf("%s/%s/%s - %02dx%02d", s.Kind, s.Directory, s.Directory, m.SeasonNumber, m.EpisodeNumber)

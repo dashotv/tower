@@ -128,7 +128,7 @@ func (c *Connector) processEpisode(e *Episode) error {
 }
 
 func (c *Connector) processSeriesEpisode(s *Series, e *Episode) {
-	if s.Kind == "anime" {
+	if isAnimeKind(string(s.Kind)) {
 		e.Display = fmt.Sprintf("#%d %s", e.AbsoluteNumber, e.Title)
 	} else {
 		e.Display = fmt.Sprintf("%02dx%02d %s", e.SeasonNumber, e.EpisodeNumber, e.Title)

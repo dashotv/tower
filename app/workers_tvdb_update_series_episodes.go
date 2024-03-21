@@ -79,7 +79,7 @@ func (j *TvdbUpdateSeriesEpisodes) Work(ctx context.Context, job *minion.Job[*Tv
 			episode.ReleaseDate = time.Unix(0, 0)
 		}
 
-		if series.Kind == "anime" {
+		if isAnimeKind(string(series.Kind)) {
 			resp, err := app.Tvdb.GetEpisodeExtended(tvdb.Int64Value(e.ID), nil)
 			if err != nil {
 				return errors.Wrap(err, "getting episodes")

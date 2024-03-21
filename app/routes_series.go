@@ -104,7 +104,7 @@ func (a *Application) SeriesCreate(c echo.Context) error {
 		SearchParams: &SearchParams{Resolution: 1080, Verified: true, Type: "tv"},
 	}
 
-	if r.Kind == "anime" || r.Kind == "ecchi" || r.Kind == "donghua" {
+	if isAnimeKind(string(r.Kind)) {
 		s.SearchParams.Type = "anime"
 	}
 

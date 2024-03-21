@@ -17,6 +17,10 @@ import (
 	"github.com/samber/lo"
 )
 
+func isAnimeKind(kind string) bool {
+	return lo.Contains([]string{"anime", "donghua", "ecchi"}, kind)
+}
+
 // QueryString retrieves a string param from the gin request querystring
 func QueryString(c echo.Context, name string) string {
 	return c.QueryParam(name)

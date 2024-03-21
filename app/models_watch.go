@@ -71,7 +71,7 @@ func (c *Connector) Watches(mediumId, username string) ([]*Watch, error) {
 				return nil, err
 			}
 
-			if s.Kind == "anime" {
+			if isAnimeKind(string(s.Kind)) {
 				m.Display = fmt.Sprintf("%02dx%02d #%03d %s", m.SeasonNumber, m.EpisodeNumber, m.AbsoluteNumber, m.Title)
 			} else {
 				m.Display = fmt.Sprintf("%02dx%02d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)

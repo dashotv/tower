@@ -139,7 +139,7 @@ func (c *Connector) processDownloads(list []*Download) {
 			}
 			m.Unwatched = unwatched
 
-			if s.Kind == "anime" {
+			if isAnimeKind(string(s.Kind)) {
 				m.Display = fmt.Sprintf("#%d %s", m.AbsoluteNumber, m.Title)
 			} else {
 				m.Display = fmt.Sprintf("%02dx%02d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)
