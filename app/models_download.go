@@ -9,6 +9,7 @@ import (
 )
 
 var nzbgeekRegex = regexp.MustCompile("^https://api.nzbgeek")
+var metubeRegex = regexp.MustCompile("^metube://")
 var activeStates = []string{"searching", "loading", "managing", "downloading", "reviewing", "paused"}
 
 func (c *Connector) DownloadGet(id string) (*Download, error) {
@@ -47,6 +48,19 @@ func (d *Download) IsNzb() bool {
 	}
 
 	if nzbgeekRegex.MatchString(url) {
+		return true
+	}
+
+	return false
+}
+
+func (d *Download) IsMetube() bool {
+	url, err := d.GetURL()
+	if err != nil {
+		return false
+	}
+
+	if metubeRegex.MatchString(url) {
 		return true
 	}
 

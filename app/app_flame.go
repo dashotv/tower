@@ -8,6 +8,7 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
 
+	"github.com/dashotv/flame/metube"
 	"github.com/dashotv/flame/qbt"
 )
 
@@ -85,7 +86,7 @@ type flameTorrentAddResponse struct {
 	Infohash string `json:"infohash"`
 }
 
-func (c *Flame) LoadTorrent(d *Download, url string) (string, error) {
+func (c *Flame) LoadTorrent(_ *Download, url string) (string, error) {
 	enc := base64.StdEncoding.EncodeToString([]byte(url))
 	res := &flameTorrentAddResponse{}
 	resp, err := c.c.R().
@@ -118,4 +119,47 @@ func (c *Flame) RemoveTorrent(thash string) error {
 
 	app.Log.Debugf("Flame::RemoveTorrent: %s", resp.Body())
 	return nil
+}
+
+type MetubeAddResponse struct {
+	Error   bool   `json:"error"`
+	Message string `json:"message"`
+}
+
+func (c *Flame) LoadMetube(name string, url string) error {
+	app.Log.Named("flame").Debugf("LoadMetube: %s %s", name, url)
+	enc := base64.StdEncoding.EncodeToString([]byte(url))
+	res := &MetubeAddResponse{}
+	resp, err := c.c.R().
+		SetQueryParam("url", enc).
+		SetQueryParam("name", name).
+		SetResult(res).
+		Get("/metube/add")
+	if err != nil {
+		return errors.Wrap(err, "failed to load metube")
+	}
+	if resp.IsError() {
+		return errors.Errorf("failed to load metube: %s", resp.Status())
+	}
+	if res.Error {
+		return errors.Errorf("failed to load metube: %s", res.Message)
+	}
+
+	return nil
+}
+
+func (c *Flame) MetubeHistory() (*metube.HistoryResponse, error) {
+	res := &metube.HistoryResponse{}
+	resp, err := c.c.R().
+		SetResult(res).
+		SetHeader("Accept", "application/json").
+		Get("/metube/")
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to load torrent")
+	}
+	if resp.IsError() {
+		return nil, errors.Errorf("failed to load torrent: %s", resp.Status())
+	}
+
+	return res, nil
 }

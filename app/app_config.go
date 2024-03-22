@@ -37,6 +37,8 @@ type Config struct {
 	DirectoriesImages     string   `env:"DIRECTORIES_IMAGES"`
 	DirectoriesIncoming   string   `env:"DIRECTORIES_INCOMING"`
 	DirectoriesCompleted  string   `env:"DIRECTORIES_COMPLETED"`
+	DirectoriesNzbget     string   `env:"DIRECTORIES_NZBGET"`
+	DirectoriesMetube     string   `env:"DIRECTORIES_METUBE"`
 	FanartApiKey          string   `env:"FANART_API_KEY"`
 	FanartApiURL          string   `env:"FANART_API_URL"`
 	TmdbToken             string   `env:"TMDB_TOKEN"`

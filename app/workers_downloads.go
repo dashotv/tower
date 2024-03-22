@@ -3,11 +3,13 @@ package app
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/minion"
 )
@@ -161,6 +163,15 @@ func (j *DownloadsProcess) Load() error {
 			}
 			d.Status = "downloading"
 			d.Thash = id
+		} else if metubeRegex.MatchString(url) {
+			app.Log.Named("downloads").Debugf("loading metube: %s", url)
+			url = strings.Replace(url, "metube://", "", 1)
+			err := app.Flame.LoadMetube(d.ID.Hex(), url)
+			if err != nil {
+				return fmt.Errorf("failed to load metube: %w", err)
+			}
+			d.Status = "downloading"
+			d.Thash = "M"
 		} else {
 			thash, err := app.Flame.LoadTorrent(d, url)
 			if err != nil {
@@ -187,6 +198,9 @@ func (j *DownloadsProcess) Manage() error {
 
 	for _, d := range list {
 		if d.Thash == "" {
+			continue
+		}
+		if d.Thash == "M" {
 			continue
 		}
 
@@ -242,6 +256,7 @@ func (j *DownloadsProcess) Manage() error {
 }
 
 func (j *DownloadsProcess) Move() error {
+	l := app.Log.Named("downloads.move")
 	list, err := app.DB.DownloadByStatus("downloading")
 	if err != nil {
 		return errors.Wrap(err, "failed to get downloads")
@@ -257,10 +272,14 @@ func (j *DownloadsProcess) Move() error {
 		if d.IsNzb() {
 			continue
 		}
+		if d.IsMetube() {
+			j.MetubeMove(d)
+			continue
+		}
 
 		t, err := app.Flame.Torrent(d.Thash)
 		if err != nil {
-			app.Log.Named("downloads.manage").Errorf("failed to get torrent: %s", err)
+			l.Errorf("failed to get torrent: %s", err)
 			continue
 		}
 
@@ -295,11 +314,11 @@ func (j *DownloadsProcess) Move() error {
 		file := strings.ToLower(fmt.Sprintf("%s.%s", dest, ext))
 		destination := fmt.Sprintf("%s/%s", app.Config.DirectoriesCompleted, file)
 
-		app.Workers.Log.Debugf("mover: %s", source)
-		app.Workers.Log.Debugf("    -> %s", destination)
+		l.Debugf("mover: %s", source)
+		l.Debugf("    -> %s", destination)
 
 		if !app.Config.Production {
-			app.Workers.Log.Debugf("skipping move in dev mode")
+			l.Debugf("skipping move in dev mode")
 			continue
 		}
 
@@ -316,7 +335,7 @@ func (j *DownloadsProcess) Move() error {
 				return errors.Wrap(err, "failed to sum files")
 			}
 			if match {
-				app.Workers.Log.Debugf("destination exists, checksums match")
+				l.Debugf("destination exists, checksums match")
 				notifier.Log.Info("Downloads::FileMover", fmt.Sprintf("destination exists, checksums match: %s %s", d.Medium.Title, d.Medium.Display))
 				return nil
 			}
@@ -326,12 +345,13 @@ func (j *DownloadsProcess) Move() error {
 			return errors.Wrap(err, "copy")
 		}
 
-		err = app.DB.EpisodeSetting(d.MediumId.Hex(), "completed", true)
-		if err != nil {
-			return errors.Wrap(err, "failed to save episode")
+		d.Status = "done"
+
+		// update medium and add path
+		if err := updateMedium(d.Medium.ID.Hex(), dest, ext); err != nil {
+			d.Status = "reviewing"
 		}
 
-		d.Status = "done"
 		err = app.DB.Download.Save(d)
 		if err != nil {
 			return errors.Wrap(err, "failed to save download")
@@ -343,6 +363,130 @@ func (j *DownloadsProcess) Move() error {
 
 		moved = append(moved, destination)
 		notifier.Success("Downloads::Completed", fmt.Sprintf("%s %s", d.Medium.Title, d.Medium.Display))
+	}
+
+	if len(moved) > 0 {
+		dirs := lo.Map(moved, func(s string, i int) string {
+			return filepath.Dir(s)
+		})
+		dirs = lo.Uniq(dirs)
+
+		for _, dir := range dirs {
+			err := app.Plex.RefreshLibraryPath(dir)
+			if err != nil {
+				return errors.Wrap(err, "failed to refresh library")
+			}
+		}
+	}
+
+	return nil
+}
+
+func updateMedium(id, dest, ext string) error {
+	m, err := app.DB.Medium.Get(id, &Medium{})
+	if err != nil {
+		return fmt.Errorf("get medium: %w", err)
+	}
+
+	m.Completed = true
+	m.Paths = append(m.Paths, &Path{
+		Local:     dest,
+		Extension: ext[1:],
+		Type:      primitive.Symbol(fileType(fmt.Sprintf("%s.%s", dest, ext[1:]))),
+	})
+	err = app.DB.Medium.Update(m)
+	if err != nil {
+		return fmt.Errorf("update medium: %s", err)
+	}
+	// enqueue path import
+	path, ok := lo.Find(m.Paths, func(p *Path) bool {
+		return p.Local == dest
+	})
+	if ok && path != nil {
+		if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: path.Id.Hex(), Title: path.Local}); err != nil {
+			return fmt.Errorf("enqueue path: %s", err)
+		}
+	}
+
+	return nil
+}
+
+func (j *DownloadsProcess) MetubeMove(download *Download) error {
+	l := app.Log.Named("downloads.metube")
+	files := []string{}
+	moved := []string{}
+
+	if download.Medium == nil || download.Medium.Type != "Episode" {
+		return errors.New("invalid medium")
+	}
+
+	err := filepath.WalkDir(app.Config.DirectoriesMetube, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		if strings.Contains(path, download.ID.Hex()) {
+			files = append(files, path)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("walk: %w", err)
+	}
+
+	files = lo.Filter(files, func(s string, i int) bool {
+		return shouldDownloadFile(s)
+	})
+
+	if len(files) == 0 {
+		return nil
+	}
+
+	for _, f := range files {
+		ext := filepath.Ext(f)
+
+		dest, err := Destination(download.Medium)
+		if err != nil {
+			return fmt.Errorf("destination: %w", err)
+		}
+
+		destination := fmt.Sprintf("%s/%s.%s", app.Config.DirectoriesCompleted, dest, ext[1:])
+		l.Debugf("move:  %s", filepath.Base(f))
+		l.Debugf("    -> %s", destination)
+
+		if exists(destination) && !download.Force {
+			return errors.New("exists, force false")
+		}
+
+		if !app.Config.Production {
+			l.Debugf("dev mode")
+			continue
+		}
+
+		if err := FileLink(f, destination, download.Force); err != nil {
+			l.Errorf("copy: %s", err)
+			return fmt.Errorf("copy: %w", err)
+		}
+
+		download.Status = "done"
+
+		// update medium and add path
+		if err := updateMedium(download.Medium.ID.Hex(), dest, ext); err != nil {
+			download.Status = "reviewing"
+		}
+
+		err = app.DB.Download.Save(download)
+		if err != nil {
+			return errors.Wrap(err, "failed to save download")
+		}
+
+		moved = append(moved, destination)
+		notifier.Success("Downloads::Completed", fmt.Sprintf("%s %s", download.Medium.Title, download.Medium.Display))
 	}
 
 	if len(moved) > 0 {
