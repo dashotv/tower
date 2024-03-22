@@ -1,2 +1,2 @@
 name: series_update_all
-# schedule: "0 0 10 * * 0" # Sunday at 10am UTC / 2am PST
+schedule: "0 0 10 * * 0" # Sunday at 10am UTC / 2am PST
