@@ -22,6 +22,7 @@ func (i *Importer) loadSeries(id int64) (*Series, error) {
 		series.Description = tvdb.StringValue(translated.Data.Overview)
 	}
 
+	series.ID = id
 	return series, nil
 }
 

@@ -10,6 +10,7 @@ import (
 
 	"github.com/dashotv/minion"
 	"github.com/dashotv/tmdb"
+	"github.com/dashotv/tower/internal/importer"
 	"github.com/dashotv/tower/internal/plex"
 	"github.com/dashotv/tvdb"
 )
@@ -49,12 +50,13 @@ type Application struct {
 
 	//golem:template:app/app_partial_definitions
 
-	Fanart *Fanart
-	Flame  *Flame
-	Scry   *Scry
-	Plex   *plex.Client
-	Tmdb   *tmdb.Client
-	Tvdb   *tvdb.Client
+	Fanart   *Fanart
+	Flame    *Flame
+	Scry     *Scry
+	Plex     *plex.Client
+	Tmdb     *tmdb.Client
+	Tvdb     *tvdb.Client
+	Importer *importer.Importer
 }
 
 func Setup() error {

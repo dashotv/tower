@@ -5,6 +5,8 @@ import (
 )
 
 var workersList = map[string]minion.Payload{
+	"DownloadsProcess": &DownloadsProcess{},
+
 	"CleanupLogs":             &CleanupLogs{},
 	"CleanupJobs":             &CleanupJobs{},
 	"CleanPlexPins":           &CleanPlexPins{},
@@ -13,22 +15,16 @@ var workersList = map[string]minion.Payload{
 	"PlexWatchlistUpdates":    &PlexWatchlistUpdates{},
 	"CreateMediaFromRequests": &CreateMediaFromRequests{},
 
-	"TmdbUpdateMovie":      &TmdbUpdateMovie{},
-	"TmdbUpdateMovieImage": &TmdbUpdateMovieImage{},
-	"TmdbUpdateAll":        &TmdbUpdateAll{},
-
-	"TvdbUpdateSeries":         &TvdbUpdateSeries{},
-	"TvdbUpdateSeriesImage":    &TvdbUpdateSeriesImage{},
-	"TvdbUpdateSeriesEpisodes": &TvdbUpdateSeriesEpisodes{},
-
-	"DownloadsProcess": &DownloadsProcess{},
-	"UpdateIndexes":    &UpdateIndexes{},
+	"UpdateIndexes": &UpdateIndexes{},
 	// "DownloadsFileMove":        &DownloadFileMover{},
 
 	"FileWalk":  &FileWalk{},
 	"FileMatch": &FileMatch{},
 
 	"PathCleanupAll": &PathCleanupAll{},
+
+	"SeriesUpdateAll":     &SeriesUpdateAll{},
+	"SeriesUpdateDonghua": &SeriesUpdateKind{SeriesKind: "donghua"},
 }
 
 // This allows you to notify other services as jobs change status.

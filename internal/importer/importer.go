@@ -46,7 +46,7 @@ func (i *Importer) Series(tvdbid int64) (*Series, error) {
 }
 
 func (i *Importer) SeriesEpisodes(tvdbid int64, episodeOrder int) ([]*Episode, error) {
-	return i.loadEpisodes(tvdbid, episodeOrder)
+	return i.loadEpisodes(tvdbid)
 }
 
 func (i *Importer) SeriesImages(tvdbid int64) ([]string, []string, error) {

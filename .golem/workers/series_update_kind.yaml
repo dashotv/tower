@@ -1,0 +1,4 @@
+name: series_update_kind
+fields:
+    - name: series_kind
+      type: string

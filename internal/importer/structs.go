@@ -1,18 +1,16 @@
 package importer
 
 type Series struct {
-	Title        string
-	Description  string
-	Airdate      string
-	Status       string
-	Language     string
-	EpisodeOrder int
-	Episodes     []*Episode
-	Covers       []string
-	Backgrounds  []string
+	ID          int64
+	Title       string
+	Description string
+	Airdate     string
+	Status      string
+	Language    string
 }
 
 type Episode struct {
+	ID          int64
 	Title       string
 	Description string
 	Airdate     string

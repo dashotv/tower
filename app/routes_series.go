@@ -121,7 +121,7 @@ func (a *Application) SeriesCreate(c echo.Context) error {
 		return err
 	}
 
-	if err := app.Workers.Enqueue(&TvdbUpdateSeries{ID: s.ID.Hex()}); err != nil {
+	if err := app.Workers.Enqueue(&SeriesUpdate{ID: s.ID.Hex()}); err != nil {
 		return err
 	}
 
@@ -190,7 +190,7 @@ func (a *Application) SeriesUpdate(c echo.Context, id string) error {
 	if !strings.HasPrefix(data.Cover, "/media-images") {
 		cover := data.GetCover()
 		if cover != nil && cover.Remote != data.Cover {
-			if err := app.Workers.Enqueue(&TvdbUpdateSeriesImage{ID: id, Type: "cover", Path: data.Cover, Ratio: posterRatio}); err != nil {
+			if err := app.Workers.Enqueue(&SeriesImage{ID: id, Type: "cover", Path: data.Cover, Ratio: posterRatio}); err != nil {
 				return err
 			}
 		}
@@ -199,7 +199,7 @@ func (a *Application) SeriesUpdate(c echo.Context, id string) error {
 	if !strings.HasPrefix(data.Background, "/media-images") {
 		background := data.GetBackground()
 		if background != nil && background.Remote != data.Background {
-			if err := app.Workers.Enqueue(&TvdbUpdateSeriesImage{ID: id, Type: "background", Path: data.Background, Ratio: backgroundRatio}); err != nil {
+			if err := app.Workers.Enqueue(&SeriesImage{ID: id, Type: "background", Path: data.Background, Ratio: backgroundRatio}); err != nil {
 				return err
 			}
 		}
@@ -286,7 +286,7 @@ func (a *Application) SeriesWatches(c echo.Context, id string) error {
 }
 
 func (a *Application) SeriesRefresh(c echo.Context, id string) error {
-	if err := app.Workers.Enqueue(&TvdbUpdateSeries{ID: id}); err != nil {
+	if err := app.Workers.Enqueue(&SeriesUpdate{ID: id}); err != nil {
 		return err
 	}
 	return c.JSON(http.StatusOK, gin.H{"error": false})
@@ -349,7 +349,7 @@ func (a *Application) SeriesBackgrounds(c echo.Context, id string) error {
 func seriesJob(name string, id string) error {
 	switch name {
 	case "refresh":
-		return app.Workers.Enqueue(&TvdbUpdateSeries{ID: id})
+		return app.Workers.Enqueue(&SeriesUpdate{ID: id})
 	case "paths":
 		return app.Workers.Enqueue(&PathCleanup{ID: id})
 	case "files":

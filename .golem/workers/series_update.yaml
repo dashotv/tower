@@ -1,0 +1,7 @@
+name: series_update
+queue: series
+fields:
+  - name: id
+    type: string
+  - name: title
+    type: string

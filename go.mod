@@ -14,6 +14,7 @@ require (
 	github.com/dashotv/scry v0.0.0-20231229215934-5ab6a66ca665
 	github.com/dashotv/tmdb v0.2.0
 	github.com/dashotv/tvdb v0.3.0
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/dotenv-org/godotenvvault v0.6.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-cmd/cmd v1.4.2
@@ -61,7 +62,6 @@ require (
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
 	github.com/dashotv/golem v0.11.3 // indirect
 	github.com/dashotv/rift v0.1.2 // indirect
-	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/deepmap/oapi-codegen v1.16.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/ericlagergren/decimal v0.0.0-20240305081647-93d586550569 // indirect

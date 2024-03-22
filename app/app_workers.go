@@ -53,6 +53,7 @@ func setupWorkers(app *Application) error {
 	// are included at the end of this file.
 
 	m.Queue("paths", 3, 3, 0)
+	m.Queue("series", 3, 0, 5)
 
 	if err := minion.RegisterWithQueue[*PathCleanup](m, &PathCleanup{}, "paths"); err != nil {
 		return errors.Wrap(err, "registering worker: PathCleanup (PathCleanup)")
@@ -149,6 +150,22 @@ func setupWorkers(app *Application) error {
 		return errors.Wrap(err, "scheduling worker: plex_watchlist_updates (PlexWatchlistUpdates)")
 	}
 
+	if err := minion.RegisterWithQueue[*SeriesImage](m, &SeriesImage{}, "series"); err != nil {
+		return errors.Wrap(err, "registering worker: series_image (SeriesImage)")
+	}
+
+	if err := minion.RegisterWithQueue[*SeriesUpdate](m, &SeriesUpdate{}, "series"); err != nil {
+		return errors.Wrap(err, "registering worker: series_update (SeriesUpdate)")
+	}
+
+	if err := minion.Register[*SeriesUpdateAll](m, &SeriesUpdateAll{}); err != nil {
+		return errors.Wrap(err, "registering worker: series_update_all (SeriesUpdateAll)")
+	}
+
+	if err := minion.Register[*SeriesUpdateKind](m, &SeriesUpdateKind{}); err != nil {
+		return errors.Wrap(err, "registering worker: series_update_kind (SeriesUpdateKind)")
+	}
+
 	if err := minion.Register[*TmdbUpdateAll](m, &TmdbUpdateAll{}); err != nil {
 		return errors.Wrap(err, "registering worker: tmdb_update_all (TmdbUpdateAll)")
 	}
@@ -159,18 +176,6 @@ func setupWorkers(app *Application) error {
 
 	if err := minion.Register[*TmdbUpdateMovieImage](m, &TmdbUpdateMovieImage{}); err != nil {
 		return errors.Wrap(err, "registering worker: tmdb_update_movie_image (TmdbUpdateMovieImage)")
-	}
-
-	if err := minion.Register[*TvdbUpdateSeries](m, &TvdbUpdateSeries{}); err != nil {
-		return errors.Wrap(err, "registering worker: tvdb_update_series (TvdbUpdateSeries)")
-	}
-
-	if err := minion.Register[*TvdbUpdateSeriesEpisodes](m, &TvdbUpdateSeriesEpisodes{}); err != nil {
-		return errors.Wrap(err, "registering worker: tvdb_update_series_episodes (TvdbUpdateSeriesEpisodes)")
-	}
-
-	if err := minion.Register[*TvdbUpdateSeriesImage](m, &TvdbUpdateSeriesImage{}); err != nil {
-		return errors.Wrap(err, "registering worker: tvdb_update_series_image (TvdbUpdateSeriesImage)")
 	}
 
 	if err := minion.Register[*UpdateIndexes](m, &UpdateIndexes{}); err != nil {

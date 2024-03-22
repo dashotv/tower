@@ -10,6 +10,7 @@ import (
 	"github.com/dashotv/tvdb"
 )
 
+// TODO: errors are non fatal, so probably better just to use wait group
 func (i *Importer) loadSeriesImages(tvdbid int64) ([]string, []string, error) {
 	var covers []string
 	var backgrounds []string

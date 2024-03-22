@@ -1,0 +1,3 @@
+name: series
+concurrency: 3
+interval: 5

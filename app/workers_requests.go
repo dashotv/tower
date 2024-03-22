@@ -77,7 +77,7 @@ func createShowFromRequest(r *Request) error {
 		return errors.Wrap(err, "saving show")
 	}
 
-	if err := app.Workers.Enqueue(&TvdbUpdateSeries{ID: s.ID.Hex()}); err != nil {
+	if err := app.Workers.Enqueue(&SeriesUpdate{ID: s.ID.Hex()}); err != nil {
 		return errors.Wrap(err, "queueing update job")
 	}
 	return nil

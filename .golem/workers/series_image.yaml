@@ -1,10 +1,11 @@
-name: tvdb_update_series_image
+name: series_image
+queue: series
 fields:
-  - name: id
+  - name: ID
     type: string
   - name: type
     type: string
   - name: path
     type: string
   - name: ratio
-    type: float32
+    type: string

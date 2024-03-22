@@ -1,4 +1,0 @@
-name: tvdb_update_series_episodes
-fields:
-  - name: id
-    type: string
