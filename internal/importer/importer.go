@@ -37,12 +37,11 @@ type Importer struct {
 }
 
 func (i *Importer) Series(tvdbid int64) (*Series, error) {
-	s, err := i.loadSeries(tvdbid)
-	if err != nil {
-		return nil, err
-	}
+	return i.loadSeries(tvdbid)
+}
 
-	return s, nil
+func (i *Importer) SeriesUpdated(since int64) ([]int64, error) {
+	return i.loadSeriesUpdated(since)
 }
 
 func (i *Importer) SeriesEpisodes(tvdbid int64, episodeOrder int) ([]*Episode, error) {

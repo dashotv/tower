@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/dashotv/tvdb"
+	"github.com/dashotv/tvdb/openapi/models/operations"
 )
 
 func (i *Importer) loadSeries(id int64) (*Series, error) {
@@ -24,6 +25,23 @@ func (i *Importer) loadSeries(id int64) (*Series, error) {
 
 	series.ID = id
 	return series, nil
+}
+
+func (i *Importer) loadSeriesUpdated(since int64) ([]int64, error) {
+	resp, err := i.Tvdb.Updates(since, operations.ActionUpdate.ToPointer(), tvdb.Int64(1), operations.TypeSeries.ToPointer())
+	if err != nil {
+		return nil, err
+	}
+
+	ints := []int64{}
+	for _, s := range resp.Data {
+		if s.SeriesID == nil {
+			continue
+		}
+		ints = append(ints, tvdb.Int64Value(s.SeriesID))
+	}
+
+	return ints, nil
 }
 
 func (i *Importer) loadSeriesTvdb(id int64) (*Series, error) {

@@ -73,6 +73,32 @@ func (j *SeriesUpdateKind) Work(ctx context.Context, job *minion.Job[*SeriesUpda
 	return nil
 }
 
+type SeriesUpdateRecent struct {
+	minion.WorkerDefaults[*SeriesUpdateRecent]
+}
+
+func (j *SeriesUpdateRecent) Kind() string { return "series_update_recent" }
+func (j *SeriesUpdateRecent) Work(ctx context.Context, job *minion.Job[*SeriesUpdateRecent]) error {
+	ints, err := app.Importer.SeriesUpdated(time.Now().Add(-15 * time.Minute).Unix())
+	if err != nil {
+		return fmt.Errorf("recent: %w", err)
+	}
+
+	for _, id := range ints {
+		list, err := app.DB.Series.Query().Where("source", "tvdb").Where("source_id", fmt.Sprintf("%d", id)).Run()
+		if err != nil {
+			return fmt.Errorf("recent: list: %w", err)
+		}
+		for _, series := range list {
+			if err := app.Workers.Enqueue(&SeriesUpdate{ID: series.ID.Hex(), SkipImages: true, Title: series.Title}); err != nil {
+				return fmt.Errorf("recent: enqueue: %w", err)
+			}
+		}
+	}
+
+	return nil
+}
+
 type SeriesUpdate struct {
 	minion.WorkerDefaults[*SeriesUpdate]
 	ID         string `bson:"id" json:"id"`

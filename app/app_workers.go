@@ -166,6 +166,13 @@ func setupWorkers(app *Application) error {
 		return errors.Wrap(err, "registering worker: series_update_kind (SeriesUpdateKind)")
 	}
 
+	if err := minion.Register[*SeriesUpdateRecent](m, &SeriesUpdateRecent{}); err != nil {
+		return errors.Wrap(err, "registering worker: series_update_recent (SeriesUpdateRecent)")
+	}
+	if _, err := m.Schedule("0 */15 * * * *", &SeriesUpdateRecent{}); err != nil {
+		return errors.Wrap(err, "scheduling worker: series_update_recent (SeriesUpdateRecent)")
+	}
+
 	if err := minion.Register[*TmdbUpdateAll](m, &TmdbUpdateAll{}); err != nil {
 		return errors.Wrap(err, "registering worker: tmdb_update_all (TmdbUpdateAll)")
 	}
