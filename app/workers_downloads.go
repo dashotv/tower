@@ -426,11 +426,13 @@ func (j *DownloadsProcess) MetubeMove(download *Download) error {
 		return h.CustomNamePrefix == download.ID.Hex()
 	})
 	if !ok || done == nil {
-		return fmt.Errorf("metube: not done: %s", download.ID.Hex())
+		l.Debugf("not done: %s", download.ID.Hex())
+		return nil
 	}
 
 	if download.Medium == nil || download.Medium.Type != "Episode" {
-		return errors.New("invalid medium")
+		l.Debugf("not episode: %s", download.ID.Hex())
+		return nil
 	}
 
 	err = filepath.WalkDir(app.Config.DirectoriesMetube, func(path string, d fs.DirEntry, err error) error {

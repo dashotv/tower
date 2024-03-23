@@ -148,9 +148,15 @@ func (c *Flame) LoadMetube(name string, url string) error {
 	return nil
 }
 
+type MetubeHistory struct {
+	Error   bool                    `json:"error"`
+	History *metube.HistoryResponse `json:"history"`
+}
+
 func (c *Flame) MetubeHistory() (*metube.HistoryResponse, error) {
-	res := &metube.HistoryResponse{}
+	res := &MetubeHistory{}
 	resp, err := c.c.R().
+		SetDebug(true).
 		SetResult(res).
 		SetHeader("Accept", "application/json").
 		Get("/metube/")
@@ -160,6 +166,9 @@ func (c *Flame) MetubeHistory() (*metube.HistoryResponse, error) {
 	if resp.IsError() {
 		return nil, errors.Errorf("failed to load torrent: %s", resp.Status())
 	}
+	if res.Error {
+		return nil, errors.New("failed to load metube")
+	}
 
-	return res, nil
+	return res.History, nil
 }
