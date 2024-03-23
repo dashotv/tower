@@ -9,7 +9,7 @@ import (
 func onRunicReleases(a *Application, msg *runic.Release) error {
 	log := a.Log.Named("runic.releases")
 
-	if msg.Size < 100000000 {
+	if msg.Size > 0 && msg.Size < 100000000 {
 		// log.Warnf("skipping: %s %02dx%02d: size %d < 100mb", msg.Title, msg.Season, msg.Episode, msg.Size)
 		return nil
 	}
