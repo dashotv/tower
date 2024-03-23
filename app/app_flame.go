@@ -156,7 +156,6 @@ type MetubeHistory struct {
 func (c *Flame) MetubeHistory() (*metube.HistoryResponse, error) {
 	res := &MetubeHistory{}
 	resp, err := c.c.R().
-		SetDebug(true).
 		SetResult(res).
 		SetHeader("Accept", "application/json").
 		Get("/metube/")
