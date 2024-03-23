@@ -11,6 +11,7 @@ import (
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
+	"github.com/dashotv/flame/metube"
 	"github.com/dashotv/minion"
 )
 
@@ -416,11 +417,23 @@ func (j *DownloadsProcess) MetubeMove(download *Download) error {
 	files := []string{}
 	moved := []string{}
 
+	history, err := app.Flame.MetubeHistory()
+	if err != nil {
+		return fmt.Errorf("history: %w", err)
+	}
+
+	done, ok := lo.Find(history.Done, func(h *metube.Download) bool {
+		return h.CustomNamePrefix == download.ID.Hex()
+	})
+	if !ok || done == nil {
+		return fmt.Errorf("metube: not done: %s", download.ID.Hex())
+	}
+
 	if download.Medium == nil || download.Medium.Type != "Episode" {
 		return errors.New("invalid medium")
 	}
 
-	err := filepath.WalkDir(app.Config.DirectoriesMetube, func(path string, d fs.DirEntry, err error) error {
+	err = filepath.WalkDir(app.Config.DirectoriesMetube, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
