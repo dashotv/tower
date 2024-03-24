@@ -30,12 +30,17 @@ func (i *Importer) loadEpisodes(tvdbid int64) ([]*Episode, error) {
 }
 
 func (i *Importer) loadEpisodesMap(tvdbid int64, episodeOrder int) (map[int64]*Episode, error) {
-	resp, err := i.Tvdb.GetSeriesSeasonEpisodesTranslated(tvdbid, i.Opts.Language, 0, episodeOrderString(episodeOrder))
+	req := tvdb.GetSeriesEpisodesRequest{
+		ID:         tvdbid,
+		Page:       0,
+		SeasonType: episodeOrderString(episodeOrder),
+	}
+	resp, err := i.Tvdb.GetSeriesEpisodes(req)
 	if err != nil {
-		return nil, fmt.Errorf("translated: %w", err)
+		return nil, fmt.Errorf("episodes: %w", err)
 	}
 	if resp.Data == nil {
-		return nil, errors.New("translated: no data")
+		return nil, errors.New("episodes: no data")
 	}
 
 	episodeMap := make(map[int64]*Episode)
@@ -49,6 +54,24 @@ func (i *Importer) loadEpisodesMap(tvdbid int64, episodeOrder int) (map[int64]*E
 			Episode:     int(tvdb.Int64Value(e.Number)),
 		}
 		episodeMap[ep.ID] = ep
+	}
+
+	trans, err := i.Tvdb.GetSeriesSeasonEpisodesTranslated(tvdbid, i.Opts.Language, 0, episodeOrderString(episodeOrder))
+	if err != nil {
+		return nil, fmt.Errorf("translated: %w", err)
+	}
+	if trans.Data == nil {
+		return nil, errors.New("translated: no data")
+	}
+	for _, e := range trans.Data.Episodes {
+		if ep, ok := episodeMap[tvdb.Int64Value(e.ID)]; ok {
+			if e.Name != nil {
+				ep.Title = tvdb.StringValue(e.Name)
+			}
+			if e.Overview != nil {
+				ep.Description = tvdb.StringValue(e.Overview)
+			}
+		}
 	}
 
 	return episodeMap, nil
