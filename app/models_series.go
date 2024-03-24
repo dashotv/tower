@@ -361,42 +361,53 @@ func (c *Connector) SeriesWatches(id string) ([]*Watch, error) {
 }
 
 func (c *Connector) SeriesBySearch(title string) (*Series, error) {
-	q := c.Series.Query().Where("kind", "donghua") // TODO: support all kinds
-	list, err := q.Where("directory", title).Run()
-	if err != nil {
-		return nil, err
-	}
-	if len(list) == 1 {
-		return list[0], nil
+	title = path(title)
+	{
+		list, err := c.Series.Query().Where("kind", "donghua").Where("directory", title).Run()
+		if err != nil {
+			return nil, err
+		}
+		c.Log.Debugf("directory: %s: %d", title, len(list))
+		if len(list) == 1 {
+			return list[0], nil
+		}
 	}
 
-	list, err = q.Where("search", title).Run()
-	if err != nil {
-		return nil, err
-	}
-	if len(list) == 1 {
-		return list[0], nil
+	{
+		list, err := c.Series.Query().Where("kind", "donghua").Where("search", title).Run()
+		if err != nil {
+			return nil, err
+		}
+		c.Log.Debugf("search: %s: %d", title, len(list))
+		if len(list) == 1 {
+			return list[0], nil
+		}
 	}
 
 	return nil, nil
 }
 
 func (c *Connector) SeriesEpisodeBy(s *Series, season, episode int) (*Episode, error) {
-	q := c.Episode.Query().Where("series_id", s.ID).Where("completed", false).Where("downloaded", false).Where("skipped", false)
-	list, err := q.Where("season_number", season).Where("episode_number", episode).Run()
-	if err != nil {
-		return nil, err
-	}
-	if len(list) == 1 {
-		return list[0], nil
+	{
+		list, err := c.Episode.Query().Where("series_id", s.ID).Where("completed", false).Where("downloaded", false).Where("skipped", false).Where("season_number", season).Where("episode_number", episode).Run()
+		if err != nil {
+			return nil, err
+		}
+		c.Log.Debugf("season/episode: %d/%d: %d", season, episode, len(list))
+		if len(list) == 1 {
+			return list[0], nil
+		}
 	}
 
-	list, err = q.Where("absolute_number", episode).Run()
-	if err != nil {
-		return nil, err
-	}
-	if len(list) == 1 {
-		return list[0], nil
+	{
+		list, err := c.Episode.Query().Where("series_id", s.ID).Where("completed", false).Where("downloaded", false).Where("skipped", false).Where("absolute_number", episode).Run()
+		if err != nil {
+			return nil, err
+		}
+		c.Log.Debugf("season/episode (abs): %d/%d: %d", season, episode, len(list))
+		if len(list) == 1 {
+			return list[0], nil
+		}
 	}
 
 	return nil, nil

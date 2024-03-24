@@ -77,7 +77,7 @@ func path(title string) string {
 	s = pathCharRegex.ReplaceAllString(s, " ")
 	s = strings.TrimSpace(s)
 	// fmt.Printf("path: %s\n", s)
-	return s
+	return strings.ToLower(s)
 }
 
 // stolen from gin gonic

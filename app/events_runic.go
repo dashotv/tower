@@ -8,6 +8,7 @@ import (
 
 func onRunicReleases(a *Application, msg *runic.Release) error {
 	log := a.Log.Named("runic.releases")
+	// log.Infof("received: '%s' %02dx%02d", msg.Title, msg.Season, msg.Episode)
 
 	if msg.Size > 0 && msg.Size < 100000000 {
 		// log.Warnf("skipping: %s %02dx%02d: size %d < 100mb", msg.Title, msg.Season, msg.Episode, msg.Size)
@@ -24,7 +25,7 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 	// 	return nil
 	// }
 
-	log.Infof("received: %s %02dx%02d", msg.Title, msg.Season, msg.Episode)
+	log.Infof("series: '%s' %02dx%02d", msg.Title, msg.Season, msg.Episode)
 
 	episode, err := app.DB.SeriesEpisodeBy(series, msg.Season, msg.Episode)
 	if episode == nil {
@@ -32,6 +33,15 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 	}
 
 	log.Warnf("found: %s s%02de%02d", msg.Title, msg.Season, msg.Episode)
+
+	count, err := a.DB.Download.Query().Where("medium_id", episode.ID).Count()
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		log.Warnf("skipping: %s s%02de%02d: download exists", msg.Title, msg.Season, msg.Episode)
+		return nil
+	}
 
 	d := &Download{}
 	d.MediumId = episode.ID
