@@ -367,7 +367,6 @@ func (c *Connector) SeriesBySearch(title string) (*Series, error) {
 		if err != nil {
 			return nil, err
 		}
-		c.Log.Debugf("directory: %s: %d", title, len(list))
 		if len(list) == 1 {
 			return list[0], nil
 		}
@@ -378,7 +377,6 @@ func (c *Connector) SeriesBySearch(title string) (*Series, error) {
 		if err != nil {
 			return nil, err
 		}
-		c.Log.Debugf("search: %s: %d", title, len(list))
 		if len(list) == 1 {
 			return list[0], nil
 		}

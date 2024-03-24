@@ -296,7 +296,7 @@ func (j *DownloadsProcess) Move() error {
 			continue
 		}
 
-		notifier.Info("Downloads::Move", fmt.Sprintf("%s %s", d.Medium.Title, d.Medium.Display))
+		// notifier.Info("Downloads::Move", fmt.Sprintf("%s %s", d.Medium.Title, d.Medium.Display))
 
 		tf := t.Files[0]
 		// df := d.Files[0]
@@ -373,6 +373,7 @@ func (j *DownloadsProcess) Move() error {
 		dirs = lo.Uniq(dirs)
 
 		for _, dir := range dirs {
+			notifier.Log.Info("downloads: refresh: ", dir)
 			err := app.Plex.RefreshLibraryPath(dir)
 			if err != nil {
 				return errors.Wrap(err, "failed to refresh library")
