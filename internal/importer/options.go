@@ -1,6 +1,9 @@
 package importer
 
+import "go.uber.org/zap"
+
 type Options struct {
+	Logger   *zap.SugaredLogger
 	Language string
 
 	TvdbKey string

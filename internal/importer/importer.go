@@ -1,6 +1,8 @@
 package importer
 
 import (
+	"go.uber.org/zap"
+
 	"github.com/dashotv/tmdb"
 	"github.com/dashotv/tower/internal/fanart"
 	"github.com/dashotv/tvdb"
@@ -11,7 +13,13 @@ func New(opts *Options) (*Importer, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	if opts.Logger == nil {
+		log, err := zap.NewProduction()
+		if err != nil {
+			return nil, err
+		}
+		opts.Logger = log.Sugar()
+	}
 	if opts.Language == "" {
 		opts.Language = DefaultOptions.Language
 	}
@@ -20,6 +28,7 @@ func New(opts *Options) (*Importer, error) {
 	}
 
 	i := &Importer{
+		Log:    opts.Logger,
 		Opts:   opts,
 		Tmdb:   tmdb.New(opts.TmdbToken),
 		Tvdb:   c,
@@ -30,6 +39,7 @@ func New(opts *Options) (*Importer, error) {
 }
 
 type Importer struct {
+	Log    *zap.SugaredLogger
 	Opts   *Options
 	Tmdb   *tmdb.Client
 	Tvdb   *tvdb.Client

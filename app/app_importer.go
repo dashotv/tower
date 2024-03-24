@@ -8,6 +8,7 @@ func init() {
 
 func setupImporter(a *Application) error {
 	opts := &importer.Options{
+		Logger:    a.Log.Named("importer"),
 		TvdbKey:   a.Config.TvdbKey,
 		TmdbToken: a.Config.TmdbToken,
 		FanartKey: a.Config.FanartApiKey,

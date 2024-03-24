@@ -4,42 +4,37 @@ import (
 	"errors"
 	"fmt"
 
-	"golang.org/x/sync/errgroup"
+	"github.com/sourcegraph/conc"
 
 	"github.com/dashotv/tmdb"
 	"github.com/dashotv/tvdb"
 )
 
-// TODO: errors are non fatal, so probably better just to use wait group
 func (i *Importer) loadSeriesImages(tvdbid int64) ([]string, []string, error) {
 	var covers []string
 	var backgrounds []string
 
 	tmdbid, err := i.TmdbID(tvdbid)
 	if err != nil {
-		return nil, nil, fmt.Errorf("images: %w", err)
+		i.Log.Warnf("images: %s", err)
 	}
 
-	eg := errgroup.Group{}
-	eg.Go(func() error {
-		var err error
+	wg := conc.NewWaitGroup()
+	wg.Go(func() {
 		covers, err = i.loadSeriesCovers(tvdbid, tmdbid)
 		if err != nil {
-			return fmt.Errorf("covers: %w", err)
+			i.Log.Warnf("covers: %s", err)
 		}
-		return nil
 	})
 
-	eg.Go(func() error {
-		var err error
+	wg.Go(func() {
 		backgrounds, err = i.loadSeriesBackgrounds(tvdbid, tmdbid)
 		if err != nil {
-			return fmt.Errorf("backgrounds: %w", err)
+			i.Log.Warnf("backgrounds: %s", err)
 		}
-		return nil
 	})
 
-	err = eg.Wait()
+	wg.Wait()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -53,38 +48,34 @@ func (i *Importer) loadSeriesCovers(tvdbid int64, tmdbid int) ([]string, error) 
 	fanartCovers := []string{}
 	tmdbCovers := []string{}
 
-	eg := errgroup.Group{}
-	eg.Go(func() error {
+	wg := conc.NewWaitGroup()
+	wg.Go(func() {
 		var err error
 		tvdbCovers, err = i.loadSeriesCoversTvdb(tvdbid)
 		if err != nil {
-			return fmt.Errorf("tvdb: %w", err)
+			i.Log.Warnf("tvdb: %s", err)
 		}
-		return nil
 	})
 
-	eg.Go(func() error {
+	wg.Go(func() {
 		var err error
 		fanartCovers, err = i.loadSeriesCoversFanart(tvdbid)
 		if err != nil {
-			return fmt.Errorf("fanart: %w", err)
+			i.Log.Warnf("fanart: %s", err)
 		}
-		return nil
 	})
 
-	eg.Go(func() error {
-		var err error
-		tmdbCovers, err = i.loadSeriesCoversTmdb(tmdbid)
-		if err != nil {
-			return fmt.Errorf("tmdb: %w", err)
-		}
-		return nil
-	})
-
-	err := eg.Wait()
-	if err != nil {
-		return nil, err
+	if tmdbid != 0 {
+		wg.Go(func() {
+			var err error
+			tmdbCovers, err = i.loadSeriesCoversTmdb(tmdbid)
+			if err != nil {
+				i.Log.Warnf("tmdb: %s", err)
+			}
+		})
 	}
+
+	wg.Wait()
 
 	covers = append(covers, tvdbCovers...)
 	covers = append(covers, fanartCovers...)
@@ -156,38 +147,34 @@ func (i *Importer) loadSeriesBackgrounds(tvdbid int64, tmdbid int) ([]string, er
 	fanartBackgrounds := []string{}
 	tmdbBackgrounds := []string{}
 
-	eg := errgroup.Group{}
-	eg.Go(func() error {
+	wg := conc.NewWaitGroup()
+	wg.Go(func() {
 		var err error
 		tvdbBackgrounds, err = i.loadSeriesBackgroundsTvdb(tvdbid)
 		if err != nil {
-			return fmt.Errorf("tvdb: %w", err)
+			i.Log.Warnf("tvdb: %s", err)
 		}
-		return nil
 	})
 
-	eg.Go(func() error {
+	wg.Go(func() {
 		var err error
 		fanartBackgrounds, err = i.loadSeriesBackgroundsFanart(tvdbid)
 		if err != nil {
-			return fmt.Errorf("fanart: %w", err)
+			i.Log.Warnf("fanart: %s", err)
 		}
-		return nil
 	})
 
-	eg.Go(func() error {
-		var err error
-		tmdbBackgrounds, err = i.loadSeriesBackgroundsTmdb(tmdbid)
-		if err != nil {
-			return fmt.Errorf("tmdb: %w", err)
-		}
-		return nil
-	})
-
-	err := eg.Wait()
-	if err != nil {
-		return nil, err
+	if tmdbid != 0 {
+		wg.Go(func() {
+			var err error
+			tmdbBackgrounds, err = i.loadSeriesBackgroundsTmdb(tmdbid)
+			if err != nil {
+				i.Log.Warnf("tmdb: %s", err)
+			}
+		})
 	}
+
+	wg.Wait()
 
 	backgrounds = append(backgrounds, tvdbBackgrounds...)
 	backgrounds = append(backgrounds, fanartBackgrounds...)
