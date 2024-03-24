@@ -391,7 +391,7 @@ func (c *Connector) SeriesEpisodeBy(s *Series, season, episode int) (*Episode, e
 		if err != nil {
 			return nil, err
 		}
-		c.Log.Debugf("season/episode: %d/%d: %d", season, episode, len(list))
+		// c.Log.Debugf("season/episode: %d/%d: %d", season, episode, len(list))
 		if len(list) == 1 {
 			return list[0], nil
 		}
@@ -402,7 +402,7 @@ func (c *Connector) SeriesEpisodeBy(s *Series, season, episode int) (*Episode, e
 		if err != nil {
 			return nil, err
 		}
-		c.Log.Debugf("season/episode (abs): %d/%d: %d", season, episode, len(list))
+		// c.Log.Debugf("season/episode (abs): %d/%d: %d", season, episode, len(list))
 		if len(list) == 1 {
 			return list[0], nil
 		}
