@@ -3,7 +3,6 @@ module github.com/dashotv/tower
 go 1.21.5
 
 require (
-	github.com/AlexEidt/Vidio v1.5.1
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/dashotv/flame v0.9.0

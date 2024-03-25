@@ -57,15 +57,16 @@ func (j *TmdbUpdateMovie) Work(ctx context.Context, job *minion.Job[*TmdbUpdateM
 	}
 	movie.ReleaseDate = d
 
+	if err := app.Workers.Enqueue(&PathCleanup{ID: id}); err != nil {
+		return errors.Wrap(err, "enqueuing media paths")
+	}
+
 	if !job.Args.JustMedia {
 		if resp.PosterPath != nil {
 			app.Workers.Enqueue(&TmdbUpdateMovieImage{ID: movie.ID.Hex(), Type: "cover", Path: tmdb.StringValue(resp.PosterPath), Ratio: posterRatio})
 		}
 		if resp.BackdropPath != nil {
 			app.Workers.Enqueue(&TmdbUpdateMovieImage{ID: movie.ID.Hex(), Type: "background", Path: tmdb.StringValue(resp.BackdropPath), Ratio: backgroundRatio})
-		}
-		if err := app.Workers.Enqueue(&MediaPaths{ID: id}); err != nil {
-			return errors.Wrap(err, "enqueuing media paths")
 		}
 	}
 

@@ -120,10 +120,6 @@ func setupWorkers(app *Application) error {
 		return errors.Wrap(err, "registering worker: file_walk (FileWalk)")
 	}
 
-	if err := minion.Register[*MediaPaths](m, &MediaPaths{}); err != nil {
-		return errors.Wrap(err, "registering worker: media_paths (MediaPaths)")
-	}
-
 	if err := minion.RegisterWithQueue[*PathImport](m, &PathImport{}, "paths"); err != nil {
 		return errors.Wrap(err, "registering worker: path_import (PathImport)")
 	}
