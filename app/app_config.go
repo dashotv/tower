@@ -50,6 +50,8 @@ type Config struct {
 	ExtensionsVideo       []string `env:"EXTENSIONS_VIDEO" envSeparator:","`
 	ExtensionsAudio       []string `env:"EXTENSIONS_AUDIO" envSeparator:","`
 	ExtensionsSubtitles   []string `env:"EXTENSIONS_SUBTITLES" envSeparator:","`
+
+	ProcessRunicEvents bool `env:"PROCESS_RUNIC_EVENTS" envDefault:"true"`
 	//golem:template:app/config_partial_struct
 	// DO NOT EDIT. This section is managed by github.com/dashotv/golem.
 	// Models (Database)

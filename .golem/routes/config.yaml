@@ -1,0 +1,3 @@
+name: config
+path: /config
+rest: true

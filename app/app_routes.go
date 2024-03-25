@@ -104,6 +104,14 @@ func (a *Application) Routes() {
 	combinations.PATCH("/:id", a.CombinationsSettingsHandler)
 	combinations.DELETE("/:id", a.CombinationsDeleteHandler)
 
+	config := a.Router.Group("/config")
+	config.GET("/", a.ConfigIndexHandler)
+	config.POST("/", a.ConfigCreateHandler)
+	config.GET("/:id", a.ConfigShowHandler)
+	config.PUT("/:id", a.ConfigUpdateHandler)
+	config.PATCH("/:id", a.ConfigSettingsHandler)
+	config.DELETE("/:id", a.ConfigDeleteHandler)
+
 	downloads := a.Router.Group("/downloads")
 	downloads.GET("/", a.DownloadsIndexHandler)
 	downloads.POST("/", a.DownloadsCreateHandler)
@@ -219,6 +227,7 @@ func (a *Application) indexHandler(c echo.Context) error {
 		"routes": H{
 			"collections":  "/collections",
 			"combinations": "/combinations",
+			"config":       "/config",
 			"downloads":    "/downloads",
 			"episodes":     "/episodes",
 			"feeds":        "/feeds",
@@ -295,6 +304,32 @@ func (a *Application) CombinationsSettingsHandler(c echo.Context) error {
 func (a *Application) CombinationsDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
 	return a.CombinationsDelete(c, id)
+}
+
+// Config (/config)
+func (a *Application) ConfigIndexHandler(c echo.Context) error {
+	page := QueryInt(c, "page")
+	limit := QueryInt(c, "limit")
+	return a.ConfigIndex(c, page, limit)
+}
+func (a *Application) ConfigCreateHandler(c echo.Context) error {
+	return a.ConfigCreate(c)
+}
+func (a *Application) ConfigShowHandler(c echo.Context) error {
+	id := c.Param("id")
+	return a.ConfigShow(c, id)
+}
+func (a *Application) ConfigUpdateHandler(c echo.Context) error {
+	id := c.Param("id")
+	return a.ConfigUpdate(c, id)
+}
+func (a *Application) ConfigSettingsHandler(c echo.Context) error {
+	id := c.Param("id")
+	return a.ConfigSettings(c, id)
+}
+func (a *Application) ConfigDeleteHandler(c echo.Context) error {
+	id := c.Param("id")
+	return a.ConfigDelete(c, id)
 }
 
 // Downloads (/downloads)

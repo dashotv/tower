@@ -9,6 +9,10 @@ import (
 func onRunicReleases(a *Application, msg *runic.Release) error {
 	log := a.Log.Named("runic.releases")
 	// log.Infof("received: '%s' %02dx%02d", msg.Title, msg.Season, msg.Episode)
+	if !a.Config.ProcessRunicEvents {
+		// log.Warnf("skipping: runic events disabled")
+		return nil
+	}
 
 	if msg.Size > 0 && msg.Size < 100000000 {
 		// log.Warnf("skipping: %s %02dx%02d: size %d < 100mb", msg.Title, msg.Season, msg.Episode, msg.Size)
