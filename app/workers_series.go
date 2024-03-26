@@ -73,6 +73,16 @@ func (j *SeriesUpdateKind) Work(ctx context.Context, job *minion.Job[*SeriesUpda
 	return nil
 }
 
+type SeriesUpdateDonghua struct {
+	minion.WorkerDefaults[*SeriesUpdateDonghua]
+}
+
+func (j *SeriesUpdateDonghua) Kind() string { return "series_update_donghua" }
+func (j *SeriesUpdateDonghua) Work(ctx context.Context, job *minion.Job[*SeriesUpdateDonghua]) error {
+	//args := job.Args
+	return app.Workers.Enqueue(&SeriesUpdateKind{SeriesKind: "donghua"})
+}
+
 type SeriesUpdateRecent struct {
 	minion.WorkerDefaults[*SeriesUpdateRecent]
 }

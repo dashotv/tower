@@ -1,0 +1,2 @@
+name: series_update_donghua
+schedule: "0 0 7 * * *"
