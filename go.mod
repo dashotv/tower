@@ -1,6 +1,6 @@
 module github.com/dashotv/tower
 
-go 1.21.5
+go 1.22.0
 
 require (
 	github.com/anthonynsimon/bild v0.13.0
