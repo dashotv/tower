@@ -14,10 +14,11 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 		return nil
 	}
 
-	if msg.Size > 0 && msg.Size < 100000000 {
-		// log.Warnf("skipping: %s %02dx%02d: size %d < 100mb", msg.Title, msg.Season, msg.Episode, msg.Size)
-		return nil
-	}
+	// TODO: misreported sizes are casuing issues
+	// if msg.Size > 0 && msg.Size < 100000000 {
+	// 	// log.Warnf("skipping: %s %02dx%02d: size %d < 100mb", msg.Title, msg.Season, msg.Episode, msg.Size)
+	// 	return nil
+	// }
 
 	series, err := a.DB.SeriesBySearch(msg.Title)
 	if series == nil {
