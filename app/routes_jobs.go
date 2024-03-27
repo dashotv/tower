@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 
-	"github.com/dashotv/minion"
+	"github.com/dashotv/minion/database"
 )
 
 func (a *Application) JobsIndex(c echo.Context, page int, limit int) error {
@@ -61,20 +61,20 @@ func (a *Application) JobsCreate(c echo.Context, job string) error {
 }
 
 func (a *Application) JobsDelete(c echo.Context, id string, hard bool) error {
-	if id == string(minion.StatusPending) && !hard {
-		filter := bson.M{"status": minion.StatusPending}
-		if _, err := app.DB.Minion.Collection.UpdateMany(context.Background(), filter, bson.M{"$set": bson.M{"status": minion.StatusCancelled}}); err != nil {
+	if id == string(database.StatusPending) && !hard {
+		filter := bson.M{"status": database.StatusPending}
+		if _, err := app.DB.Minion.Collection.UpdateMany(context.Background(), filter, bson.M{"$set": bson.M{"status": database.StatusCancelled}}); err != nil {
 			return err
 		}
 		return c.JSON(http.StatusOK, H{"error": false})
-	} else if id == string(minion.StatusFailed) && hard {
-		filter := bson.M{"status": minion.StatusFailed}
+	} else if id == string(database.StatusFailed) && hard {
+		filter := bson.M{"status": database.StatusFailed}
 		if _, err := app.DB.Minion.Collection.DeleteMany(context.Background(), filter); err != nil {
 			return err
 		}
 		return c.JSON(http.StatusOK, H{"error": false})
-	} else if id == string(minion.StatusCancelled) && hard {
-		filter := bson.M{"status": minion.StatusCancelled}
+	} else if id == string(database.StatusCancelled) && hard {
+		filter := bson.M{"status": database.StatusCancelled}
 		if _, err := app.DB.Minion.Collection.DeleteMany(context.Background(), filter); err != nil {
 			return err
 		}
@@ -86,7 +86,7 @@ func (a *Application) JobsDelete(c echo.Context, id string, hard bool) error {
 		return err
 	}
 
-	j.Status = string(minion.StatusCancelled)
+	j.Status = string(database.StatusCancelled)
 	if err := app.DB.Minion.Save(j); err != nil {
 		return err
 	}
