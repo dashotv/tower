@@ -126,13 +126,14 @@ type MetubeAddResponse struct {
 	Message string `json:"message"`
 }
 
-func (c *Flame) LoadMetube(name string, url string) error {
-	app.Log.Named("flame").Debugf("LoadMetube: %s %s", name, url)
+func (c *Flame) LoadMetube(name string, url string, autoStart bool) error {
+	app.Log.Named("flame").Debugf("LoadMetube: %s %s %t", name, url, autoStart)
 	enc := base64.StdEncoding.EncodeToString([]byte(url))
 	res := &MetubeAddResponse{}
 	resp, err := c.c.R().
 		SetQueryParam("url", enc).
 		SetQueryParam("name", name).
+		SetQueryParam("auto_start", fmt.Sprintf("%t", autoStart)).
 		SetResult(res).
 		Get("/metube/add")
 	if err != nil {

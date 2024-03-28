@@ -50,7 +50,11 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 
 	d := &Download{}
 	d.MediumId = episode.ID
-	d.Status = "reviewing"
+	if app.Config.Production {
+		d.Status = "loading"
+	} else {
+		d.Status = "reviewing"
+	}
 	d.Url = "metube://" + msg.Download
 
 	if err := a.DB.Download.Save(d); err != nil {

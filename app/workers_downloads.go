@@ -165,9 +165,13 @@ func (j *DownloadsProcess) Load() error {
 			d.Status = "downloading"
 			d.Thash = id
 		} else if metubeRegex.MatchString(url) {
+			autoStart := false
+			if app.Config.Production {
+				autoStart = true
+			}
 			app.Log.Named("downloads").Debugf("loading metube: %s", url)
 			url = strings.Replace(url, "metube://", "", 1)
-			err := app.Flame.LoadMetube(d.ID.Hex(), url)
+			err := app.Flame.LoadMetube(d.ID.Hex(), url, autoStart)
 			if err != nil {
 				return fmt.Errorf("failed to load metube: %w", err)
 			}
