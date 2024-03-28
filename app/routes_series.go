@@ -189,7 +189,7 @@ func (a *Application) SeriesUpdate(c echo.Context, id string) error {
 
 	if !strings.HasPrefix(data.Cover, "/media-images") {
 		cover := data.GetCover()
-		if cover != nil && cover.Remote != data.Cover {
+		if cover == nil || cover.Remote != data.Cover {
 			if err := app.Workers.Enqueue(&SeriesImage{ID: id, Type: "cover", Path: data.Cover, Ratio: posterRatio}); err != nil {
 				return err
 			}
@@ -198,7 +198,7 @@ func (a *Application) SeriesUpdate(c echo.Context, id string) error {
 
 	if !strings.HasPrefix(data.Background, "/media-images") {
 		background := data.GetBackground()
-		if background != nil && background.Remote != data.Background {
+		if background == nil || background.Remote != data.Background {
 			if err := app.Workers.Enqueue(&SeriesImage{ID: id, Type: "background", Path: data.Background, Ratio: backgroundRatio}); err != nil {
 				return err
 			}
