@@ -5,6 +5,7 @@ go 1.22.0
 require (
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/caarlos0/env/v10 v10.0.0
+	github.com/dashotv/fae v0.1.4
 	github.com/dashotv/flame v0.9.1
 	github.com/dashotv/grimoire v0.5.1
 	github.com/dashotv/mercury v0.3.2
@@ -62,7 +63,6 @@ require (
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
-	github.com/dashotv/fae v0.1.4 // indirect
 	github.com/dashotv/rift v0.1.2 // indirect
 	github.com/deepmap/oapi-codegen v1.16.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/pkg/errors"
+	"github.com/dashotv/fae"
 )
 
 type Pin struct {
@@ -20,10 +20,10 @@ func (p *Client) CreatePin() (*Pin, error) {
 	pin := &Pin{}
 	resp, err := p._plextv().SetResult(pin).SetQueryParamsFromValues(p.data).Post("/pins")
 	if err != nil {
-		return nil, fmt.Errorf("failed to make request: %w", err)
+		return nil, fae.Wrap(err, "make request")
 	}
 	if !resp.IsSuccess() {
-		return nil, errors.Errorf("failed to create pin: %s", resp.Status())
+		return nil, fae.Errorf("failed to create pin: %s", resp.Status())
 	}
 	return pin, nil
 }
@@ -39,13 +39,13 @@ func (p *Client) CheckPin(pin *Pin) (bool, error) {
 		SetQueryParamsFromValues(params).
 		Get(fmt.Sprintf("/pins/%d", pin.ID))
 	if err != nil {
-		return false, errors.Wrap(err, "failed to make request")
+		return false, fae.Wrap(err, "failed to make request")
 	}
 	if !resp.IsSuccess() {
-		return false, errors.Errorf("pin not authorized: %s", resp.Status())
+		return false, fae.Errorf("pin not authorized: %s", resp.Status())
 	}
 	if newPin.Token == "" {
-		return false, errors.Errorf("pin not authorized: token is empty")
+		return false, fae.Errorf("pin not authorized: token is empty")
 	}
 
 	pin.Token = newPin.Token
@@ -54,7 +54,7 @@ func (p *Client) CheckPin(pin *Pin) (bool, error) {
 
 	// err = app.DB.Pin.Update(pin)
 	// if err != nil {
-	// 	return false, errors.Wrap(err, "failed to update token")
+	// 	return false, fae.Wrap(err, "failed to update token")
 	// }
 
 	return true, nil

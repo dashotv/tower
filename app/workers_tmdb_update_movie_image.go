@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
 )
 
@@ -30,18 +30,18 @@ func (j *TmdbUpdateMovieImage) Work(ctx context.Context, job *minion.Job[*TmdbUp
 	thumb := fmt.Sprintf("%s/%s_thumb.%s", app.Config.DirectoriesImages, local, extension)
 
 	if err := imageDownload(remote, dest); err != nil {
-		return errors.Wrap(err, "downloading image")
+		return fae.Wrap(err, "downloading image")
 	}
 
 	height := 400
 	width := int(float32(height) * input.Ratio)
 	if err := imageResize(dest, thumb, width, height); err != nil {
-		return errors.Wrap(err, "resizing image")
+		return fae.Wrap(err, "resizing image")
 	}
 
 	movie := &Movie{}
 	if err := app.DB.Movie.Find(input.ID, movie); err != nil {
-		return errors.Wrap(err, "finding movie")
+		return fae.Wrap(err, "finding movie")
 	}
 	app.DB.processMovies([]*Movie{movie})
 
@@ -65,7 +65,7 @@ func (j *TmdbUpdateMovieImage) Work(ctx context.Context, job *minion.Job[*TmdbUp
 	movie.Paths = append(movie.Paths, img)
 
 	if err := app.DB.Movie.Update(movie); err != nil {
-		return errors.Wrap(err, "updating movie")
+		return fae.Wrap(err, "updating movie")
 	}
 
 	return nil

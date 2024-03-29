@@ -9,8 +9,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/labstack/echo/v4"
-	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/dashotv/fae"
 )
 
 const pagesize = 42
@@ -90,7 +91,7 @@ func (a *Application) SeriesCreate(c echo.Context) error {
 	r := &CreateRequest{}
 	c.Bind(r)
 	if r.ID == "" || r.Source == "" {
-		return errors.New("id and source are required")
+		return fae.New("id and source are required")
 	}
 
 	a.Log.Debugf("series create: %+v", r)
@@ -295,20 +296,20 @@ func (a *Application) SeriesRefresh(c echo.Context, id string) error {
 func (a *Application) SeriesCovers(c echo.Context, id string) error {
 	series, err := a.DB.Series.Get(id, &Series{})
 	if err != nil {
-		return errors.Wrap(err, "getting series")
+		return fae.Wrap(err, "getting series")
 	}
 
 	if series == nil {
-		return errors.New("series not found")
+		return fae.New("series not found")
 	}
 
 	if series.Source != "tvdb" {
-		return errors.New("series not from tvdb")
+		return fae.New("series not from tvdb")
 	}
 
 	tvdbid, err := strconv.Atoi(series.SourceId)
 	if err != nil {
-		return errors.Wrap(err, "converting tvdb id")
+		return fae.Wrap(err, "converting tvdb id")
 	}
 
 	resp, err := app.TvdbSeriesCovers(int64(tvdbid))
@@ -322,20 +323,20 @@ func (a *Application) SeriesCovers(c echo.Context, id string) error {
 func (a *Application) SeriesBackgrounds(c echo.Context, id string) error {
 	series, err := a.DB.Series.Get(id, &Series{})
 	if err != nil {
-		errors.Wrap(err, "getting series")
+		fae.Wrap(err, "getting series")
 	}
 
 	if series == nil {
-		return errors.New("series not found")
+		return fae.New("series not found")
 	}
 
 	if series.Source != "tvdb" {
-		return errors.New("series not from tvdb")
+		return fae.New("series not from tvdb")
 	}
 
 	tvdbid, err := strconv.Atoi(series.SourceId)
 	if err != nil {
-		errors.Wrap(err, "converting tvdb id")
+		fae.Wrap(err, "converting tvdb id")
 	}
 
 	resp, err := app.TvdbSeriesBackgrounds(int64(tvdbid))
@@ -355,7 +356,7 @@ func seriesJob(name string, id string) error {
 	case "files":
 		return app.Workers.Enqueue(&FileMatchMedium{ID: id})
 	default:
-		return fmt.Errorf("unknown job: %s", name)
+		return fae.Errorf("unknown job: %s", name)
 	}
 }
 

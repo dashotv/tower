@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/dashotv/fae"
 )
 
 /*
@@ -81,7 +81,7 @@ func (p *Client) GetLibraries() ([]*PlexLibrary, error) {
 		return nil, err
 	}
 	if !resp.IsSuccess() {
-		return nil, errors.Errorf("failed to get libraries: %s", resp.Status())
+		return nil, fae.Errorf("failed to get libraries: %s", resp.Status())
 	}
 
 	return dest.MediaContainer.Directories, nil
@@ -93,12 +93,12 @@ func (p *Client) LibraryType(section string) (int, error) {
 		return 0, err
 	}
 	if t == "" {
-		return 0, errors.Errorf("library section %s not found", section)
+		return 0, fae.Errorf("library section %s not found", section)
 	}
 
 	id := p.LibraryTypeID(t)
 	if id == PlexLibraryTypeUnknown {
-		return 0, errors.Errorf("library section %s unknown", section)
+		return 0, fae.Errorf("library section %s unknown", section)
 	}
 
 	return id, nil
@@ -114,7 +114,7 @@ func (p *Client) LibraryTypeName(section string) (string, error) {
 			return r.Type, nil
 		}
 	}
-	return "", errors.Errorf("library section %s not found", section)
+	return "", fae.Errorf("library section %s not found", section)
 }
 
 func (p *Client) LibraryByPath(path string) (*PlexLibrary, error) {
@@ -129,7 +129,7 @@ func (p *Client) LibraryByPath(path string) (*PlexLibrary, error) {
 			}
 		}
 	}
-	return nil, errors.Errorf("library path %s not found", path)
+	return nil, fae.Errorf("library path %s not found", path)
 }
 
 func (p *Client) RefreshLibraryPath(path string) error {
@@ -147,7 +147,7 @@ func (p *Client) RefreshLibraryPath(path string) error {
 		return err
 	}
 	if !resp.IsSuccess() {
-		return errors.Errorf("failed to refresh library: %s", resp.Status())
+		return fae.Errorf("failed to refresh library: %s", resp.Status())
 	}
 
 	return nil

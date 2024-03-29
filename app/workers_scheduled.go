@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
+	"github.com/dashotv/fae"
 )
 
 func init() {
@@ -39,7 +39,7 @@ func PopularReleases() error {
 
 			results, err := app.DB.ReleasesPopularQuery(t, date, limit)
 			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("popular releases %s %s", f, t))
+				return fae.Wrap(err, fmt.Sprintf("popular releases %s %s", f, t))
 			}
 
 			app.Cache.Set(fmt.Sprintf("releases_popular_%s_%s", f, t), results)

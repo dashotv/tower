@@ -3,8 +3,7 @@ package app
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
-
+	"github.com/dashotv/fae"
 	"github.com/dashotv/tmdb"
 	"github.com/dashotv/tvdb"
 )
@@ -16,7 +15,7 @@ func init() {
 func setupTvdb(app *Application) error {
 	c, err := tvdb.Login(app.Config.TvdbKey)
 	if err != nil {
-		return errors.Wrap(err, "tvdb login")
+		return fae.Wrap(err, "tvdb login")
 	}
 	app.Tvdb = c
 	return nil
@@ -51,10 +50,10 @@ func (a *Application) TvdbSeriesCovers(id int64) ([]string, error) {
 func (a *Application) TvdbSeriesCoversTmdb(id int64) ([]string, error) {
 	find, err := app.Tmdb.FindByID(fmt.Sprintf("%d", id), "tvdb_id", tmdb.String("en-US"))
 	if err != nil {
-		return nil, errors.Wrap(err, "getting series")
+		return nil, fae.Wrap(err, "getting series")
 	}
 	if find.TvResults == nil || len(find.TvResults) == 0 {
-		return nil, errors.New("not found getting series by tvdbid")
+		return nil, fae.New("not found getting series by tvdbid")
 	}
 
 	res := find.TvResults[0].(map[string]interface{})
@@ -62,7 +61,7 @@ func (a *Application) TvdbSeriesCoversTmdb(id int64) ([]string, error) {
 
 	resp, err := a.Tmdb.TvSeriesImages(found, nil, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting series images")
+		return nil, fae.Wrap(err, "getting series images")
 	}
 
 	out := make([]string, 0)
@@ -79,7 +78,7 @@ func (a *Application) TvdbSeriesCoversTmdb(id int64) ([]string, error) {
 func (a *Application) TvdbSeriesCoversFanart(id string) ([]string, error) {
 	resp, err := a.Fanart.GetShowImages(id)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting fanart")
+		return nil, fae.Wrap(err, "getting fanart")
 	}
 
 	out := make([]string, 0)
@@ -118,10 +117,10 @@ func (a *Application) TvdbSeriesBackgrounds(id int64) ([]string, error) {
 func (a *Application) TvdbSeriesBackgroundsTmdb(id int64) ([]string, error) {
 	find, err := app.Tmdb.FindByID(fmt.Sprintf("%d", id), "tvdb_id", tmdb.String("en-US"))
 	if err != nil {
-		return nil, errors.Wrap(err, "getting series")
+		return nil, fae.Wrap(err, "getting series")
 	}
 	if find.TvResults == nil || len(find.TvResults) == 0 {
-		return nil, errors.New("not found getting series by tvdbid")
+		return nil, fae.New("not found getting series by tvdbid")
 	}
 
 	res := find.TvResults[0].(map[string]interface{})
@@ -129,7 +128,7 @@ func (a *Application) TvdbSeriesBackgroundsTmdb(id int64) ([]string, error) {
 
 	resp, err := a.Tmdb.TvSeriesImages(found, nil, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting series images")
+		return nil, fae.Wrap(err, "getting series images")
 	}
 
 	out := make([]string, 0)
@@ -146,7 +145,7 @@ func (a *Application) TvdbSeriesBackgroundsTmdb(id int64) ([]string, error) {
 func (a *Application) TvdbSeriesBackgroundsFanart(id string) ([]string, error) {
 	resp, err := a.Fanart.GetShowImages(id)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting fanart")
+		return nil, fae.Wrap(err, "getting fanart")
 	}
 
 	out := make([]string, 0)

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/exp/maps"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/grimoire"
 )
 
@@ -120,7 +120,7 @@ func (c *Connector) processEpisode(e *Episode) error {
 	s := &Series{}
 	err := c.Series.Find(e.SeriesId.Hex(), s)
 	if err != nil {
-		return errors.Wrap(err, "processEpisode")
+		return fae.Wrap(err, "processEpisode")
 	}
 
 	c.processSeriesEpisode(s, e)

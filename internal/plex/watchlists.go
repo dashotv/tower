@@ -3,7 +3,7 @@ package plex
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
+	"github.com/dashotv/fae"
 )
 
 type WatchlistOpts struct {
@@ -21,7 +21,7 @@ func (p *Client) GetWatchlist(token string) (*PlexWatchlist, error) {
 		return dest, err
 	}
 	if !resp.IsSuccess() {
-		return dest, errors.Errorf("failed to get watchlist: %s", resp.Status())
+		return dest, fae.Errorf("failed to get watchlist: %s", resp.Status())
 	}
 
 	return dest, nil
@@ -36,10 +36,10 @@ func (p *Client) GetWatchlistDetail(token string, w *PlexWatchlist) ([]*PlexWatc
 			SetHeader("X-Plex-Token", token).
 			Get("/library/metadata/" + d.RatingKey)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to make watchlistdetails request")
+			return nil, fae.Wrap(err, "failed to make watchlistdetails request")
 		}
 		if !resp.IsSuccess() {
-			return nil, errors.Errorf("failed to get watchlistdetails: %s", resp.Status())
+			return nil, fae.Errorf("failed to get watchlistdetails: %s", resp.Status())
 		}
 		out = append(out, dest)
 	}

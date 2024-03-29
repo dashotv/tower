@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/tower/internal/plex"
 )
 
@@ -154,7 +155,7 @@ func (w *Walker) getDirectories() error {
 				return err
 			}
 			if status.Exit != 0 {
-				return fmt.Errorf("command '%s' failed with exit code %d", cmd, status.Exit)
+				return fae.Errorf("command '%s' failed with exit code %d", cmd, status.Exit)
 			}
 		}
 	}
@@ -177,7 +178,7 @@ func (w *Walker) getFiles(dir string) error {
 		return e
 	}
 	if status.Exit != 0 {
-		return fmt.Errorf("command '%s' failed with exit code %d", cmd, status.Exit)
+		return fae.Errorf("command '%s' failed with exit code %d", cmd, status.Exit)
 	}
 	return nil
 }

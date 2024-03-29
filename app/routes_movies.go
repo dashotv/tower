@@ -7,8 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/labstack/echo/v4"
-	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/dashotv/fae"
 )
 
 func (a *Application) MoviesIndex(c echo.Context, page, limit int) error {
@@ -73,7 +74,7 @@ func (a *Application) MoviesCreate(c echo.Context) error {
 	r := &CreateRequest{}
 	c.Bind(r)
 	if r.ID == "" || r.Source == "" {
-		return errors.New("id and source are required")
+		return fae.New("id and source are required")
 	}
 
 	m := &Movie{

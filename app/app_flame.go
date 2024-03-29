@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/pkg/errors"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/flame/metube"
 	"github.com/dashotv/flame/qbt"
 )
@@ -41,10 +41,10 @@ func (c *Flame) Torrent(thash string) (*qbt.Torrent, error) {
 		ForceContentType("application/json").
 		Get("/qbittorrents/")
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to load torrent")
+		return nil, fae.Wrap(err, "failed to load torrent")
 	}
 	if resp.IsError() {
-		return nil, errors.Errorf("failed to load torrent: %s", resp.Status())
+		return nil, fae.Errorf("failed to load torrent: %s", resp.Status())
 	}
 
 	for _, t := range res.Torrents {
@@ -53,7 +53,7 @@ func (c *Flame) Torrent(thash string) (*qbt.Torrent, error) {
 		}
 	}
 
-	return nil, errors.Errorf("torrent not found: %s", thash)
+	return nil, fae.Errorf("torrent not found: %s", thash)
 }
 
 func (c *Flame) LoadNzb(d *Download, url string) (string, error) {
@@ -69,13 +69,13 @@ func (c *Flame) LoadNzb(d *Download, url string) (string, error) {
 		SetResult(res).
 		Get("/nzbs/add")
 	if err != nil {
-		return "", errors.Wrap(err, "failed to load nzb")
+		return "", fae.Wrap(err, "failed to load nzb")
 	}
 	if resp.IsError() {
-		return "", errors.Errorf("failed to load nzb: %s", resp.Status())
+		return "", fae.Errorf("failed to load nzb: %s", resp.Status())
 	}
 	if res.Error {
-		return "", errors.New("failed to load nzb")
+		return "", fae.New("failed to load nzb")
 	}
 
 	return fmt.Sprintf("%d", res.ID), nil
@@ -94,13 +94,13 @@ func (c *Flame) LoadTorrent(_ *Download, url string) (string, error) {
 		SetResult(res).
 		Get("/qbittorrents/add")
 	if err != nil {
-		return "", errors.Wrap(err, "failed to load torrent")
+		return "", fae.Wrap(err, "failed to load torrent")
 	}
 	if resp.IsError() {
-		return "", errors.Errorf("failed to load torrent: %s", resp.Status())
+		return "", fae.Errorf("failed to load torrent: %s", resp.Status())
 	}
 	if res.Error {
-		return "", errors.New("failed to load torrent")
+		return "", fae.New("failed to load torrent")
 	}
 
 	return res.Infohash, nil
@@ -111,10 +111,10 @@ func (c *Flame) RemoveTorrent(thash string) error {
 		SetQueryParam("infohash", thash).
 		Get("/qbittorrents/remove")
 	if err != nil {
-		return errors.Wrap(err, "failed to remove torrent")
+		return fae.Wrap(err, "failed to remove torrent")
 	}
 	if resp.IsError() {
-		return errors.Errorf("failed to remove torrent: %s", resp.Status())
+		return fae.Errorf("failed to remove torrent: %s", resp.Status())
 	}
 
 	app.Log.Debugf("Flame::RemoveTorrent: %s", resp.Body())
@@ -137,13 +137,13 @@ func (c *Flame) LoadMetube(name string, url string, autoStart bool) error {
 		SetResult(res).
 		Get("/metube/add")
 	if err != nil {
-		return errors.Wrap(err, "failed to load metube")
+		return fae.Wrap(err, "failed to load metube")
 	}
 	if resp.IsError() {
-		return errors.Errorf("failed to load metube: %s", resp.Status())
+		return fae.Errorf("failed to load metube: %s", resp.Status())
 	}
 	if res.Error {
-		return errors.Errorf("failed to load metube: %s", res.Message)
+		return fae.Errorf("failed to load metube: %s", res.Message)
 	}
 
 	return nil
@@ -161,13 +161,13 @@ func (c *Flame) MetubeHistory() (*metube.HistoryResponse, error) {
 		SetHeader("Accept", "application/json").
 		Get("/metube/")
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to load torrent")
+		return nil, fae.Wrap(err, "failed to load torrent")
 	}
 	if resp.IsError() {
-		return nil, errors.Errorf("failed to load torrent: %s", resp.Status())
+		return nil, fae.Errorf("failed to load torrent: %s", resp.Status())
 	}
 	if res.Error {
-		return nil, errors.New("failed to load metube")
+		return nil, fae.New("failed to load metube")
 	}
 
 	return res.History, nil

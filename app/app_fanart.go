@@ -2,7 +2,8 @@ package app
 
 import (
 	"github.com/go-resty/resty/v2"
-	"github.com/pkg/errors"
+
+	"github.com/dashotv/fae"
 )
 
 func init() {
@@ -53,7 +54,7 @@ func (f *Fanart) GetMovieImages(id string) (*FanartShowImages, error) {
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.Errorf("fanart: %s", resp.Status())
+		return nil, fae.Errorf("fanart: %s", resp.Status())
 	}
 	return res, nil
 }
@@ -77,10 +78,10 @@ func (f *Fanart) GetShowImages(id string) (*FanartShowImages, error) {
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.Errorf("fanart: %s", resp.Status())
+		return nil, fae.Errorf("fanart: %s", resp.Status())
 	}
 	if res.Status == "error" {
-		return nil, errors.Errorf("fanart: %s", res.Erorr)
+		return nil, fae.Errorf("fanart: %s", res.Erorr)
 	}
 	return res, nil
 }

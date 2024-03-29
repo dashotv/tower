@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/pkg/errors"
 	"github.com/samber/lo"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/scry/search"
 )
 
@@ -155,7 +155,7 @@ func (s *Scry) Search(options *SearchOptions) (*search.ReleaseSearchResponse, er
 		return nil, err
 	}
 	if resp.IsError() {
-		return nil, errors.New(resp.Status())
+		return nil, fae.New(resp.Status())
 	}
 	return r, nil
 }
@@ -174,7 +174,7 @@ func (s *Scry) ScrySearchEpisode(ep *Medium) (*search.Release, error) {
 
 	params := series.SearchParams
 	if params == nil {
-		return nil, errors.New("no search params")
+		return nil, fae.New("no search params")
 	}
 
 	switch params.Type {
@@ -212,7 +212,7 @@ func (s *Scry) ScrySearchEpisode(ep *Medium) (*search.Release, error) {
 
 	resp, err := app.Scry.Search(opt)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to search releases")
+		return nil, fae.Wrap(err, "failed to search releases")
 	}
 	if len(resp.Releases) == 0 {
 		return nil, nil

@@ -3,9 +3,9 @@ package app
 import (
 	"context"
 
-	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
 )
 
@@ -18,7 +18,7 @@ func (j *CreateMediaFromRequests) Kind() string { return "CreateMediaFromRequest
 func (j *CreateMediaFromRequests) Work(ctx context.Context, job *minion.Job[*CreateMediaFromRequests]) error {
 	requests, err := app.DB.Request.Query().Where("status", "approved").Run()
 	if err != nil {
-		return errors.Wrap(err, "querying requests")
+		return fae.Wrap(err, "querying requests")
 	}
 
 	for _, r := range requests {
@@ -45,11 +45,11 @@ func (j *CreateMediaFromRequests) Work(ctx context.Context, job *minion.Job[*Cre
 
 		app.Log.Infof("request: [%s] %s", r.Status, r.Title)
 		if err := app.DB.Request.Update(r); err != nil {
-			return errors.Wrap(err, "updating request")
+			return fae.Wrap(err, "updating request")
 		}
 
 		if err := app.Events.Send("tower.requests", &EventRequests{Event: "update", Id: r.ID.Hex(), Request: r}); err != nil {
-			return errors.Wrap(err, "sending event")
+			return fae.Wrap(err, "sending event")
 		}
 	}
 	return nil
@@ -58,7 +58,7 @@ func (j *CreateMediaFromRequests) Work(ctx context.Context, job *minion.Job[*Cre
 func createShowFromRequest(r *Request) error {
 	count, err := app.DB.Series.Count(bson.M{"_type": "Series", "source": r.Source, "source_id": r.SourceId})
 	if err != nil {
-		return errors.Wrap(err, "counting series")
+		return fae.Wrap(err, "counting series")
 	}
 	if count > 0 {
 		return nil
@@ -74,11 +74,11 @@ func createShowFromRequest(r *Request) error {
 
 	err = app.DB.Series.Save(s)
 	if err != nil {
-		return errors.Wrap(err, "saving show")
+		return fae.Wrap(err, "saving show")
 	}
 
 	if err := app.Workers.Enqueue(&SeriesUpdate{ID: s.ID.Hex()}); err != nil {
-		return errors.Wrap(err, "queueing update job")
+		return fae.Wrap(err, "queueing update job")
 	}
 	return nil
 }
@@ -86,7 +86,7 @@ func createShowFromRequest(r *Request) error {
 func createMovieFromRequest(r *Request) error {
 	count, err := app.DB.Series.Count(bson.M{"_type": "Movie", "source": r.Source, "source_id": r.SourceId})
 	if err != nil {
-		return errors.Wrap(err, "counting series")
+		return fae.Wrap(err, "counting series")
 	}
 	if count > 0 {
 		return nil
@@ -102,11 +102,11 @@ func createMovieFromRequest(r *Request) error {
 
 	err = app.DB.Movie.Save(m)
 	if err != nil {
-		return errors.Wrap(err, "saving movie")
+		return fae.Wrap(err, "saving movie")
 	}
 
 	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: m.ID.Hex()}); err != nil {
-		return errors.Wrap(err, "queueing update job")
+		return fae.Wrap(err, "queueing update job")
 	}
 	return nil
 }

@@ -10,6 +10,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
 )
 
@@ -29,20 +30,20 @@ func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
 	l := app.Log.Named("file_walk")
 	if !atomic.CompareAndSwapUint32(&walking, 0, 1) {
 		l.Warnf("walkFiles: already running")
-		return fmt.Errorf("already running")
+		return fae.Errorf("already running")
 	}
 	defer atomic.StoreUint32(&walking, 0)
 
 	libs, err := app.Plex.GetLibraries()
 	if err != nil {
 		l.Errorw("libs", "error", err)
-		return fmt.Errorf("getting libraries: %w", err)
+		return fae.Wrap(err, "getting libraries")
 	}
 
 	w := newWalker(app.DB, l.Named("walker"), libs)
 	if err := w.Walk(); err != nil {
 		l.Errorw("walk", "error", err)
-		return fmt.Errorf("walking: %w", err)
+		return fae.Wrap(err, "walking")
 	}
 
 	app.Workers.Enqueue(&FileMatch{})
@@ -64,7 +65,7 @@ func (j *FileMatch) Work(ctx context.Context, job *minion.Job[*FileMatch]) error
 		dir := filepath.Join(app.Config.DirectoriesCompleted, kind)
 		if err := app.Workers.Enqueue(&FileMatchDir{Dir: dir}); err != nil {
 			l.Errorw("enqueue", "error", err)
-			return fmt.Errorf("enqueue: %w", err)
+			return fae.Wrap(err, "enqueue")
 		}
 	}
 
@@ -86,14 +87,14 @@ func (j *FileMatchMedium) Work(ctx context.Context, job *minion.Job[*FileMatchMe
 	m := &Medium{}
 	if err := app.DB.Medium.Find(job.Args.ID, m); err != nil {
 		l.Errorw("find", "error", err)
-		return fmt.Errorf("finding: %w", err)
+		return fae.Wrap(err, "finding")
 	}
 
 	dest := m.Destination()
 	dir := filepath.Join(app.Config.DirectoriesCompleted, dest)
 	if err := app.Workers.Enqueue(&FileMatchDir{Dir: dir}); err != nil {
 		l.Errorw("enqueue", "error", err)
-		return fmt.Errorf("enqueue: %w", err)
+		return fae.Wrap(err, "enqueue")
 	}
 
 	return nil
@@ -116,7 +117,7 @@ func (j *FileMatchDir) Work(ctx context.Context, job *minion.Job[*FileMatchDir])
 	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			l.Errorw("walk", "error", err)
-			return fmt.Errorf("walking: %w", err)
+			return fae.Wrap(err, "walking")
 		}
 
 		if d.IsDir() {
@@ -160,14 +161,14 @@ func (j *FileMatchDir) Work(ctx context.Context, job *minion.Job[*FileMatchDir])
 		m.Paths = append(m.Paths, &Path{Type: primitive.Symbol(filetype), Local: local, Extension: ext})
 		if err := app.DB.Medium.Save(m); err != nil {
 			l.Errorw("save", "error", err)
-			return fmt.Errorf("saving: %w", err)
+			return fae.Wrap(err, "saving")
 		}
 
 		return nil
 	})
 	if err != nil {
 		l.Errorw("walk", "error", err)
-		return fmt.Errorf("walking: %w", err)
+		return fae.Wrap(err, "walking")
 	}
 	return nil
 }

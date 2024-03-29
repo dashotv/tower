@@ -5,7 +5,8 @@ import (
 	"net/url"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/pkg/errors"
+
+	"github.com/dashotv/fae"
 )
 
 const (
@@ -114,10 +115,10 @@ func (p *Client) GetUser(token string) (*PlexUser, error) {
 	resp, err := p._plextv().SetResult(user).
 		SetHeader("X-Plex-Token", token).Get("/user")
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to make request")
+		return nil, fae.Wrap(err, "failed to make request")
 	}
 	if !resp.IsSuccess() {
-		return nil, errors.Errorf("pin not authorized: %s", resp.Status())
+		return nil, fae.Errorf("pin not authorized: %s", resp.Status())
 	}
 
 	return user, nil

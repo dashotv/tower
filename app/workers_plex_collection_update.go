@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/samber/lo"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
 )
 
@@ -33,7 +33,7 @@ func (j *PlexCollectionUpdate) Work(ctx context.Context, job *minion.Job[*PlexCo
 			return err
 		}
 		if len(resp.MediaContainer.Directory) == 0 {
-			return errors.New("api response did not contain a directory")
+			return fae.New("api response did not contain a directory")
 		}
 
 		c.RatingKey = resp.MediaContainer.Directory[0].RatingKey

@@ -2,13 +2,12 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/samber/lo"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
 )
 
@@ -26,27 +25,27 @@ func (j *PathImport) Timeout(job *minion.Job[*PathImport]) time.Duration { retur
 func (j *PathImport) Work(ctx context.Context, job *minion.Job[*PathImport]) error {
 	m := &Medium{}
 	if err := app.DB.Medium.Find(job.Args.ID, m); err != nil {
-		return errors.Wrap(err, "find medium")
+		return fae.Wrap(err, "find medium")
 	}
 
 	list := lo.Filter(m.Paths, func(p *Path, i int) bool {
 		return p.Id.Hex() == job.Args.PathID
 	})
 	if len(list) == 0 {
-		return errors.New("no matching path in list")
+		return fae.New("no matching path in list")
 	}
 	if len(list) > 1 {
-		return errors.New("multiple paths found")
+		return fae.New("multiple paths found")
 	}
 
 	path := list[0]
 	if !path.Exists() {
-		return errors.Errorf("path does not exist: %s", path.LocalPath())
+		return fae.Errorf("path does not exist: %s", path.LocalPath())
 	}
 
 	stat, err := os.Stat(path.LocalPath())
 	if err != nil {
-		return errors.Wrap(err, "stat path")
+		return fae.Wrap(err, "stat path")
 	}
 
 	path.UpdatedAt = stat.ModTime()
@@ -72,7 +71,7 @@ func (j *PathImport) Work(ctx context.Context, job *minion.Job[*PathImport]) err
 	// 	}
 
 	if err := app.DB.Medium.Save(m); err != nil {
-		return errors.Wrap(err, "save path")
+		return fae.Wrap(err, "save path")
 	}
 
 	return nil
@@ -89,7 +88,7 @@ func (j *PathCleanup) Work(ctx context.Context, job *minion.Job[*PathCleanup]) e
 	m := &Medium{}
 	if err := app.DB.Medium.Find(job.Args.ID, m); err != nil {
 		l.Errorf("find medium: %s", err)
-		return fmt.Errorf("find medium: %w", err)
+		return fae.Wrap(err, "find medium")
 	}
 
 	queuedPaths := map[string]int{}
@@ -101,7 +100,7 @@ func (j *PathCleanup) Work(ctx context.Context, job *minion.Job[*PathCleanup]) e
 		if queuedPaths[p.LocalPath()] == 0 {
 			// app.Workers.Log.Debugf("path import: %s", p.LocalPath())
 			if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: p.Id.Hex(), Title: p.LocalPath()}); err != nil {
-				return errors.Wrap(err, "enqueue path import")
+				return fae.Wrap(err, "enqueue path import")
 			}
 			queuedPaths[p.LocalPath()]++
 			newPaths = append(newPaths, p)
@@ -110,7 +109,7 @@ func (j *PathCleanup) Work(ctx context.Context, job *minion.Job[*PathCleanup]) e
 
 	m.Paths = newPaths
 	if err := app.DB.Medium.Save(m); err != nil {
-		return errors.Wrap(err, "save medium")
+		return fae.Wrap(err, "save medium")
 	}
 
 	if m.Type == "Series" {
@@ -118,18 +117,18 @@ func (j *PathCleanup) Work(ctx context.Context, job *minion.Job[*PathCleanup]) e
 
 		count, err := q.Count()
 		if err != nil {
-			return errors.Wrap(err, "count episodes")
+			return fae.Wrap(err, "count episodes")
 		}
 
 		for skip := 0; skip < int(count); skip += 100 {
 			eps, err := q.Limit(100).Skip(skip).Run()
 			if err != nil {
-				return errors.Wrap(err, "find episodes")
+				return fae.Wrap(err, "find episodes")
 			}
 
 			for _, e := range eps {
 				if err := app.Workers.Enqueue(&PathCleanup{ID: e.ID.Hex()}); err != nil {
-					return errors.Wrap(err, "enqueue media paths")
+					return fae.Wrap(err, "enqueue media paths")
 				}
 			}
 		}
@@ -147,7 +146,7 @@ func (j *PathCleanupAll) Work(ctx context.Context, job *minion.Job[*PathCleanupA
 	for _, t := range TYPES {
 		total, err := app.DB.Medium.Query().Where("_type", t).Count()
 		if err != nil {
-			return fmt.Errorf("count media: %w", err)
+			return fae.Wrap(err, "count media")
 		}
 		if total == 0 {
 			continue
@@ -155,12 +154,12 @@ func (j *PathCleanupAll) Work(ctx context.Context, job *minion.Job[*PathCleanupA
 		for skip := 0; skip < int(total); skip += 100 {
 			media, err := app.DB.Medium.Query().Limit(100).Skip(skip).Run()
 			if err != nil {
-				return fmt.Errorf("find media: %w", err)
+				return fae.Wrap(err, "find media")
 			}
 
 			for _, m := range media {
 				if err := app.Workers.Enqueue(&PathCleanup{ID: m.ID.Hex()}); err != nil {
-					return fmt.Errorf("enqueue path cleanup: %w", err)
+					return fae.Wrap(err, "enqueue path cleanup")
 				}
 			}
 		}

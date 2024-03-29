@@ -5,16 +5,18 @@ import (
 
 	"github.com/caarlos0/env/v10"
 	"github.com/pkg/errors"
+
+	"github.com/dashotv/fae"
 )
 
 func setupConfig(app *Application) error {
 	app.Config = &Config{}
 	if err := env.Parse(app.Config); err != nil {
-		return errors.Wrap(err, "parsing config")
+		return fae.Wrap(err, "parsing config")
 	}
 
 	if err := app.Config.Validate(); err != nil {
-		return errors.Wrap(err, "failed to validate config")
+		return fae.Wrap(err, "failed to validate config")
 	}
 
 	return nil
@@ -114,7 +116,7 @@ func (c *Config) validateLogger() error {
 	case "dev", "release":
 		return nil
 	default:
-		return errors.New("invalid logger (must be 'dev' or 'release')")
+		return fae.New("invalid logger (must be 'dev' or 'release')")
 	}
 }
 

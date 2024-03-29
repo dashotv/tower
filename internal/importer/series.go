@@ -1,9 +1,7 @@
 package importer
 
 import (
-	"errors"
-	"fmt"
-
+	"github.com/dashotv/fae"
 	"github.com/dashotv/tvdb"
 	"github.com/dashotv/tvdb/openapi/models/operations"
 )
@@ -11,13 +9,13 @@ import (
 func (i *Importer) loadSeries(id int64) (*Series, error) {
 	series, err := i.loadSeriesTvdb(id)
 	if err != nil {
-		return nil, fmt.Errorf("base: %w", err)
+		return nil, fae.Wrap(err, "base")
 	}
 
 	if series.Language != i.Opts.Language {
 		translated, err := i.Tvdb.GetSeriesTranslation(id, i.Opts.Language)
 		if err != nil {
-			return nil, fmt.Errorf("translation: %w", err)
+			return nil, fae.Wrap(err, "translation")
 		}
 		series.Title = tvdb.StringValue(translated.Data.Name)
 		series.Description = tvdb.StringValue(translated.Data.Overview)
@@ -51,7 +49,7 @@ func (i *Importer) loadSeriesTvdb(id int64) (*Series, error) {
 	}
 
 	if resp.Data == nil {
-		return nil, errors.New("no data")
+		return nil, fae.New("no data")
 	}
 
 	s := &Series{

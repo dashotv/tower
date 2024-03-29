@@ -7,12 +7,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
 	"github.com/dashotv/tower/internal/importer"
 )
@@ -92,17 +92,17 @@ func (j *SeriesUpdateRecent) Kind() string { return "series_update_recent" }
 func (j *SeriesUpdateRecent) Work(ctx context.Context, job *minion.Job[*SeriesUpdateRecent]) error {
 	ints, err := app.Importer.SeriesUpdated(time.Now().Add(-15 * time.Minute).Unix())
 	if err != nil {
-		return fmt.Errorf("recent: %w", err)
+		return fae.Wrap(err, "recent")
 	}
 
 	for _, id := range ints {
 		list, err := app.DB.Series.Query().Where("source", "tvdb").Where("source_id", fmt.Sprintf("%d", id)).Run()
 		if err != nil {
-			return fmt.Errorf("recent: list: %w", err)
+			return fae.Wrap(err, "recent: list")
 		}
 		for _, series := range list {
 			if err := app.Workers.Enqueue(&SeriesUpdate{ID: series.ID.Hex(), SkipImages: true, Title: series.Title}); err != nil {
-				return fmt.Errorf("recent: enqueue: %w", err)
+				return fae.Wrap(err, "recent: enqueue")
 			}
 		}
 	}
@@ -201,7 +201,7 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 			episode.ReleaseDate = dateFromString(e.Airdate)
 
 			if err := app.DB.Episode.Save(episode); err != nil {
-				return errors.Wrap(err, fmt.Sprintf("updating episode %s %d/%d", id, episode.SeasonNumber, episode.EpisodeNumber))
+				return fae.Wrap(err, fmt.Sprintf("updating episode %s %d/%d", id, episode.SeasonNumber, episode.EpisodeNumber))
 			}
 		}
 
@@ -271,7 +271,7 @@ func (j *SeriesImage) Work(ctx context.Context, job *minion.Job[*SeriesImage]) e
 
 	series := &Series{}
 	if err := app.DB.Series.Find(id, series); err != nil {
-		return errors.Wrap(err, "finding series")
+		return fae.Wrap(err, "finding series")
 	}
 
 	return seriesImage(series, t, remote, ratio)
@@ -285,13 +285,13 @@ func seriesImage(series *Series, t string, remote string, ratio float32) error {
 	thumb := fmt.Sprintf("%s/%s_thumb.%s", app.Config.DirectoriesImages, local, extension)
 
 	if err := imageDownload(remote, dest); err != nil {
-		return errors.Wrap(err, "downloading image")
+		return fae.Wrap(err, "downloading image")
 	}
 
 	height := 400
 	width := int(float32(height) * ratio)
 	if err := imageResize(dest, thumb, width, height); err != nil {
-		return errors.Wrap(err, "resizing image")
+		return fae.Wrap(err, "resizing image")
 	}
 
 	var img *Path
@@ -314,7 +314,7 @@ func seriesImage(series *Series, t string, remote string, ratio float32) error {
 	img.Extension = extension
 
 	if err := app.DB.Series.Update(series); err != nil {
-		return errors.Wrap(err, "updating series")
+		return fae.Wrap(err, "updating series")
 	}
 
 	return nil
@@ -332,12 +332,12 @@ func episodeMap(id string) (map[int64]*Episode, error) {
 	episodeMap := make(map[int64]*Episode)
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, errors.Wrap(err, "converting id")
+		return nil, fae.Wrap(err, "converting id")
 	}
 
 	episodes, err := app.DB.Episode.Query().Where("series_id", oid).Limit(-1).Run()
 	if err != nil {
-		return nil, errors.Wrap(err, "querying episodes")
+		return nil, fae.Wrap(err, "querying episodes")
 	}
 
 	for _, e := range episodes {
@@ -355,12 +355,12 @@ func episodeSEMap(id string, anime bool) (map[int]map[int]*Episode, error) {
 	episodeMap := map[int]map[int]*Episode{}
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, errors.Wrap(err, "converting id")
+		return nil, fae.Wrap(err, "converting id")
 	}
 
 	episodes, err := app.DB.Episode.Query().Where("series_id", oid).Limit(-1).Run()
 	if err != nil {
-		return nil, errors.Wrap(err, "querying episodes")
+		return nil, fae.Wrap(err, "querying episodes")
 	}
 
 	app.Log.Warnf("episodes: %d", len(episodes))

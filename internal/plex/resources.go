@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/url"
 
-	"github.com/pkg/errors"
+	"github.com/dashotv/fae"
 )
 
 func (p *Client) GetResources() ([]*Resource, error) {
@@ -21,13 +21,13 @@ func (p *Client) GetResources() ([]*Resource, error) {
 		SetQueryParamsFromValues(params).
 		Get("/resources")
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to make request")
+		return nil, fae.Wrap(err, "failed to make request")
 	}
 	if !resp.IsSuccess() {
-		return nil, errors.Errorf("failed to get resources: %s", resp.Status())
+		return nil, fae.Errorf("failed to get resources: %s", resp.Status())
 	}
 	if err := json.Unmarshal(resp.Body(), &out); err != nil {
-		return nil, errors.Wrap(err, "failed to unmarshal response")
+		return nil, fae.Wrap(err, "failed to unmarshal response")
 	}
 	return out, nil
 }

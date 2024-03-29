@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/labstack/echo/v4"
-	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.uber.org/zap"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
 	"github.com/dashotv/tmdb"
 	"github.com/dashotv/tower/internal/importer"
@@ -61,7 +61,7 @@ type Application struct {
 
 func Setup() error {
 	if app != nil {
-		return errors.New("application already setup")
+		return fae.New("application already setup")
 	}
 
 	app = &Application{}

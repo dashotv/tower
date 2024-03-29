@@ -3,7 +3,7 @@ package app
 import (
 	"time"
 
-	"github.com/pkg/errors"
+	"github.com/dashotv/fae"
 )
 
 type EventSeerNotice struct {
@@ -35,7 +35,7 @@ type EventSeerLog struct {
 func onSeerDownloads(app *Application, msg *EventSeerDownload) (*EventDownloads, error) {
 	d, err := app.DB.DownloadGet(msg.ID)
 	if err != nil {
-		return nil, errors.Wrap(err, "loading download")
+		return nil, fae.Wrap(err, "loading download")
 	}
 	return &EventDownloads{Event: msg.Event, Id: d.ID.Hex(), Download: d}, nil
 }
@@ -43,7 +43,7 @@ func onSeerDownloads(app *Application, msg *EventSeerDownload) (*EventDownloads,
 func onSeerEpisodes(app *Application, msg *EventSeerEpisode) (*EventEpisodes, error) {
 	ep, err := app.DB.EpisodeGet(msg.ID)
 	if err != nil {
-		return nil, errors.Wrap(err, "loading episode")
+		return nil, fae.Wrap(err, "loading episode")
 	}
 	return &EventEpisodes{Event: msg.Event, Id: ep.ID.Hex(), Episode: ep}, nil
 }

@@ -1,11 +1,11 @@
 package importer
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/sourcegraph/conc"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/tmdb"
 	"github.com/dashotv/tvdb"
 )
@@ -88,11 +88,11 @@ func (i *Importer) loadSeriesCoversTvdb(tvdbid int64) ([]string, error) {
 
 	r, err := i.Tvdb.GetSeriesArtworks(tvdbid, tvdb.String("eng"), tvdb.Int64(int64(2)))
 	if err != nil {
-		return nil, fmt.Errorf("covers: %w", err)
+		return nil, fae.Wrap(err, "covers")
 	}
 
 	if r.Data == nil || len(r.Data.Artworks) == 0 {
-		return nil, errors.New("covers: no data")
+		return nil, fae.New("covers: no data")
 	}
 
 	for _, cover := range r.Data.Artworks {
@@ -107,11 +107,11 @@ func (i *Importer) loadSeriesCoversFanart(tvdbid int64) ([]string, error) {
 
 	ftv, err := i.Fanart.GetShowImages(fmt.Sprintf("%d", tvdbid))
 	if err != nil {
-		return nil, fmt.Errorf("covers: %w", err)
+		return nil, fae.Wrap(err, "covers")
 	}
 
 	if len(ftv.Posters) == 0 {
-		return nil, errors.New("covers: no data")
+		return nil, fae.New("covers: no data")
 	}
 
 	for _, poster := range ftv.Posters {
@@ -126,11 +126,11 @@ func (i *Importer) loadSeriesCoversTmdb(tmdbid int) ([]string, error) {
 
 	resp, err := i.Tmdb.TvSeriesImages(tmdbid, nil, nil)
 	if err != nil {
-		return nil, fmt.Errorf("cover: %w", err)
+		return nil, fae.Wrap(err, "cover")
 	}
 
 	if resp.Posters == nil || len(resp.Posters) == 0 {
-		return nil, errors.New("cover: no data")
+		return nil, fae.New("cover: no data")
 	}
 
 	for _, cover := range resp.Posters {
@@ -187,11 +187,11 @@ func (i *Importer) loadSeriesBackgroundsTvdb(tvdbid int64) ([]string, error) {
 
 	r, err := i.Tvdb.GetSeriesArtworks(tvdbid, tvdb.String("eng"), tvdb.Int64(int64(3)))
 	if err != nil {
-		return nil, fmt.Errorf("backgrounds: %w", err)
+		return nil, fae.Wrap(err, "backgrounds")
 	}
 
 	if r.Data == nil || len(r.Data.Artworks) == 0 {
-		return nil, errors.New("backgrounds: no data")
+		return nil, fae.New("backgrounds: no data")
 	}
 
 	for _, background := range r.Data.Artworks {
@@ -206,11 +206,11 @@ func (i *Importer) loadSeriesBackgroundsFanart(tvdbid int64) ([]string, error) {
 
 	ftv, err := i.Fanart.GetShowImages(fmt.Sprintf("%d", tvdbid))
 	if err != nil {
-		return nil, fmt.Errorf("backgrounds: %w", err)
+		return nil, fae.Wrap(err, "backgrounds")
 	}
 
 	if len(ftv.Posters) == 0 {
-		return nil, errors.New("backgrounds: no data")
+		return nil, fae.New("backgrounds: no data")
 	}
 
 	for _, fanart := range ftv.Posters {
@@ -225,11 +225,11 @@ func (i *Importer) loadSeriesBackgroundsTmdb(tmdbid int) ([]string, error) {
 
 	resp, err := i.Tmdb.TvSeriesImages(tmdbid, nil, nil)
 	if err != nil {
-		return nil, fmt.Errorf("background: %w", err)
+		return nil, fae.Wrap(err, "background")
 	}
 
 	if resp.Backdrops == nil || len(resp.Backdrops) == 0 {
-		return nil, errors.New("background: no data")
+		return nil, fae.New("background: no data")
 	}
 
 	for _, background := range resp.Backdrops {

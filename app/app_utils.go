@@ -15,6 +15,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
+
+	"github.com/dashotv/fae"
 )
 
 func isAnimeKind(kind string) bool {
@@ -54,7 +56,7 @@ func QueryDefaultInteger(c echo.Context, name string, def int) (int, error) {
 	}
 
 	if n < 0 {
-		return def, fmt.Errorf("less than zero")
+		return def, fae.Errorf("less than zero")
 	}
 
 	return n, nil
@@ -148,14 +150,14 @@ func pathParts(path string) (string, string, string, string, error) {
 	path = strings.Replace(path, app.Config.DirectoriesCompleted+"/", "", 1)
 	parts := strings.Split(path, "/")
 	if len(parts) < 3 {
-		return "", "", "", "", fmt.Errorf("not enough parts")
+		return "", "", "", "", fae.Errorf("not enough parts")
 	}
 
 	kind, name, file := parts[0], parts[1], parts[2]
 	f := strings.Split(file, ".")
 
 	if len(f) < 2 {
-		return "", "", "", "", fmt.Errorf("no extension")
+		return "", "", "", "", fae.Errorf("no extension")
 	}
 
 	return kind, name, f[0], f[1], nil
@@ -164,13 +166,13 @@ func pathParts(path string) (string, string, string, string, error) {
 func sumFile(path string) (string, error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to open file")
+		return "", fae.Wrap(err, "failed to open file")
 	}
 	defer f.Close()
 
 	h := md5.New()
 	if _, err := io.Copy(h, f); err != nil {
-		return "", errors.Wrap(err, "failed to hash file")
+		return "", fae.Wrap(err, "failed to hash file")
 	}
 
 	return fmt.Sprintf("%x", h.Sum(nil)), nil
@@ -197,10 +199,10 @@ func sumFiles(source, destination string) (bool, error) {
 	r_dest := <-ch_dest
 
 	if r_source.Err != nil {
-		return false, errors.Wrap(r_source.Err, "failed to sum source")
+		return false, fae.Wrap(r_source.Err, "failed to sum source")
 	}
 	if r_dest.Err != nil {
-		return false, errors.Wrap(r_dest.Err, "failed to sum destination")
+		return false, fae.Wrap(r_dest.Err, "failed to sum destination")
 	}
 
 	return r_source.Hash == r_dest.Hash, nil
@@ -213,13 +215,13 @@ func sumFiles(source, destination string) (bool, error) {
 func FileCopy(srcpath, dstpath string) (err error) {
 	r, err := os.Open(srcpath)
 	if err != nil {
-		return errors.Wrap(err, "source")
+		return fae.Wrap(err, "source")
 	}
 	defer r.Close() // ignore error: file was opened read-only.
 
 	w, err := os.Create(dstpath)
 	if err != nil {
-		return errors.Wrap(err, "destination")
+		return fae.Wrap(err, "destination")
 	}
 
 	defer func() {
@@ -238,14 +240,14 @@ func FileCopy(srcpath, dstpath string) (err error) {
 // FileLink creates hard link, if destination exists and force is true, it will remove the destination before linking
 func FileLink(srcpath, dstpath string, force bool) error {
 	if err := FileDir(dstpath); err != nil {
-		return fmt.Errorf("failed to create directory: %w", err)
+		return fae.Wrap(err, "create directory")
 	}
 	if exists(dstpath) {
 		if !force {
-			return fmt.Errorf("destination exists, force false")
+			return fae.Errorf("destination exists, force false")
 		}
 		if err := os.Remove(dstpath); err != nil {
-			return fmt.Errorf("failed to remove destination: %w", err)
+			return fae.Wrap(err, "remove destination")
 		}
 	}
 	return os.Link(srcpath, dstpath)

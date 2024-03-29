@@ -5,8 +5,9 @@ import (
 	"time"
 
 	"github.com/kamva/mgm/v3"
-	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
+
+	"github.com/dashotv/fae"
 )
 
 func (c *Connector) ReleasesPopularQuery(t string, date time.Time, count int) ([]*Popular, error) {
@@ -48,12 +49,12 @@ func ReleasesPopularQuery(coll *mgm.Collection, t string, date time.Time, count 
 
 	cursor, err := coll.Aggregate(ctx, p)
 	if err != nil {
-		return nil, errors.Wrap(err, "aggregating popular releases")
+		return nil, fae.Wrap(err, "aggregating popular releases")
 	}
 
 	results := make([]*Popular, count)
 	if err = cursor.All(ctx, &results); err != nil {
-		return nil, errors.Wrap(err, "decoding popular releases")
+		return nil, fae.Wrap(err, "decoding popular releases")
 	}
 
 	return results, nil

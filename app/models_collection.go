@@ -1,6 +1,6 @@
 package app
 
-import "github.com/pkg/errors"
+import "github.com/dashotv/fae"
 
 func (c *Connector) CollectionGet(id string) (*Collection, error) {
 	collection, err := c.Collection.Get(id, &Collection{})
@@ -18,11 +18,11 @@ func (c *Connector) CollectionGet(id string) (*Collection, error) {
 func (c *Connector) CollectionList(limit, skip int) ([]*Collection, error) {
 	list, err := c.Collection.Query().Desc("created_at").Limit(limit).Skip(skip).Run()
 	if err != nil {
-		return nil, errors.Wrap(err, "query failed")
+		return nil, fae.Wrap(err, "query failed")
 	}
 
 	// if err := c.processCollections(list); err != nil {
-	// 	return nil, errors.Wrap(err, "process collections failed")
+	// 	return nil, fae.Wrap(err, "process collections failed")
 	// }
 
 	return list, nil

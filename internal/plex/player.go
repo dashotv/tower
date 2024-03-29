@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/pkg/errors"
+	"github.com/dashotv/fae"
 )
 
 func (p *Client) Play(ratingKey, player string) error {
 	queue, err := p.playCreateQueue(ratingKey)
 	if err != nil {
-		return errors.Wrap(err, "failed to create queue")
+		return fae.Wrap(err, "failed to create queue")
 	}
 	if queue == nil {
-		return errors.New("failed to create queue")
+		return fae.New("failed to create queue")
 	}
 
 	return p.playQueue(queue.MediaContainer.ID, ratingKey, player)
@@ -29,10 +29,10 @@ func (p *Client) Stop(session string) error {
 		SetQueryParamsFromValues(params).
 		Get("/status/sessions/terminate")
 	if err != nil {
-		return errors.Wrap(err, "failed to make request")
+		return fae.Wrap(err, "failed to make request")
 	}
 	if !resp.IsSuccess() {
-		return errors.Errorf("failed to play: %s", resp.Status())
+		return fae.Errorf("failed to play: %s", resp.Status())
 	}
 
 	return nil
@@ -69,10 +69,10 @@ func (p *Client) playQueue(queueID int64, ratingKey, player string) error {
 		SetQueryParamsFromValues(params).
 		Get("/player/playback/playMedia")
 	if err != nil {
-		return errors.Wrap(err, "failed to make request")
+		return fae.Wrap(err, "failed to make request")
 	}
 	if !resp.IsSuccess() {
-		return errors.Errorf("failed to play: %s: %s", resp.Status(), resp.String())
+		return fae.Errorf("failed to play: %s: %s", resp.Status(), resp.String())
 	}
 	return nil
 }
@@ -90,10 +90,10 @@ func (p *Client) playCreateQueue(ratingKey string) (*PlexQueue, error) {
 
 	resp, err := p._server().SetResult(q).SetHeaders(p.Headers).SetQueryParamsFromValues(params).Post("/playQueues")
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to make request")
+		return nil, fae.Wrap(err, "failed to make request")
 	}
 	if !resp.IsSuccess() {
-		return nil, errors.Errorf("failed to play: %s", resp.Status())
+		return nil, fae.Errorf("failed to play: %s", resp.Status())
 	}
 	// fmt.Printf("queue: %s\n", resp.String())
 	// fmt.Printf("queue: %+v\n", q)

@@ -6,7 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/labstack/echo/v4"
-	"github.com/pkg/errors"
+
+	"github.com/dashotv/fae"
 )
 
 const releasePageSize = 25
@@ -80,7 +81,7 @@ func (a *Application) ReleasesPopular(c echo.Context, interval string) error {
 			return err
 		}
 		if !ok {
-			return errors.New("http.StatusNotFound")
+			return fae.New("http.StatusNotFound")
 		}
 		out[t] = results
 	}

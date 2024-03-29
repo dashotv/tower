@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/dashotv/fae"
 )
 
 var regexPathTv = regexp.MustCompile(`(?i)(?P<season>\d+)x(?P<episode>\d+)`)
@@ -34,7 +36,7 @@ func (c *Connector) MediumByFile(f *File) (*Medium, error) {
 	case "anime", "donghua", "ecchi":
 		return c.MediumByFilePartsAnime(kind, name, file)
 	default:
-		return nil, fmt.Errorf("unknown kind: %s", kind)
+		return nil, fae.Errorf("unknown kind: %s", kind)
 	}
 }
 func (c *Connector) MediumBy(kind, name, file, ext string) (*Medium, bool, error) {
@@ -55,7 +57,7 @@ func (c *Connector) MediumBy(kind, name, file, ext string) (*Medium, bool, error
 		m, err := c.MediumByFilePartsAnime(kind, name, file)
 		return m, false, err
 	default:
-		return nil, false, fmt.Errorf("unknown kind: %s", kind)
+		return nil, false, fae.Errorf("unknown kind: %s", kind)
 	}
 }
 
@@ -68,7 +70,7 @@ func (c *Connector) MediumByFilePartsMovie(kind, name string) (*Medium, error) {
 		return nil, nil
 	}
 	if len(list) > 1 {
-		return nil, fmt.Errorf("more than one medium found for kind: %s, name: %s", kind, name)
+		return nil, fae.Errorf("more than one medium found for kind: %s, name: %s", kind, name)
 	}
 	return list[0], nil
 }
@@ -79,12 +81,12 @@ func (c *Connector) MediumByFilePartsTv(kind, name, file string) (*Medium, error
 		return nil, err
 	}
 	if len(series) != 1 {
-		return nil, fmt.Errorf("series not found for kind: %s, name: %s", kind, name)
+		return nil, fae.Errorf("series not found for kind: %s, name: %s", kind, name)
 	}
 
 	matches := regexPathTv.FindStringSubmatch(file)
 	if len(matches) != 3 {
-		return nil, fmt.Errorf("no matches found for file: %s: %v", file, matches)
+		return nil, fae.Errorf("no matches found for file: %s: %v", file, matches)
 	}
 
 	season, _ := strconv.Atoi(matches[1])
@@ -94,10 +96,10 @@ func (c *Connector) MediumByFilePartsTv(kind, name, file string) (*Medium, error
 		return nil, err
 	}
 	if len(list) == 0 {
-		return nil, fmt.Errorf("not found: %s/%s/%s: %v", kind, name, file, matches)
+		return nil, fae.Errorf("not found: %s/%s/%s: %v", kind, name, file, matches)
 	}
 	if len(list) > 1 {
-		return nil, fmt.Errorf("more than one medium found for kind: %s, name: %s", kind, name)
+		return nil, fae.Errorf("more than one medium found for kind: %s, name: %s", kind, name)
 	}
 	return list[0], nil
 }
@@ -108,12 +110,12 @@ func (c *Connector) MediumByFilePartsAnime(kind, name, file string) (*Medium, er
 		return nil, err
 	}
 	if len(series) != 1 {
-		return nil, fmt.Errorf("series not found: %s/%s/%s", kind, name, file)
+		return nil, fae.Errorf("series not found: %s/%s/%s", kind, name, file)
 	}
 
 	matches := regexPathAnime.FindStringSubmatch(file)
 	if len(matches) != 4 {
-		return nil, fmt.Errorf("no matches: %s/%s/%s: %v", kind, name, file, matches)
+		return nil, fae.Errorf("no matches: %s/%s/%s: %v", kind, name, file, matches)
 	}
 
 	absolute, _ := strconv.Atoi(matches[3])
@@ -124,7 +126,7 @@ func (c *Connector) MediumByFilePartsAnime(kind, name, file string) (*Medium, er
 		}
 		if len(list) > 1 {
 			c.Log.Warnf("more than one: %s/%s/%s: %d %d %+v", kind, name, file, absolute, list)
-			return nil, fmt.Errorf("more than one: %s/%s/%s: %v", kind, name, file, matches)
+			return nil, fae.Errorf("more than one: %s/%s/%s: %v", kind, name, file, matches)
 		}
 		if len(list) == 1 {
 			return list[0], nil
@@ -139,7 +141,7 @@ func (c *Connector) MediumByFilePartsAnime(kind, name, file string) (*Medium, er
 	// absolute didn't work, try episode as absolute
 	episode, _ := strconv.Atoi(matches[2])
 	if episode == 0 {
-		return nil, fmt.Errorf("episode == 0: %s/%s/%s: %v", kind, name, file, matches)
+		return nil, fae.Errorf("episode == 0: %s/%s/%s: %v", kind, name, file, matches)
 	}
 
 	list, err := c.Medium.Query().Where("_type", "Episode").Where("series_id", series[0].ID).Where("absolute_number", episode).Run()
@@ -152,7 +154,7 @@ func (c *Connector) MediumByFilePartsAnime(kind, name, file string) (*Medium, er
 	}
 	if len(list) > 1 {
 		c.Log.Warnf("more than one: %s/%s/%s: %d %d %+v", kind, name, file, absolute, episode, list)
-		return nil, fmt.Errorf("more than one: %s/%s/%s: %v", kind, name, file, matches)
+		return nil, fae.Errorf("more than one: %s/%s/%s: %v", kind, name, file, matches)
 	}
 	return list[0], nil
 }

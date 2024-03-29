@@ -1,7 +1,7 @@
 package plex
 
 import (
-	"github.com/pkg/errors"
+	"github.com/dashotv/fae"
 )
 
 type PlexLibraryMetadataContainer struct {
@@ -40,10 +40,10 @@ type PlexLeavesMetadata struct {
 func (p *Client) GetMetadataByKey(key string) (string, error) {
 	resp, err := p._server().SetFormDataFromValues(p.data).Get("/library/metadata/" + key)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to make request")
+		return "", fae.Wrap(err, "failed to make request")
 	}
 	if !resp.IsSuccess() {
-		return "", errors.Errorf("failed to get metadata: %s", resp.Status())
+		return "", fae.Errorf("failed to get metadata: %s", resp.Status())
 	}
 	return resp.String(), nil
 }
@@ -51,10 +51,10 @@ func (p *Client) GetViewedByKey(key string) (*PlexLibraryMetadata, error) {
 	m := &PlexLibraryMetadataContainer{}
 	resp, err := p._server().SetResult(m).SetFormDataFromValues(p.data).Get("/library/metadata/" + key)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to make request")
+		return nil, fae.Wrap(err, "failed to make request")
 	}
 	if !resp.IsSuccess() {
-		return nil, errors.Errorf("failed to get viewed: %s", resp.Status())
+		return nil, fae.Errorf("failed to get viewed: %s", resp.Status())
 	}
 	return m.MediaContainer.Metadata[0], nil
 }
@@ -62,10 +62,10 @@ func (p *Client) GetSeriesEpisodes(key string) ([]*PlexLeavesMetadata, error) {
 	m := &PlexLeavesMetadataContainer{}
 	resp, err := p._server().SetResult(m).SetFormDataFromValues(p.data).Get("/library/metadata/" + key + "/allLeaves")
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to make request")
+		return nil, fae.Wrap(err, "failed to make request")
 	}
 	if !resp.IsSuccess() {
-		return nil, errors.Errorf("failed to get viewed: %s", resp.Status())
+		return nil, fae.Errorf("failed to get viewed: %s", resp.Status())
 	}
 	// fmt.Printf("unwatched: %s\n", resp.String())
 	return m.MediaContainer.Metadata, nil

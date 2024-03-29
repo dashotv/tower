@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/flame/metube"
 	"github.com/dashotv/minion"
 )
@@ -43,12 +43,12 @@ func (j *DownloadsProcess) Work(ctx context.Context, job *minion.Job[*DownloadsP
 func (j *DownloadsProcess) Create() error {
 	list, err := app.DB.UpcomingNow()
 	if err != nil {
-		return errors.Wrap(err, "failed to get upcoming episodes")
+		return fae.Wrap(err, "failed to get upcoming episodes")
 	}
 
 	seriesDownloads, err := app.DB.SeriesDownloadCounts()
 	if err != nil {
-		return errors.Wrap(err, "failed to get series download counts")
+		return fae.Wrap(err, "failed to get series download counts")
 	}
 
 	for _, ep := range list {
@@ -67,7 +67,7 @@ func (j *DownloadsProcess) Create() error {
 			// If I'm not watching it, see if others are
 			unwatched, err := app.DB.SeriesUnwatchedByID(ep.SeriesId.Hex())
 			if err != nil {
-				return errors.Wrap(err, "failed to get unwatched")
+				return fae.Wrap(err, "failed to get unwatched")
 			}
 
 			if unwatched >= 3 {
@@ -87,12 +87,12 @@ func (j *DownloadsProcess) Create() error {
 		}
 		err = app.DB.Download.Save(d)
 		if err != nil {
-			return errors.Wrap(err, "failed to save download")
+			return fae.Wrap(err, "failed to save download")
 		}
 
 		err = app.DB.EpisodeSetting(ep.ID.Hex(), "downloaded", true)
 		if err != nil {
-			return errors.Wrap(err, "failed to save episode")
+			return fae.Wrap(err, "failed to save episode")
 		}
 	}
 
@@ -102,7 +102,7 @@ func (j *DownloadsProcess) Create() error {
 func (j *DownloadsProcess) Search() error {
 	list, err := app.DB.DownloadByStatus("searching")
 	if err != nil {
-		return errors.Wrap(err, "failed to get downloads")
+		return fae.Wrap(err, "failed to get downloads")
 	}
 
 	for _, d := range list {
@@ -117,7 +117,7 @@ func (j *DownloadsProcess) Search() error {
 		//app.Workers.Log.Debugf("DownloadsProcess: search: %s %s", d.Medium.Title, d.Medium.Display)
 		match, err := app.Scry.ScrySearchEpisode(d.Medium)
 		if err != nil {
-			return errors.Wrap(err, "failed to search releases")
+			return fae.Wrap(err, "failed to search releases")
 		}
 		if match == nil {
 			continue
@@ -134,7 +134,7 @@ func (j *DownloadsProcess) Search() error {
 
 		err = app.DB.Download.Save(d)
 		if err != nil {
-			return errors.Wrap(err, "failed to save download")
+			return fae.Wrap(err, "failed to save download")
 		}
 	}
 	return nil
@@ -143,7 +143,7 @@ func (j *DownloadsProcess) Search() error {
 func (j *DownloadsProcess) Load() error {
 	list, err := app.DB.DownloadByStatus("loading")
 	if err != nil {
-		return errors.Wrap(err, "failed to get downloads")
+		return fae.Wrap(err, "failed to get downloads")
 	}
 
 	for _, d := range list {
@@ -154,13 +154,13 @@ func (j *DownloadsProcess) Load() error {
 
 		url, err := d.GetURL()
 		if err != nil {
-			return errors.Wrap(err, "failed to get url")
+			return fae.Wrap(err, "failed to get url")
 		}
 
 		if nzbgeekRegex.MatchString(url) {
 			id, err := app.Flame.LoadNzb(d, url)
 			if err != nil {
-				return errors.Wrap(err, "failed to load nzb")
+				return fae.Wrap(err, "failed to load nzb")
 			}
 			d.Status = "downloading"
 			d.Thash = id
@@ -173,14 +173,14 @@ func (j *DownloadsProcess) Load() error {
 			url = strings.Replace(url, "metube://", "", 1)
 			err := app.Flame.LoadMetube(d.ID.Hex(), url, autoStart)
 			if err != nil {
-				return fmt.Errorf("failed to load metube: %w", err)
+				return fae.Wrap(err, "load metube")
 			}
 			d.Status = "downloading"
 			d.Thash = "M"
 		} else {
 			thash, err := app.Flame.LoadTorrent(d, url)
 			if err != nil {
-				return errors.Wrap(err, "failed to load torrent")
+				return fae.Wrap(err, "failed to load torrent")
 			}
 			d.Status = "managing"
 			d.Thash = strings.ToLower(thash)
@@ -188,7 +188,7 @@ func (j *DownloadsProcess) Load() error {
 
 		err = app.DB.Download.Save(d)
 		if err != nil {
-			return errors.Wrap(err, "failed to save download")
+			return fae.Wrap(err, "failed to save download")
 		}
 	}
 
@@ -198,7 +198,7 @@ func (j *DownloadsProcess) Load() error {
 func (j *DownloadsProcess) Manage() error {
 	list, err := app.DB.DownloadByStatus("managing")
 	if err != nil {
-		return fmt.Errorf("failed to get downloads: %w", err)
+		return fae.Wrap(err, "get downloads")
 	}
 
 	for _, d := range list {
@@ -253,7 +253,7 @@ func (j *DownloadsProcess) Manage() error {
 
 		err = app.DB.Download.Save(d)
 		if err != nil {
-			return errors.Wrap(err, "failed to save download")
+			return fae.Wrap(err, "failed to save download")
 		}
 	}
 
@@ -264,7 +264,7 @@ func (j *DownloadsProcess) Move() error {
 	l := app.Log.Named("downloads.move")
 	list, err := app.DB.DownloadByStatus("downloading")
 	if err != nil {
-		return errors.Wrap(err, "failed to get downloads")
+		return fae.Wrap(err, "failed to get downloads")
 	}
 
 	moved := []string{}
@@ -312,7 +312,7 @@ func (j *DownloadsProcess) Move() error {
 		// TODO: move to configurable templates
 		dest, err := Destination(d.Medium)
 		if err != nil {
-			return errors.Wrap(err, "failed to get destination")
+			return fae.Wrap(err, "failed to get destination")
 		}
 
 		source := fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, tf.Name)
@@ -328,16 +328,16 @@ func (j *DownloadsProcess) Move() error {
 		}
 
 		if !exists(source) {
-			return errors.Errorf("source does not exist: %s", source)
+			return fae.Errorf("source does not exist: %s", source)
 		}
 		if exists(destination) {
 			if !d.Force {
-				return errors.New("destination exists, force false")
+				return fae.New("destination exists, force false")
 			}
 
 			match, err := sumFiles(source, destination)
 			if err != nil {
-				return errors.Wrap(err, "failed to sum files")
+				return fae.Wrap(err, "failed to sum files")
 			}
 			if match {
 				l.Debugf("destination exists, checksums match")
@@ -347,7 +347,7 @@ func (j *DownloadsProcess) Move() error {
 		}
 
 		if err := FileLink(source, destination, d.Force); err != nil {
-			return errors.Wrap(err, "copy")
+			return fae.Wrap(err, "copy")
 		}
 
 		d.Status = "done"
@@ -359,11 +359,11 @@ func (j *DownloadsProcess) Move() error {
 
 		err = app.DB.Download.Save(d)
 		if err != nil {
-			return errors.Wrap(err, "failed to save download")
+			return fae.Wrap(err, "failed to save download")
 		}
 
 		if err := app.Flame.RemoveTorrent(d.Thash); err != nil {
-			return errors.Wrap(err, "failed to remove torrent")
+			return fae.Wrap(err, "failed to remove torrent")
 		}
 
 		moved = append(moved, destination)
@@ -380,7 +380,7 @@ func (j *DownloadsProcess) Move() error {
 			notifier.Log.Info("downloads: refresh: ", dir)
 			err := app.Plex.RefreshLibraryPath(dir)
 			if err != nil {
-				return errors.Wrap(err, "failed to refresh library")
+				return fae.Wrap(err, "failed to refresh library")
 			}
 		}
 	}
@@ -391,7 +391,7 @@ func (j *DownloadsProcess) Move() error {
 func updateMedium(id, dest, ext string) error {
 	m, err := app.DB.Medium.Get(id, &Medium{})
 	if err != nil {
-		return fmt.Errorf("get medium: %w", err)
+		return fae.Wrap(err, "get medium")
 	}
 
 	m.Completed = true
@@ -402,7 +402,7 @@ func updateMedium(id, dest, ext string) error {
 	})
 	err = app.DB.Medium.Update(m)
 	if err != nil {
-		return fmt.Errorf("update medium: %s", err)
+		return fae.Errorf("update medium: %s", err)
 	}
 	// enqueue path import
 	path, ok := lo.Find(m.Paths, func(p *Path) bool {
@@ -410,7 +410,7 @@ func updateMedium(id, dest, ext string) error {
 	})
 	if ok && path != nil {
 		if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: path.Id.Hex(), Title: path.Local}); err != nil {
-			return fmt.Errorf("enqueue path: %s", err)
+			return fae.Errorf("enqueue path: %s", err)
 		}
 	}
 
@@ -424,7 +424,7 @@ func (j *DownloadsProcess) MetubeMove(download *Download) error {
 
 	history, err := app.Flame.MetubeHistory()
 	if err != nil {
-		return fmt.Errorf("history: %w", err)
+		return fae.Wrap(err, "history")
 	}
 
 	done, ok := lo.Find(history.Done, func(h *metube.Download) bool {
@@ -456,7 +456,7 @@ func (j *DownloadsProcess) MetubeMove(download *Download) error {
 		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("walk: %w", err)
+		return fae.Wrap(err, "walk")
 	}
 
 	files = lo.Filter(files, func(s string, i int) bool {
@@ -472,7 +472,7 @@ func (j *DownloadsProcess) MetubeMove(download *Download) error {
 
 		dest, err := Destination(download.Medium)
 		if err != nil {
-			return fmt.Errorf("destination: %w", err)
+			return fae.Wrap(err, "destination")
 		}
 
 		destination := fmt.Sprintf("%s/%s.%s", app.Config.DirectoriesCompleted, dest, ext[1:])
@@ -480,7 +480,7 @@ func (j *DownloadsProcess) MetubeMove(download *Download) error {
 		l.Debugf("    -> %s", destination)
 
 		if exists(destination) && !download.Force {
-			return errors.New("exists, force false")
+			return fae.New("exists, force false")
 		}
 
 		if !app.Config.Production {
@@ -490,7 +490,7 @@ func (j *DownloadsProcess) MetubeMove(download *Download) error {
 
 		if err := FileLink(f, destination, download.Force); err != nil {
 			l.Errorf("copy: %s", err)
-			return fmt.Errorf("copy: %w", err)
+			return fae.Wrap(err, "copy")
 		}
 
 		download.Status = "done"
@@ -502,7 +502,7 @@ func (j *DownloadsProcess) MetubeMove(download *Download) error {
 
 		err = app.DB.Download.Save(download)
 		if err != nil {
-			return errors.Wrap(err, "failed to save download")
+			return fae.Wrap(err, "failed to save download")
 		}
 
 		moved = append(moved, destination)
@@ -518,7 +518,7 @@ func (j *DownloadsProcess) MetubeMove(download *Download) error {
 		for _, dir := range dirs {
 			err := app.Plex.RefreshLibraryPath(dir)
 			if err != nil {
-				return errors.Wrap(err, "failed to refresh library")
+				return fae.Wrap(err, "failed to refresh library")
 			}
 		}
 	}
@@ -535,7 +535,7 @@ func (j *DownloadsProcess) MetubeMove(download *Download) error {
 // func (j *DownloadFileMover) Work(ctx context.Context, job *minion.Job[*DownloadFileMover]) error {
 // 	d, err :=app.DB.DownloadGet(job.Args.ID)
 // 	if err != nil {
-// 		return errors.Wrap(err, "failed to get download")
+// 		return fae.Wrap(err, "failed to get download")
 // 	}
 // 	notifier.Info("Downloads::Move", fmt.Sprintf("%s %s", d.Medium.Title, d.Medium.Display))
 //
@@ -562,16 +562,16 @@ func (j *DownloadsProcess) MetubeMove(download *Download) error {
 //app.Workers.Log.Debugf("    -> %s", destination)
 //
 // 	if !exists(source) {
-// 		return errors.New("source does not exist")
+// 		return fae.New("source does not exist")
 // 	}
 // 	if exists(destination) {
 // 		if !d.Force {
-// 			return errors.New("destination exists, force false")
+// 			return fae.New("destination exists, force false")
 // 		}
 //
 // 		match, err := sumFiles(source, destination)
 // 		if err != nil {
-// 			return errors.Wrap(err, "failed to sum files")
+// 			return fae.Wrap(err, "failed to sum files")
 // 		}
 // 		if match {
 //app.Workers.Log.Debugf("destination exists, checksums match")
@@ -581,7 +581,7 @@ func (j *DownloadsProcess) MetubeMove(download *Download) error {
 // 	}
 //
 // 	if err := FileCopy(source, destination); err != nil {
-// 		return errors.Wrap(err, "copy")
+// 		return fae.Wrap(err, "copy")
 // 	}
 //
 // 	return nil

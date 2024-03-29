@@ -1,9 +1,10 @@
 package app
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
+
+	"github.com/dashotv/fae"
 )
 
 func (f *File) Parts() (string, string, string) {
@@ -46,7 +47,7 @@ func (c *Connector) FileByPath(path string) (*File, error) {
 	}
 
 	if len(list) > 1 {
-		return nil, fmt.Errorf("more than one file found for path: %s", path)
+		return nil, fae.Errorf("more than one file found for path: %s", path)
 	}
 
 	if len(list) == 0 {

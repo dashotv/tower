@@ -5,8 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/pkg/errors"
-
+	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
 	"github.com/dashotv/tmdb"
 )
@@ -25,18 +24,18 @@ func (j *TmdbUpdateMovie) Work(ctx context.Context, job *minion.Job[*TmdbUpdateM
 	movie := &Movie{}
 	err := app.DB.Movie.Find(id, movie)
 	if err != nil {
-		return errors.Wrap(err, "finding movie")
+		return fae.Wrap(err, "finding movie")
 	}
 	app.DB.processMovies([]*Movie{movie})
 
 	mid, err := strconv.Atoi(movie.SourceId)
 	if err != nil {
-		return errors.Wrap(err, "converting source id")
+		return fae.Wrap(err, "converting source id")
 	}
 
 	resp, err := app.Tmdb.MovieDetails(mid, nil, nil)
 	if err != nil {
-		return errors.Wrap(err, "getting movie details")
+		return fae.Wrap(err, "getting movie details")
 	}
 
 	movie.Title = tmdb.StringValue(resp.Title)
@@ -53,12 +52,12 @@ func (j *TmdbUpdateMovie) Work(ctx context.Context, job *minion.Job[*TmdbUpdateM
 	movie.Description = tmdb.StringValue(resp.Overview)
 	d, err := time.Parse("2006-01-02", tmdb.StringValue(resp.ReleaseDate))
 	if err != nil {
-		return errors.Wrap(err, "parsing release date")
+		return fae.Wrap(err, "parsing release date")
 	}
 	movie.ReleaseDate = d
 
 	if err := app.Workers.Enqueue(&PathCleanup{ID: id}); err != nil {
-		return errors.Wrap(err, "enqueuing media paths")
+		return fae.Wrap(err, "enqueuing media paths")
 	}
 
 	if !job.Args.JustMedia {
@@ -72,7 +71,7 @@ func (j *TmdbUpdateMovie) Work(ctx context.Context, job *minion.Job[*TmdbUpdateM
 
 	err = app.DB.Movie.Update(movie)
 	if err != nil {
-		return errors.Wrap(err, "saving movie")
+		return fae.Wrap(err, "saving movie")
 	}
 
 	return nil

@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/dashotv/fae"
 )
 
 var nzbgeekRegex = regexp.MustCompile("^https://api.nzbgeek")
@@ -38,7 +39,7 @@ func (d *Download) GetURL() (string, error) {
 		return r.Download, nil
 	}
 
-	return "", errors.New("no url or release")
+	return "", fae.New("no url or release")
 }
 
 func (d *Download) IsNzb() bool {
@@ -244,5 +245,5 @@ func (c *Connector) DownloadSelect(id, mediumId string, num int) error {
 		}
 	}
 
-	return errors.New("could not match num with download file")
+	return fae.New("could not match num with download file")
 }

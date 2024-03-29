@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/samber/lo"
 
+	"github.com/dashotv/fae"
 	flame "github.com/dashotv/flame/app"
 	"github.com/dashotv/flame/nzbget"
 	"github.com/dashotv/flame/qbt"
@@ -38,7 +38,7 @@ type Downloading struct {
 func onFlameCombined(app *Application, c *FlameCombined) (*EventDownloading, error) {
 	list, err := app.DB.ActiveDownloads()
 	if err != nil {
-		return nil, errors.Wrap(err, "getting active downloads")
+		return nil, fae.Wrap(err, "getting active downloads")
 	}
 
 	hashes := make(map[string]string)

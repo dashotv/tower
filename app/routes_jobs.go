@@ -2,13 +2,12 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/minion/database"
 )
 
@@ -43,12 +42,12 @@ func (a *Application) JobsIndex(c echo.Context, page int, limit int) error {
 func (a *Application) JobsCreate(c echo.Context, job string) error {
 	a.Log.Debugf("JobsCreate: %s", job)
 	if job == "" {
-		return errors.New("missing job")
+		return fae.New("missing job")
 	}
 
 	j, ok := workersList[job]
 	if !ok || j == nil {
-		return fmt.Errorf("unknown job: %s", job)
+		return fae.Errorf("unknown job: %s", job)
 	}
 
 	app.Log.Infof("Enqueuing job: %s", j.Kind())

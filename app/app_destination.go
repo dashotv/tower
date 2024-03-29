@@ -3,6 +3,8 @@ package app
 import (
 	"fmt"
 	"regexp"
+
+	"github.com/dashotv/fae"
 )
 
 var titleRegex = regexp.MustCompile(`(?i)^(?:episode|chapter)`)
@@ -14,7 +16,7 @@ func Destination(m *Medium) (string, error) {
 	case "Episode":
 		return destinationEpisode(m)
 	default:
-		return "", fmt.Errorf("unknown type: %s", m.Type)
+		return "", fae.Errorf("unknown type: %s", m.Type)
 	}
 }
 

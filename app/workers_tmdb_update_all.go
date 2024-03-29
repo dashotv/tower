@@ -3,8 +3,7 @@ package app
 import (
 	"context"
 
-	"github.com/pkg/errors"
-
+	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
 )
 
@@ -16,7 +15,7 @@ func (j *TmdbUpdateAll) Kind() string { return "TmdbUpdateAll" }
 func (j *TmdbUpdateAll) Work(ctx context.Context, job *minion.Job[*TmdbUpdateAll]) error {
 	movies, err := app.DB.Movie.Query().Limit(-1).Run()
 	if err != nil {
-		return errors.Wrap(err, "querying movies")
+		return fae.Wrap(err, "querying movies")
 	}
 
 	for _, m := range movies {

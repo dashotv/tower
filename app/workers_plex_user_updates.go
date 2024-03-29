@@ -3,8 +3,7 @@ package app
 import (
 	"context"
 
-	"github.com/pkg/errors"
-
+	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
 )
 
@@ -19,13 +18,13 @@ func (j *PlexUserUpdates) Work(ctx context.Context, job *minion.Job[*PlexUserUpd
 
 	users, err := app.DB.User.Query().NotEqual("token", "").Run()
 	if err != nil {
-		return errors.Wrap(err, "querying users")
+		return fae.Wrap(err, "querying users")
 	}
 
 	for _, u := range users {
 		data, err := app.Plex.GetUser(u.Token)
 		if err != nil {
-			return errors.Wrap(err, "getting user data")
+			return fae.Wrap(err, "getting user data")
 		}
 
 		u.Name = data.Username
@@ -37,12 +36,12 @@ func (j *PlexUserUpdates) Work(ctx context.Context, job *minion.Job[*PlexUserUpd
 		app.Log.Debugf("updating user %s", u.Name)
 		err = app.DB.User.Update(u)
 		if err != nil {
-			return errors.Wrap(err, "updating user")
+			return fae.Wrap(err, "updating user")
 		}
 	}
 
 	if err := app.Workers.Enqueue(&PlexWatchlistUpdates{}); err != nil {
-		return errors.Wrap(err, "enqueuing worker")
+		return fae.Wrap(err, "enqueuing worker")
 	}
 
 	return nil

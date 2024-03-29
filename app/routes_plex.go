@@ -7,9 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/labstack/echo/v4"
-	"github.com/pkg/errors"
 	"github.com/samber/lo"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/tower/internal/plex"
 )
 
@@ -64,7 +64,7 @@ func (a *Application) PlexAuth(c echo.Context) error {
 		return err
 	}
 	if len(list) != 1 {
-		return errors.New("pin not found")
+		return fae.New("pin not found")
 	}
 
 	plexPin := pinToPlexPin(list[0])
@@ -73,7 +73,7 @@ func (a *Application) PlexAuth(c echo.Context) error {
 		return err
 	}
 	if !ok {
-		return errors.New("something went wrong...")
+		return fae.New("something went wrong...")
 	}
 
 	if err := app.Workers.Enqueue(&PlexPinToUsers{}); err != nil {

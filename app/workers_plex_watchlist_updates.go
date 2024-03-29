@@ -4,8 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/pkg/errors"
-
+	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
 	"github.com/dashotv/tower/internal/plex"
 )
@@ -23,13 +22,13 @@ func (j *PlexWatchlistUpdates) Work(ctx context.Context, job *minion.Job[*PlexWa
 
 	users, err := app.DB.User.Query().NotEqual("token", "").Run()
 	if err != nil {
-		return errors.Wrap(err, "querying users")
+		return fae.Wrap(err, "querying users")
 	}
 
 	for _, u := range users {
 		list, err := app.Plex.GetWatchlist(u.Token)
 		if err != nil {
-			return errors.Wrap(err, "getting watchlist")
+			return fae.Wrap(err, "getting watchlist")
 		}
 
 		if list == nil || len(list.MediaContainer.Metadata) == 0 {
@@ -38,7 +37,7 @@ func (j *PlexWatchlistUpdates) Work(ctx context.Context, job *minion.Job[*PlexWa
 
 		details, err := app.Plex.GetWatchlistDetail(u.Token, list)
 		if err != nil {
-			return errors.Wrap(err, "getting watchlist details")
+			return fae.Wrap(err, "getting watchlist details")
 		}
 
 		for _, d := range details {
@@ -49,7 +48,7 @@ func (j *PlexWatchlistUpdates) Work(ctx context.Context, job *minion.Job[*PlexWa
 			dm := d.MediaContainer.Metadata[0]
 			m, err := findMediaByGUIDs(dm.GUID)
 			if err != nil {
-				return errors.Wrap(err, "finding media")
+				return fae.Wrap(err, "finding media")
 			}
 			if m != nil {
 				continue
@@ -57,7 +56,7 @@ func (j *PlexWatchlistUpdates) Work(ctx context.Context, job *minion.Job[*PlexWa
 			// app.Log.Debugf("PlexUserUpdates: NOT FOUND: %s: %s", dm.Title, dm.Type)
 			err = createRequest(u.Name, dm.Title, dm.Type, dm.GUID)
 			if err != nil {
-				return errors.Wrap(err, "creating request")
+				return fae.Wrap(err, "creating request")
 			}
 			// app.Log.Infof("PlexUserUpdates: REQUESTED: %s: %s", dm.Title, dm.Type)
 		}
@@ -73,19 +72,19 @@ func createRequest(user, title, t string, guids []plex.GUID) error {
 	case "show":
 		return createShowRequest(user, title, guids)
 	default:
-		return errors.Errorf("createRequest: unknown type: %s", t)
+		return fae.Errorf("createRequest: unknown type: %s", t)
 	}
 }
 
 func createMovieRequest(user, title string, guids []plex.GUID) error {
 	source_id := guidToSourceID("tmdb", guids)
 	if source_id == "" {
-		return errors.New("createMovieRequest: no tmdb guid")
+		return fae.New("createMovieRequest: no tmdb guid")
 	}
 
 	reqs, err := app.DB.Request.Query().Where("source", "tmdb").Where("source_id", source_id).Run()
 	if err != nil {
-		return errors.Wrap(err, "querying requests")
+		return fae.Wrap(err, "querying requests")
 	}
 	if len(reqs) > 0 {
 		return nil
@@ -102,7 +101,7 @@ func createMovieRequest(user, title string, guids []plex.GUID) error {
 
 	err = app.DB.Request.Save(req)
 	if err != nil {
-		return errors.Wrap(err, "saving request")
+		return fae.Wrap(err, "saving request")
 	}
 
 	return nil
@@ -111,12 +110,12 @@ func createMovieRequest(user, title string, guids []plex.GUID) error {
 func createShowRequest(user, title string, guids []plex.GUID) error {
 	source_id := guidToSourceID("tvdb", guids)
 	if source_id == "" {
-		return errors.New("createShowRequest: no tvdb guid")
+		return fae.New("createShowRequest: no tvdb guid")
 	}
 
 	reqs, err := app.DB.Request.Query().Where("source", "tvdb").Where("source_id", source_id).Run()
 	if err != nil {
-		return errors.Wrap(err, "querying requests")
+		return fae.Wrap(err, "querying requests")
 	}
 	if len(reqs) > 0 {
 		return nil
@@ -133,7 +132,7 @@ func createShowRequest(user, title string, guids []plex.GUID) error {
 
 	err = app.DB.Request.Save(req)
 	if err != nil {
-		return errors.Wrap(err, "saving request")
+		return fae.Wrap(err, "saving request")
 	}
 	return nil
 }
@@ -154,7 +153,7 @@ func findMediaByGUIDs(list []plex.GUID) (*Medium, error) {
 		s := strings.Split(g.ID, "://")
 		list, err := app.DB.Medium.Query().Where("source", s[0]).Where("source_id", s[1]).Run()
 		if err != nil {
-			return nil, errors.Wrap(err, "querying media")
+			return nil, fae.Wrap(err, "querying media")
 		}
 		if len(list) > 0 {
 			return list[0], nil

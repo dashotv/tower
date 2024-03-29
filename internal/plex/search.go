@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/pkg/errors"
+	"github.com/dashotv/fae"
 )
 
 func (p *Client) Search(query, section string) ([]SearchMetadata, error) {
@@ -30,7 +30,7 @@ func (p *Client) Search(query, section string) ([]SearchMetadata, error) {
 		return nil, err
 	}
 	if !resp.IsSuccess() {
-		return nil, errors.Errorf("failed to get search: %s", resp.Status())
+		return nil, fae.Errorf("failed to get search: %s", resp.Status())
 	}
 
 	// app.Log.Debugf("search req url: %s", resp.Request.URL)

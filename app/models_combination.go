@@ -3,6 +3,8 @@ package app
 import (
 	"fmt"
 	"sort"
+
+	"github.com/dashotv/fae"
 )
 
 func (c *Connector) CombinationGet(id string) (*Combination, error) {
@@ -114,7 +116,7 @@ func (c *Connector) CombinationChildren(name string) ([]*CombinationChild, error
 				return nil, err
 			}
 			if metadata == nil {
-				return nil, fmt.Errorf("metadata not found for %s", child.RatingKey)
+				return nil, fae.Errorf("metadata not found for %s", child.RatingKey)
 			}
 			if metadata.Leaves == metadata.Viewed {
 				continue

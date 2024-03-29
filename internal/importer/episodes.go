@@ -1,21 +1,19 @@
 package importer
 
 import (
-	"errors"
-	"fmt"
-
+	"github.com/dashotv/fae"
 	"github.com/dashotv/tvdb"
 )
 
 func (i *Importer) loadEpisodes(tvdbid int64) ([]*Episode, error) {
 	def, err := i.loadEpisodesMap(tvdbid, EpisodeOrderDefault)
 	if err != nil {
-		return nil, fmt.Errorf("default: %w", err)
+		return nil, fae.Wrap(err, "default")
 	}
 
 	abs, err := i.loadEpisodesMap(tvdbid, EpisodeOrderAbsolute)
 	if err != nil {
-		return nil, fmt.Errorf("absolute: %w", err)
+		return nil, fae.Wrap(err, "absolute")
 	}
 
 	episodes := make([]*Episode, 0)
@@ -37,10 +35,10 @@ func (i *Importer) loadEpisodesMap(tvdbid int64, episodeOrder int) (map[int64]*E
 	}
 	resp, err := i.Tvdb.GetSeriesEpisodes(req)
 	if err != nil {
-		return nil, fmt.Errorf("episodes: %w", err)
+		return nil, fae.Wrap(err, "episodes")
 	}
 	if resp.Data == nil {
-		return nil, errors.New("episodes: no data")
+		return nil, fae.New("episodes: no data")
 	}
 
 	episodeMap := make(map[int64]*Episode)
@@ -58,10 +56,10 @@ func (i *Importer) loadEpisodesMap(tvdbid int64, episodeOrder int) (map[int64]*E
 
 	trans, err := i.Tvdb.GetSeriesSeasonEpisodesTranslated(tvdbid, i.Opts.Language, 0, episodeOrderString(episodeOrder))
 	if err != nil {
-		return nil, fmt.Errorf("translated: %w", err)
+		return nil, fae.Wrap(err, "translated")
 	}
 	if trans.Data == nil {
-		return nil, errors.New("translated: no data")
+		return nil, fae.New("translated: no data")
 	}
 	for _, e := range trans.Data.Episodes {
 		if ep, ok := episodeMap[tvdb.Int64Value(e.ID)]; ok {

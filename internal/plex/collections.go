@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/pkg/errors"
 	"github.com/samber/lo"
+
+	"github.com/dashotv/fae"
 )
 
 type PlexCollectionCreate struct {
@@ -48,7 +49,7 @@ func (p *Client) CreateCollection(title, section, firstKey string) (*PlexCollect
 		return nil, err
 	}
 	if !resp.IsSuccess() {
-		return nil, errors.Errorf("failed to create collection: %s", resp.Status())
+		return nil, fae.Errorf("failed to create collection: %s", resp.Status())
 	}
 
 	return dest, nil
@@ -132,7 +133,7 @@ func (p *Client) DeleteCollection(ratingKey string) error {
 		return err
 	}
 	if !resp.IsSuccess() {
-		return errors.Errorf("failed to delete collection: %s", resp.Status())
+		return fae.Errorf("failed to delete collection: %s", resp.Status())
 	}
 
 	return nil
@@ -151,7 +152,7 @@ func (p *Client) ListCollections(section string) ([]*PlexCollection, error) {
 		return nil, err
 	}
 	if !resp.IsSuccess() {
-		return nil, errors.Errorf("failed to get collections: %s", resp.Status())
+		return nil, fae.Errorf("failed to get collections: %s", resp.Status())
 	}
 
 	return dest.MediaContainer.Metadata, nil
@@ -170,10 +171,10 @@ func (p *Client) GetCollection(ratingKey string) (*PlexCollection, error) {
 		return nil, err
 	}
 	if !resp.IsSuccess() {
-		return nil, errors.Errorf("failed to update collection: %s", resp.Status())
+		return nil, fae.Errorf("failed to update collection: %s", resp.Status())
 	}
 	if len(dest.MediaContainer.Directory) != 1 {
-		return nil, errors.Errorf("api response found %d directories, wanted 1", len(dest.MediaContainer.Directory))
+		return nil, fae.Errorf("api response found %d directories, wanted 1", len(dest.MediaContainer.Directory))
 	}
 	children, err := p.GetCollectionChildren(ratingKey)
 	if err != nil {
@@ -199,7 +200,7 @@ func (p *Client) GetCollectionChildren(ratingKey string) ([]*PlexCollectionChild
 		return nil, err
 	}
 	if !resp.IsSuccess() {
-		return nil, errors.Errorf("failed to get collection children: %s", resp.Status())
+		return nil, fae.Errorf("failed to get collection children: %s", resp.Status())
 	}
 	// fmt.Printf("collection: %s\n", resp.String())
 	return dest.MediaContainer.Directory, nil
@@ -246,7 +247,7 @@ func (p *Client) addCollectionItem(ratingKey, newKey string) error {
 		return err
 	}
 	if !resp.IsSuccess() {
-		return errors.Errorf("failed to add to collection: %s", resp.Status())
+		return fae.Errorf("failed to add to collection: %s", resp.Status())
 	}
 
 	return nil
@@ -264,7 +265,7 @@ func (p *Client) removeCollectionItem(ratingKey, rmKey string) error {
 		return err
 	}
 	if !resp.IsSuccess() {
-		return errors.Errorf("failed to remove from collection: %s", resp.Status())
+		return fae.Errorf("failed to remove from collection: %s", resp.Status())
 	}
 
 	return nil
@@ -277,7 +278,7 @@ func (p *Client) removeCollectionItem(ratingKey, rmKey string) error {
 // 		return dest, err
 // 	}
 // 	if !resp.IsSuccess() {
-// 		return dest, errors.Errorf("failed to get collections: %s", resp.Status())
+// 		return dest, fae.Errorf("failed to get collections: %s", resp.Status())
 // 	}
 //
 // 	return dest, nil
