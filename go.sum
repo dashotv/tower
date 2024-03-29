@@ -108,6 +108,8 @@ github.com/coreos/go-etcd v2.0.0+incompatible/go.mod h1:Jez6KQU2B/sWsbdaef3ED8Nz
 github.com/coreos/go-semver v0.2.0/go.mod h1:nnelYz7RCh+5ahJtPPxZlU+153eP4D4r3EedlOD2RNk=
 github.com/cpuguy83/go-md2man v1.0.10/go.mod h1:SmD6nW6nTyfqj6ABTjUi3V3JVMnlJmwcJI5acqYI6dE=
 github.com/cpuguy83/go-md2man/v2 v2.0.3/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
+github.com/dashotv/fae v0.1.4 h1:zI2a3lgEztiWnFs2Tny84f9F2WaP1WoBi47DzBarwDo=
+github.com/dashotv/fae v0.1.4/go.mod h1:+deep7H052Bz6GxW7HXiel4S+Rqkva1mPETS+3tQOVU=
 github.com/dashotv/flame v0.9.1 h1:h07/cDfIGYvJEI2QpgAM/bxkOYYSHukycL093qexT74=
 github.com/dashotv/flame v0.9.1/go.mod h1:/GoISXhdyxaePIzk1pXF8+KoW8kyriU4DTggSGVS770=
 github.com/dashotv/grimoire v0.5.1 h1:DP0sY3NTO6fjOpx+q72ZZkHoEzYCGqxNF4mH0pVNHW8=
@@ -176,6 +178,8 @@ github.com/glycerine/goconvey v0.0.0-20190315024820-982ee783a72e/go.mod h1:Ogl1T
 github.com/glycerine/goconvey v0.0.0-20190410193231-58a59202ab31/go.mod h1:Ogl1Tioa0aV7gstGFO7KhffUsb9M4ydbEbbxpcEDc24=
 github.com/go-cmd/cmd v1.4.2 h1:pnX38iIJHh4huzBSqfkAZkfXrVwM/5EccAJmrVqMnbg=
 github.com/go-cmd/cmd v1.4.2/go.mod h1:u3hxg/ry+D5kwh8WvUkHLAMe2zQCaXd00t35WfQaOFk=
+github.com/go-errors/errors v1.5.1 h1:ZwEMSLRCapFLflTpT7NKaAc7ukJ8ZPEjzlxt8rPN8bk=
+github.com/go-errors/errors v1.5.1/go.mod h1:sIVyrIiJhuEF+Pj9Ebtd6P/rEYROXFi3BopGUQ5a5Og=
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-kit/kit v0.9.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9GBnD5lWE=

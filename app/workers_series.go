@@ -11,6 +11,7 @@ import (
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/dashotv/minion"
 	"github.com/dashotv/tower/internal/importer"
@@ -119,6 +120,9 @@ type SeriesUpdate struct {
 func (j *SeriesUpdate) Kind() string { return "series_update" }
 func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate]) error {
 	id := job.Args.ID
+	eg, ctx := errgroup.WithContext(ctx)
+
+	// TODO: use waitgroup to do some of this concurrently and save series once only at the end
 
 	series := &Series{}
 	err := app.DB.Series.Find(id, series)
@@ -132,104 +136,121 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 
 	tvdbid, err := strconv.ParseInt(series.SourceId, 10, 64)
 	if err != nil {
-		return fmt.Errorf("converting source id: %w", err)
+		return fae.Wrap(err, "converting source id")
 	}
 
-	s, err := app.Importer.Series(tvdbid)
-	if err != nil {
-		return fmt.Errorf("importer series: %w", err)
-	}
-
-	series.Title = s.Title
-	series.Description = s.Description
-	series.Status = s.Status
-	series.ReleaseDate = dateFromString(s.Airdate)
-	if series.Display == "" {
-		series.Display = s.Title
-	}
-	if series.Search == "" {
-		series.Search = path(s.Title)
-	}
-	if series.Directory == "" {
-		series.Directory = path(s.Title)
-	}
-
-	order := importer.EpisodeOrderDefault
-	anime := isAnimeKind(string(series.Kind))
-	if anime {
-		order = importer.EpisodeOrderAbsolute
-	}
-
-	eps, err := app.Importer.SeriesEpisodes(tvdbid, order)
-	if err != nil {
-		return fmt.Errorf("importer series episodes: %w", err)
-	}
-
-	episodeMap, err := episodeMap(id)
-	if err != nil {
-		return fmt.Errorf("building episode map: %w", err)
-	}
-
-	found := []int64{}
-
-	for _, e := range eps {
-		episode, ok := episodeMap[e.ID]
-		if ok {
-			found = append(found, e.ID)
-		}
-		if episode == nil {
-			episode = &Episode{}
+	eg.Go(func() error {
+		s, err := app.Importer.Series(tvdbid)
+		if err != nil {
+			return fae.Wrap(err, "importer series")
 		}
 
-		episode.Type = "Episode"
-		episode.SeriesId = series.ID
-		episode.SourceId = fmt.Sprintf("%d", e.ID)
-		episode.SeasonNumber = e.Season
-		episode.EpisodeNumber = e.Episode
-		episode.AbsoluteNumber = e.Absolute
-		episode.Title = e.Title
-		episode.Description = e.Description
-		episode.ReleaseDate = dateFromString(e.Airdate)
-
-		if err := app.DB.Episode.Save(episode); err != nil {
-			return errors.Wrap(err, fmt.Sprintf("updating episode %s %d/%d", id, episode.SeasonNumber, episode.EpisodeNumber))
+		series.Title = s.Title
+		series.Description = s.Description
+		series.Status = s.Status
+		series.ReleaseDate = dateFromString(s.Airdate)
+		if series.Display == "" {
+			series.Display = s.Title
 		}
-	}
+		if series.Search == "" {
+			series.Search = path(s.Title)
+		}
+		if series.Directory == "" {
+			series.Directory = path(s.Title)
+		}
 
-	all := lo.Keys(episodeMap)
-	missing, updated := lo.Difference(all, found)
-	if _, err := app.DB.Episode.Collection.UpdateMany(context.Background(), bson.M{"_type": "Episode", "series_id": series.ID, "source_id": bson.M{"$in": missing}}, bson.M{"$set": bson.M{"missing": time.Now()}}); err != nil {
-		return fmt.Errorf("missing: %w", err)
-	}
-	if _, err := app.DB.Episode.Collection.UpdateMany(context.Background(), bson.M{"_type": "Episode", "series_id": series.ID, "source_id": bson.M{"$in": updated}}, bson.M{"$set": bson.M{"missing": nil}}); err != nil {
-		return fmt.Errorf("found: %w", err)
-	}
-	if _, err := app.DB.Episode.Collection.DeleteMany(context.Background(), bson.M{"_type": "Episode", "series_id": series.ID, "missing": bson.M{"$ne": nil}, "paths.type": bson.M{"$ne": "video"}}); err != nil {
-		return fmt.Errorf("missing delete: %w", err)
+		return nil
+	})
+
+	eg.Go(func() error {
+		order := importer.EpisodeOrderDefault
+		anime := isAnimeKind(string(series.Kind))
+		if anime {
+			order = importer.EpisodeOrderAbsolute
+		}
+
+		eps, err := app.Importer.SeriesEpisodes(tvdbid, order)
+		if err != nil {
+			return fae.Wrap(err, "importer series episodes")
+		}
+
+		episodeMap, err := episodeMap(id)
+		if err != nil {
+			return fae.Wrap(err, "building episode map")
+		}
+
+		found := []int64{}
+
+		for _, e := range eps {
+			episode, ok := episodeMap[e.ID]
+			if ok {
+				found = append(found, e.ID)
+			}
+			if episode == nil {
+				episode = &Episode{}
+			}
+
+			episode.Type = "Episode"
+			episode.SeriesId = series.ID
+			episode.SourceId = fmt.Sprintf("%d", e.ID)
+			episode.SeasonNumber = e.Season
+			episode.EpisodeNumber = e.Episode
+			episode.AbsoluteNumber = e.Absolute
+			episode.Title = e.Title
+			episode.Description = e.Description
+			episode.ReleaseDate = dateFromString(e.Airdate)
+
+			if err := app.DB.Episode.Save(episode); err != nil {
+				return errors.Wrap(err, fmt.Sprintf("updating episode %s %d/%d", id, episode.SeasonNumber, episode.EpisodeNumber))
+			}
+		}
+
+		all := lo.Keys(episodeMap)
+		missing, updated := lo.Difference(all, found)
+		if _, err := app.DB.Episode.Collection.UpdateMany(ctx, bson.M{"_type": "Episode", "series_id": series.ID, "source_id": bson.M{"$in": missing}}, bson.M{"$set": bson.M{"missing": time.Now()}}); err != nil {
+			return fae.Wrap(err, "missing")
+		}
+		if _, err := app.DB.Episode.Collection.UpdateMany(ctx, bson.M{"_type": "Episode", "series_id": series.ID, "source_id": bson.M{"$in": updated}}, bson.M{"$set": bson.M{"missing": nil}}); err != nil {
+			return fae.Wrap(err, "found")
+		}
+		if _, err := app.DB.Episode.Collection.DeleteMany(ctx, bson.M{"_type": "Episode", "series_id": series.ID, "missing": bson.M{"$ne": nil}, "paths.type": bson.M{"$ne": "video"}}); err != nil {
+			return fae.Wrap(err, "missing delete")
+		}
+		return nil
+	})
+
+	eg.Go(func() error {
+		if !job.Args.SkipImages {
+			covers, backgrounds, err := app.Importer.SeriesImages(tvdbid)
+			if err != nil {
+				return fae.Wrap(err, "importer series images")
+			}
+
+			if len(covers) > 0 {
+				eg.Go(func() error {
+					err := seriesImage(series, "cover", covers[0], posterRatio)
+					app.Log.Errorf("series %s cover: %v", series.ID.Hex(), err)
+					return nil
+				})
+			}
+			if len(backgrounds) > 0 {
+				eg.Go(func() error {
+					seriesImage(series, "background", backgrounds[0], backgroundRatio)
+					app.Log.Errorf("series %s background: %v", series.ID.Hex(), err)
+					return nil
+				})
+			}
+		}
+		return nil
+	})
+
+	if err := eg.Wait(); err != nil {
+		return err
 	}
 
 	if err := app.DB.Series.Save(series); err != nil {
-		return fmt.Errorf("saving series: %w", err)
+		return fae.Wrap(err, "saving series")
 	}
-
-	if !job.Args.SkipImages {
-		covers, backgrounds, err := app.Importer.SeriesImages(tvdbid)
-		if err != nil {
-			return fmt.Errorf("importer series images: %w", err)
-		}
-
-		if len(covers) > 0 {
-			if err := app.Workers.Enqueue(&SeriesImage{ID: id, Type: "cover", Path: covers[0], Ratio: posterRatio}); err != nil {
-				return fmt.Errorf("enqueue: cover: %w", err)
-			}
-		}
-		if len(backgrounds) > 0 {
-			if err := app.Workers.Enqueue(&SeriesImage{ID: id, Type: "background", Path: backgrounds[0], Ratio: backgroundRatio}); err != nil {
-				return fmt.Errorf("enqueue: background: %w", err)
-			}
-		}
-	}
-
 	return nil
 }
 
@@ -253,8 +274,13 @@ func (j *SeriesImage) Work(ctx context.Context, job *minion.Job[*SeriesImage]) e
 		return errors.Wrap(err, "finding series")
 	}
 
+	return seriesImage(series, t, remote, ratio)
+}
+
+// TODO: make this a function
+func seriesImage(series *Series, t string, remote string, ratio float32) error {
 	extension := filepath.Ext(remote)[1:]
-	local := fmt.Sprintf("series-%s/%s", id, t)
+	local := fmt.Sprintf("series-%s/%s", series.ID.Hex(), t)
 	dest := fmt.Sprintf("%s/%s.%s", app.Config.DirectoriesImages, local, extension)
 	thumb := fmt.Sprintf("%s/%s_thumb.%s", app.Config.DirectoriesImages, local, extension)
 
@@ -317,7 +343,7 @@ func episodeMap(id string) (map[int64]*Episode, error) {
 	for _, e := range episodes {
 		sid, err := strconv.ParseInt(e.SourceId, 10, 64)
 		if err != nil {
-			return nil, fmt.Errorf("converting source id: %w", err)
+			return nil, fae.Wrap(err, "converting source id")
 		}
 		episodeMap[sid] = e
 	}
