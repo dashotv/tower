@@ -229,14 +229,18 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 			if len(covers) > 0 {
 				eg.Go(func() error {
 					err := seriesImage(series, "cover", covers[0], posterRatio)
-					app.Log.Errorf("series %s cover: %v", series.ID.Hex(), err)
+					if err != nil {
+						app.Log.Errorf("series %s cover: %v", series.ID.Hex(), err)
+					}
 					return nil
 				})
 			}
 			if len(backgrounds) > 0 {
 				eg.Go(func() error {
 					seriesImage(series, "background", backgrounds[0], backgroundRatio)
-					app.Log.Errorf("series %s background: %v", series.ID.Hex(), err)
+					if err != nil {
+						app.Log.Errorf("series %s background: %v", series.ID.Hex(), err)
+					}
 					return nil
 				})
 			}
@@ -303,7 +307,6 @@ func seriesImage(series *Series, t string, remote string, ratio float32) error {
 	}
 
 	if img == nil {
-		app.Log.Info("path not found")
 		img = &Path{}
 		series.Paths = append(series.Paths, img)
 	}
