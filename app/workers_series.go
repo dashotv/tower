@@ -283,7 +283,10 @@ func (j *SeriesImage) Work(ctx context.Context, job *minion.Job[*SeriesImage]) e
 
 // TODO: make this a function
 func seriesImage(series *Series, t string, remote string, ratio float32) error {
-	extension := filepath.Ext(remote)[1:]
+	extension := filepath.Ext(remote)
+	if len(extension) > 0 && extension[0] == '.' {
+		extension = extension[1:]
+	}
 	local := fmt.Sprintf("series-%s/%s", series.ID.Hex(), t)
 	dest := fmt.Sprintf("%s/%s.%s", app.Config.DirectoriesImages, local, extension)
 	thumb := fmt.Sprintf("%s/%s_thumb.%s", app.Config.DirectoriesImages, local, extension)

@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
-	"strings"
 
 	"github.com/dashotv/fae"
 )
@@ -19,8 +18,8 @@ func (m *Medium) Destination() string {
 
 func (c *Connector) MediumByFile(f *File) (*Medium, error) {
 	kind, name, file := f.Parts()
-	fext := strings.Split(file, ".")
-	path := fmt.Sprintf("%s/%s/%s", kind, name, fext[0])
+	filename, _ := filenameSplit(file)
+	path := fmt.Sprintf("%s/%s/%s", kind, name, filename)
 
 	if m, err := c.Medium.Query().Where("paths.local", path).Run(); err != nil {
 		return nil, err

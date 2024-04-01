@@ -260,11 +260,24 @@ func FileDir(file string) error {
 
 func shouldDownloadFile(name string) bool {
 	ext := strings.ToLower(filepath.Ext(name))
-	ext = ext[1:]
+	if ext == "" {
+		return false
+	}
+	if ext[0] == '.' {
+		ext = ext[1:]
+	}
 	list := lo.Filter(app.Config.Extensions(), func(s string, i int) bool {
 		return s == ext
 	})
 	return len(list) > 0
+}
+
+// filenameSplit splits a filename into a name and extension
+// faster than trimsuffix, see:
+// https://freshman.tech/snippets/go/filename-no-extension/
+func filenameSplit(fileName string) (string, string) {
+	ext := filepath.Ext(fileName)
+	return fileName[:len(fileName)-len(ext)], ext
 }
 
 // WithTimeout runs a delegate function with a timeout,

@@ -305,7 +305,7 @@ func (j *DownloadsProcess) Move() error {
 		tf := t.Files[0]
 		// df := d.Files[0]
 		ext := filepath.Ext(tf.Name)
-		if len(ext) > 0 {
+		if len(ext) > 0 && ext[0] == '.' {
 			ext = ext[1:]
 		}
 
@@ -393,12 +393,15 @@ func updateMedium(id, dest, ext string) error {
 	if err != nil {
 		return fae.Wrap(err, "get medium")
 	}
+	if ext[0] == '.' {
+		ext = ext[1:]
+	}
 
 	m.Completed = true
 	m.Paths = append(m.Paths, &Path{
 		Local:     dest,
-		Extension: ext[1:],
-		Type:      primitive.Symbol(fileType(fmt.Sprintf("%s.%s", dest, ext[1:]))),
+		Extension: ext,
+		Type:      primitive.Symbol(fileType(fmt.Sprintf("%s.%s", dest, ext))),
 	})
 	err = app.DB.Medium.Update(m)
 	if err != nil {
@@ -469,13 +472,16 @@ func (j *DownloadsProcess) MetubeMove(download *Download) error {
 
 	for _, f := range files {
 		ext := filepath.Ext(f)
+		if ext[0] == '.' {
+			ext = ext[1:]
+		}
 
 		dest, err := Destination(download.Medium)
 		if err != nil {
 			return fae.Wrap(err, "destination")
 		}
 
-		destination := fmt.Sprintf("%s/%s.%s", app.Config.DirectoriesCompleted, dest, ext[1:])
+		destination := fmt.Sprintf("%s/%s.%s", app.Config.DirectoriesCompleted, dest, ext)
 		l.Debugf("move:  %s", filepath.Base(f))
 		l.Debugf("    -> %s", destination)
 

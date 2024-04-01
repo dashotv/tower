@@ -24,7 +24,10 @@ func (j *TmdbUpdateMovieImage) Kind() string { return "TmdbUpdateMovieImage" }
 func (j *TmdbUpdateMovieImage) Work(ctx context.Context, job *minion.Job[*TmdbUpdateMovieImage]) error {
 	input := job.Args
 	remote := app.Config.TmdbImages + input.Path
-	extension := filepath.Ext(input.Path)[1:]
+	extension := filepath.Ext(input.Path)
+	if len(extension) > 0 && extension[0] == '.' {
+		extension = extension[1:]
+	}
 	local := fmt.Sprintf("movie-%s/%s", input.ID, input.Type)
 	dest := fmt.Sprintf("%s/%s.%s", app.Config.DirectoriesImages, local, extension)
 	thumb := fmt.Sprintf("%s/%s_thumb.%s", app.Config.DirectoriesImages, local, extension)
