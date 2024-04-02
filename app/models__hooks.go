@@ -149,6 +149,12 @@ func (s *Series) Saving() error {
 	if s.SearchParams == nil {
 		s.SearchParams = &SearchParams{Type: "tv", Resolution: 1080, Verified: true}
 	}
+	if s.SearchParams != nil && s.SearchParams.Type == "" {
+		s.SearchParams.Type = "tv"
+	}
+	if s.SearchParams != nil && s.SearchParams.Resolution < 1080 {
+		s.SearchParams.Resolution = 1080
+	}
 
 	if s.Display == "" {
 		s.Display = s.Title
