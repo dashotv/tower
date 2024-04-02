@@ -1,6 +1,9 @@
 name: hooks
 path: /hooks
 routes:
-    - name: plex
-      path: /plex
-      method: GET
+  - name: plex
+    path: /plex
+    method: GET
+  - name: nzbget
+    path: /nzbget
+    method: GET

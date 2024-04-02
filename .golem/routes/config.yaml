@@ -1,3 +1,13 @@
 name: config
 path: /config
-rest: true
+routes:
+  - name: settings
+    path: /:id
+    method: PATCH
+    result: "*Setting"
+    params:
+      - name: id
+        type: string
+      - name: settings
+        type: "*Setting"
+        bind: true

@@ -19,11 +19,11 @@ func (a *Application) RequestsShow(c echo.Context, id string) error {
 	return c.JSON(http.StatusOK, gin.H{"message": "RequestsShow"})
 }
 
-func (a *Application) RequestsCreate(c echo.Context) error {
+func (a *Application) RequestsCreate(c echo.Context, r *Request) error {
 	return c.JSON(http.StatusOK, gin.H{"message": "RequestsCreate"})
 }
 
-func (a *Application) RequestsSettings(c echo.Context, id string) error {
+func (a *Application) RequestsSettings(c echo.Context, id string, s *Setting) error {
 	return c.JSON(http.StatusOK, gin.H{"message": "RequestsSettings"})
 }
 
@@ -31,15 +31,10 @@ func (a *Application) RequestsDelete(c echo.Context, id string) error {
 	return c.JSON(http.StatusOK, gin.H{"message": "RequestsDelete"})
 }
 
-func (a *Application) RequestsUpdate(c echo.Context, id string) error {
+func (a *Application) RequestsUpdate(c echo.Context, id string, updated *Request) error {
 	req := &Request{}
 	err := app.DB.Request.Find(id, req)
 	if err != nil {
-		return err
-	}
-
-	updated := &Request{}
-	if err := c.Bind(updated); err != nil {
 		return err
 	}
 

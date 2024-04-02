@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/dashotv/fae"
+	"github.com/dashotv/golem/plugins/router"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"go.infratographer.com/x/echox/echozap"
 )
 
 func init() {
@@ -35,11 +35,10 @@ func startRoutes(ctx context.Context, app *Application) error {
 
 func setupRoutes(app *Application) error {
 	logger := app.Log.Named("routes").Desugar()
-	e := echo.New()
-	e.HideBanner = true
-	e.Use(middleware.Recover())
-	e.Use(echozap.Middleware(logger))
-
+	e, err := router.New(logger)
+	if err != nil {
+		return fae.Wrap(err, "router plugin")
+	}
 	app.Engine = e
 	// unauthenticated routes
 	app.Default = app.Engine.Group("")
@@ -47,21 +46,25 @@ func setupRoutes(app *Application) error {
 	app.Router = app.Engine.Group("")
 
 	// TODO: fix auth
-	// if app.Config.Auth {
-	// 	clerkSecret := app.Config.ClerkSecretKey
-	// 	if clerkSecret == "" {
-	// 		app.Log.Fatal("CLERK_SECRET_KEY is not set")
-	// 	}
-	//
-	// 	clerkClient, err := clerk.NewClient(clerkSecret)
-	// 	if err != nil {
-	// 		app.Log.Fatalf("clerk: %s", err)
-	// 	}
-	//
-	// 	app.Router.Use(requireSession(clerkClient))
-	// }
+	if app.Config.Auth {
+		clerkSecret := app.Config.ClerkSecretKey
+		if clerkSecret == "" {
+			app.Log.Fatal("CLERK_SECRET_KEY is not set")
+		}
+		clerkToken := app.Config.ClerkToken
+		if clerkToken == "" {
+			app.Log.Fatal("CLERK_TOKEN is not set")
+		}
+
+		app.Router.Use(router.ClerkAuth(clerkSecret, clerkToken))
+	}
 
 	return nil
+}
+
+type Setting struct {
+	Name  string `json:"name"`
+	Value bool   `json:"value"`
 }
 
 func (a *Application) Routes() {
@@ -85,12 +88,7 @@ func (a *Application) Routes() {
 	combinations.DELETE("/:id", a.CombinationsDeleteHandler)
 
 	config := a.Router.Group("/config")
-	config.GET("/", a.ConfigIndexHandler)
-	config.POST("/", a.ConfigCreateHandler)
-	config.GET("/:id", a.ConfigShowHandler)
-	config.PUT("/:id", a.ConfigUpdateHandler)
 	config.PATCH("/:id", a.ConfigSettingsHandler)
-	config.DELETE("/:id", a.ConfigDeleteHandler)
 
 	downloads := a.Router.Group("/downloads")
 	downloads.GET("/", a.DownloadsIndexHandler)
@@ -120,11 +118,7 @@ func (a *Application) Routes() {
 
 	hooks := a.Router.Group("/hooks")
 	hooks.GET("/plex", a.HooksPlexHandler)
-
-	jobs := a.Router.Group("/jobs")
-	jobs.GET("/", a.JobsIndexHandler)
-	jobs.POST("/", a.JobsCreateHandler)
-	jobs.DELETE("/:id", a.JobsDeleteHandler)
+	hooks.GET("/nzbget", a.HooksNzbgetHandler)
 
 	messages := a.Router.Group("/messages")
 	messages.GET("/", a.MessagesIndexHandler)
@@ -212,7 +206,6 @@ func (a *Application) indexHandler(c echo.Context) error {
 			"episodes":     "/episodes",
 			"feeds":        "/feeds",
 			"hooks":        "/hooks",
-			"jobs":         "/jobs",
 			"messages":     "/messages",
 			"movies":       "/movies",
 			"plex":         "/plex",
@@ -241,7 +234,11 @@ func (a *Application) CollectionsIndexHandler(c echo.Context) error {
 	return a.CollectionsIndex(c, page, limit)
 }
 func (a *Application) CollectionsCreateHandler(c echo.Context) error {
-	return a.CollectionsCreate(c)
+	var subject *Collection
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.CollectionsCreate(c, subject)
 }
 func (a *Application) CollectionsShowHandler(c echo.Context) error {
 	id := c.Param("id")
@@ -249,11 +246,19 @@ func (a *Application) CollectionsShowHandler(c echo.Context) error {
 }
 func (a *Application) CollectionsUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.CollectionsUpdate(c, id)
+	var subject *Collection
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.CollectionsUpdate(c, id, subject)
 }
 func (a *Application) CollectionsSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.CollectionsSettings(c, id)
+	var setting *Setting
+	if err := c.Bind(setting); err != nil {
+		return err
+	}
+	return a.CollectionsSettings(c, id, setting)
 }
 func (a *Application) CollectionsDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
@@ -267,7 +272,11 @@ func (a *Application) CombinationsIndexHandler(c echo.Context) error {
 	return a.CombinationsIndex(c, page, limit)
 }
 func (a *Application) CombinationsCreateHandler(c echo.Context) error {
-	return a.CombinationsCreate(c)
+	var subject *Combination
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.CombinationsCreate(c, subject)
 }
 func (a *Application) CombinationsShowHandler(c echo.Context) error {
 	id := c.Param("id")
@@ -275,11 +284,19 @@ func (a *Application) CombinationsShowHandler(c echo.Context) error {
 }
 func (a *Application) CombinationsUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.CombinationsUpdate(c, id)
+	var subject *Combination
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.CombinationsUpdate(c, id, subject)
 }
 func (a *Application) CombinationsSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.CombinationsSettings(c, id)
+	var setting *Setting
+	if err := c.Bind(setting); err != nil {
+		return err
+	}
+	return a.CombinationsSettings(c, id, setting)
 }
 func (a *Application) CombinationsDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
@@ -287,29 +304,13 @@ func (a *Application) CombinationsDeleteHandler(c echo.Context) error {
 }
 
 // Config (/config)
-func (a *Application) ConfigIndexHandler(c echo.Context) error {
-	page := QueryInt(c, "page")
-	limit := QueryInt(c, "limit")
-	return a.ConfigIndex(c, page, limit)
-}
-func (a *Application) ConfigCreateHandler(c echo.Context) error {
-	return a.ConfigCreate(c)
-}
-func (a *Application) ConfigShowHandler(c echo.Context) error {
-	id := c.Param("id")
-	return a.ConfigShow(c, id)
-}
-func (a *Application) ConfigUpdateHandler(c echo.Context) error {
-	id := c.Param("id")
-	return a.ConfigUpdate(c, id)
-}
 func (a *Application) ConfigSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.ConfigSettings(c, id)
-}
-func (a *Application) ConfigDeleteHandler(c echo.Context) error {
-	id := c.Param("id")
-	return a.ConfigDelete(c, id)
+	var settings *Setting
+	if err := c.Bind(settings); err != nil {
+		return err
+	}
+	return a.ConfigSettings(c, id, settings)
 }
 
 // Downloads (/downloads)
@@ -319,7 +320,11 @@ func (a *Application) DownloadsIndexHandler(c echo.Context) error {
 	return a.DownloadsIndex(c, page, limit)
 }
 func (a *Application) DownloadsCreateHandler(c echo.Context) error {
-	return a.DownloadsCreate(c)
+	var subject *Download
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.DownloadsCreate(c, subject)
 }
 func (a *Application) DownloadsShowHandler(c echo.Context) error {
 	id := c.Param("id")
@@ -327,11 +332,19 @@ func (a *Application) DownloadsShowHandler(c echo.Context) error {
 }
 func (a *Application) DownloadsUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.DownloadsUpdate(c, id)
+	var subject *Download
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.DownloadsUpdate(c, id, subject)
 }
 func (a *Application) DownloadsSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.DownloadsSettings(c, id)
+	var setting *Setting
+	if err := c.Bind(setting); err != nil {
+		return err
+	}
+	return a.DownloadsSettings(c, id, setting)
 }
 func (a *Application) DownloadsDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
@@ -376,7 +389,11 @@ func (a *Application) FeedsIndexHandler(c echo.Context) error {
 	return a.FeedsIndex(c, page, limit)
 }
 func (a *Application) FeedsCreateHandler(c echo.Context) error {
-	return a.FeedsCreate(c)
+	var subject *Feed
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.FeedsCreate(c, subject)
 }
 func (a *Application) FeedsShowHandler(c echo.Context) error {
 	id := c.Param("id")
@@ -384,11 +401,19 @@ func (a *Application) FeedsShowHandler(c echo.Context) error {
 }
 func (a *Application) FeedsUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.FeedsUpdate(c, id)
+	var subject *Feed
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.FeedsUpdate(c, id, subject)
 }
 func (a *Application) FeedsSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.FeedsSettings(c, id)
+	var setting *Setting
+	if err := c.Bind(setting); err != nil {
+		return err
+	}
+	return a.FeedsSettings(c, id, setting)
 }
 func (a *Application) FeedsDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
@@ -399,21 +424,8 @@ func (a *Application) FeedsDeleteHandler(c echo.Context) error {
 func (a *Application) HooksPlexHandler(c echo.Context) error {
 	return a.HooksPlex(c)
 }
-
-// Jobs (/jobs)
-func (a *Application) JobsIndexHandler(c echo.Context) error {
-	page := QueryInt(c, "page")
-	limit := QueryInt(c, "limit")
-	return a.JobsIndex(c, page, limit)
-}
-func (a *Application) JobsCreateHandler(c echo.Context) error {
-	job := QueryString(c, "job")
-	return a.JobsCreate(c, job)
-}
-func (a *Application) JobsDeleteHandler(c echo.Context) error {
-	id := c.Param("id")
-	hard := QueryBool(c, "hard")
-	return a.JobsDelete(c, id, hard)
+func (a *Application) HooksNzbgetHandler(c echo.Context) error {
+	return a.HooksNzbget(c)
 }
 
 // Messages (/messages)
@@ -431,7 +443,11 @@ func (a *Application) MoviesIndexHandler(c echo.Context) error {
 	return a.MoviesIndex(c, page, limit)
 }
 func (a *Application) MoviesCreateHandler(c echo.Context) error {
-	return a.MoviesCreate(c)
+	var subject *Movie
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.MoviesCreate(c, subject)
 }
 func (a *Application) MoviesShowHandler(c echo.Context) error {
 	id := c.Param("id")
@@ -439,11 +455,19 @@ func (a *Application) MoviesShowHandler(c echo.Context) error {
 }
 func (a *Application) MoviesUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.MoviesUpdate(c, id)
+	var subject *Movie
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.MoviesUpdate(c, id, subject)
 }
 func (a *Application) MoviesSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.MoviesSettings(c, id)
+	var setting *Setting
+	if err := c.Bind(setting); err != nil {
+		return err
+	}
+	return a.MoviesSettings(c, id, setting)
 }
 func (a *Application) MoviesDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
@@ -518,7 +542,11 @@ func (a *Application) ReleasesIndexHandler(c echo.Context) error {
 	return a.ReleasesIndex(c, page, limit)
 }
 func (a *Application) ReleasesCreateHandler(c echo.Context) error {
-	return a.ReleasesCreate(c)
+	var subject *Release
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.ReleasesCreate(c, subject)
 }
 func (a *Application) ReleasesShowHandler(c echo.Context) error {
 	id := c.Param("id")
@@ -526,11 +554,19 @@ func (a *Application) ReleasesShowHandler(c echo.Context) error {
 }
 func (a *Application) ReleasesUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.ReleasesUpdate(c, id)
+	var subject *Release
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.ReleasesUpdate(c, id, subject)
 }
 func (a *Application) ReleasesSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.ReleasesSettings(c, id)
+	var setting *Setting
+	if err := c.Bind(setting); err != nil {
+		return err
+	}
+	return a.ReleasesSettings(c, id, setting)
 }
 func (a *Application) ReleasesDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
@@ -548,7 +584,11 @@ func (a *Application) RequestsIndexHandler(c echo.Context) error {
 	return a.RequestsIndex(c, page, limit)
 }
 func (a *Application) RequestsCreateHandler(c echo.Context) error {
-	return a.RequestsCreate(c)
+	var subject *Request
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.RequestsCreate(c, subject)
 }
 func (a *Application) RequestsShowHandler(c echo.Context) error {
 	id := c.Param("id")
@@ -556,11 +596,19 @@ func (a *Application) RequestsShowHandler(c echo.Context) error {
 }
 func (a *Application) RequestsUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.RequestsUpdate(c, id)
+	var subject *Request
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.RequestsUpdate(c, id, subject)
 }
 func (a *Application) RequestsSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.RequestsSettings(c, id)
+	var setting *Setting
+	if err := c.Bind(setting); err != nil {
+		return err
+	}
+	return a.RequestsSettings(c, id, setting)
 }
 func (a *Application) RequestsDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
@@ -574,7 +622,11 @@ func (a *Application) SeriesIndexHandler(c echo.Context) error {
 	return a.SeriesIndex(c, page, limit)
 }
 func (a *Application) SeriesCreateHandler(c echo.Context) error {
-	return a.SeriesCreate(c)
+	var subject *Series
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.SeriesCreate(c, subject)
 }
 func (a *Application) SeriesShowHandler(c echo.Context) error {
 	id := c.Param("id")
@@ -582,11 +634,19 @@ func (a *Application) SeriesShowHandler(c echo.Context) error {
 }
 func (a *Application) SeriesUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.SeriesUpdate(c, id)
+	var subject *Series
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.SeriesUpdate(c, id, subject)
 }
 func (a *Application) SeriesSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.SeriesSettings(c, id)
+	var setting *Setting
+	if err := c.Bind(setting); err != nil {
+		return err
+	}
+	return a.SeriesSettings(c, id, setting)
 }
 func (a *Application) SeriesDeleteHandler(c echo.Context) error {
 	id := c.Param("id")

@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/labstack/echo/v4"
@@ -70,16 +69,14 @@ func (a *Application) MoviesIndex(c echo.Context, page, limit int) error {
 	return c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
 }
 
-func (a *Application) MoviesCreate(c echo.Context) error {
-	r := &CreateRequest{}
-	c.Bind(r)
-	if r.ID == "" || r.Source == "" {
+func (a *Application) MoviesCreate(c echo.Context, r *Movie) error {
+	if r.SourceId == "" || r.Source == "" {
 		return fae.New("id and source are required")
 	}
 
 	m := &Movie{
 		Type:         "Movie",
-		SourceId:     r.ID,
+		SourceId:     r.SourceId,
 		Source:       r.Source,
 		Title:        r.Title,
 		Description:  r.Description,
@@ -87,13 +84,13 @@ func (a *Application) MoviesCreate(c echo.Context) error {
 		SearchParams: &SearchParams{Type: "movies", Resolution: 1080, Verified: true},
 	}
 
-	d, err := time.Parse("2006-01-02", r.Date)
-	if err != nil {
-		return err
-	}
-	m.ReleaseDate = d
+	// d, err := time.Parse("2006-01-02", r.ReleaseDate)
+	// if err != nil {
+	// 	return err
+	// }
+	// m.ReleaseDate = d
 
-	err = app.DB.Movie.Save(m)
+	err := app.DB.Movie.Save(m)
 	if err != nil {
 		return err
 	}
@@ -123,22 +120,16 @@ func (a *Application) MoviesShow(c echo.Context, id string) error {
 		}
 	}
 
-	return c.JSON(http.StatusOK, m)
+	return c.JSON(http.StatusOK, gin.H{"errors": false, "result": m})
 }
 
-func (a *Application) MoviesUpdate(c echo.Context, id string) error {
-	data := &Movie{}
-	err := c.Bind(&data)
+func (a *Application) MoviesUpdate(c echo.Context, id string, data *Movie) error {
+	err := app.DB.MovieUpdate(id, data)
 	if err != nil {
 		return err
 	}
 
-	err = app.DB.MovieUpdate(id, data)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
+	return c.JSON(http.StatusOK, gin.H{"errors": false, "result": data})
 }
 
 func (a *Application) MoviesRefresh(c echo.Context, id string) error {
@@ -149,19 +140,13 @@ func (a *Application) MoviesRefresh(c echo.Context, id string) error {
 	return c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func (a *Application) MoviesSettings(c echo.Context, id string) error {
-	data := &Setting{}
-	err := c.Bind(&data)
+func (a *Application) MoviesSettings(c echo.Context, id string, data *Setting) error {
+	err := app.DB.MovieSetting(id, data.Name, data.Value)
 	if err != nil {
 		return err
 	}
 
-	err = app.DB.MovieSetting(id, data.Setting, data.Value)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
+	return c.JSON(http.StatusOK, gin.H{"errors": false, "result": data})
 }
 
 func (a *Application) MoviesDelete(c echo.Context, id string) error {

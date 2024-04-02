@@ -34,30 +34,19 @@ type DownloadRequest struct {
 	MediumId string `json:"medium_id"`
 }
 
-func (a *Application) DownloadsCreate(c echo.Context) error {
-	data := &DownloadRequest{}
-	err := c.Bind(data)
-	if err != nil {
-		return err
-	}
-
-	if data.MediumId == "" {
+func (a *Application) DownloadsCreate(c echo.Context, data *Download) error {
+	if data.MediumId == primitive.NilObjectID {
 		return fae.New("medium_id is required")
 	}
 
-	id, err := primitive.ObjectIDFromHex(data.MediumId)
-	if err != nil {
-		return err
-	}
-
-	d := &Download{MediumId: id, Status: "searching"}
-	err = app.DB.Download.Save(d)
+	data.Status = "searching"
+	err := app.DB.Download.Save(data)
 	if err != nil {
 		return err
 	}
 
 	m := &Medium{}
-	err = app.DB.Medium.Find(data.MediumId, m)
+	err = app.DB.Medium.FindByID(data.MediumId, m)
 	if err != nil {
 		return err
 	}
@@ -68,7 +57,7 @@ func (a *Application) DownloadsCreate(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, gin.H{"error": false, "id": d.ID.Hex()})
+	return c.JSON(http.StatusOK, gin.H{"error": false, "result": data.ID.Hex()})
 }
 
 func (a *Application) DownloadsShow(c echo.Context, id string) error {
@@ -81,17 +70,11 @@ func (a *Application) DownloadsShow(c echo.Context, id string) error {
 	list := []*Download{result}
 	app.DB.processDownloads(list)
 
-	return c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusOK, H{"error": false, "result": result})
 }
 
-func (a *Application) DownloadsUpdate(c echo.Context, id string) error {
-	data := &Download{}
-	err := c.Bind(data)
-	if err != nil {
-		return err
-	}
-
-	err = app.DB.Download.Update(data)
+func (a *Application) DownloadsUpdate(c echo.Context, id string, data *Download) error {
+	err := app.DB.Download.Update(data)
 	if err != nil {
 		return err
 	}
@@ -114,22 +97,16 @@ func (a *Application) DownloadsUpdate(c echo.Context, id string) error {
 		}
 	}
 
-	return c.JSON(http.StatusOK, data)
+	return c.JSON(http.StatusOK, H{"error": false, "result": data})
 }
 
-func (a *Application) DownloadsSettings(c echo.Context, id string) error {
-	data := &Setting{}
-	err := c.Bind(data)
+func (a *Application) DownloadsSettings(c echo.Context, id string, data *Setting) error {
+	err := app.DB.DownloadSetting(id, data.Name, data.Value)
 	if err != nil {
 		return err
 	}
 
-	err = app.DB.DownloadSetting(id, data.Setting, data.Value)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
+	return c.JSON(http.StatusOK, gin.H{"errors": false, "result": data})
 }
 
 func (a *Application) DownloadsDelete(c echo.Context, id string) error {

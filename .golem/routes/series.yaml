@@ -1,5 +1,6 @@
 name: series
 path: /series
+model: "*Series"
 rest: true
 routes:
   - name: current_season

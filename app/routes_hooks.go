@@ -17,3 +17,7 @@ func (a *Application) HooksPlex(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, gin.H{"error": false})
 }
+
+func (a *Application) HooksNzbget(c echo.Context) error {
+	return c.JSON(http.StatusOK, gin.H{"error": false})
+}

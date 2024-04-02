@@ -1,9 +1,11 @@
 name: watches
 path: /watches
+model: "*Watch"
 routes:
   - name: index
     path: /
     method: GET
+    result: "[]*Watch"
     params:
       - name: medium_id
         type: string

@@ -1,10 +1,11 @@
 name: releases
 path: /releases
+model: "*Release"
 rest: true
 routes:
-    - name: popular
-      path: /popular/:interval
-      method: GET
-      params:
-        - name: interval
-          type: string
+  - name: popular
+    path: /popular/:interval
+    method: GET
+    params:
+      - name: interval
+        type: string

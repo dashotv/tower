@@ -1,6 +1,8 @@
 name: users
 path: /users
+model: "*User"
 routes:
-    - name: index
-      path: /
-      method: GET
+  - name: index
+    path: /
+    method: GET
+    result: "[]*User"

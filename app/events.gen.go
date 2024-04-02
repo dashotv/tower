@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/nats-io/nats.go"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
+	"github.com/dashotv/fae"
 	flame "github.com/dashotv/flame/app"
 	"github.com/dashotv/mercury"
 	"github.com/dashotv/minion"
@@ -46,7 +46,7 @@ func checkEvents(app *Application) error {
 	case nats.CONNECTED:
 		return nil
 	default:
-		return errors.Errorf("nats status: %s", app.Events.Merc.Status())
+		return fae.Errorf("nats status: %s", app.Events.Merc.Status())
 	}
 }
 
@@ -238,7 +238,7 @@ func (e *Events) Send(topic EventsTopic, data any) error {
 	}
 	if err != nil {
 		e.Log.Errorf("sending: %s", err)
-		return errors.Wrap(err.(error), "events.send")
+		return fae.Wrap(err.(error), "events.send")
 	}
 	return nil
 }
@@ -248,84 +248,84 @@ func (e *Events) doSend(topic EventsTopic, data any) error {
 	case "tower.downloading":
 		m, ok := data.(*EventDownloading)
 		if !ok {
-			return errors.Errorf("events.send: wrong data type: %t", data)
+			return fae.Errorf("events.send: wrong data type: %t", data)
 		}
 		e.Downloading <- m
 
 	case "tower.downloads":
 		m, ok := data.(*EventDownloads)
 		if !ok {
-			return errors.Errorf("events.send: wrong data type: %t", data)
+			return fae.Errorf("events.send: wrong data type: %t", data)
 		}
 		e.Downloads <- m
 
 	case "tower.episodes":
 		m, ok := data.(*EventEpisodes)
 		if !ok {
-			return errors.Errorf("events.send: wrong data type: %t", data)
+			return fae.Errorf("events.send: wrong data type: %t", data)
 		}
 		e.Episodes <- m
 
 	case "tower.jobs":
 		m, ok := data.(*EventJobs)
 		if !ok {
-			return errors.Errorf("events.send: wrong data type: %t", data)
+			return fae.Errorf("events.send: wrong data type: %t", data)
 		}
 		e.Jobs <- m
 
 	case "tower.logs":
 		m, ok := data.(*EventLogs)
 		if !ok {
-			return errors.Errorf("events.send: wrong data type: %t", data)
+			return fae.Errorf("events.send: wrong data type: %t", data)
 		}
 		e.Logs <- m
 
 	case "tower.movies":
 		m, ok := data.(*EventMovies)
 		if !ok {
-			return errors.Errorf("events.send: wrong data type: %t", data)
+			return fae.Errorf("events.send: wrong data type: %t", data)
 		}
 		e.Movies <- m
 
 	case "tower.notices":
 		m, ok := data.(*EventNotices)
 		if !ok {
-			return errors.Errorf("events.send: wrong data type: %t", data)
+			return fae.Errorf("events.send: wrong data type: %t", data)
 		}
 		e.Notices <- m
 
 	case "tower.plex_sessions":
 		m, ok := data.(*EventPlexSessions)
 		if !ok {
-			return errors.Errorf("events.send: wrong data type: %t", data)
+			return fae.Errorf("events.send: wrong data type: %t", data)
 		}
 		e.PlexSessions <- m
 
 	case "tower.index.releases":
 		m, ok := data.(*Release)
 		if !ok {
-			return errors.Errorf("events.send: wrong data type: %t", data)
+			return fae.Errorf("events.send: wrong data type: %t", data)
 		}
 		e.Releases <- m
 
 	case "tower.requests":
 		m, ok := data.(*EventRequests)
 		if !ok {
-			return errors.Errorf("events.send: wrong data type: %t", data)
+			return fae.Errorf("events.send: wrong data type: %t", data)
 		}
 		e.Requests <- m
 
 	case "tower.series":
 		m, ok := data.(*EventSeries)
 		if !ok {
-			return errors.Errorf("events.send: wrong data type: %t", data)
+			return fae.Errorf("events.send: wrong data type: %t", data)
 		}
 		e.Series <- m
 
 	case "tower.stats":
 		m, ok := data.(*minion.Stats)
 		if !ok {
-			return errors.Errorf("events.send: wrong data type: %t", data)
+			return fae.Errorf("events.send: wrong data type: %t", data)
 		}
 		e.Stats <- m
 	default:

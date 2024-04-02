@@ -1,3 +1,4 @@
 name: requests
 path: /requests
+model: "*Request"
 rest: true

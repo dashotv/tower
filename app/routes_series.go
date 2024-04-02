@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/labstack/echo/v4"
@@ -87,17 +86,15 @@ func (a *Application) SeriesIndex(c echo.Context, page, limit int) error {
 	return c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
 }
 
-func (a *Application) SeriesCreate(c echo.Context) error {
-	r := &CreateRequest{}
-	c.Bind(r)
-	if r.ID == "" || r.Source == "" {
+func (a *Application) SeriesCreate(c echo.Context, r *Series) error {
+	if r.SourceId == "" || r.Source == "" {
 		return fae.New("id and source are required")
 	}
 
 	a.Log.Debugf("series create: %+v", r)
 	s := &Series{
 		Type:         "Series",
-		SourceId:     r.ID,
+		SourceId:     r.SourceId,
 		Source:       r.Source,
 		Title:        r.Title,
 		Description:  r.Description,
@@ -109,15 +106,15 @@ func (a *Application) SeriesCreate(c echo.Context) error {
 		s.SearchParams.Type = "anime"
 	}
 
-	d, err := time.Parse("2006-01-02", r.Date)
-	if err != nil {
-		a.Log.Debugf("error parsing date: %s", err.Error())
-		s.ReleaseDate = time.Unix(0, 0)
-	} else {
-		s.ReleaseDate = d
-	}
+	// d, err := time.Parse("2006-01-02", r.Date)
+	// if err != nil {
+	// 	a.Log.Debugf("error parsing date: %s", err.Error())
+	// 	s.ReleaseDate = time.Unix(0, 0)
+	// } else {
+	// 	s.ReleaseDate = d
+	// }
 
-	err = app.DB.Series.Save(s)
+	err := app.DB.Series.Save(s)
 	if err != nil {
 		return err
 	}
@@ -126,7 +123,7 @@ func (a *Application) SeriesCreate(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, gin.H{"error": false, "series": s})
+	return c.JSON(http.StatusOK, gin.H{"error": false, "result": s})
 }
 
 func (a *Application) SeriesShow(c echo.Context, id string) error {
@@ -181,13 +178,7 @@ func (a *Application) SeriesShow(c echo.Context, id string) error {
 	return c.JSON(http.StatusOK, result)
 }
 
-func (a *Application) SeriesUpdate(c echo.Context, id string) error {
-	data := &Series{}
-	err := c.Bind(&data)
-	if err != nil {
-		return err
-	}
-
+func (a *Application) SeriesUpdate(c echo.Context, id string, data *Series) error {
 	if !strings.HasPrefix(data.Cover, "/media-images") {
 		cover := data.GetCover()
 		if cover == nil || cover.Remote != data.Cover {
@@ -206,7 +197,7 @@ func (a *Application) SeriesUpdate(c echo.Context, id string) error {
 		}
 	}
 
-	err = app.DB.SeriesUpdate(id, data)
+	err := app.DB.SeriesUpdate(id, data)
 	if err != nil {
 		return err
 	}
@@ -214,14 +205,8 @@ func (a *Application) SeriesUpdate(c echo.Context, id string) error {
 	return c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
 }
 
-func (a *Application) SeriesSettings(c echo.Context, id string) error {
-	data := &Setting{}
-	err := c.Bind(&data)
-	if err != nil {
-		return err
-	}
-
-	err = app.DB.SeriesSetting(id, data.Setting, data.Value)
+func (a *Application) SeriesSettings(c echo.Context, id string, data *Setting) error {
+	err := app.DB.SeriesSetting(id, data.Name, data.Value)
 	if err != nil {
 		return err
 	}

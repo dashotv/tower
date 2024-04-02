@@ -1,5 +1,6 @@
 name: downloads
 path: /downloads
+model: "*Download"
 rest: true
 routes:
   - name: last

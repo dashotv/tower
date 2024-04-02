@@ -19,19 +19,13 @@ func (a *Application) FeedsIndex(c echo.Context, page, limit int) error {
 	return c.JSON(http.StatusOK, results)
 }
 
-func (a *Application) FeedsCreate(c echo.Context) error {
-	data := &Feed{}
-	err := c.Bind(&data)
+func (a *Application) FeedsCreate(c echo.Context, data *Feed) error {
+	err := app.DB.Feed.Save(data)
 	if err != nil {
 		return err
 	}
 
-	err = app.DB.Feed.Save(data)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, gin.H{"error": false, "id": data.ID.Hex(), "feed": data})
+	return c.JSON(http.StatusOK, gin.H{"error": false, "id": data.ID.Hex(), "result": data})
 }
 
 func (a *Application) FeedsShow(c echo.Context, id string) error {
@@ -43,34 +37,22 @@ func (a *Application) FeedsShow(c echo.Context, id string) error {
 	return c.JSON(http.StatusOK, result)
 }
 
-func (a *Application) FeedsUpdate(c echo.Context, id string) error {
-	data := &Feed{}
-	err := c.Bind(&data)
+func (a *Application) FeedsUpdate(c echo.Context, id string, data *Feed) error {
+	err := app.DB.FeedUpdate(id, data)
 	if err != nil {
 		return err
 	}
 
-	err = app.DB.FeedUpdate(id, data)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, gin.H{"error": false})
+	return c.JSON(http.StatusOK, gin.H{"error": false, "result": data})
 }
 
-func (a *Application) FeedsSettings(c echo.Context, id string) error {
-	data := &Setting{}
-	err := c.Bind(&data)
+func (a *Application) FeedsSettings(c echo.Context, id string, data *Setting) error {
+	err := app.DB.FeedSetting(id, data.Name, data.Value)
 	if err != nil {
 		return err
 	}
 
-	err = app.DB.FeedSetting(id, data.Setting, data.Value)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, gin.H{"error": false})
+	return c.JSON(http.StatusOK, gin.H{"error": false, "result": data})
 }
 
 func (a *Application) FeedsDelete(c echo.Context, id string) error {

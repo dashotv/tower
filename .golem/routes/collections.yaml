@@ -1,3 +1,4 @@
 name: collections
 path: /collections
+model: "*Collection"
 rest: true

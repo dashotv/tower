@@ -10,11 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type Setting struct {
-	Setting string
-	Value   bool
-}
-
 func (a *Application) EpisodesUpdate(c echo.Context, id string) error {
 	data := &Setting{}
 	err := c.Bind(&data)
@@ -22,7 +17,7 @@ func (a *Application) EpisodesUpdate(c echo.Context, id string) error {
 		return err
 	}
 
-	err = app.DB.EpisodeSetting(id, data.Setting, data.Value)
+	err = app.DB.EpisodeSetting(id, data.Name, data.Value)
 	if err != nil {
 		return err
 	}
@@ -37,7 +32,7 @@ func (a *Application) EpisodesSetting(c echo.Context, id string) error {
 		return err
 	}
 
-	err = app.DB.EpisodeSetting(id, data.Setting, data.Value)
+	err = app.DB.EpisodeSetting(id, data.Name, data.Value)
 	if err != nil {
 		return err
 	}

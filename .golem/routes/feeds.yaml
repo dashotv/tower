@@ -1,3 +1,4 @@
 name: feeds
 path: /feeds
+model: "*Feed"
 rest: true

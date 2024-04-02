@@ -28,8 +28,8 @@ func (a *Application) ReleasesIndex(c echo.Context, page, limit int) error {
 	return c.JSON(http.StatusOK, results)
 }
 
-func (a *Application) ReleasesCreate(c echo.Context) error {
-	return c.JSON(http.StatusOK, gin.H{"error": false})
+func (a *Application) ReleasesCreate(c echo.Context, release *Release) error {
+	return c.JSON(http.StatusNotImplemented, gin.H{"error": true})
 }
 
 func (a *Application) ReleasesShow(c echo.Context, id string) error {
@@ -47,27 +47,21 @@ func (a *Application) ReleasesShow(c echo.Context, id string) error {
 	return c.JSON(http.StatusOK, result)
 }
 
-func (a *Application) ReleasesUpdate(c echo.Context, id string) error {
-	return c.JSON(http.StatusOK, gin.H{"error": false})
+func (a *Application) ReleasesUpdate(c echo.Context, id string, release *Release) error {
+	return c.JSON(http.StatusNotImplemented, gin.H{"error": true})
 }
 
 func (a *Application) ReleasesDelete(c echo.Context, id string) error {
 	return c.JSON(http.StatusOK, gin.H{"error": false})
 }
 
-func (a *Application) ReleasesSettings(c echo.Context, id string) error {
-	s := &Setting{}
-	err := c.Bind(s)
+func (a *Application) ReleasesSettings(c echo.Context, id string, s *Setting) error {
+	err := app.DB.ReleaseSetting(id, s.Name, s.Value)
 	if err != nil {
 		return err
 	}
 
-	err = app.DB.ReleaseSetting(id, s.Setting, s.Value)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, gin.H{"errors": false, "data": s})
+	return c.JSON(http.StatusOK, gin.H{"errors": false, "result": s})
 }
 
 func (a *Application) ReleasesPopular(c echo.Context, interval string) error {

@@ -4,8 +4,8 @@ package app
 import (
 	"context"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
-	"github.com/pkg/errors"
 )
 
 func init() {
@@ -41,7 +41,7 @@ func setupWorkers(app *Application) error {
 
 	m, err := minion.New("tower", mcfg)
 	if err != nil {
-		return errors.Wrap(err, "creating minion")
+		return fae.Wrap(err, "creating minion")
 	}
 
 	// add something like the below line in app.Start() (before the workers are
@@ -55,143 +55,143 @@ func setupWorkers(app *Application) error {
 	m.Queue("series", 3, 0, 5)
 
 	if err := minion.RegisterWithQueue[*PathCleanup](m, &PathCleanup{}, "paths"); err != nil {
-		return errors.Wrap(err, "registering worker: PathCleanup (PathCleanup)")
+		return fae.Wrap(err, "registering worker: PathCleanup (PathCleanup)")
 	}
 
 	if err := minion.Register[*PathCleanupAll](m, &PathCleanupAll{}); err != nil {
-		return errors.Wrap(err, "registering worker: PathCleanupAll (PathCleanupAll)")
+		return fae.Wrap(err, "registering worker: PathCleanupAll (PathCleanupAll)")
 	}
 	if _, err := m.Schedule("0 0 10 * * 0", &PathCleanupAll{}); err != nil {
-		return errors.Wrap(err, "scheduling worker: PathCleanupAll (PathCleanupAll)")
+		return fae.Wrap(err, "scheduling worker: PathCleanupAll (PathCleanupAll)")
 	}
 
 	if err := minion.Register[*CleanPlexPins](m, &CleanPlexPins{}); err != nil {
-		return errors.Wrap(err, "registering worker: clean_plex_pins (CleanPlexPins)")
+		return fae.Wrap(err, "registering worker: clean_plex_pins (CleanPlexPins)")
 	}
 	if _, err := m.Schedule("0 0 11 * * *", &CleanPlexPins{}); err != nil {
-		return errors.Wrap(err, "scheduling worker: clean_plex_pins (CleanPlexPins)")
+		return fae.Wrap(err, "scheduling worker: clean_plex_pins (CleanPlexPins)")
 	}
 
 	if err := minion.Register[*CleanupJobs](m, &CleanupJobs{}); err != nil {
-		return errors.Wrap(err, "registering worker: cleanup_jobs (CleanupJobs)")
+		return fae.Wrap(err, "registering worker: cleanup_jobs (CleanupJobs)")
 	}
 	if _, err := m.Schedule("0 10 11 * * *", &CleanupJobs{}); err != nil {
-		return errors.Wrap(err, "scheduling worker: cleanup_jobs (CleanupJobs)")
+		return fae.Wrap(err, "scheduling worker: cleanup_jobs (CleanupJobs)")
 	}
 
 	if err := minion.Register[*CleanupLogs](m, &CleanupLogs{}); err != nil {
-		return errors.Wrap(err, "registering worker: cleanup_logs (CleanupLogs)")
+		return fae.Wrap(err, "registering worker: cleanup_logs (CleanupLogs)")
 	}
 	if _, err := m.Schedule("0 20 11 * * *", &CleanupLogs{}); err != nil {
-		return errors.Wrap(err, "scheduling worker: cleanup_logs (CleanupLogs)")
+		return fae.Wrap(err, "scheduling worker: cleanup_logs (CleanupLogs)")
 	}
 
 	if err := minion.Register[*CreateMediaFromRequests](m, &CreateMediaFromRequests{}); err != nil {
-		return errors.Wrap(err, "registering worker: create_media_from_requests (CreateMediaFromRequests)")
+		return fae.Wrap(err, "registering worker: create_media_from_requests (CreateMediaFromRequests)")
 	}
 	if _, err := m.Schedule("15 0 * * * *", &CreateMediaFromRequests{}); err != nil {
-		return errors.Wrap(err, "scheduling worker: create_media_from_requests (CreateMediaFromRequests)")
+		return fae.Wrap(err, "scheduling worker: create_media_from_requests (CreateMediaFromRequests)")
 	}
 
 	if err := minion.Register[*DownloadsProcess](m, &DownloadsProcess{}); err != nil {
-		return errors.Wrap(err, "registering worker: downloads_process (DownloadsProcess)")
+		return fae.Wrap(err, "registering worker: downloads_process (DownloadsProcess)")
 	}
 	if _, err := m.Schedule("30 * * * * *", &DownloadsProcess{}); err != nil {
-		return errors.Wrap(err, "scheduling worker: downloads_process (DownloadsProcess)")
+		return fae.Wrap(err, "scheduling worker: downloads_process (DownloadsProcess)")
 	}
 
 	if err := minion.Register[*FileMatch](m, &FileMatch{}); err != nil {
-		return errors.Wrap(err, "registering worker: file_match (FileMatch)")
+		return fae.Wrap(err, "registering worker: file_match (FileMatch)")
 	}
 	if _, err := m.Schedule("0 0 12 * * *", &FileMatch{}); err != nil {
-		return errors.Wrap(err, "scheduling worker: file_match (FileMatch)")
+		return fae.Wrap(err, "scheduling worker: file_match (FileMatch)")
 	}
 
 	if err := minion.Register[*FileMatchDir](m, &FileMatchDir{}); err != nil {
-		return errors.Wrap(err, "registering worker: file_match_dir (FileMatchDir)")
+		return fae.Wrap(err, "registering worker: file_match_dir (FileMatchDir)")
 	}
 
 	if err := minion.Register[*FileMatchMedium](m, &FileMatchMedium{}); err != nil {
-		return errors.Wrap(err, "registering worker: file_match_medium (FileMatchMedium)")
+		return fae.Wrap(err, "registering worker: file_match_medium (FileMatchMedium)")
 	}
 
 	if err := minion.RegisterWithQueue[*FileWalk](m, &FileWalk{}, "paths"); err != nil {
-		return errors.Wrap(err, "registering worker: file_walk (FileWalk)")
+		return fae.Wrap(err, "registering worker: file_walk (FileWalk)")
 	}
 
 	if err := minion.RegisterWithQueue[*PathImport](m, &PathImport{}, "paths"); err != nil {
-		return errors.Wrap(err, "registering worker: path_import (PathImport)")
+		return fae.Wrap(err, "registering worker: path_import (PathImport)")
 	}
 
 	if err := minion.Register[*PlexCollectionUpdate](m, &PlexCollectionUpdate{}); err != nil {
-		return errors.Wrap(err, "registering worker: plex_collection_update (PlexCollectionUpdate)")
+		return fae.Wrap(err, "registering worker: plex_collection_update (PlexCollectionUpdate)")
 	}
 
 	if err := minion.Register[*PlexPinToUsers](m, &PlexPinToUsers{}); err != nil {
-		return errors.Wrap(err, "registering worker: plex_pin_to_users (PlexPinToUsers)")
+		return fae.Wrap(err, "registering worker: plex_pin_to_users (PlexPinToUsers)")
 	}
 
 	if err := minion.Register[*PlexUserUpdates](m, &PlexUserUpdates{}); err != nil {
-		return errors.Wrap(err, "registering worker: plex_user_updates (PlexUserUpdates)")
+		return fae.Wrap(err, "registering worker: plex_user_updates (PlexUserUpdates)")
 	}
 	if _, err := m.Schedule("0 30 11 * * *", &PlexUserUpdates{}); err != nil {
-		return errors.Wrap(err, "scheduling worker: plex_user_updates (PlexUserUpdates)")
+		return fae.Wrap(err, "scheduling worker: plex_user_updates (PlexUserUpdates)")
 	}
 
 	if err := minion.Register[*PlexWatchlistUpdates](m, &PlexWatchlistUpdates{}); err != nil {
-		return errors.Wrap(err, "registering worker: plex_watchlist_updates (PlexWatchlistUpdates)")
+		return fae.Wrap(err, "registering worker: plex_watchlist_updates (PlexWatchlistUpdates)")
 	}
 	if _, err := m.Schedule("0 0 * * * *", &PlexWatchlistUpdates{}); err != nil {
-		return errors.Wrap(err, "scheduling worker: plex_watchlist_updates (PlexWatchlistUpdates)")
+		return fae.Wrap(err, "scheduling worker: plex_watchlist_updates (PlexWatchlistUpdates)")
 	}
 
 	if err := minion.RegisterWithQueue[*SeriesImage](m, &SeriesImage{}, "series"); err != nil {
-		return errors.Wrap(err, "registering worker: series_image (SeriesImage)")
+		return fae.Wrap(err, "registering worker: series_image (SeriesImage)")
 	}
 
 	if err := minion.RegisterWithQueue[*SeriesUpdate](m, &SeriesUpdate{}, "series"); err != nil {
-		return errors.Wrap(err, "registering worker: series_update (SeriesUpdate)")
+		return fae.Wrap(err, "registering worker: series_update (SeriesUpdate)")
 	}
 
 	if err := minion.Register[*SeriesUpdateAll](m, &SeriesUpdateAll{}); err != nil {
-		return errors.Wrap(err, "registering worker: series_update_all (SeriesUpdateAll)")
+		return fae.Wrap(err, "registering worker: series_update_all (SeriesUpdateAll)")
 	}
 	if _, err := m.Schedule("0 0 10 * * 0", &SeriesUpdateAll{}); err != nil {
-		return errors.Wrap(err, "scheduling worker: series_update_all (SeriesUpdateAll)")
+		return fae.Wrap(err, "scheduling worker: series_update_all (SeriesUpdateAll)")
 	}
 
 	if err := minion.Register[*SeriesUpdateDonghua](m, &SeriesUpdateDonghua{}); err != nil {
-		return errors.Wrap(err, "registering worker: series_update_donghua (SeriesUpdateDonghua)")
+		return fae.Wrap(err, "registering worker: series_update_donghua (SeriesUpdateDonghua)")
 	}
 	if _, err := m.Schedule("0 0 7 * * *", &SeriesUpdateDonghua{}); err != nil {
-		return errors.Wrap(err, "scheduling worker: series_update_donghua (SeriesUpdateDonghua)")
+		return fae.Wrap(err, "scheduling worker: series_update_donghua (SeriesUpdateDonghua)")
 	}
 
 	if err := minion.Register[*SeriesUpdateKind](m, &SeriesUpdateKind{}); err != nil {
-		return errors.Wrap(err, "registering worker: series_update_kind (SeriesUpdateKind)")
+		return fae.Wrap(err, "registering worker: series_update_kind (SeriesUpdateKind)")
 	}
 
 	if err := minion.Register[*SeriesUpdateRecent](m, &SeriesUpdateRecent{}); err != nil {
-		return errors.Wrap(err, "registering worker: series_update_recent (SeriesUpdateRecent)")
+		return fae.Wrap(err, "registering worker: series_update_recent (SeriesUpdateRecent)")
 	}
 	if _, err := m.Schedule("0 */15 * * * *", &SeriesUpdateRecent{}); err != nil {
-		return errors.Wrap(err, "scheduling worker: series_update_recent (SeriesUpdateRecent)")
+		return fae.Wrap(err, "scheduling worker: series_update_recent (SeriesUpdateRecent)")
 	}
 
 	if err := minion.Register[*TmdbUpdateAll](m, &TmdbUpdateAll{}); err != nil {
-		return errors.Wrap(err, "registering worker: tmdb_update_all (TmdbUpdateAll)")
+		return fae.Wrap(err, "registering worker: tmdb_update_all (TmdbUpdateAll)")
 	}
 
 	if err := minion.Register[*TmdbUpdateMovie](m, &TmdbUpdateMovie{}); err != nil {
-		return errors.Wrap(err, "registering worker: tmdb_update_movie (TmdbUpdateMovie)")
+		return fae.Wrap(err, "registering worker: tmdb_update_movie (TmdbUpdateMovie)")
 	}
 
 	if err := minion.Register[*TmdbUpdateMovieImage](m, &TmdbUpdateMovieImage{}); err != nil {
-		return errors.Wrap(err, "registering worker: tmdb_update_movie_image (TmdbUpdateMovieImage)")
+		return fae.Wrap(err, "registering worker: tmdb_update_movie_image (TmdbUpdateMovieImage)")
 	}
 
 	if err := minion.Register[*UpdateIndexes](m, &UpdateIndexes{}); err != nil {
-		return errors.Wrap(err, "registering worker: update_indexes (UpdateIndexes)")
+		return fae.Wrap(err, "registering worker: update_indexes (UpdateIndexes)")
 	}
 
 	app.Workers = m

@@ -23,14 +23,8 @@ func (a *Application) CollectionsIndex(c echo.Context, page int, limit int) erro
 	return c.JSON(http.StatusOK, gin.H{"error": false, "count": len(list), "results": list})
 }
 
-func (a *Application) CollectionsCreate(c echo.Context) error {
-	col := &Collection{}
-	err := c.Bind(col)
-	if err != nil {
-		return err
-	}
-
-	err = a.DB.Collection.Save(col)
+func (a *Application) CollectionsCreate(c echo.Context, col *Collection) error {
+	err := a.DB.Collection.Save(col)
 	if err != nil {
 		return err
 	}
@@ -47,13 +41,7 @@ func (a *Application) CollectionsShow(c echo.Context, id string) error {
 	return c.JSON(http.StatusOK, subject)
 }
 
-func (a *Application) CollectionsUpdate(c echo.Context, id string) error {
-	subject := &Collection{}
-
-	if err := c.Bind(subject); err != nil {
-		return err
-	}
-
+func (a *Application) CollectionsUpdate(c echo.Context, id string, subject *Collection) error {
 	if err := a.DB.Collection.Save(subject); err != nil {
 		return err
 	}
@@ -67,7 +55,7 @@ func (a *Application) CollectionsUpdate(c echo.Context, id string) error {
 	return nil
 }
 
-func (a *Application) CollectionsSettings(c echo.Context, id string) error {
+func (a *Application) CollectionsSettings(c echo.Context, id string, setting *Setting) error {
 	// asssuming this is a CRUD route, get the subject from the database
 	// subject, err := a.DB.Collections.Get(id)
 	return c.JSON(http.StatusNotImplemented, H{"message": "not implemented"})

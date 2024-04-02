@@ -16,12 +16,7 @@ func (a *Application) CombinationsIndex(c echo.Context, page int, limit int) err
 	return c.JSON(http.StatusOK, list)
 }
 
-func (a *Application) CombinationsCreate(c echo.Context) error {
-	combination := &Combination{}
-	if err := c.Bind(combination); err != nil {
-		return c.JSON(http.StatusBadRequest, gin.H{"error": true, "msg": err.Error()})
-	}
-
+func (a *Application) CombinationsCreate(c echo.Context, combination *Combination) error {
 	if err := a.DB.Combination.Save(combination); err != nil {
 		return c.JSON(http.StatusInternalServerError, gin.H{"error": true, "msg": err.Error()})
 	}
@@ -38,7 +33,7 @@ func (a *Application) CombinationsShow(c echo.Context, name string) error {
 	return c.JSON(http.StatusOK, list)
 }
 
-func (a *Application) CombinationsUpdate(c echo.Context, id string) error {
+func (a *Application) CombinationsUpdate(c echo.Context, id string, combination *Combination) error {
 	// asssuming this is a CRUD route, get the subject from the database
 	// subject, err := a.DB.Combinations.Get(id)
 	return c.JSON(http.StatusOK, gin.H{
@@ -46,7 +41,7 @@ func (a *Application) CombinationsUpdate(c echo.Context, id string) error {
 	})
 }
 
-func (a *Application) CombinationsSettings(c echo.Context, id string) error {
+func (a *Application) CombinationsSettings(c echo.Context, id string, setting *Setting) error {
 	// asssuming this is a CRUD route, get the subject from the database
 	// subject, err := a.DB.Combinations.Get(id)
 	return c.JSON(http.StatusOK, gin.H{
