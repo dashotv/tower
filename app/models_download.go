@@ -42,6 +42,22 @@ func (d *Download) GetURL() (string, error) {
 	return "", fae.New("no url or release")
 }
 
+func (c *Connector) DownloadByHash(hash string) (*Download, error) {
+	list, err := c.Download.Query().Where("thash", hash).Run()
+	if err != nil {
+		return nil, err
+	}
+	if len(list) == 0 {
+		return nil, fae.Errorf("could not find download by hash: %s", hash)
+	}
+	if len(list) > 1 {
+		return nil, fae.Errorf("multiple downloads found by hash: %s", hash)
+	}
+
+	c.processDownloads(list)
+	return list[0], nil
+}
+
 func (d *Download) IsNzb() bool {
 	url, err := d.GetURL()
 	if err != nil {

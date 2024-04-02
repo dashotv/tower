@@ -6,4 +6,8 @@ routes:
     method: GET
   - name: nzbget
     path: /nzbget
-    method: GET
+    method: POST
+    params:
+      - name: payload
+        type: "*NzbgetPayload"
+        bind: true

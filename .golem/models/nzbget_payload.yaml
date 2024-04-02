@@ -1,0 +1,17 @@
+name: nzbget_payload
+type: struct
+fields:
+  - name: id
+    type: string
+  - name: name
+    type: string
+  - name: category
+    type: string
+  - name: dir
+    type: string
+  - name: final_dir
+    type: string
+  - name: file
+    type: string
+  - name: status
+    type: string

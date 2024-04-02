@@ -425,6 +425,16 @@ type Movie struct { // model
 	Background   string           `bson:"-" json:"background"`
 }
 
+type NzbgetPayload struct { // struct
+	Id       string `bson:"id" json:"id"`
+	Name     string `bson:"name" json:"name"`
+	Category string `bson:"category" json:"category"`
+	Dir      string `bson:"dir" json:"dir"`
+	FinalDir string `bson:"final_dir" json:"final_dir"`
+	File     string `bson:"file" json:"file"`
+	Status   string `bson:"status" json:"status"`
+}
+
 type Path struct { // struct
 	Id         primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Type       primitive.Symbol   `bson:"type" json:"type"`

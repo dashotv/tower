@@ -119,6 +119,10 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "registering worker: file_walk (FileWalk)")
 	}
 
+	if err := minion.Register[*NzbgetProcess](m, &NzbgetProcess{}); err != nil {
+		return fae.Wrap(err, "registering worker: nzbget_process (NzbgetProcess)")
+	}
+
 	if err := minion.RegisterWithQueue[*PathImport](m, &PathImport{}, "paths"); err != nil {
 		return fae.Wrap(err, "registering worker: path_import (PathImport)")
 	}
