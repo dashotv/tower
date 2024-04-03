@@ -365,8 +365,8 @@ func (a *Application) DownloadsMediumHandler(c echo.Context) error {
 	return a.DownloadsMedium(c, id)
 }
 func (a *Application) DownloadsRecentHandler(c echo.Context) error {
-	page := c.Param("page")
-	medium_id := c.Param("medium_id")
+	page := QueryInt(c, "page")
+	medium_id := QueryString(c, "medium_id")
 	return a.DownloadsRecent(c, page, medium_id)
 }
 func (a *Application) DownloadsSelectHandler(c echo.Context) error {

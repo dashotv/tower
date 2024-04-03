@@ -1,0 +1,15 @@
+name: torrent_file
+type: struct
+fields:
+  - name: id
+    type: int
+  - name: is_send
+    type: bool
+  - name: name
+    type: string
+  - name: priority
+    type: int
+  - name: progress
+    type: float64
+  - name: size
+    type: int64

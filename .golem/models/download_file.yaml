@@ -12,3 +12,7 @@ fields:
     type: int
     json: num
     bson: num
+  - name: torrent_file # used by the ui
+    type: "*TorrentFile"
+    bson: "-"
+    json: "-"

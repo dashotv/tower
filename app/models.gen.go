@@ -266,10 +266,11 @@ type Download struct { // model
 }
 
 type DownloadFile struct { // struct
-	Id       primitive.ObjectID `bson:"_id" json:"id"`
-	MediumId primitive.ObjectID `bson:"medium_id" json:"medium_id"`
-	Medium   *Medium            `bson:"medium" json:"medium"`
-	Num      int                `bson:"num" json:"num"`
+	Id          primitive.ObjectID `bson:"_id" json:"id"`
+	MediumId    primitive.ObjectID `bson:"medium_id" json:"medium_id"`
+	Medium      *Medium            `bson:"medium" json:"medium"`
+	Num         int                `bson:"num" json:"num"`
+	TorrentFile *TorrentFile       `bson:"-" json:"-"`
 }
 
 type Episode struct { // model
@@ -552,6 +553,15 @@ type Series struct { // model
 	Seasons       []int            `bson:"-" json:"seasons"`
 	Episodes      []*Episode       `bson:"-" json:"episodes"`
 	Watches       []*Watch         `bson:"-" json:"watches"`
+}
+
+type TorrentFile struct { // struct
+	Id       int     `bson:"id" json:"id"`
+	IsSend   bool    `bson:"is_send" json:"is_send"`
+	Name     string  `bson:"name" json:"name"`
+	Priority int     `bson:"priority" json:"priority"`
+	Progress float64 `bson:"progress" json:"progress"`
+	Size     int64   `bson:"size" json:"size"`
 }
 
 type User struct { // model

@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/gin-gonic/gin"
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -17,7 +16,7 @@ func (a *Application) DownloadsIndex(c echo.Context, page, limit int) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: results})
 }
 
 func (a *Application) DownloadsLast(c echo.Context) error {
@@ -27,7 +26,7 @@ func (a *Application) DownloadsLast(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, gin.H{"error": false, "last": t})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: t})
 }
 
 type DownloadRequest struct {
@@ -57,7 +56,7 @@ func (a *Application) DownloadsCreate(c echo.Context, data *Download) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, gin.H{"error": false, "result": data.ID.Hex()})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: data.ID.Hex()})
 }
 
 func (a *Application) DownloadsShow(c echo.Context, id string) error {
@@ -70,7 +69,7 @@ func (a *Application) DownloadsShow(c echo.Context, id string) error {
 	list := []*Download{result}
 	app.DB.processDownloads(list)
 
-	return c.JSON(http.StatusOK, H{"error": false, "result": result})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: result})
 }
 
 func (a *Application) DownloadsUpdate(c echo.Context, id string, data *Download) error {
@@ -97,7 +96,7 @@ func (a *Application) DownloadsUpdate(c echo.Context, id string, data *Download)
 		}
 	}
 
-	return c.JSON(http.StatusOK, H{"error": false, "result": data})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: data})
 }
 
 func (a *Application) DownloadsSettings(c echo.Context, id string, data *Setting) error {
@@ -106,18 +105,16 @@ func (a *Application) DownloadsSettings(c echo.Context, id string, data *Setting
 		return err
 	}
 
-	return c.JSON(http.StatusOK, gin.H{"errors": false, "result": data})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: data})
 }
 
 func (a *Application) DownloadsDelete(c echo.Context, id string) error {
-	return c.JSON(http.StatusOK, gin.H{"error": false})
+	return c.JSON(http.StatusOK, &Response{Error: false})
 }
 
-func (a *Application) DownloadsRecent(c echo.Context) error {
-	mid := QueryString(c, "medium_id")
-	page, err := QueryDefaultInteger(c, "page", 1)
-	if err != nil {
-		return err
+func (a *Application) DownloadsRecent(c echo.Context, page int, mid string) error {
+	if page < 1 {
+		page = 1
 	}
 
 	results, total, err := app.DB.RecentDownloads(mid, page)
@@ -125,7 +122,7 @@ func (a *Application) DownloadsRecent(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, gin.H{"count": total, "results": results})
+	return c.JSON(http.StatusOK, &Response{Total: total, Result: results})
 }
 
 type DownloadSelector struct {
@@ -133,19 +130,13 @@ type DownloadSelector struct {
 	Num      int
 }
 
-func (a *Application) DownloadsSelect(c echo.Context, id string) error {
-	data := &DownloadSelector{}
-	err := c.Bind(&data)
+func (a *Application) DownloadsSelect(c echo.Context, id string, medium_id string, num int) error {
+	err := app.DB.DownloadSelect(id, medium_id, num)
 	if err != nil {
 		return err
 	}
 
-	err = app.DB.DownloadSelect(id, data.MediumId, data.Num)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
+	return c.JSON(http.StatusOK, &Response{Error: false})
 }
 
 func (a *Application) DownloadsMedium(c echo.Context, id string) error {
@@ -159,14 +150,14 @@ func (a *Application) DownloadsMedium(c echo.Context, id string) error {
 	app.DB.processDownloads(list)
 
 	if download.Medium == nil {
-		return c.JSON(http.StatusOK, gin.H{"errors": false})
+		return c.JSON(http.StatusOK, &Response{Error: false})
 	}
 
 	if download.Medium.Type == "Series" {
 		return a.SeriesSeasonEpisodesAll(c, download.MediumId.Hex())
 	}
 
-	return c.JSON(http.StatusOK, []*Medium{download.Medium})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: []*Medium{download.Medium}})
 }
 
 var thashIsTorrent = regexp.MustCompile(`^[a-f0-9]{40}$`)
@@ -179,7 +170,7 @@ func (a *Application) DownloadsTorrent(c echo.Context, id string) error {
 	}
 
 	if download.Thash == "" || thashIsTorrent.MatchString(download.Thash) == false {
-		return c.JSON(http.StatusOK, gin.H{"errors": false, "message": "No torrent hash available"})
+		return c.JSON(http.StatusOK, &Response{Error: false, Message: "No torrent hash available"})
 	}
 
 	torrent, err := app.Flame.Torrent(download.Thash)

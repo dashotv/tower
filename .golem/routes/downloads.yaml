@@ -10,7 +10,7 @@ routes:
   - name: medium
     path: /:id/medium
     method: GET
-    result: "*Medium"
+    result: "[]*Medium"
     params:
       - name: id
         type: string
@@ -21,8 +21,10 @@ routes:
     params:
       - name: page
         type: int
+        query: true
       - name: medium_id
         type: string
+        query: true
   - name: select
     path: /:id/select
     method: PUT
