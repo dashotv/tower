@@ -5,22 +5,36 @@ rest: true
 routes:
   - name: last
     path: /last
+    result: int
     method: GET
   - name: medium
     path: /:id/medium
     method: GET
+    result: "*Medium"
     params:
       - name: id
         type: string
   - name: recent
     path: /recent
     method: GET
+    result: "[]*Download"
+    params:
+      - name: page
+        type: int
+      - name: medium_id
+        type: string
   - name: select
     path: /:id/select
     method: PUT
     params:
       - name: id
         type: string
+      - name: medium_id
+        type: string
+        query: true
+      - name: num
+        type: int
+        query: true
   - name: torrent
     path: /:id/torrent
     method: GET

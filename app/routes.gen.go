@@ -67,6 +67,13 @@ type Setting struct {
 	Value bool   `json:"value"`
 }
 
+type Response struct {
+	Error   bool        `json:"error"`
+	Message string      `json:"message,omitempty"`
+	Result  interface{} `json:"result,omitempty"`
+	Total   int64       `json:"total,omitempty"`
+}
+
 func (a *Application) Routes() {
 	a.Default.GET("/", a.indexHandler)
 	a.Default.GET("/health", a.healthHandler)
@@ -358,11 +365,15 @@ func (a *Application) DownloadsMediumHandler(c echo.Context) error {
 	return a.DownloadsMedium(c, id)
 }
 func (a *Application) DownloadsRecentHandler(c echo.Context) error {
-	return a.DownloadsRecent(c)
+	page := c.Param("page")
+	medium_id := c.Param("medium_id")
+	return a.DownloadsRecent(c, page, medium_id)
 }
 func (a *Application) DownloadsSelectHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.DownloadsSelect(c, id)
+	medium_id := QueryString(c, "medium_id")
+	num := QueryInt(c, "num")
+	return a.DownloadsSelect(c, id, medium_id, num)
 }
 func (a *Application) DownloadsTorrentHandler(c echo.Context) error {
 	id := c.Param("id")
