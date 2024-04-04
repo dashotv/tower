@@ -6,11 +6,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (a *Application) WatchesIndex(c echo.Context, mediumId, username string) error {
-	watches, err := app.DB.Watches(mediumId, username)
+// GET /watches/
+func (a *Application) WatchesIndex(c echo.Context, medium_id string, username string) error {
+	list, err := app.DB.Watches(medium_id, username)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error loading Watches"})
 	}
-
-	return c.JSON(http.StatusOK, watches)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
 }

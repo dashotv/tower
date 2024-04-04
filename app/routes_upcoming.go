@@ -6,11 +6,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// GET /upcoming/
 func (a *Application) UpcomingIndex(c echo.Context) error {
-	episodes, err := app.DB.Upcoming()
+	list, err := a.DB.Upcoming()
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error loading Upcoming"})
 	}
-
-	return c.JSON(http.StatusOK, episodes)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
 }

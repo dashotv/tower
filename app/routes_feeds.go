@@ -3,58 +3,78 @@ package app
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/labstack/echo/v4"
 )
 
-func (a *Application) FeedsIndex(c echo.Context, page, limit int) error {
-	results, err := app.DB.Feed.Query().
-		Desc("processed").
-		Limit(1000).
-		Run()
+// GET /feeds/
+func (a *Application) FeedsIndex(c echo.Context, page int, limit int) error {
+	list, err := a.DB.FeedList(page, limit)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error loading Feeds"})
 	}
-
-	return c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
 }
 
-func (a *Application) FeedsCreate(c echo.Context, data *Feed) error {
-	err := app.DB.Feed.Save(data)
-	if err != nil {
-		return err
+// POST /feeds/
+func (a *Application) FeedsCreate(c echo.Context, subject *Feed) error {
+	// TODO: process the subject
+	if err := a.DB.Feed.Save(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Feeds"})
 	}
-
-	return c.JSON(http.StatusOK, gin.H{"error": false, "id": data.ID.Hex(), "result": data})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
+// GET /feeds/:id
 func (a *Application) FeedsShow(c echo.Context, id string) error {
-	result := &Feed{}
-	err := app.DB.Feed.Find(id, result)
+	subject, err := a.DB.FeedGet(id)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
 	}
-	return c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
-func (a *Application) FeedsUpdate(c echo.Context, id string, data *Feed) error {
-	err := app.DB.FeedUpdate(id, data)
-	if err != nil {
-		return err
-	}
+// PUT /feeds/:id
+func (a *Application) FeedsUpdate(c echo.Context, id string, subject *Feed) error {
+	// TODO: process the subject
 
-	return c.JSON(http.StatusOK, gin.H{"error": false, "result": data})
+	// if you need to copy or compare to existing object...
+	// data, err := a.DB.FeedGet(id)
+	// if err != nil {
+	//     return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
+	// }
+	// data.Name = subject.Name ...
+	if err := a.DB.Feed.Save(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Feeds"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
-func (a *Application) FeedsSettings(c echo.Context, id string, data *Setting) error {
-	err := app.DB.FeedSetting(id, data.Name, data.Value)
+// PATCH /feeds/:id
+func (a *Application) FeedsSettings(c echo.Context, id string, setting *Setting) error {
+	subject, err := a.DB.FeedGet(id)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
 	}
 
-	return c.JSON(http.StatusOK, gin.H{"error": false, "result": data})
+	// switch Setting.Name {
+	// case "something":
+	//    subject.Something = Setting.Value
+	// }
+
+	if err := a.DB.Feed.Save(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Feeds"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
+// DELETE /feeds/:id
 func (a *Application) FeedsDelete(c echo.Context, id string) error {
-	return c.JSON(http.StatusOK, gin.H{"error": false})
+	subject, err := a.DB.FeedGet(id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
+	}
+	if err := a.DB.Feed.Delete(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error deleting Feeds"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }

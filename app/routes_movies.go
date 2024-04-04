@@ -4,24 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/labstack/echo/v4"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/fae"
 )
 
-func (a *Application) MoviesIndex(c echo.Context, page, limit int) error {
-	if page == 0 {
-		page = 1
-	}
-
-	kind := QueryString(c, "kind")
-	source := QueryString(c, "source")
-	completed := QueryBool(c, "completed")
-	downloaded := QueryBool(c, "downloaded")
-	broken := QueryBool(c, "broken")
-
+// GET /movies/
+func (a *Application) MoviesIndex(c echo.Context, page int, limit int, kind, source string, completed, downloaded, broken bool) error {
 	q := app.DB.Movie.Query()
 	if kind != "" {
 		q = q.Where("kind", kind)
@@ -29,31 +18,30 @@ func (a *Application) MoviesIndex(c echo.Context, page, limit int) error {
 	if source != "" {
 		q = q.Where("source", source)
 	}
+	if broken {
+		q = q.Where("broken", true)
+	}
 	if completed {
 		q = q.Where("completed", true)
 	}
 	if downloaded {
 		q = q.Where("downloaded", true)
 	}
-	if broken {
-		q = q.Where("broken", true)
-	}
 
 	count, err := q.Count()
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 	}
 
-	results, err := q.
-		Limit(pagesize).
-		Skip((page - 1) * pagesize).
+	list, err := q.
+		Limit(limit).
+		Skip((page - 1) * limit).
 		Desc("created_at").Run()
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 	}
 
-	// TODO: do this with custom unmarshaling?
-	for _, m := range results {
+	for _, m := range list {
 		for _, p := range m.Paths {
 			if p.Type == "cover" {
 				m.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
@@ -66,98 +54,98 @@ func (a *Application) MoviesIndex(c echo.Context, page, limit int) error {
 		}
 	}
 
-	return c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
+	return c.JSON(http.StatusOK, &Response{Error: false, Total: count, Result: list})
 }
 
-func (a *Application) MoviesCreate(c echo.Context, r *Movie) error {
-	if r.SourceId == "" || r.Source == "" {
+// POST /movies/
+func (a *Application) MoviesCreate(c echo.Context, subject *Movie) error {
+	if subject.SourceId == "" || subject.Source == "" {
 		return fae.New("id and source are required")
 	}
 
-	m := &Movie{
-		Type:         "Movie",
-		SourceId:     r.SourceId,
-		Source:       r.Source,
-		Title:        r.Title,
-		Description:  r.Description,
-		Kind:         primitive.Symbol(r.Kind),
-		SearchParams: &SearchParams{Type: "movies", Resolution: 1080, Verified: true},
+	subject.Type = "Movie"
+	subject.SearchParams = &SearchParams{Resolution: 1080, Verified: true, Type: "movies"}
+
+	if err := a.DB.Movie.Save(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Movies"})
 	}
-
-	// d, err := time.Parse("2006-01-02", r.ReleaseDate)
-	// if err != nil {
-	// 	return err
-	// }
-	// m.ReleaseDate = d
-
-	err := app.DB.Movie.Save(m)
-	if err != nil {
+	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: subject.ID.Hex()}); err != nil {
 		return err
 	}
-
-	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: m.ID.Hex()}); err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, gin.H{"error": false, "movie": m})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
+// GET /movies/:id
 func (a *Application) MoviesShow(c echo.Context, id string) error {
-	m := &Movie{}
-	err := app.DB.Movie.Find(id, m)
+	subject, err := a.DB.MovieGet(id)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
 	}
-
-	for _, p := range m.Paths {
+	for _, p := range subject.Paths {
 		if p.Type == "cover" {
-			m.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+			subject.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
 			continue
 		}
 		if p.Type == "background" {
-			m.Background = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+			subject.Background = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
 			continue
 		}
 	}
-
-	return c.JSON(http.StatusOK, gin.H{"errors": false, "result": m})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
-func (a *Application) MoviesUpdate(c echo.Context, id string, data *Movie) error {
-	err := app.DB.MovieUpdate(id, data)
+// PUT /movies/:id
+func (a *Application) MoviesUpdate(c echo.Context, id string, subject *Movie) error {
+	// TODO: process the subject
+
+	// if you need to copy or compare to existing object...
+	// data, err := a.DB.MovieGet(id)
+	// if err != nil {
+	//     return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
+	// }
+	// data.Name = subject.Name ...
+	if err := a.DB.Movie.Save(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Movies"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
+}
+
+// PATCH /movies/:id
+func (a *Application) MoviesSettings(c echo.Context, id string, setting *Setting) error {
+	err := a.DB.MovieSetting(id, setting.Name, setting.Value)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, gin.H{"errors": false, "result": data})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: setting})
 }
 
+// DELETE /movies/:id
+func (a *Application) MoviesDelete(c echo.Context, id string) error {
+	subject, err := a.DB.MovieGet(id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
+	}
+	if err := a.DB.Movie.Delete(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error deleting Movies"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
+}
+
+// PUT /movies/:id/refresh
 func (a *Application) MoviesRefresh(c echo.Context, id string) error {
 	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: id}); err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, gin.H{"error": false})
+	return c.JSON(http.StatusOK, &Response{Error: false})
 }
 
-func (a *Application) MoviesSettings(c echo.Context, id string, data *Setting) error {
-	err := app.DB.MovieSetting(id, data.Name, data.Value)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, gin.H{"errors": false, "result": data})
-}
-
-func (a *Application) MoviesDelete(c echo.Context, id string) error {
-	return c.JSON(http.StatusOK, gin.H{"error": false})
-}
-
+// GET /movies/:id/paths
 func (a *Application) MoviesPaths(c echo.Context, id string) error {
 	results, err := app.DB.MoviePaths(id)
 	if err != nil {
 		return err
 	}
-
-	return c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: results})
 }

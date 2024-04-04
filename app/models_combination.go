@@ -48,25 +48,25 @@ func (c *Connector) CombinationList(page, limit int) ([]*Combination, error) {
 	return list, nil
 }
 
-type CombinationChild struct {
-	RatingKey    string `json:"ratingKey"`
-	Key          string `json:"key"`
-	GUID         string `json:"guid"`
-	Type         string `json:"type"`
-	Title        string `json:"title"`
-	LibraryID    int64  `json:"librarySectionID"`
-	LibraryTitle string `json:"librarySectionTitle"`
-	LibraryKey   string `json:"librarySectionKey"`
-	Summary      string `json:"summary"`
-	Thumb        string `json:"thumb"`
-	Total        int    `json:"total"`
-	Viewed       int    `json:"viewed"`
-	Link         string `json:"link"`
-	Next         string `json:"next"`
-	LastViewedAt int64  `json:"lastViewedAt"`
-	AddedAt      int64  `json:"addedAt"`
-	UpdatedAt    int64  `json:"updatedAt"`
-}
+// type CombinationChild struct {
+// 	RatingKey    string `json:"ratingKey"`
+// 	Key          string `json:"key"`
+// 	GUID         string `json:"guid"`
+// 	Type         string `json:"type"`
+// 	Title        string `json:"title"`
+// 	LibraryID    int64  `json:"librarySectionID"`
+// 	LibraryTitle string `json:"librarySectionTitle"`
+// 	LibraryKey   string `json:"librarySectionKey"`
+// 	Summary      string `json:"summary"`
+// 	Thumb        string `json:"thumb"`
+// 	Total        int    `json:"total"`
+// 	Viewed       int    `json:"viewed"`
+// 	Link         string `json:"link"`
+// 	Next         string `json:"next"`
+// 	LastViewedAt int64  `json:"lastViewedAt"`
+// 	AddedAt      int64  `json:"addedAt"`
+// 	UpdatedAt    int64  `json:"updatedAt"`
+// }
 
 type stuffSorter struct {
 	list []*CombinationChild
@@ -130,10 +130,10 @@ func (c *Connector) CombinationChildren(name string) ([]*CombinationChild, error
 			stuff := &CombinationChild{
 				RatingKey:    child.RatingKey,
 				Key:          child.Key,
-				GUID:         child.GUID,
+				Guid:         child.GUID,
 				Type:         child.Type,
 				Title:        child.Title,
-				LibraryID:    child.LibraryID,
+				LibraryId:    child.LibraryID,
 				LibraryTitle: child.LibraryTitle,
 				LibraryKey:   child.LibraryKey,
 				Summary:      child.Summary,

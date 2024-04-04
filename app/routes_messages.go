@@ -6,38 +6,26 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (a *Application) MessagesIndex(c echo.Context) error {
-	page, err := QueryDefaultInteger(c, "page", 1)
-	if err != nil {
-		return err
+// GET /messages/
+func (a *Application) MessagesIndex(c echo.Context, page int, limit int) error {
+	if page < 1 {
+		page = 1
 	}
-
-	limit, err := QueryDefaultInteger(c, "limit", 250)
-	if err != nil {
-		return err
+	if limit < 1 {
+		limit = 25
 	}
-
-	list, err := app.DB.Message.Query().Desc("created_at").Skip((page - 1) * limit).Limit(limit).Run()
+	list, err := a.DB.MessageList(page, limit)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error loading Messages"})
 	}
-
-	return c.JSON(http.StatusOK, list)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
 }
 
-func (a *Application) MessagesCreate(c echo.Context) error {
-	m := &Message{}
-	if err := c.Bind(m); err != nil {
-		return err
+// POST /messages/
+func (a *Application) MessagesCreate(c echo.Context, subject *Message) error {
+	// TODO: process the subject
+	if err := a.DB.Message.Save(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Messages"})
 	}
-
-	if err := app.DB.Message.Save(m); err != nil {
-		return err
-	}
-
-	if err := a.Events.Send("tower.logs", &EventLogs{Event: "new", Id: m.ID.Hex(), Log: m}); err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, m)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }

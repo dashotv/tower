@@ -3,50 +3,94 @@ package app
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/labstack/echo/v4"
 )
 
-func (a *Application) RequestsIndex(c echo.Context, page, limit int) error {
-	list, err := app.DB.Request.Query().Desc("created_at").Run()
-	if err != nil {
-		return err
+// GET /requests/
+func (a *Application) RequestsIndex(c echo.Context, page int, limit int) error {
+	if page < 1 {
+		page = 1
 	}
-	return c.JSON(http.StatusOK, list)
+	if limit < 1 {
+		limit = 25
+	}
+	skip := (page - 1) * limit
+	list, err := a.DB.Request.Query().Desc("created_at").Limit(limit).Skip(skip).Run()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error loading Requests"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
 }
 
+// POST /requests/
+func (a *Application) RequestsCreate(c echo.Context, subject *Request) error {
+	// TODO: process the subject
+	if err := a.DB.Request.Save(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Requests"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
+}
+
+// GET /requests/:id
 func (a *Application) RequestsShow(c echo.Context, id string) error {
-	return c.JSON(http.StatusOK, gin.H{"message": "RequestsShow"})
+	subject, err := a.DB.Request.Get(id, &Request{})
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
-func (a *Application) RequestsCreate(c echo.Context, r *Request) error {
-	return c.JSON(http.StatusOK, gin.H{"message": "RequestsCreate"})
-}
-
-func (a *Application) RequestsSettings(c echo.Context, id string, s *Setting) error {
-	return c.JSON(http.StatusOK, gin.H{"message": "RequestsSettings"})
-}
-
-func (a *Application) RequestsDelete(c echo.Context, id string) error {
-	return c.JSON(http.StatusOK, gin.H{"message": "RequestsDelete"})
-}
-
-func (a *Application) RequestsUpdate(c echo.Context, id string, updated *Request) error {
+// PUT /requests/:id
+func (a *Application) RequestsUpdate(c echo.Context, id string, subject *Request) error {
 	req := &Request{}
 	err := app.DB.Request.Find(id, req)
 	if err != nil {
 		return err
 	}
 
-	req.Status = updated.Status
+	req.Status = subject.Status
 	if err := app.DB.Request.Update(req); err != nil {
 		return err
 	}
 
-	if updated.Status == "approved" {
+	if subject.Status == "approved" {
 		if err := app.Workers.Enqueue(&CreateMediaFromRequests{}); err != nil {
 			return err
 		}
 	}
-	return c.JSON(http.StatusOK, req)
+
+	if err := a.DB.Request.Save(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Requests"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
+}
+
+// PATCH /requests/:id
+func (a *Application) RequestsSettings(c echo.Context, id string, setting *Setting) error {
+	subject, err := a.DB.Request.Get(id, &Request{})
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
+	}
+
+	// switch Setting.Name {
+	// case "something":
+	//    subject.Something = Setting.Value
+	// }
+
+	if err := a.DB.Request.Save(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Requests"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
+}
+
+// DELETE /requests/:id
+func (a *Application) RequestsDelete(c echo.Context, id string) error {
+	subject, err := a.DB.Request.Get(id, &Request{})
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
+	}
+	if err := a.DB.Request.Delete(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error deleting Requests"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }

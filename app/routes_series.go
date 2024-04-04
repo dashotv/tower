@@ -6,29 +6,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/labstack/echo/v4"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/fae"
 )
 
-const pagesize = 42
-
-func (a *Application) SeriesIndex(c echo.Context, page, limit int) error {
-	if page == 0 {
-		page = 1
-	}
-	if limit == 0 {
-		limit = pagesize
-	}
-
-	kind := QueryString(c, "type")
-	source := QueryString(c, "source")
-	active := QueryBool(c, "active")
-	favorite := QueryBool(c, "favorite")
-	broken := QueryBool(c, "broken")
-
+// GET /series/
+func (a *Application) SeriesIndex(c echo.Context, page, limit int, kind, source string, active, favorite, broken bool) error {
 	q := app.DB.Series.Query()
 	if kind != "" {
 		q = q.Where("kind", kind)
@@ -48,7 +32,7 @@ func (a *Application) SeriesIndex(c echo.Context, page, limit int) error {
 
 	count, err := q.Count()
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 	}
 
 	results, err := q.
@@ -56,7 +40,7 @@ func (a *Application) SeriesIndex(c echo.Context, page, limit int) error {
 		Skip((page - 1) * limit).
 		Desc("created_at").Run()
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 	}
 
 	for _, s := range results {
@@ -83,66 +67,47 @@ func (a *Application) SeriesIndex(c echo.Context, page, limit int) error {
 		}
 	}
 
-	return c.JSON(http.StatusOK, gin.H{"count": count, "results": results})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: results, Total: count})
 }
 
-func (a *Application) SeriesCreate(c echo.Context, r *Series) error {
-	if r.SourceId == "" || r.Source == "" {
+// POST /series/
+func (a *Application) SeriesCreate(c echo.Context, subject *Series) error {
+	if subject.SourceId == "" || subject.Source == "" {
 		return fae.New("id and source are required")
 	}
 
-	a.Log.Debugf("series create: %+v", r)
-	s := &Series{
-		Type:         "Series",
-		SourceId:     r.SourceId,
-		Source:       r.Source,
-		Title:        r.Title,
-		Description:  r.Description,
-		Kind:         primitive.Symbol(r.Kind),
-		SearchParams: &SearchParams{Resolution: 1080, Verified: true, Type: "tv"},
+	subject.Type = "Series"
+	subject.SearchParams = &SearchParams{Resolution: 1080, Verified: true, Type: "tv"}
+	if isAnimeKind(string(subject.Kind)) {
+		subject.SearchParams.Type = "anime"
 	}
 
-	if isAnimeKind(string(r.Kind)) {
-		s.SearchParams.Type = "anime"
+	if err := a.DB.Series.Save(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Series"})
 	}
-
-	// d, err := time.Parse("2006-01-02", r.Date)
-	// if err != nil {
-	// 	a.Log.Debugf("error parsing date: %s", err.Error())
-	// 	s.ReleaseDate = time.Unix(0, 0)
-	// } else {
-	// 	s.ReleaseDate = d
-	// }
-
-	err := app.DB.Series.Save(s)
-	if err != nil {
-		return err
+	if err := app.Workers.Enqueue(&SeriesUpdate{ID: subject.ID.Hex()}); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error queueing Series"})
 	}
-
-	if err := app.Workers.Enqueue(&SeriesUpdate{ID: s.ID.Hex()}); err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, gin.H{"error": false, "result": s})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
+// GET /series/:id
 func (a *Application) SeriesShow(c echo.Context, id string) error {
+	// TODO: cache this? have to figure out how to handle breaking cache
 	result := &Series{}
-	app.Log.Infof("series.show id=%s", id)
-	// cache this? have to figure out how to handle breaking cache
 	err := app.DB.Series.Find(id, result)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: err.Error()})
 	}
 
 	unwatched, err := app.DB.SeriesUserUnwatched(result)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: err.Error()})
 	}
 	result.Unwatched = unwatched
 	unwatchedall, err := app.DB.SeriesUnwatched(result, "")
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: err.Error()})
 	}
 	result.UnwatchedAll = unwatchedall
 
@@ -160,124 +125,132 @@ func (a *Application) SeriesShow(c echo.Context, id string) error {
 	//Paths
 	result.Paths, err = app.DB.SeriesPaths(id)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: err.Error()})
 	}
 
 	//Seasons
 	result.Seasons, err = app.DB.SeriesSeasons(id)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: err.Error()})
 	}
 
 	//CurrentSeason
 	result.CurrentSeason, err = app.DB.SeriesCurrentSeason(id)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: result})
 }
 
-func (a *Application) SeriesUpdate(c echo.Context, id string, data *Series) error {
-	if !strings.HasPrefix(data.Cover, "/media-images") {
-		cover := data.GetCover()
-		if cover == nil || cover.Remote != data.Cover {
-			if err := app.Workers.Enqueue(&SeriesImage{ID: id, Type: "cover", Path: data.Cover, Ratio: posterRatio}); err != nil {
+// PUT /series/:id
+func (a *Application) SeriesUpdate(c echo.Context, id string, subject *Series) error {
+	if !strings.HasPrefix(subject.Cover, "/media-images") {
+		cover := subject.GetCover()
+		if cover == nil || cover.Remote != subject.Cover {
+			if err := app.Workers.Enqueue(&SeriesImage{ID: id, Type: "cover", Path: subject.Cover, Ratio: posterRatio}); err != nil {
 				return err
 			}
 		}
 	}
 
-	if !strings.HasPrefix(data.Background, "/media-images") {
-		background := data.GetBackground()
-		if background == nil || background.Remote != data.Background {
-			if err := app.Workers.Enqueue(&SeriesImage{ID: id, Type: "background", Path: data.Background, Ratio: backgroundRatio}); err != nil {
+	if !strings.HasPrefix(subject.Background, "/media-images") {
+		background := subject.GetBackground()
+		if background == nil || background.Remote != subject.Background {
+			if err := app.Workers.Enqueue(&SeriesImage{ID: id, Type: "background", Path: subject.Background, Ratio: backgroundRatio}); err != nil {
 				return err
 			}
 		}
 	}
 
-	err := app.DB.SeriesUpdate(id, data)
-	if err != nil {
-		return err
+	if err := a.DB.Series.Save(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Series"})
 	}
-
-	return c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
-func (a *Application) SeriesSettings(c echo.Context, id string, data *Setting) error {
-	err := app.DB.SeriesSetting(id, data.Name, data.Value)
+// PATCH /series/:id
+func (a *Application) SeriesSettings(c echo.Context, id string, setting *Setting) error {
+	err := app.DB.SeriesSetting(id, setting.Name, setting.Value)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Series setting"})
 	}
 
-	return c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
+	// switch Setting.Name {
+	// case "something":
+	//    subject.Something = Setting.Value
+	// }
+
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: setting})
 }
 
+// DELETE /series/:id
 func (a *Application) SeriesDelete(c echo.Context, id string) error {
-	return c.JSON(http.StatusOK, gin.H{"error": false})
+	subject := &Series{}
+	err := app.DB.Series.Find(id, subject)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
+	}
+	if err := a.DB.Series.Delete(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error deleting Series"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
+// GET /series/:id/currentseason
 func (a *Application) SeriesCurrentSeason(c echo.Context, id string) error {
 	i, err := app.DB.SeriesCurrentSeason(id)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 	}
-	return c.JSON(http.StatusOK, gin.H{"current": i})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: i})
 }
 
-func (a *Application) SeriesSeasons(c echo.Context, id string) error {
-	results, err := app.DB.SeriesSeasons(id)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, results)
-}
-
-func (a *Application) SeriesSeasonEpisodesAll(c echo.Context, id string) error {
-	results, err := app.DB.SeriesSeasonEpisodesAll(id)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, results)
-}
-
-func (a *Application) SeriesSeasonEpisodes(c echo.Context, id string, season string) error {
-	results, err := app.DB.SeriesSeasonEpisodes(id, season)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, results)
-}
-
+// GET /series/:id/paths
 func (a *Application) SeriesPaths(c echo.Context, id string) error {
 	results, err := app.DB.SeriesPaths(id)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 	}
-
-	return c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: results})
 }
 
+// PUT /series/:id/refresh
+func (a *Application) SeriesRefresh(c echo.Context, id string) error {
+	if err := a.Workers.Enqueue(&SeriesUpdate{ID: id}); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false})
+}
+
+// GET /series/:id/seasons/all
+func (a *Application) SeriesSeasonEpisodesAll(c echo.Context, id string) error {
+	results, err := app.DB.SeriesSeasonEpisodesAll(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: results})
+}
+
+// GET /series/:id/seasons/:season
+func (a *Application) SeriesSeasonEpisodes(c echo.Context, id string, season string) error {
+	results, err := app.DB.SeriesSeasonEpisodes(id, season)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: results})
+}
+
+// GET /series/:id/watches
 func (a *Application) SeriesWatches(c echo.Context, id string) error {
 	results, err := app.DB.SeriesWatches(id)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 	}
-
-	return c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: results})
 }
 
-func (a *Application) SeriesRefresh(c echo.Context, id string) error {
-	if err := app.Workers.Enqueue(&SeriesUpdate{ID: id}); err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, gin.H{"error": false})
-}
-
+// GET /series/:id/covers
 func (a *Application) SeriesCovers(c echo.Context, id string) error {
 	series, err := a.DB.Series.Get(id, &Series{})
 	if err != nil {
@@ -302,13 +275,14 @@ func (a *Application) SeriesCovers(c echo.Context, id string) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, gin.H{"error": false, "covers": resp})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: resp})
 }
 
+// GET /series/:id/backgrounds
 func (a *Application) SeriesBackgrounds(c echo.Context, id string) error {
 	series, err := a.DB.Series.Get(id, &Series{})
 	if err != nil {
-		fae.Wrap(err, "getting series")
+		return fae.Wrap(err, "getting series")
 	}
 
 	if series == nil {
@@ -321,7 +295,7 @@ func (a *Application) SeriesBackgrounds(c echo.Context, id string) error {
 
 	tvdbid, err := strconv.Atoi(series.SourceId)
 	if err != nil {
-		fae.Wrap(err, "converting tvdb id")
+		return fae.Wrap(err, "converting tvdb id")
 	}
 
 	resp, err := app.TvdbSeriesBackgrounds(int64(tvdbid))
@@ -329,7 +303,7 @@ func (a *Application) SeriesBackgrounds(c echo.Context, id string) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, gin.H{"error": false, "backgrounds": resp})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: resp})
 }
 
 func seriesJob(name string, id string) error {
@@ -345,10 +319,11 @@ func seriesJob(name string, id string) error {
 	}
 }
 
+// POST /series/:id/jobs
 func (a *Application) SeriesJobs(c echo.Context, id string, name string) error {
 	if err := seriesJob(name, id); err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, gin.H{"error": false})
+	return c.JSON(http.StatusOK, &Response{Error: false})
 }

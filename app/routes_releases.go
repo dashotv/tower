@@ -4,68 +4,90 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/labstack/echo/v4"
 
 	"github.com/dashotv/fae"
 )
 
-const releasePageSize = 25
-
-func (a *Application) ReleasesIndex(c echo.Context, page, limit int) error {
-	if page == 0 {
+// GET /releases/
+func (a *Application) ReleasesIndex(c echo.Context, page int, limit int) error {
+	if page < 1 {
 		page = 1
 	}
-	results, err := app.DB.Release.Query().
+	if limit < 1 {
+		limit = 25
+	}
+	skip := (page - 1) * limit
+	list, err := a.DB.Release.Query().
 		Desc("published_at").
 		Desc("created_at").
-		Limit(releasePageSize).Skip((page - 1) * releasePageSize).
+		Limit(limit).Skip(skip).
 		Run()
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error loading Releases"})
 	}
-
-	return c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
 }
 
-func (a *Application) ReleasesCreate(c echo.Context, release *Release) error {
-	return c.JSON(http.StatusNotImplemented, gin.H{"error": true})
+// POST /releases/
+func (a *Application) ReleasesCreate(c echo.Context, subject *Release) error {
+	// TODO: process the subject
+	if err := a.DB.Release.Save(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Releases"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
+// GET /releases/:id
 func (a *Application) ReleasesShow(c echo.Context, id string) error {
-	result := &Release{}
-	err := app.DB.Release.Find(id, result)
+	subject := &Release{}
+	err := app.DB.Release.Find(id, subject)
 	if err != nil {
-		// if err.Error() == "mongo: no documents in result" {
-		// 	c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		// } else {
-		// 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		// }
-		return err
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
 	}
-
-	return c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
-func (a *Application) ReleasesUpdate(c echo.Context, id string, release *Release) error {
-	return c.JSON(http.StatusNotImplemented, gin.H{"error": true})
+// PUT /releases/:id
+func (a *Application) ReleasesUpdate(c echo.Context, id string, subject *Release) error {
+	// TODO: process the subject
+
+	// if you need to copy or compare to existing object...
+	// data, err := a.DB.ReleaseGet(id)
+	// if err != nil {
+	//     return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
+	// }
+	// data.Name = subject.Name ...
+	if err := a.DB.Release.Save(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Releases"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
+// PATCH /releases/:id
+func (a *Application) ReleasesSettings(c echo.Context, id string, setting *Setting) error {
+	err := app.DB.ReleaseSetting(id, setting.Name, setting.Value)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: setting})
+}
+
+// DELETE /releases/:id
 func (a *Application) ReleasesDelete(c echo.Context, id string) error {
-	return c.JSON(http.StatusOK, gin.H{"error": false})
-}
-
-func (a *Application) ReleasesSettings(c echo.Context, id string, s *Setting) error {
-	err := app.DB.ReleaseSetting(id, s.Name, s.Value)
+	subject := &Release{}
+	err := a.DB.Release.Find(id, subject)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
 	}
-
-	return c.JSON(http.StatusOK, gin.H{"errors": false, "result": s})
+	if err := a.DB.Release.Delete(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error deleting Releases"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
+// GET /releases/popular/:interval
 func (a *Application) ReleasesPopular(c echo.Context, interval string) error {
-	app.Log.Infof("ReleasesPopular: interval: %s", interval)
 	out := map[string][]*Popular{}
 
 	for _, t := range releaseTypes {
@@ -80,5 +102,5 @@ func (a *Application) ReleasesPopular(c echo.Context, interval string) error {
 		out[t] = results
 	}
 
-	return c.JSON(http.StatusOK, out)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: out})
 }

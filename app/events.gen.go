@@ -379,7 +379,7 @@ type EventNotices struct { // notices
 }
 
 type EventPlexSessions struct { // plex_sessions
-	Sessions []*plex.PlexSessionMetadata `bson:"sessions" json:"sessions"`
+	Sessions []*plex.SessionMetadata `bson:"sessions" json:"sessions"`
 }
 
 type EventRequests struct { // requests

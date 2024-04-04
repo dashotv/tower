@@ -2,8 +2,12 @@ package app
 
 import "time"
 
-func (c *Connector) MessageList() ([]*Message, error) {
-	list, err := c.Message.Query().Limit(10).Run()
+func (c *Connector) MessageList(page, limit int) ([]*Message, error) {
+	if page < 1 {
+		page = 1
+	}
+	skip := (page - 1) * limit
+	list, err := c.Message.Query().Limit(limit).Skip(skip).Run()
 	if err != nil {
 		return nil, err
 	}

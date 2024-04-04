@@ -247,6 +247,26 @@ type Combination struct { // model
 	Collections []string `bson:"collections" json:"collections"`
 }
 
+type CombinationChild struct { // struct
+	RatingKey    string `bson:"rating_key" json:"rating_key"`
+	Key          string `bson:"key" json:"key"`
+	Guid         string `bson:"guid" json:"guid"`
+	Type         string `bson:"type" json:"type"`
+	Title        string `bson:"title" json:"title"`
+	LibraryId    int64  `bson:"library_id" json:"library_id"`
+	LibraryTitle string `bson:"library_title" json:"library_title"`
+	LibraryKey   string `bson:"library_key" json:"library_key"`
+	Summary      string `bson:"summary" json:"summary"`
+	Thumb        string `bson:"thumb" json:"thumb"`
+	Total        int    `bson:"total" json:"total"`
+	Viewed       int    `bson:"viewed" json:"viewed"`
+	Link         string `bson:"link" json:"link"`
+	Next         string `bson:"next" json:"next"`
+	LastViewedAt int64  `bson:"last_viewed_at" json:"last_viewed_at"`
+	AddedAt      int64  `bson:"added_at" json:"added_at"`
+	UpdatedAt    int64  `bson:"updated_at" json:"updated_at"`
+}
+
 type Download struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
@@ -461,6 +481,19 @@ type Pin struct { // model
 	Identifier string `bson:"identifier" json:"clientIdentifier"`
 }
 
+type Popular struct { // struct
+	Name  string `bson:"_id" json:"name"`
+	Year  int    `bson:"year" json:"year"`
+	Type  string `bson:"type" json:"type"`
+	Count int    `bson:"count" json:"count"`
+}
+
+type PopularResponse struct { // struct
+	Tv     []*Popular `bson:"tv" json:"tv"`
+	Anime  []*Popular `bson:"anime" json:"anime"`
+	Movies []*Popular `bson:"movies" json:"movies"`
+}
+
 type Release struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
@@ -479,6 +512,7 @@ type Release struct { // model
 	Season      int       `bson:"season" json:"season"`
 	Episode     int       `bson:"episode" json:"episode"`
 	Volume      int       `bson:"volume" json:"volume"`
+	Year        int       `bson:"year" json:"year"`
 	Checksum    string    `bson:"checksum" json:"checksum"`
 	Group       string    `bson:"group" json:"group"`
 	Author      string    `bson:"author" json:"author"`

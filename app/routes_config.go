@@ -12,8 +12,8 @@ func (a *Application) ConfigSettings(c echo.Context, id string, data *Setting) e
 	case "runic":
 		a.Config.ProcessRunicEvents = data.Value
 	default:
-		return c.JSON(http.StatusBadRequest, H{"error": true, "message": "invalid setting: " + data.Name})
+		return c.JSON(http.StatusBadRequest, &Response{Error: true, Message: "invalid setting: " + data.Name})
 	}
 
-	return c.JSON(http.StatusOK, H{"error": false})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: data})
 }

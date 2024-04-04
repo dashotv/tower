@@ -17,7 +17,6 @@ require (
 	github.com/dashotv/tvdb v0.3.0
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/dotenv-org/godotenvvault v0.6.0
-	github.com/gin-gonic/gin v1.9.1
 	github.com/go-cmd/cmd v1.4.2
 	github.com/go-resty/resty/v2 v2.12.0
 	github.com/joho/godotenv v1.5.1
@@ -75,6 +74,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/getkin/kin-openapi v0.123.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
+	github.com/gin-gonic/gin v1.9.1 // indirect
 	github.com/go-errors/errors v1.5.1 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.1 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect

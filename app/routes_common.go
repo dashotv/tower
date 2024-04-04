@@ -1,5 +1,7 @@
 package app
 
+var pagesize = 25
+
 type CreateRequest struct {
 	ID          string `json:"id"`
 	Title       string `json:"title"`

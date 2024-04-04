@@ -67,6 +67,12 @@ type Setting struct {
 	Value bool   `json:"value"`
 }
 
+type SettingsBatch struct {
+	IDs   []string `json:"ids"`
+	Name  string   `json:"name"`
+	Value bool     `json:"value"`
+}
+
 type Response struct {
 	Error   bool        `json:"error"`
 	Message string      `json:"message,omitempty"`
@@ -88,11 +94,8 @@ func (a *Application) Routes() {
 
 	combinations := a.Router.Group("/combinations")
 	combinations.GET("/", a.CombinationsIndexHandler)
+	combinations.GET("/:name", a.CombinationsShowHandler)
 	combinations.POST("/", a.CombinationsCreateHandler)
-	combinations.GET("/:id", a.CombinationsShowHandler)
-	combinations.PUT("/:id", a.CombinationsUpdateHandler)
-	combinations.PATCH("/:id", a.CombinationsSettingsHandler)
-	combinations.DELETE("/:id", a.CombinationsDeleteHandler)
 
 	config := a.Router.Group("/config")
 	config.PATCH("/:id", a.ConfigSettingsHandler)
@@ -111,9 +114,9 @@ func (a *Application) Routes() {
 	downloads.GET("/:id/torrent", a.DownloadsTorrentHandler)
 
 	episodes := a.Router.Group("/episodes")
-	episodes.PATCH("/:id", a.EpisodesSettingHandler)
+	episodes.PATCH("/:id", a.EpisodesSettingsHandler)
 	episodes.PUT("/:id", a.EpisodesUpdateHandler)
-	episodes.POST("/settings", a.EpisodesSettingsHandler)
+	episodes.PATCH("/settings", a.EpisodesSettingsBatchHandler)
 
 	feeds := a.Router.Group("/feeds")
 	feeds.GET("/", a.FeedsIndexHandler)
@@ -236,8 +239,8 @@ func (a *Application) healthHandler(c echo.Context) error {
 
 // Collections (/collections)
 func (a *Application) CollectionsIndexHandler(c echo.Context) error {
-	page := QueryInt(c, "page")
-	limit := QueryInt(c, "limit")
+	page := QueryParamIntDefault(c, "page", "1")
+	limit := QueryParamIntDefault(c, "limit", "25")
 	return a.CollectionsIndex(c, page, limit)
 }
 func (a *Application) CollectionsCreateHandler(c echo.Context) error {
@@ -274,9 +277,13 @@ func (a *Application) CollectionsDeleteHandler(c echo.Context) error {
 
 // Combinations (/combinations)
 func (a *Application) CombinationsIndexHandler(c echo.Context) error {
-	page := QueryInt(c, "page")
-	limit := QueryInt(c, "limit")
+	page := QueryParamIntDefault(c, "page", "1")
+	limit := QueryParamIntDefault(c, "limit", "25")
 	return a.CombinationsIndex(c, page, limit)
+}
+func (a *Application) CombinationsShowHandler(c echo.Context) error {
+	name := c.Param("name")
+	return a.CombinationsShow(c, name)
 }
 func (a *Application) CombinationsCreateHandler(c echo.Context) error {
 	subject := &Combination{}
@@ -284,30 +291,6 @@ func (a *Application) CombinationsCreateHandler(c echo.Context) error {
 		return err
 	}
 	return a.CombinationsCreate(c, subject)
-}
-func (a *Application) CombinationsShowHandler(c echo.Context) error {
-	id := c.Param("id")
-	return a.CombinationsShow(c, id)
-}
-func (a *Application) CombinationsUpdateHandler(c echo.Context) error {
-	id := c.Param("id")
-	subject := &Combination{}
-	if err := c.Bind(subject); err != nil {
-		return err
-	}
-	return a.CombinationsUpdate(c, id, subject)
-}
-func (a *Application) CombinationsSettingsHandler(c echo.Context) error {
-	id := c.Param("id")
-	setting := &Setting{}
-	if err := c.Bind(setting); err != nil {
-		return err
-	}
-	return a.CombinationsSettings(c, id, setting)
-}
-func (a *Application) CombinationsDeleteHandler(c echo.Context) error {
-	id := c.Param("id")
-	return a.CombinationsDelete(c, id)
 }
 
 // Config (/config)
@@ -322,8 +305,8 @@ func (a *Application) ConfigSettingsHandler(c echo.Context) error {
 
 // Downloads (/downloads)
 func (a *Application) DownloadsIndexHandler(c echo.Context) error {
-	page := QueryInt(c, "page")
-	limit := QueryInt(c, "limit")
+	page := QueryParamIntDefault(c, "page", "1")
+	limit := QueryParamIntDefault(c, "limit", "25")
 	return a.DownloadsIndex(c, page, limit)
 }
 func (a *Application) DownloadsCreateHandler(c echo.Context) error {
@@ -365,14 +348,14 @@ func (a *Application) DownloadsMediumHandler(c echo.Context) error {
 	return a.DownloadsMedium(c, id)
 }
 func (a *Application) DownloadsRecentHandler(c echo.Context) error {
-	page := QueryInt(c, "page")
-	medium_id := QueryString(c, "medium_id")
+	page := QueryParamInt(c, "page")
+	medium_id := QueryParamString(c, "medium_id")
 	return a.DownloadsRecent(c, page, medium_id)
 }
 func (a *Application) DownloadsSelectHandler(c echo.Context) error {
 	id := c.Param("id")
-	medium_id := QueryString(c, "medium_id")
-	num := QueryInt(c, "num")
+	medium_id := QueryParamString(c, "medium_id")
+	num := QueryParamInt(c, "num")
 	return a.DownloadsSelect(c, id, medium_id, num)
 }
 func (a *Application) DownloadsTorrentHandler(c echo.Context) error {
@@ -381,22 +364,34 @@ func (a *Application) DownloadsTorrentHandler(c echo.Context) error {
 }
 
 // Episodes (/episodes)
-func (a *Application) EpisodesSettingHandler(c echo.Context) error {
+func (a *Application) EpisodesSettingsHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.EpisodesSetting(c, id)
+	setting := &Setting{}
+	if err := c.Bind(setting); err != nil {
+		return err
+	}
+	return a.EpisodesSettings(c, id, setting)
 }
 func (a *Application) EpisodesUpdateHandler(c echo.Context) error {
 	id := c.Param("id")
-	return a.EpisodesUpdate(c, id)
+	episode := &Episode{}
+	if err := c.Bind(episode); err != nil {
+		return err
+	}
+	return a.EpisodesUpdate(c, id, episode)
 }
-func (a *Application) EpisodesSettingsHandler(c echo.Context) error {
-	return a.EpisodesSettings(c)
+func (a *Application) EpisodesSettingsBatchHandler(c echo.Context) error {
+	settings := &SettingsBatch{}
+	if err := c.Bind(settings); err != nil {
+		return err
+	}
+	return a.EpisodesSettingsBatch(c, settings)
 }
 
 // Feeds (/feeds)
 func (a *Application) FeedsIndexHandler(c echo.Context) error {
-	page := QueryInt(c, "page")
-	limit := QueryInt(c, "limit")
+	page := QueryParamIntDefault(c, "page", "1")
+	limit := QueryParamIntDefault(c, "limit", "25")
 	return a.FeedsIndex(c, page, limit)
 }
 func (a *Application) FeedsCreateHandler(c echo.Context) error {
@@ -445,17 +440,28 @@ func (a *Application) HooksNzbgetHandler(c echo.Context) error {
 
 // Messages (/messages)
 func (a *Application) MessagesIndexHandler(c echo.Context) error {
-	return a.MessagesIndex(c)
+	page := QueryParamIntDefault(c, "page", "1")
+	limit := QueryParamIntDefault(c, "limit", "25")
+	return a.MessagesIndex(c, page, limit)
 }
 func (a *Application) MessagesCreateHandler(c echo.Context) error {
-	return a.MessagesCreate(c)
+	message := &Message{}
+	if err := c.Bind(message); err != nil {
+		return err
+	}
+	return a.MessagesCreate(c, message)
 }
 
 // Movies (/movies)
 func (a *Application) MoviesIndexHandler(c echo.Context) error {
-	page := QueryInt(c, "page")
-	limit := QueryInt(c, "limit")
-	return a.MoviesIndex(c, page, limit)
+	page := QueryParamIntDefault(c, "page", "1")
+	limit := QueryParamIntDefault(c, "limit", "25")
+	kind := QueryParamString(c, "kind")
+	source := QueryParamString(c, "source")
+	downloaded := QueryParamBool(c, "downloaded")
+	completed := QueryParamBool(c, "completed")
+	broken := QueryParamBool(c, "broken")
+	return a.MoviesIndex(c, page, limit, kind, source, downloaded, completed, broken)
 }
 func (a *Application) MoviesCreateHandler(c echo.Context) error {
 	subject := &Movie{}
@@ -508,8 +514,8 @@ func (a *Application) PlexUpdateHandler(c echo.Context) error {
 	return a.PlexUpdate(c)
 }
 func (a *Application) PlexSearchHandler(c echo.Context) error {
-	query := QueryString(c, "query")
-	section := QueryString(c, "section")
+	query := QueryParamString(c, "query")
+	section := QueryParamString(c, "section")
 	return a.PlexSearch(c, query, section)
 }
 func (a *Application) PlexLibrariesHandler(c echo.Context) error {
@@ -538,22 +544,22 @@ func (a *Application) PlexResourcesHandler(c echo.Context) error {
 	return a.PlexResources(c)
 }
 func (a *Application) PlexPlayHandler(c echo.Context) error {
-	ratingKey := QueryString(c, "ratingKey")
-	player := QueryString(c, "player")
+	ratingKey := QueryParamString(c, "ratingKey")
+	player := QueryParamString(c, "player")
 	return a.PlexPlay(c, ratingKey, player)
 }
 func (a *Application) PlexSessionsHandler(c echo.Context) error {
 	return a.PlexSessions(c)
 }
 func (a *Application) PlexStopHandler(c echo.Context) error {
-	session := QueryString(c, "session")
+	session := QueryParamString(c, "session")
 	return a.PlexStop(c, session)
 }
 
 // Releases (/releases)
 func (a *Application) ReleasesIndexHandler(c echo.Context) error {
-	page := QueryInt(c, "page")
-	limit := QueryInt(c, "limit")
+	page := QueryParamIntDefault(c, "page", "1")
+	limit := QueryParamIntDefault(c, "limit", "25")
 	return a.ReleasesIndex(c, page, limit)
 }
 func (a *Application) ReleasesCreateHandler(c echo.Context) error {
@@ -594,8 +600,8 @@ func (a *Application) ReleasesPopularHandler(c echo.Context) error {
 
 // Requests (/requests)
 func (a *Application) RequestsIndexHandler(c echo.Context) error {
-	page := QueryInt(c, "page")
-	limit := QueryInt(c, "limit")
+	page := QueryParamIntDefault(c, "page", "1")
+	limit := QueryParamIntDefault(c, "limit", "25")
 	return a.RequestsIndex(c, page, limit)
 }
 func (a *Application) RequestsCreateHandler(c echo.Context) error {
@@ -632,9 +638,14 @@ func (a *Application) RequestsDeleteHandler(c echo.Context) error {
 
 // Series (/series)
 func (a *Application) SeriesIndexHandler(c echo.Context) error {
-	page := QueryInt(c, "page")
-	limit := QueryInt(c, "limit")
-	return a.SeriesIndex(c, page, limit)
+	page := QueryParamIntDefault(c, "page", "1")
+	limit := QueryParamIntDefault(c, "limit", "25")
+	kind := QueryParamString(c, "kind")
+	source := QueryParamString(c, "source")
+	active := QueryParamBool(c, "active")
+	favorite := QueryParamBool(c, "favorite")
+	broken := QueryParamBool(c, "broken")
+	return a.SeriesIndex(c, page, limit, kind, source, active, favorite, broken)
 }
 func (a *Application) SeriesCreateHandler(c echo.Context) error {
 	subject := &Series{}
@@ -702,7 +713,7 @@ func (a *Application) SeriesBackgroundsHandler(c echo.Context) error {
 }
 func (a *Application) SeriesJobsHandler(c echo.Context) error {
 	id := c.Param("id")
-	name := QueryString(c, "name")
+	name := QueryParamString(c, "name")
 	return a.SeriesJobs(c, id, name)
 }
 
@@ -718,7 +729,7 @@ func (a *Application) UsersIndexHandler(c echo.Context) error {
 
 // Watches (/watches)
 func (a *Application) WatchesIndexHandler(c echo.Context) error {
-	medium_id := QueryString(c, "medium_id")
-	username := QueryString(c, "username")
+	medium_id := QueryParamString(c, "medium_id")
+	username := QueryParamString(c, "username")
 	return a.WatchesIndex(c, medium_id, username)
 }

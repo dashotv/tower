@@ -4,59 +4,41 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func (a *Application) EpisodesUpdate(c echo.Context, id string) error {
-	data := &Setting{}
-	err := c.Bind(&data)
+// PATCH /episodes/:id
+func (a *Application) EpisodesSettings(c echo.Context, id string, data *Setting) error {
+	err := app.DB.EpisodeSetting(id, data.Name, data.Value)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 	}
 
-	err = app.DB.EpisodeSetting(id, data.Name, data.Value)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: data})
 }
 
-func (a *Application) EpisodesSetting(c echo.Context, id string) error {
-	data := &Setting{}
-	err := c.Bind(&data)
-	if err != nil {
-		return err
-	}
+// PUT /episodes/:id
+func (a *Application) EpisodesUpdate(c echo.Context, id string, subject *Episode) error {
+	// TODO: process the subject
 
-	err = app.DB.EpisodeSetting(id, data.Name, data.Value)
-	if err != nil {
-		return err
+	// if you need to copy or compare to existing object...
+	// data, err := a.DB.EpisodeGet(id)
+	// if err != nil {
+	//     return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
+	// }
+	// data.Name = subject.Name ...
+	if err := a.DB.Episode.Save(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Episodes"})
 	}
-
-	return c.JSON(http.StatusOK, gin.H{"errors": false, "data": data})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
-type EpisodeSettingsBatch struct {
-	IDs   []primitive.ObjectID `json:"ids"`
-	Field string               `json:"field"`
-	Value bool                 `json:"value"`
-}
-
-func (a *Application) EpisodesSettings(c echo.Context) error {
-	data := &EpisodeSettingsBatch{}
-	err := c.Bind(data)
+func (a *Application) EpisodesSettingsBatch(c echo.Context, settings *SettingsBatch) error {
+	_, err := app.DB.Episode.Collection.UpdateMany(context.Background(), bson.M{"_id": bson.M{"$in": settings.IDs}}, bson.M{"$set": bson.M{settings.Name: settings.Value}})
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 	}
 
-	_, err = app.DB.Episode.Collection.UpdateMany(context.Background(), bson.M{"_id": bson.M{"$in": data.IDs}}, bson.M{"$set": bson.M{data.Field: data.Value}})
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, gin.H{"errors": false})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: settings})
 }

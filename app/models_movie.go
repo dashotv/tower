@@ -1,6 +1,37 @@
 package app
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/dashotv/fae"
+)
+
+func (c *Connector) MovieGet(id string) (*Movie, error) {
+	movie, err := c.Movie.Get(id, &Movie{})
+	if err != nil {
+		return nil, err
+	}
+
+	// if err := c.processMovies([]*Movie{movie}); err != nil {
+	// 	return nil, err
+	// }
+
+	return movie, nil
+}
+
+func (c *Connector) MovieList(page, limit int) ([]*Movie, error) {
+	skip := (page - 1) * limit
+	list, err := c.Movie.Query().Desc("created_at").Limit(limit).Skip(skip).Run()
+	if err != nil {
+		return nil, fae.Wrap(err, "query failed")
+	}
+
+	// if err := c.processMovies(list); err != nil {
+	// 	return nil, fae.Wrap(err, "process movies failed")
+	// }
+
+	return list, nil
+}
 
 func (c *Connector) MoviesAll() ([]*Movie, error) {
 	return c.Movie.Query().Limit(-1).Run()

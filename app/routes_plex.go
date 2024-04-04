@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
 
@@ -94,7 +93,7 @@ func (a *Application) PlexLibraries(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, list)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
 }
 
 func (a *Application) PlexSearch(c echo.Context, query, section string) error {
@@ -103,7 +102,7 @@ func (a *Application) PlexSearch(c echo.Context, query, section string) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, list)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
 }
 
 func (a *Application) PlexCollectionsIndex(c echo.Context, section string) error {
@@ -111,14 +110,14 @@ func (a *Application) PlexCollectionsIndex(c echo.Context, section string) error
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, list)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
 }
 func (a *Application) PlexCollectionsShow(c echo.Context, section, ratingKey string) error {
 	list, err := a.Plex.GetCollection(ratingKey)
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, list)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
 }
 
 func (a *Application) PlexMetadata(c echo.Context, key string) error {
@@ -127,7 +126,7 @@ func (a *Application) PlexMetadata(c echo.Context, key string) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, resp)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: resp})
 }
 
 func (a *Application) PlexClients(c echo.Context) error {
@@ -135,7 +134,7 @@ func (a *Application) PlexClients(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, list)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
 }
 
 func (a *Application) PlexDevices(c echo.Context) error {
@@ -143,7 +142,7 @@ func (a *Application) PlexDevices(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, list)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
 }
 
 func (a *Application) PlexResources(c echo.Context) error {
@@ -163,26 +162,26 @@ func (a *Application) PlexResources(c echo.Context) error {
 		return lo.Contains(provided, provides) && r.Name != "iPhone"
 	})
 
-	return c.JSON(http.StatusOK, filtered)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: filtered})
 }
 func (a *Application) PlexPlay(c echo.Context, ratingKey, player string) error {
 	err := a.Plex.Play(ratingKey, player)
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, gin.H{"errors": "false"})
+	return c.JSON(http.StatusOK, &Response{Error: false})
 }
 func (a *Application) PlexStop(c echo.Context, session string) error {
 	err := a.Plex.Stop(session)
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, gin.H{"errors": "false"})
+	return c.JSON(http.StatusOK, &Response{Error: false})
 }
 func (a *Application) PlexSessions(c echo.Context) error {
 	list, err := a.Plex.GetSessions()
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, list)
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
 }

@@ -1,5 +1,34 @@
 package app
 
+import "github.com/dashotv/fae"
+
+func (c *Connector) FeedGet(id string) (*Feed, error) {
+	feed, err := c.Feed.Get(id, &Feed{})
+	if err != nil {
+		return nil, err
+	}
+
+	// if err := c.processFeeds([]*Feed{feed}); err != nil {
+	// 	return nil, err
+	// }
+
+	return feed, nil
+}
+
+func (c *Connector) FeedList(page, limit int) ([]*Feed, error) {
+	skip := (page - 1) * limit
+	list, err := c.Feed.Query().Desc("created_at").Limit(limit).Skip(skip).Run()
+	if err != nil {
+		return nil, fae.Wrap(err, "query failed")
+	}
+
+	// if err := c.processFeeds(list); err != nil {
+	// 	return nil, fae.Wrap(err, "process feeds failed")
+	// }
+
+	return list, nil
+}
+
 func (c *Connector) ProcessFeeds() error {
 	// feeds, err := c.Feed.Query().Where("active", true).Run()
 	// if err != nil {

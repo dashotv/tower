@@ -9,7 +9,7 @@ import (
 
 func init() {
 	initializers = append(initializers, func(app *Application) error {
-		app.Workers.ScheduleFunc("* * * * * *", "plex_session_updates", PlexSessionUpdates)
+		app.Workers.ScheduleFunc("*/5 * * * * *", "plex_session_updates", PlexSessionUpdates)
 		app.Workers.ScheduleFunc("0 */15 * * * *", "PopularReleases", PopularReleases)
 		return nil
 	})

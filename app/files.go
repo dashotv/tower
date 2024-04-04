@@ -14,7 +14,7 @@ import (
 	"github.com/dashotv/tower/internal/plex"
 )
 
-func newWalker(db *Connector, logger *zap.SugaredLogger, libs []*plex.PlexLibrary) *Walker {
+func newWalker(db *Connector, logger *zap.SugaredLogger, libs []*plex.Library) *Walker {
 	return &Walker{
 		db:          db,
 		logger:      logger,
@@ -27,7 +27,7 @@ func newWalker(db *Connector, logger *zap.SugaredLogger, libs []*plex.PlexLibrar
 type Walker struct {
 	db          *Connector
 	logger      *zap.SugaredLogger
-	Libraries   []*plex.PlexLibrary
+	Libraries   []*plex.Library
 	directories chan string
 	files       chan string
 }

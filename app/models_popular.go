@@ -14,12 +14,12 @@ func (c *Connector) ReleasesPopularQuery(t string, date time.Time, count int) ([
 	return ReleasesPopularQuery(c.Release.Collection, t, date, count)
 }
 
-type Popular struct {
-	Name  string `json:"name" bson:"_id"`
-	Year  int    `json:"year" bson:"year"`
-	Type  string `json:"type" bson:"type"`
-	Count int    `json:"count" bson:"count"`
-}
+// type Popular struct {
+// 	Name  string `json:"name" bson:"_id"`
+// 	Year  int    `json:"year" bson:"year"`
+// 	Type  string `json:"type" bson:"type"`
+// 	Count int    `json:"count" bson:"count"`
+// }
 
 /*
 ReleasesPopular returns the most popular releases for a given type and date.

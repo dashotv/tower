@@ -15,7 +15,8 @@ func (c *Connector) CollectionGet(id string) (*Collection, error) {
 	return collection, nil
 }
 
-func (c *Connector) CollectionList(limit, skip int) ([]*Collection, error) {
+func (c *Connector) CollectionList(page, limit int) ([]*Collection, error) {
+	skip := (page - 1) * limit
 	list, err := c.Collection.Query().Desc("created_at").Limit(limit).Skip(skip).Run()
 	if err != nil {
 		return nil, fae.Wrap(err, "query failed")
