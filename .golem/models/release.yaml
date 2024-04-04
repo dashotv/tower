@@ -29,6 +29,8 @@ fields:
     type: int
   - name: volume
     type: int
+  - name: year
+    type: int
   - name: checksum
     type: string
   - name: group

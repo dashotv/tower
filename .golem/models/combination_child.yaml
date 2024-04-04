@@ -1,0 +1,37 @@
+name: combination_child
+type: struct
+fields:
+    - name: rating_key
+      type: string
+    - name: key
+      type: string
+    - name: guid
+      type: string
+    - name: type
+      type: string
+    - name: title
+      type: string
+    - name: library_id
+      type: int64
+    - name: library_title
+      type: string
+    - name: library_key
+      type: string
+    - name: summary
+      type: string
+    - name: thumb
+      type: string
+    - name: total
+      type: int
+    - name: viewed
+      type: int
+    - name: link
+      type: string
+    - name: next
+      type: string
+    - name: last_viewed_at
+      type: int64
+    - name: added_at
+      type: int64
+    - name: updated_at
+      type: int64

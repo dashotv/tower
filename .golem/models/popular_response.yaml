@@ -1,0 +1,9 @@
+name: popular_response
+type: struct
+fields:
+    - name: tv
+      type: '[]*Popular'
+    - name: anime
+      type: '[]*Popular'
+    - name: movies
+      type: '[]*Popular'

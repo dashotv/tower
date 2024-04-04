@@ -1,0 +1,12 @@
+name: popular
+type: struct
+fields:
+  - name: name
+    type: string
+    bson: _id
+  - name: year
+    type: int
+  - name: type
+    type: string
+  - name: count
+    type: int
