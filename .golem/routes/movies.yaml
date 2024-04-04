@@ -1,8 +1,76 @@
 name: movies
 path: /movies
 model: "*Movie"
-rest: true
 routes:
+  - name: index
+    path: /
+    method: GET
+    result: "[]*Movie"
+    params:
+      - name: page
+        type: int
+        default: 1
+        query: true
+      - name: limit
+        type: int
+        default: 25
+        query: true
+      - name: kind
+        type: string
+        query: true
+      - name: source
+        type: string
+        query: true
+      - name: downloaded
+        type: bool
+        query: true
+      - name: completed
+        type: bool
+        query: true
+      - name: broken
+        type: bool
+        query: true
+  - name: create
+    path: /
+    method: POST
+    result: "*Movie"
+    params:
+      - name: subject
+        type: "*Movie"
+        bind: true
+  - name: show
+    path: /:id
+    method: GET
+    result: "*Movie"
+    params:
+      - name: id
+        type: string
+  - name: update
+    path: /:id
+    method: PUT
+    result: "*Movie"
+    params:
+      - name: id
+        type: string
+      - name: subject
+        type: "*Movie"
+        bind: true
+  - name: settings
+    path: /:id
+    method: PATCH
+    params:
+      - name: id
+        type: string
+      - name: setting
+        type: "*Setting"
+        bind: true
+  - name: delete
+    path: /:id
+    method: DELETE
+    result: "*Movie"
+    params:
+      - name: id
+        type: string
   - name: refresh
     path: /:id/refresh
     method: PUT
@@ -12,6 +80,7 @@ routes:
   - name: paths
     path: /:id/paths
     method: GET
+    result: "[]*Path"
     params:
       - name: id
         type: string

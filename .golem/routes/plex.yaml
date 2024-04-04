@@ -13,6 +13,7 @@ routes:
   - name: search
     path: /search
     method: GET
+    result: "[]plex.SearchMetadata"
     params:
       - name: query
         type: string
@@ -23,9 +24,11 @@ routes:
   - name: libraries
     path: /libraries
     method: GET
+    result: "[]*plex.Library"
   - name: collectionsIndex
     path: /libraries/:section/collections
     method: GET
+    result: "[]*plex.Collection"
     params:
       - name: section
         type: string
@@ -46,12 +49,15 @@ routes:
   - name: clients
     path: /clients
     method: GET
+    result: "[]*plex.Client"
   - name: devices
     path: /devices
     method: GET
+    result: "[]*plex.Device"
   - name: resources
     path: /resources
     method: GET
+    result: "[]*plex.Resource"
   - name: play
     path: /play
     method: GET
@@ -65,6 +71,7 @@ routes:
   - name: sessions
     path: /sessions
     method: GET
+    result: "[]*plex.Session"
   - name: stop
     path: /stop
     method: GET

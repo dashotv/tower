@@ -1,4 +1,31 @@
 name: combinations
 path: /combinations
 model: "*Combination"
-rest: true
+routes:
+  - name: index
+    path: /
+    method: GET
+    result: "[]*Combination"
+    params:
+      - name: page
+        type: int
+        default: 1
+        query: true
+      - name: limit
+        type: int
+        default: 25
+        query: true
+  - name: show
+    path: /:name
+    method: GET
+    result: "[]*CombinationChild"
+    params:
+      - name: name
+        type: string
+  - name: create
+    path: /
+    method: POST
+    params:
+      - name: subject
+        type: "*Combination"
+        bind: true

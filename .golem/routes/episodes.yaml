@@ -1,18 +1,28 @@
 name: episodes
 path: /episodes
 routes:
-  - name: setting
+  - name: settings
     path: /:id
     method: PATCH
     params:
       - name: id
         type: string
+      - name: setting
+        type: "*Setting"
+        bind: true
   - name: update
     path: /:id
     method: PUT
     params:
       - name: id
         type: string
-  - name: settings
+      - name: episode
+        type: "*Episode"
+        bind: true
+  - name: settings_batch
     path: /settings
-    method: POST
+    method: PATCH
+    params:
+      - name: settings
+        type: "*SettingsBatch"
+        bind: true

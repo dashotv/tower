@@ -1,17 +1,87 @@
 name: series
 path: /series
 model: "*Series"
-rest: true
 routes:
+  - name: index
+    path: /
+    method: GET
+    result: "[]*Series"
+    params:
+      - name: page
+        type: int
+        default: 1
+        query: true
+      - name: limit
+        type: int
+        default: 25
+        query: true
+      - name: kind
+        type: string
+        query: true
+      - name: source
+        type: string
+        query: true
+      - name: active
+        type: bool
+        query: true
+      - name: favorite
+        type: bool
+        query: true
+      - name: broken
+        type: bool
+        query: true
+  - name: create
+    path: /
+    method: POST
+    result: "*Series"
+    params:
+      - name: subject
+        type: "*Series"
+        bind: true
+  - name: show
+    path: /:id
+    method: GET
+    result: "*Series"
+    params:
+      - name: id
+        type: string
+  - name: update
+    path: /:id
+    method: PUT
+    result: "*Series"
+    params:
+      - name: id
+        type: string
+      - name: subject
+        type: "*Series"
+        bind: true
+  - name: settings
+    path: /:id
+    method: PATCH
+    params:
+      - name: id
+        type: string
+      - name: setting
+        type: "*Setting"
+        bind: true
+  - name: delete
+    path: /:id
+    method: DELETE
+    result: "*Series"
+    params:
+      - name: id
+        type: string
   - name: current_season
     path: /:id/currentseason
     method: GET
+    result: int
     params:
       - name: id
         type: string
   - name: paths
     path: /:id/paths
     method: GET
+    result: "[]*Path"
     params:
       - name: id
         type: string
@@ -24,12 +94,14 @@ routes:
   - name: season_episodes_all
     path: /:id/seasons/all
     method: GET
+    result: "[]*Episode"
     params:
       - name: id
         type: string
   - name: season_episodes
     path: /:id/seasons/:season
     method: GET
+    result: "[]*Episode"
     params:
       - name: id
         type: string
@@ -38,18 +110,21 @@ routes:
   - name: watches
     path: /:id/watches
     method: GET
+    result: "[]*Watch"
     params:
       - name: id
         type: string
   - name: covers
     path: /:id/covers
     method: GET
+    result: "[]string"
     params:
       - name: id
         type: string
   - name: backgrounds
     path: /:id/backgrounds
     method: GET
+    result: "[]string"
     params:
       - name: id
         type: string

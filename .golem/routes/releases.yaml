@@ -6,6 +6,7 @@ routes:
   - name: popular
     path: /popular/:interval
     method: GET
+    result: "*PopularResponse"
     params:
       - name: interval
         type: string

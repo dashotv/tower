@@ -4,3 +4,4 @@ routes:
   - name: index
     path: /
     method: GET
+    result: "[]*Episode"

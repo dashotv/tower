@@ -4,6 +4,21 @@ routes:
   - name: index
     path: /
     method: GET
+    result: "[]*Message"
+    params:
+      - name: page
+        type: int
+        default: 1
+        query: true
+      - name: limit
+        type: int
+        default: 25
+        query: true
   - name: create
     path: /
     method: POST
+    result: "*Message"
+    params:
+      - name: message
+        type: "*Message"
+        bind: true
