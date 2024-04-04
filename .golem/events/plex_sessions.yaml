@@ -2,5 +2,5 @@ name: plex_sessions
 channel: tower.plex_sessions
 receiver: false
 fields:
-    - name: sessions
-      type: '[]*plex.PlexSessionMetadata'
+  - name: sessions
+    type: "[]*plex.SessionMetadata"

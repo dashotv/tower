@@ -13,7 +13,7 @@ func (p *Client) Search(query, section string) ([]SearchMetadata, error) {
 		return nil, err
 	}
 
-	dest := &PlexSearch{}
+	dest := &Search{}
 	path := fmt.Sprintf("/library/sections/%s/search", section)
 
 	params := url.Values{}
@@ -38,7 +38,7 @@ func (p *Client) Search(query, section string) ([]SearchMetadata, error) {
 	return dest.MediaContainer.Metadata, nil
 }
 
-type PlexSearch struct {
+type Search struct {
 	MediaContainer struct {
 		Size         int64            `json:"size"`
 		SectionID    int64            `json:"sectionID"`

@@ -73,7 +73,7 @@ func (p *Client) GetAuthUrl(redirect string, pin *Pin) string {
 }
 
 /*
-Plex Pin response:
+ Pin response:
 {
 	"id": 00000000000,
 	"code": "adladoqienbfquboqoqiobeoi",

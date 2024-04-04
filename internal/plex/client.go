@@ -10,16 +10,16 @@ import (
 )
 
 const (
-	defaultMetaURL   = "https://metadata.provider.plex.tv"
-	defaultPlexTVURL = "https://plex.tv/api/v2"
-	applicationXml   = "application/xml"
-	applicationJson  = "application/json"
+	defaultMetaURL  = "https://metadata.provider.plex.tv"
+	defaultTVURL    = "https://plex.tv/api/v2"
+	applicationXml  = "application/xml"
+	applicationJson = "application/json"
 )
 
 const (
-	PlexLibraryTypeUnknown = iota
-	PlexLibraryTypeMovie
-	PlexLibraryTypeShow
+	LibraryTypeUnknown = iota
+	LibraryTypeMovie
+	LibraryTypeShow
 )
 
 func New(opt *ClientOptions) *Client {
@@ -33,13 +33,13 @@ func New(opt *ClientOptions) *Client {
 		Device:            opt.Device,
 		AppName:           opt.AppName,
 		MetadataURL:       opt.MetadataURL,
-		PlexTVURL:         opt.PlexTVURL,
+		TVURL:             opt.TVURL,
 	}
 	if c.MetadataURL == "" {
 		c.MetadataURL = defaultMetaURL
 	}
-	if c.PlexTVURL == "" {
-		c.PlexTVURL = defaultPlexTVURL
+	if c.TVURL == "" {
+		c.TVURL = defaultTVURL
 	}
 
 	c.Headers = map[string]string{
@@ -60,7 +60,7 @@ func New(opt *ClientOptions) *Client {
 	c.data = data
 
 	c.server = resty.New().SetDebug(c.Debug).SetBaseURL(c.URL).SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	c.plextv = resty.New().SetDebug(c.Debug).SetBaseURL(c.PlexTVURL)
+	c.plextv = resty.New().SetDebug(c.Debug).SetBaseURL(c.TVURL)
 	c.metadata = resty.New().SetDebug(c.Debug).SetBaseURL(c.MetadataURL)
 
 	return c
@@ -77,7 +77,7 @@ type ClientOptions struct {
 	Device            string
 	AppName           string
 	MetadataURL       string
-	PlexTVURL         string
+	TVURL             string
 }
 
 type Client struct {
@@ -91,7 +91,7 @@ type Client struct {
 	Device            string
 	AppName           string
 	MetadataURL       string
-	PlexTVURL         string
+	TVURL             string
 	Headers           map[string]string
 
 	data     url.Values
@@ -110,8 +110,8 @@ func (p *Client) _metadata() *resty.Request {
 	return p.metadata.R().SetHeaders(p.Headers)
 }
 
-func (p *Client) GetUser(token string) (*PlexUser, error) {
-	user := &PlexUser{}
+func (p *Client) GetUser(token string) (*User, error) {
+	user := &User{}
 	resp, err := p._plextv().SetResult(user).
 		SetHeader("X-Plex-Token", token).Get("/user")
 	if err != nil {

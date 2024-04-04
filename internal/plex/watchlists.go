@@ -12,8 +12,8 @@ type WatchlistOpts struct {
 	Type   string // library type? movie, show, episode, artist, album, track?
 }
 
-func (p *Client) GetWatchlist(token string) (*PlexWatchlist, error) {
-	dest := &PlexWatchlist{}
+func (p *Client) GetWatchlist(token string) (*Watchlist, error) {
+	dest := &Watchlist{}
 	opts := &WatchlistOpts{Filter: "all"}
 	u := fmt.Sprintf("/library/sections/watchlist/%s", opts.Filter)
 	resp, err := p._metadata().SetResult(dest).SetHeader("X-Plex-Token", token).Get(u)
@@ -27,10 +27,10 @@ func (p *Client) GetWatchlist(token string) (*PlexWatchlist, error) {
 	return dest, nil
 }
 
-func (p *Client) GetWatchlistDetail(token string, w *PlexWatchlist) ([]*PlexWatchlistDetail, error) {
-	out := []*PlexWatchlistDetail{}
+func (p *Client) GetWatchlistDetail(token string, w *Watchlist) ([]*WatchlistDetail, error) {
+	out := []*WatchlistDetail{}
 	for _, d := range w.MediaContainer.Metadata {
-		dest := &PlexWatchlistDetail{}
+		dest := &WatchlistDetail{}
 		resp, err := p._metadata().
 			SetResult(dest).
 			SetHeader("X-Plex-Token", token).
@@ -46,7 +46,7 @@ func (p *Client) GetWatchlistDetail(token string, w *PlexWatchlist) ([]*PlexWatc
 	return out, nil
 }
 
-type PlexWatchlist struct {
+type Watchlist struct {
 	MediaContainer struct {
 		LibrarySectionID    string `json:"librarySectionID"`
 		LibrarySectionTitle string `json:"librarySectionTitle"`
@@ -91,7 +91,7 @@ type PlexWatchlist struct {
 	} `json:"MediaContainer"`
 }
 
-type PlexWatchlistDetail struct {
+type WatchlistDetail struct {
 	MediaContainer struct {
 		Offset     int64  `json:"offset"`
 		TotalSize  int64  `json:"totalSize"`

@@ -87,12 +87,12 @@ const (
 // 	Summary             string `json:"summary"`
 // }
 
-type PlexUser struct {
-	ID       int64  `json:"id"`
+type User struct {
+	ID       string `json:"id"`
 	UUID     string `json:"uuid"`
 	Username string `json:"username"`
-	// Title             string      `json:"title"`
-	Email string `json:"email"`
+	Title    string `json:"title"`
+	Email    string `json:"email"`
 	// FriendlyName      string      `json:"friendlyName"`
 	// Locale            interface{} `json:"locale"`
 	Confirmed bool  `json:"confirmed"`

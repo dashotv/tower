@@ -1,7 +1,7 @@
 package plex
 
-func (p *Client) GetSessions() ([]*PlexSessionMetadata, error) {
-	sessions := &PlexSessionContainer{}
+func (p *Client) GetSessions() ([]*SessionMetadata, error) {
+	sessions := &SessionContainer{}
 	resp, err := p._server().SetResult(sessions).Get("/status/sessions")
 	if err != nil {
 		return nil, err
@@ -15,14 +15,14 @@ func (p *Client) GetSessions() ([]*PlexSessionMetadata, error) {
 	return sessions.MediaContainer.Metadata, nil
 }
 
-type PlexSessionContainer struct {
+type SessionContainer struct {
 	MediaContainer struct {
-		Size     int64                  `json:"size"`
-		Metadata []*PlexSessionMetadata `json:"Metadata"`
+		Size     int64              `json:"size"`
+		Metadata []*SessionMetadata `json:"Metadata"`
 	} `json:"MediaContainer"`
 }
 
-type PlexSessionMetadata struct {
+type SessionMetadata struct {
 	AddedAt               int64           `json:"addedAt"`
 	Art                   string          `json:"art"`
 	ContentRating         string          `json:"contentRating"`
@@ -191,10 +191,4 @@ type TranscodeSession struct {
 	TimeStamp                float64 `json:"timeStamp"`
 	MaxOffsetAvailable       float64 `json:"maxOffsetAvailable"`
 	MinOffsetAvailable       float64 `json:"minOffsetAvailable"`
-}
-
-type User struct {
-	ID    string `json:"id"`
-	Thumb string `json:"thumb"`
-	Title string `json:"title"`
 }

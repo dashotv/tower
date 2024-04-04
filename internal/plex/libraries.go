@@ -20,7 +20,7 @@ import (
 	        "type": "show",
 	        "title": "TV Shows",
 	        "agent": "tv.plex.agents.series",
-	        "scanner": "Plex TV Series",
+	        "scanner": " TV Series",
 	        "language": "en-US",
 	        "uuid": "e35a54e6-79ff-4cde-98c6-c05c1a09c821",
 	        "updatedAt": 1704818112,
@@ -38,44 +38,44 @@ import (
 	        ]
 	      },
 */
-type PlexLibraryLocation struct {
+type LibraryLocation struct {
 	ID   int64  `json:"id"`
 	Path string `json:"path"`
 }
 
-type PlexLibrary struct {
-	AllowSync        bool                   `json:"allowSync"`
-	Art              string                 `json:"art"`
-	Composite        string                 `json:"composite"`
-	Filters          bool                   `json:"filters"`
-	Refreshing       bool                   `json:"refreshing"`
-	Thumb            string                 `json:"thumb"`
-	Key              string                 `json:"key"`
-	Type             string                 `json:"type"`
-	Title            string                 `json:"title"`
-	Agent            string                 `json:"agent"`
-	Scanner          string                 `json:"scanner"`
-	Language         string                 `json:"language"`
-	UUID             string                 `json:"uuid"`
-	UpdatedAt        int64                  `json:"updatedAt"`
-	CreatedAt        int64                  `json:"createdAt"`
-	ScannedAt        int64                  `json:"scannedAt"`
-	Content          bool                   `json:"content"`
-	Directory        bool                   `json:"directory"`
-	ContentChangedAt int64                  `json:"contentChangedAt"`
-	Hidden           int64                  `json:"hidden"`
-	Locations        []*PlexLibraryLocation `json:"Location"`
+type Library struct {
+	AllowSync        bool               `json:"allowSync"`
+	Art              string             `json:"art"`
+	Composite        string             `json:"composite"`
+	Filters          bool               `json:"filters"`
+	Refreshing       bool               `json:"refreshing"`
+	Thumb            string             `json:"thumb"`
+	Key              string             `json:"key"`
+	Type             string             `json:"type"`
+	Title            string             `json:"title"`
+	Agent            string             `json:"agent"`
+	Scanner          string             `json:"scanner"`
+	Language         string             `json:"language"`
+	UUID             string             `json:"uuid"`
+	UpdatedAt        int64              `json:"updatedAt"`
+	CreatedAt        int64              `json:"createdAt"`
+	ScannedAt        int64              `json:"scannedAt"`
+	Content          bool               `json:"content"`
+	Directory        bool               `json:"directory"`
+	ContentChangedAt int64              `json:"contentChangedAt"`
+	Hidden           int64              `json:"hidden"`
+	Locations        []*LibraryLocation `json:"Location"`
 }
 
-type PlexLibraries struct {
+type Libraries struct {
 	MediaContainer struct {
-		Size        int64          `json:"size"`
-		Directories []*PlexLibrary `json:"Directory"`
+		Size        int64      `json:"size"`
+		Directories []*Library `json:"Directory"`
 	} `json:"MediaContainer"`
 }
 
-func (p *Client) GetLibraries() ([]*PlexLibrary, error) {
-	dest := &PlexLibraries{}
+func (p *Client) GetLibraries() ([]*Library, error) {
+	dest := &Libraries{}
 	resp, err := p._server().SetResult(dest).SetFormDataFromValues(p.data).Get("/library/sections")
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func (p *Client) LibraryType(section string) (int, error) {
 	}
 
 	id := p.LibraryTypeID(t)
-	if id == PlexLibraryTypeUnknown {
+	if id == LibraryTypeUnknown {
 		return 0, fae.Errorf("library section %s unknown", section)
 	}
 
@@ -117,7 +117,7 @@ func (p *Client) LibraryTypeName(section string) (string, error) {
 	return "", fae.Errorf("library section %s not found", section)
 }
 
-func (p *Client) LibraryByPath(path string) (*PlexLibrary, error) {
+func (p *Client) LibraryByPath(path string) (*Library, error) {
 	resp, err := p.GetLibraries()
 	if err != nil {
 		return nil, err
@@ -156,10 +156,10 @@ func (p *Client) RefreshLibraryPath(path string) error {
 func (p *Client) LibraryTypeID(t string) int {
 	switch t {
 	case "movie":
-		return PlexLibraryTypeMovie
+		return LibraryTypeMovie
 	case "show":
-		return PlexLibraryTypeShow
+		return LibraryTypeShow
 	default:
-		return PlexLibraryTypeUnknown
+		return LibraryTypeUnknown
 	}
 }

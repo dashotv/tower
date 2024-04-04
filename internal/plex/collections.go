@@ -9,7 +9,7 @@ import (
 	"github.com/dashotv/fae"
 )
 
-type PlexCollectionCreate struct {
+type CollectionCreate struct {
 	MediaContainer struct {
 		Directory []struct {
 			RatingKey string `json:"ratingKey"`
@@ -26,7 +26,7 @@ type PlexCollectionCreate struct {
 	} `json:"MediaContainer"`
 }
 
-func (p *Client) CreateCollection(title, section, firstKey string) (*PlexCollectionCreate, error) {
+func (p *Client) CreateCollection(title, section, firstKey string) (*CollectionCreate, error) {
 	id, err := p.LibraryType(section)
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func (p *Client) CreateCollection(title, section, firstKey string) (*PlexCollect
 	data.Set("smart", "0")
 	data.Set("uri", fmt.Sprintf("server://%s/com.plexapp.plugins.library/library/metadata/%s", p.MachineIdentifier, firstKey))
 
-	dest := &PlexCollectionCreate{}
+	dest := &CollectionCreate{}
 	resp, err := p._server().
 		SetResult(dest).
 		SetQueryParamsFromValues(data).
@@ -55,59 +55,59 @@ func (p *Client) CreateCollection(title, section, firstKey string) (*PlexCollect
 	return dest, nil
 }
 
-type PlexLibrariesCollectionResponse struct {
+type LibrariesCollectionResponse struct {
 	MediaContainer struct {
-		Size         int64             `json:"size"`
-		AllowSync    bool              `json:"allowSync"`
-		Identifier   string            `json:"identifier"`
-		LibraryID    int64             `json:"librarySectionID"`
-		LibraryTitle string            `json:"librarySectionTitle"`
-		LibraryUUID  string            `json:"librarySectionUUID"`
-		Title        string            `json:"title1"`
-		Subtitle     string            `json:"title2"`
-		Metadata     []*PlexCollection `json:"Metadata,omitempty"`
+		Size         int64         `json:"size"`
+		AllowSync    bool          `json:"allowSync"`
+		Identifier   string        `json:"identifier"`
+		LibraryID    int64         `json:"librarySectionID"`
+		LibraryTitle string        `json:"librarySectionTitle"`
+		LibraryUUID  string        `json:"librarySectionUUID"`
+		Title        string        `json:"title1"`
+		Subtitle     string        `json:"title2"`
+		Metadata     []*Collection `json:"Metadata,omitempty"`
 	} `json:"MediaContainer"`
 }
 
-type PlexCollectionResponse struct {
+type CollectionResponse struct {
 	MediaContainer struct {
-		Size         int64             `json:"size"`
-		AllowSync    bool              `json:"allowSync"`
-		Identifier   string            `json:"identifier"`
-		LibraryID    int64             `json:"librarySectionID"`
-		LibraryTitle string            `json:"librarySectionTitle"`
-		LibraryUUID  string            `json:"librarySectionUUID"`
-		Title        string            `json:"title1"`
-		Subtitle     string            `json:"title2"`
-		Directory    []*PlexCollection `json:"Metadata,omitempty"`
+		Size         int64         `json:"size"`
+		AllowSync    bool          `json:"allowSync"`
+		Identifier   string        `json:"identifier"`
+		LibraryID    int64         `json:"librarySectionID"`
+		LibraryTitle string        `json:"librarySectionTitle"`
+		LibraryUUID  string        `json:"librarySectionUUID"`
+		Title        string        `json:"title1"`
+		Subtitle     string        `json:"title2"`
+		Directory    []*Collection `json:"Metadata,omitempty"`
 	} `json:"MediaContainer"`
 }
-type PlexCollection struct {
-	RatingKey    string                 `json:"ratingKey"`
-	Key          string                 `json:"key"`
-	GUID         string                 `json:"guid"`
-	Type         string                 `json:"type"`
-	Title        string                 `json:"title"`
-	LibraryID    int64                  `json:"librarySectionID"`
-	LibraryTitle string                 `json:"librarySectionTitle"`
-	LibraryKey   string                 `json:"librarySectionKey"`
-	Subtype      string                 `json:"subtype"`
-	Summary      string                 `json:"summary"`
-	Thumb        string                 `json:"thumb"`
-	AddedAt      int64                  `json:"addedAt"`
-	UpdatedAt    int64                  `json:"updatedAt"`
-	ChildCount   string                 `json:"childCount"`
-	MaxYear      string                 `json:"maxYear"`
-	MinYear      string                 `json:"minYear"`
-	Children     []*PlexCollectionChild `json:"children,omitempty"`
+type Collection struct {
+	RatingKey    string             `json:"ratingKey"`
+	Key          string             `json:"key"`
+	GUID         string             `json:"guid"`
+	Type         string             `json:"type"`
+	Title        string             `json:"title"`
+	LibraryID    int64              `json:"librarySectionID"`
+	LibraryTitle string             `json:"librarySectionTitle"`
+	LibraryKey   string             `json:"librarySectionKey"`
+	Subtype      string             `json:"subtype"`
+	Summary      string             `json:"summary"`
+	Thumb        string             `json:"thumb"`
+	AddedAt      int64              `json:"addedAt"`
+	UpdatedAt    int64              `json:"updatedAt"`
+	ChildCount   string             `json:"childCount"`
+	MaxYear      string             `json:"maxYear"`
+	MinYear      string             `json:"minYear"`
+	Children     []*CollectionChild `json:"children,omitempty"`
 }
-type PlexCollectionChildrenResponse struct {
+type CollectionChildrenResponse struct {
 	MediaContainer struct {
-		Size      int64                  `json:"size"`
-		Directory []*PlexCollectionChild `json:"Metadata,omitempty"`
+		Size      int64              `json:"size"`
+		Directory []*CollectionChild `json:"Metadata,omitempty"`
 	} `json:"MediaContainer"`
 }
-type PlexCollectionChild struct {
+type CollectionChild struct {
 	RatingKey    string `json:"ratingKey"`
 	Key          string `json:"key"`
 	GUID         string `json:"guid"`
@@ -139,11 +139,11 @@ func (p *Client) DeleteCollection(ratingKey string) error {
 	return nil
 }
 
-func (p *Client) ListCollections(section string) ([]*PlexCollection, error) {
+func (p *Client) ListCollections(section string) ([]*Collection, error) {
 	data := url.Values{}
 	data.Set("X-Plex-Token", p.Token)
 
-	dest := &PlexLibrariesCollectionResponse{}
+	dest := &LibrariesCollectionResponse{}
 	resp, err := p._server().
 		SetResult(dest).
 		SetQueryParamsFromValues(p.data).
@@ -158,11 +158,11 @@ func (p *Client) ListCollections(section string) ([]*PlexCollection, error) {
 	return dest.MediaContainer.Metadata, nil
 }
 
-func (p *Client) GetCollection(ratingKey string) (*PlexCollection, error) {
+func (p *Client) GetCollection(ratingKey string) (*Collection, error) {
 	data := url.Values{}
 	data.Set("X-Plex-Token", p.Token)
 
-	dest := &PlexCollectionResponse{}
+	dest := &CollectionResponse{}
 	resp, err := p._server().
 		SetResult(dest).
 		SetQueryParamsFromValues(p.data).
@@ -187,11 +187,11 @@ func (p *Client) GetCollection(ratingKey string) (*PlexCollection, error) {
 	return r, nil
 }
 
-func (p *Client) GetCollectionChildren(ratingKey string) ([]*PlexCollectionChild, error) {
+func (p *Client) GetCollectionChildren(ratingKey string) ([]*CollectionChild, error) {
 	data := url.Values{}
 	data.Set("X-Plex-Token", p.Token)
 
-	dest := &PlexCollectionChildrenResponse{}
+	dest := &CollectionChildrenResponse{}
 	resp, err := p._server().
 		SetResult(dest).
 		SetQueryParamsFromValues(p.data).
@@ -212,7 +212,7 @@ func (p *Client) UpdateCollection(section, ratingKey string, keys []string) erro
 		return err
 	}
 
-	existingKeys := lo.Map(existing.Children, func(c *PlexCollectionChild, i int) string {
+	existingKeys := lo.Map(existing.Children, func(c *CollectionChild, i int) string {
 		return c.RatingKey
 	})
 
@@ -270,16 +270,3 @@ func (p *Client) removeCollectionItem(ratingKey, rmKey string) error {
 
 	return nil
 }
-
-// func (p *Plex) GetCollections(token string) (*PlexCollections, error) {
-// 	dest := &PlexCollections{}
-// 	resp, err := p.metadata().SetResult(dest).SetHeader("X-Plex-Token", token).Get("/library/sections")
-// 	if err != nil {
-// 		return dest, err
-// 	}
-// 	if !resp.IsSuccess() {
-// 		return dest, fae.Errorf("failed to get collections: %s", resp.Status())
-// 	}
-//
-// 	return dest, nil
-// }

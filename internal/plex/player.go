@@ -38,7 +38,7 @@ func (p *Client) Stop(session string) error {
 	return nil
 }
 
-type PlexQueue struct {
+type Queue struct {
 	MediaContainer struct {
 		Size            int64  `json:"size"`
 		Identifier      string `json:"identifier"`
@@ -77,8 +77,8 @@ func (p *Client) playQueue(queueID int64, ratingKey, player string) error {
 	return nil
 }
 
-func (p *Client) playCreateQueue(ratingKey string) (*PlexQueue, error) {
-	q := &PlexQueue{}
+func (p *Client) playCreateQueue(ratingKey string) (*Queue, error) {
+	q := &Queue{}
 
 	params := url.Values{}
 	params.Set("type", "video")
