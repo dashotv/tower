@@ -73,7 +73,10 @@ func (a *Application) DownloadsShow(c echo.Context, id string) error {
 }
 
 func (a *Application) DownloadsUpdate(c echo.Context, id string, data *Download) error {
-	err := app.DB.Download.Update(data)
+	if id != data.ID.Hex() || id == primitive.NilObjectID.Hex() || data.ID == primitive.NilObjectID {
+		return fae.New("ID mismatch")
+	}
+	err := app.DB.Download.Save(data)
 	if err != nil {
 		return err
 	}

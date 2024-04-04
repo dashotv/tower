@@ -104,7 +104,7 @@ func (a *Application) MoviesUpdate(c echo.Context, id string, subject *Movie) er
 	//     return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
 	// }
 	// data.Name = subject.Name ...
-	if err := a.DB.Movie.Save(subject); err != nil {
+	if err := a.DB.Movie.Update(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Movies"})
 	}
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})

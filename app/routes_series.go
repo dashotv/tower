@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/fae"
 )
@@ -145,6 +146,10 @@ func (a *Application) SeriesShow(c echo.Context, id string) error {
 
 // PUT /series/:id
 func (a *Application) SeriesUpdate(c echo.Context, id string, subject *Series) error {
+	if id != subject.ID.Hex() || id == primitive.NilObjectID.Hex() || subject.ID == primitive.NilObjectID {
+		return fae.New("ID mismatch")
+	}
+
 	if !strings.HasPrefix(subject.Cover, "/media-images") {
 		cover := subject.GetCover()
 		if cover == nil || cover.Remote != subject.Cover {
@@ -163,7 +168,7 @@ func (a *Application) SeriesUpdate(c echo.Context, id string, subject *Series) e
 		}
 	}
 
-	if err := a.DB.Series.Save(subject); err != nil {
+	if err := a.DB.Series.Update(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Series"})
 	}
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
