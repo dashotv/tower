@@ -281,7 +281,7 @@ type Download struct { // model
 	Thash     string             `bson:"thash" json:"thash"`
 	Selected  string             `bson:"selected" json:"selected"`
 	Status    string             `bson:"status" json:"status"`
-	Files     []*DownloadFile    `bson:"download_files" json:"download_files"`
+	Files     []*DownloadFile    `bson:"download_files" json:"files"`
 	Medium    *Medium            `bson:"-" json:"medium"`
 }
 

@@ -185,6 +185,9 @@ func setupWorkers(app *Application) error {
 	if err := minion.Register[*SeriesUpdateToday](m, &SeriesUpdateToday{}); err != nil {
 		return fae.Wrap(err, "registering worker: series_update_today (SeriesUpdateToday)")
 	}
+	if _, err := m.Schedule("0 0 */12 * * *", &SeriesUpdateToday{}); err != nil {
+		return fae.Wrap(err, "scheduling worker: series_update_today (SeriesUpdateToday)")
+	}
 
 	if err := minion.Register[*TmdbUpdateAll](m, &TmdbUpdateAll{}); err != nil {
 		return fae.Wrap(err, "registering worker: tmdb_update_all (TmdbUpdateAll)")

@@ -24,7 +24,7 @@ fields:
     type: string
   - name: files
     type: "[]*DownloadFile"
-    json: download_files
+    json: files
     bson: download_files
   # for the UI
   - name: medium
