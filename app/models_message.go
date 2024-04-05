@@ -7,7 +7,7 @@ func (c *Connector) MessageList(page, limit int) ([]*Message, error) {
 		page = 1
 	}
 	skip := (page - 1) * limit
-	list, err := c.Message.Query().Limit(limit).Skip(skip).Run()
+	list, err := c.Message.Query().Desc("created_at").Limit(limit).Skip(skip).Run()
 	if err != nil {
 		return nil, err
 	}
