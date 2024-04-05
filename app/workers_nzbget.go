@@ -79,9 +79,8 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 	if err != nil {
 		return fae.Wrap(err, "getting destination")
 	}
-	dest = fmt.Sprintf("%s.%s", dest, ext)
 
-	destination := filepath.Join(app.Config.DirectoriesCompleted, dest)
+	destination := filepath.Join(app.Config.DirectoriesCompleted, fmt.Sprintf("%s.%s", dest, ext))
 	source := filepath.Join(dir, file)
 	l.Debugf("nzbget process: %s: %s => %s", p.Id, source, destination)
 
@@ -97,6 +96,12 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 	if err := updateMedium(download.Medium.ID.Hex(), dest, ext); err != nil {
 		return fae.Wrap(err, "updating medium")
 	}
+
+	download.Status = "done"
+	if err := app.DB.Download.Save(download); err != nil {
+		return fae.Wrap(err, "saving download")
+	}
+
 	return nil
 }
 

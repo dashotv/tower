@@ -403,10 +403,12 @@ func updateMedium(id, dest, ext string) error {
 		Extension: ext,
 		Type:      primitive.Symbol(fileType(fmt.Sprintf("%s.%s", dest, ext))),
 	})
+
 	err = app.DB.Medium.Update(m)
 	if err != nil {
 		return fae.Errorf("update medium: %s", err)
 	}
+
 	// enqueue path import
 	path, ok := lo.Find(m.Paths, func(p *Path) bool {
 		return p.Local == dest
