@@ -82,9 +82,10 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 	dest = fmt.Sprintf("%s.%s", dest, ext)
 
 	destination := filepath.Join(app.Config.DirectoriesCompleted, dest)
-	l.Debugf("nzbget process: %s: %s => %s", p.Id, file, destination)
+	source := filepath.Join(dir, file)
+	l.Debugf("nzbget process: %s: %s => %s", p.Id, source, destination)
 
-	if err := FileLink(file, destination, true); err != nil {
+	if err := FileLink(source, destination, true); err != nil {
 		return fae.Wrap(err, "linking file")
 	}
 
