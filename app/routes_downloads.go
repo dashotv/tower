@@ -56,7 +56,7 @@ func (a *Application) DownloadsCreate(c echo.Context, data *Download) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, &Response{Error: false, Result: data.ID.Hex()})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: data})
 }
 
 func (a *Application) DownloadsShow(c echo.Context, id string) error {
