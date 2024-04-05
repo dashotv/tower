@@ -97,11 +97,16 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 		return fae.Wrap(err, "updating medium")
 	}
 
+	if err := app.Plex.RefreshLibraryPath(destination); err != nil {
+		return fae.Wrap(err, "refreshing plex library")
+	}
+
 	download.Status = "done"
 	if err := app.DB.Download.Save(download); err != nil {
 		return fae.Wrap(err, "saving download")
 	}
 
+	notifier.Success("Downloads::Completed", fmt.Sprintf("%s %s", download.Medium.Title, download.Medium.Display))
 	return nil
 }
 
