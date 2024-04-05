@@ -97,7 +97,8 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 		return fae.Wrap(err, "updating medium")
 	}
 
-	if err := app.Plex.RefreshLibraryPath(destination); err != nil {
+	d := filepath.Join(app.Config.DirectoriesCompleted, string(download.Medium.Kind))
+	if err := app.Plex.RefreshLibraryPath(d); err != nil {
 		return fae.Wrap(err, "refreshing plex library")
 	}
 
