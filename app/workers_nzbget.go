@@ -85,10 +85,18 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 	source := filepath.Join(dir, file)
 	l.Debugf("nzbget process: %s: %s => %s", p.Id, source, destination)
 
+	if !app.Config.Production {
+		l.Debugf("skipping move in dev mode")
+		return nil
+	}
+
 	if err := FileLink(source, destination, true); err != nil {
 		return fae.Wrap(err, "linking file")
 	}
 
+	if err := updateMedium(download.Medium.ID.Hex(), dest, ext); err != nil {
+		return fae.Wrap(err, "updating medium")
+	}
 	return nil
 }
 
