@@ -110,6 +110,32 @@ func (j *SeriesUpdateRecent) Work(ctx context.Context, job *minion.Job[*SeriesUp
 	return nil
 }
 
+type SeriesUpdateToday struct {
+	minion.WorkerDefaults[*SeriesUpdateToday]
+}
+
+func (j *SeriesUpdateToday) Kind() string { return "series_update_today" }
+func (j *SeriesUpdateToday) Work(ctx context.Context, job *minion.Job[*SeriesUpdateToday]) error {
+	today := time.Now().Format("2006-01-02")
+	list, err := app.DB.Episode.Query().Where("release_date", today).Run()
+	if err != nil {
+		return fae.Wrap(err, "listing todays episodes")
+	}
+
+	seriesIds := lo.Map(list, func(e *Episode, i int) string {
+		return e.SeriesId.Hex()
+	})
+	seriesIds = lo.Uniq(seriesIds)
+
+	for _, id := range seriesIds {
+		if err := app.Workers.Enqueue(&SeriesUpdate{ID: id, SkipImages: true}); err != nil {
+			return fae.Wrap(err, "enqueueing series")
+		}
+	}
+
+	return nil
+}
+
 type SeriesUpdate struct {
 	minion.WorkerDefaults[*SeriesUpdate]
 	ID         string `bson:"id" json:"id"`
@@ -121,8 +147,6 @@ func (j *SeriesUpdate) Kind() string { return "series_update" }
 func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate]) error {
 	id := job.Args.ID
 	eg, ctx := errgroup.WithContext(ctx)
-
-	// TODO: use waitgroup to do some of this concurrently and save series once only at the end
 
 	series := &Series{}
 	err := app.DB.Series.Find(id, series)
