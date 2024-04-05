@@ -278,7 +278,9 @@ func (j *DownloadsProcess) Move() error {
 			continue
 		}
 		if d.IsMetube() {
-			j.MetubeMove(d)
+			if err := j.MetubeMove(d); err != nil {
+				return fae.Wrap(err, "metube move")
+			}
 			continue
 		}
 
@@ -472,6 +474,7 @@ func (j *DownloadsProcess) MetubeMove(download *Download) error {
 		return nil
 	}
 
+	l.Debugf("%s: files: %d", download.ID.Hex(), len(files))
 	for _, f := range files {
 		ext := filepath.Ext(f)
 		if ext[0] == '.' {

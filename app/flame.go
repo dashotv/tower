@@ -161,13 +161,13 @@ func (c *Flame) MetubeHistory() (*metube.HistoryResponse, error) {
 		SetHeader("Accept", "application/json").
 		Get("/metube/")
 	if err != nil {
-		return nil, fae.Wrap(err, "failed to load torrent")
+		return nil, fae.Wrap(err, "failed to load history")
 	}
 	if resp.IsError() {
-		return nil, fae.Errorf("failed to load torrent: %s", resp.Status())
+		return nil, fae.Errorf("failed to load history: %s", resp.Status())
 	}
 	if res.Error {
-		return nil, fae.New("failed to load metube")
+		return nil, fae.New("failed to load history")
 	}
 
 	return res.History, nil
