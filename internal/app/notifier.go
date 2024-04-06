@@ -6,6 +6,18 @@ import (
 
 var notifier *Notifier
 
+func init() {
+	initializers = append(initializers, setupNotifier)
+}
+
+func setupNotifier(a *Application) error {
+	notifier = &Notifier{
+		Log:    &NotifierLog{},
+		Notice: &NotifierNotice{},
+	}
+	return nil
+}
+
 type Notifier struct {
 	Log    *NotifierLog
 	Notice *NotifierNotice
@@ -60,7 +72,7 @@ func (n *NotifierLog) Info(title, message string) {
 	notifier.log("info", title, message)
 }
 func (n *NotifierLog) Warn(title, message string) {
-	notifier.log("Warn", title, message)
+	notifier.log("warning", title, message)
 }
 func (n *NotifierLog) Error(title, message string) {
 	notifier.log("error", title, message)
@@ -73,19 +85,11 @@ func (n *NotifierNotice) Info(title, message string) {
 	notifier.notice("info", title, message)
 }
 func (n *NotifierNotice) Warn(title, message string) {
-	notifier.notice("Warn", title, message)
+	notifier.notice("warn", title, message)
 }
 func (n *NotifierNotice) Error(title, message string) {
 	notifier.notice("error", title, message)
 }
 func (n *NotifierNotice) Success(title, message string) {
 	notifier.notice("success", title, message)
-}
-
-func setupNotifier() error {
-	notifier = &Notifier{
-		Log:    &NotifierLog{},
-		Notice: &NotifierNotice{},
-	}
-	return nil
 }

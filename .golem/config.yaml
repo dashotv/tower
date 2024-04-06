@@ -2,18 +2,18 @@ version: v0.14.8
 name: tower
 repo: github.com/dashotv/tower
 package: app
-output: app
+output: internal/app
 plugins:
-    models: true
-    routes: true
-    workers: true
-    cache: true
-    events: true
-    clients: true
+  models: true
+  routes: true
+  workers: true
+  cache: true
+  events: true
+  clients: true
 definitions:
-    models: .golem/models
-    routes: .golem/routes
-    events: .golem/events
-    workers: .golem/workers
-    queues: .golem/queues
-    clients: .golem/clients
+  models: .golem/models
+  routes: .golem/routes
+  events: .golem/events
+  workers: .golem/workers
+  queues: .golem/queues
+  clients: .golem/clients

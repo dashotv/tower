@@ -5,6 +5,10 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
+	"strings"
+
+	"github.com/samber/lo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/fae"
 )
@@ -14,6 +18,33 @@ var regexPathAnime = regexp.MustCompile(`(?i)(?P<season>\d+)x(?P<episode>\d+)(?:
 
 func (m *Medium) Destination() string {
 	return filepath.Join(string(m.Kind), m.Directory)
+}
+
+// AddPathByFullpath adds a path to the medium by the full path of the file. it ensures
+// that the path has a unique id and returns the path.
+func (m *Medium) AddPathByFullpath(file string) *Path {
+	d := filepath.Join(app.Config.DirectoriesCompleted, m.Destination())
+	dest := strings.Replace(file, d+"/", "", 1)
+	ext := Extension(file)
+
+	path, ok := lo.Find(m.Paths, func(p *Path) bool {
+		return p.Local == dest && p.Extension == ext
+	})
+	if ok && path != nil {
+		if path.Id == primitive.NilObjectID {
+			path.Id = primitive.NewObjectID()
+		}
+		return path
+	}
+
+	path = &Path{
+		Id:        primitive.NewObjectID(),
+		Local:     dest,
+		Extension: ext,
+		Type:      primitive.Symbol(fileType(fmt.Sprintf("%s.%s", dest, ext))),
+	}
+	m.Paths = append(m.Paths, path)
+	return path
 }
 
 func (c *Connector) MediumByFile(f *File) (*Medium, error) {

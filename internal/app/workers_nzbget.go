@@ -93,7 +93,7 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 		return fae.Wrap(err, "linking file")
 	}
 
-	if err := updateMedium(download.Medium.ID.Hex(), dest, ext); err != nil {
+	if err := updateMedium(download.Medium, []string{dest}); err != nil {
 		return fae.Wrap(err, "updating medium")
 	}
 

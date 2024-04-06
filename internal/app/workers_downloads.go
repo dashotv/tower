@@ -3,15 +3,12 @@ package app
 import (
 	"context"
 	"fmt"
-	"io/fs"
 	"path/filepath"
 	"strings"
 
 	"github.com/samber/lo"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/fae"
-	"github.com/dashotv/flame/metube"
 	"github.com/dashotv/minion"
 )
 
@@ -261,7 +258,6 @@ func (j *DownloadsProcess) Manage() error {
 }
 
 func (j *DownloadsProcess) Move() error {
-	l := app.Log.Named("downloads.move")
 	list, err := app.DB.DownloadByStatus("downloading")
 	if err != nil {
 		return fae.Wrap(err, "failed to get downloads")
@@ -270,92 +266,30 @@ func (j *DownloadsProcess) Move() error {
 	moved := []string{}
 
 	for _, d := range list {
-		if d.Thash == "" {
+		if d.Medium == nil {
 			continue
 		}
 
-		if d.IsNzb() {
-			continue
-		}
-		if d.IsMetube() {
-			if err := j.MetubeMove(d); err != nil {
-				return fae.Wrap(err, "metube move")
-			}
+		// for now only handle "singular" downloads
+		if d.Medium.Type != "Episode" && d.Medium.Type != "Movie" {
 			continue
 		}
 
-		t, err := app.Flame.Torrent(d.Thash)
+		files, err := DownloadMove(d)
 		if err != nil {
-			l.Errorf("failed to get torrent: %s", err)
+			return fae.Wrap(err, "move download")
+		}
+
+		if files == nil || len(files) == 0 {
 			continue
 		}
 
-		if t.Progress < 100 {
-			continue
-		}
-
-		if len(t.Files) == 0 {
-			continue
-		}
-
-		if len(t.Files) > 1 {
-			continue
-		}
-
-		// notifier.Info("Downloads::Move", fmt.Sprintf("%s %s", d.Medium.Title, d.Medium.Display))
-
-		tf := t.Files[0]
-		// df := d.Files[0]
-		ext := filepath.Ext(tf.Name)
-		if len(ext) > 0 && ext[0] == '.' {
-			ext = ext[1:]
-		}
-
-		// TODO: move to configurable templates
-		dest, err := Destination(d.Medium)
-		if err != nil {
-			return fae.Wrap(err, "failed to get destination")
-		}
-
-		source := fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, tf.Name)
-		file := strings.ToLower(fmt.Sprintf("%s.%s", dest, ext))
-		destination := fmt.Sprintf("%s/%s", app.Config.DirectoriesCompleted, file)
-
-		l.Debugf("mover: %s", source)
-		l.Debugf("    -> %s", destination)
-
-		if !app.Config.Production {
-			l.Debugf("skipping move in dev mode")
-			continue
-		}
-
-		if !exists(source) {
-			return fae.Errorf("source does not exist: %s", source)
-		}
-		if exists(destination) {
-			if !d.Force {
-				return fae.New("destination exists, force false")
-			}
-
-			match, err := sumFiles(source, destination)
-			if err != nil {
-				return fae.Wrap(err, "failed to sum files")
-			}
-			if match {
-				l.Debugf("destination exists, checksums match")
-				notifier.Log.Info("Downloads::FileMover", fmt.Sprintf("destination exists, checksums match: %s %s", d.Medium.Title, d.Medium.Display))
-				return nil
-			}
-		}
-
-		if err := FileLink(source, destination, d.Force); err != nil {
-			return fae.Wrap(err, "copy")
-		}
+		moved = append(moved, files...)
+		notifier.Success("Downloads::Completed", fmt.Sprintf("%s %s", d.Medium.Title, d.Medium.Display))
 
 		d.Status = "done"
-
 		// update medium and add path
-		if err := updateMedium(d.Medium.ID.Hex(), dest, ext); err != nil {
+		if err := updateMedium(d.Medium, files); err != nil {
 			d.Status = "reviewing"
 		}
 
@@ -364,12 +298,11 @@ func (j *DownloadsProcess) Move() error {
 			return fae.Wrap(err, "failed to save download")
 		}
 
-		if err := app.Flame.RemoveTorrent(d.Thash); err != nil {
-			return fae.Wrap(err, "failed to remove torrent")
+		if d.IsTorrent() {
+			if err := app.Flame.RemoveTorrent(d.Thash); err != nil {
+				return fae.Wrap(err, "failed to remove torrent")
+			}
 		}
-
-		moved = append(moved, destination)
-		notifier.Success("Downloads::Completed", fmt.Sprintf("%s %s", d.Medium.Title, d.Medium.Display))
 	}
 
 	if len(moved) > 0 {
@@ -390,152 +323,195 @@ func (j *DownloadsProcess) Move() error {
 	return nil
 }
 
-func updateMedium(id, dest, ext string) error {
-	m, err := app.DB.Medium.Get(id, &Medium{})
-	if err != nil {
-		return fae.Wrap(err, "get medium")
-	}
-	if ext[0] == '.' {
-		ext = ext[1:]
-	}
-
+func updateMedium(m *Medium, files []string) error {
 	m.Completed = true
-	m.Paths = append(m.Paths, &Path{
-		Local:     dest,
-		Extension: ext,
-		Type:      primitive.Symbol(fileType(fmt.Sprintf("%s.%s", dest, ext))),
-	})
 
-	err = app.DB.Medium.Update(m)
-	if err != nil {
-		return fae.Errorf("update medium: %s", err)
-	}
+	for _, f := range files {
+		path := m.AddPathByFullpath(f)
 
-	// enqueue path import
-	path, ok := lo.Find(m.Paths, func(p *Path) bool {
-		return p.Local == dest
-	})
-	if ok && path != nil {
 		if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: path.Id.Hex(), Title: path.Local}); err != nil {
 			return fae.Errorf("enqueue path: %s", err)
 		}
 	}
 
+	if err := app.DB.Medium.Save(m); err != nil {
+		return fae.Wrap(err, "failed to save medium")
+	}
+
 	return nil
 }
 
-func (j *DownloadsProcess) MetubeMove(download *Download) error {
-	l := app.Log.Named("downloads.metube")
-	files := []string{}
-	moved := []string{}
+// TODO: handle context?
+func DownloadMove(d *Download) ([]string, error) {
+	l := app.Log.Named("download.move:" + d.ID.Hex())
+	out := []string{}
 
-	history, err := app.Flame.MetubeHistory()
-	if err != nil {
-		return fae.Wrap(err, "history")
-	}
-
-	done, ok := lo.Find(history.Done, func(h *metube.Download) bool {
-		return h.CustomNamePrefix == download.ID.Hex()
-	})
-	if !ok || done == nil {
-		l.Debugf("not done: %s", download.ID.Hex())
-		return nil
-	}
-
-	if download.Medium == nil || download.Medium.Type != "Episode" {
-		l.Debugf("not episode: %s", download.ID.Hex())
-		return nil
-	}
-
-	err = filepath.WalkDir(app.Config.DirectoriesMetube, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if d.IsDir() {
-			return nil
-		}
-
-		if strings.Contains(path, download.ID.Hex()) {
-			files = append(files, path)
-		}
-
-		return nil
-	})
-	if err != nil {
-		return fae.Wrap(err, "walk")
-	}
-
-	files = lo.Filter(files, func(s string, i int) bool {
-		return shouldDownloadFile(s)
-	})
-
+	files, err := Files(d)
 	if len(files) == 0 {
-		return nil
+		return nil, fae.Wrap(err, "no files")
 	}
 
-	l.Debugf("%s: files: %d", download.ID.Hex(), len(files))
-	for _, f := range files {
-		ext := filepath.Ext(f)
-		if ext[0] == '.' {
-			ext = ext[1:]
-		}
+	for _, source := range files {
+		ext := Extension(source)
 
-		dest, err := Destination(download.Medium)
+		// TODO: move to configurable templates
+		dest, err := Destination(d.Medium)
 		if err != nil {
-			return fae.Wrap(err, "destination")
+			return nil, fae.Wrap(err, "failed to get destination")
 		}
 
-		destination := fmt.Sprintf("%s/%s.%s", app.Config.DirectoriesCompleted, dest, ext)
-		l.Debugf("move:  %s", filepath.Base(f))
+		file := strings.ToLower(fmt.Sprintf("%s.%s", dest, ext))
+		destination := fmt.Sprintf("%s/%s", app.Config.DirectoriesCompleted, file)
+
+		l.Debugf("mover: %s", source)
 		l.Debugf("    -> %s", destination)
 
-		if exists(destination) && !download.Force {
-			return fae.New("exists, force false")
+		if !exists(source) {
+			return nil, fae.Errorf("source does not exist: %s", source)
+		}
+		if exists(destination) {
+			if !d.Force {
+				notifier.Log.Warn("DownloadMove", fmt.Sprintf("destination exists, force false: %s", destination))
+				return nil, nil
+			}
+
+			match, err := sumFiles(source, destination)
+			if err != nil {
+				return nil, fae.Errorf("failed to sum files")
+			}
+			if match {
+				notifier.Log.Warn("DownloadMove", fmt.Sprintf("destination exists, sums match: %s", destination))
+				return nil, nil
+			}
 		}
 
 		if !app.Config.Production {
-			l.Debugf("dev mode")
-			continue
+			l.Debugf("skipping move in dev mode")
+			return nil, nil
 		}
 
-		if err := FileLink(f, destination, download.Force); err != nil {
-			l.Errorf("copy: %s", err)
-			return fae.Wrap(err, "copy")
+		if err := FileLink(source, destination, d.Force); err != nil {
+			return nil, fae.Wrap(err, "link")
 		}
 
-		download.Status = "done"
-
-		// update medium and add path
-		if err := updateMedium(download.Medium.ID.Hex(), dest, ext); err != nil {
-			download.Status = "reviewing"
-		}
-
-		err = app.DB.Download.Save(download)
-		if err != nil {
-			return fae.Wrap(err, "failed to save download")
-		}
-
-		moved = append(moved, destination)
-		notifier.Success("Downloads::Completed", fmt.Sprintf("%s %s", download.Medium.Title, download.Medium.Display))
+		out = append(out, destination)
 	}
 
-	if len(moved) > 0 {
-		dirs := lo.Map(moved, func(s string, i int) string {
-			return filepath.Dir(s)
-		})
-		dirs = lo.Uniq(dirs)
-
-		for _, dir := range dirs {
-			err := app.Plex.RefreshLibraryPath(dir)
-			if err != nil {
-				return fae.Wrap(err, "failed to refresh library")
-			}
-		}
-	}
-
-	return nil
+	return out, nil
 }
+
+// func (j *DownloadsProcess) MetubeMove(download *Download) error {
+// 	l := app.Log.Named("downloads.metube")
+// 	files := []string{}
+// 	moved := []string{}
+//
+// 	history, err := app.Flame.MetubeHistory()
+// 	if err != nil {
+// 		return fae.Wrap(err, "history")
+// 	}
+//
+// 	done, ok := lo.Find(history.Done, func(h *metube.Download) bool {
+// 		return h.CustomNamePrefix == download.ID.Hex()
+// 	})
+// 	if !ok || done == nil {
+// 		l.Debugf("not done: %s", download.ID.Hex())
+// 		return nil
+// 	}
+//
+// 	if download.Medium == nil || download.Medium.Type != "Episode" {
+// 		l.Debugf("not episode: %s", download.ID.Hex())
+// 		return nil
+// 	}
+//
+// 	err = filepath.WalkDir(app.Config.DirectoriesMetube, func(path string, d fs.DirEntry, err error) error {
+// 		if err != nil {
+// 			return err
+// 		}
+//
+// 		if d.IsDir() {
+// 			return nil
+// 		}
+//
+// 		if strings.Contains(path, download.ID.Hex()) {
+// 			files = append(files, path)
+// 		}
+//
+// 		return nil
+// 	})
+// 	if err != nil {
+// 		return fae.Wrap(err, "walk")
+// 	}
+//
+// 	files = lo.Filter(files, func(s string, i int) bool {
+// 		return shouldDownloadFile(s)
+// 	})
+//
+// 	if len(files) == 0 {
+// 		return nil
+// 	}
+//
+// 	l.Debugf("%s: files: %d", download.ID.Hex(), len(files))
+// 	for _, f := range files {
+// 		ext := filepath.Ext(f)
+// 		if ext[0] == '.' {
+// 			ext = ext[1:]
+// 		}
+//
+// 		dest, err := Destination(download.Medium)
+// 		if err != nil {
+// 			return fae.Wrap(err, "destination")
+// 		}
+//
+// 		destination := fmt.Sprintf("%s/%s.%s", app.Config.DirectoriesCompleted, dest, ext)
+// 		l.Debugf("move:  %s", filepath.Base(f))
+// 		l.Debugf("    -> %s", destination)
+//
+// 		if exists(destination) && !download.Force {
+// 			return fae.New("exists, force false")
+// 		}
+//
+// 		if !app.Config.Production {
+// 			l.Debugf("dev mode")
+// 			continue
+// 		}
+//
+// 		if err := FileLink(f, destination, download.Force); err != nil {
+// 			l.Errorf("copy: %s", err)
+// 			return fae.Wrap(err, "copy")
+// 		}
+//
+// 		download.Status = "done"
+//
+// 		// update medium and add path
+// 		if err := updateMedium(download.Medium.ID.Hex(), dest, ext); err != nil {
+// 			download.Status = "reviewing"
+// 		}
+//
+// 		err = app.DB.Download.Save(download)
+// 		if err != nil {
+// 			return fae.Wrap(err, "failed to save download")
+// 		}
+//
+// 		moved = append(moved, destination)
+// 		notifier.Success("Downloads::Completed", fmt.Sprintf("%s %s", download.Medium.Title, download.Medium.Display))
+// 	}
+//
+// 	if len(moved) > 0 {
+// 		dirs := lo.Map(moved, func(s string, i int) string {
+// 			return filepath.Dir(s)
+// 		})
+// 		dirs = lo.Uniq(dirs)
+//
+// 		for _, dir := range dirs {
+// 			err := app.Plex.RefreshLibraryPath(dir)
+// 			if err != nil {
+// 				return fae.Wrap(err, "failed to refresh library")
+// 			}
+// 		}
+// 	}
+//
+// 	return nil
+// }
 
 //
 // type DownloadFileMover struct {

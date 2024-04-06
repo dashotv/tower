@@ -84,6 +84,19 @@ func (d *Download) IsMetube() bool {
 	return false
 }
 
+func (d *Download) IsTorrent() bool {
+	url, err := d.GetURL()
+	if err != nil {
+		return false
+	}
+
+	if !nzbgeekRegex.MatchString(url) && !metubeRegex.MatchString(url) {
+		return true
+	}
+
+	return false
+}
+
 func (c *Connector) ActiveDownloads() ([]*Download, error) {
 	q := c.Download.Query()
 	list, err := q.In("status", activeStates).Run()
