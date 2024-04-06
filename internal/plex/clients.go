@@ -1,8 +1,6 @@
 package plex
 
 import (
-	"fmt"
-
 	"github.com/dashotv/fae"
 )
 
@@ -39,7 +37,7 @@ func (p *Client) GetClients() (*ClientsResponse, error) {
 	if !resp.IsSuccess() {
 		return nil, fae.Errorf("failed to get clients: %s", resp.Status())
 	}
-	fmt.Printf("clients: %s\n", resp.String())
+	// fmt.Printf("clients: %s\n", resp.String())
 	return clients, nil
 }
 
@@ -53,6 +51,6 @@ func (p *Client) GetDevices() (map[string]any, error) {
 	if !resp.IsSuccess() {
 		return nil, fae.Errorf("failed to get devices: %s", resp.Status())
 	}
-	fmt.Printf("devices: %s\n", resp.String())
+	// fmt.Printf("devices: %s\n", resp.String())
 	return devices, nil
 }

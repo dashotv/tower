@@ -273,11 +273,11 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 	})
 
 	if err := eg.Wait(); err != nil {
-		return err
+		return fae.Wrapf(err, "series: %s", series.Title)
 	}
 
 	if err := app.DB.Series.Save(series); err != nil {
-		return fae.Wrap(err, "saving series")
+		return fae.Wrapf(err, "saving series: %s", series.Title)
 	}
 	return nil
 }
