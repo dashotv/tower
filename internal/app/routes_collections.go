@@ -46,6 +46,10 @@ func (a *Application) CollectionsUpdate(c echo.Context, id string, subject *Coll
 	if err := a.DB.Collection.Save(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Collections"})
 	}
+
+	if err := a.Workers.Enqueue(&PlexCollectionUpdate{Id: subject.ID.Hex()}); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error enqueueing job"})
+	}
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
@@ -61,6 +65,10 @@ func (a *Application) CollectionsSettings(c echo.Context, id string, setting *Se
 	//    subject.Something = Setting.Value
 	// }
 
+	if err := a.Workers.Enqueue(&PlexCollectionUpdate{Id: subject.ID.Hex()}); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error enqueueing job"})
+	}
+
 	if err := a.DB.Collection.Save(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Collections"})
 	}
@@ -71,7 +79,12 @@ func (a *Application) CollectionsSettings(c echo.Context, id string, setting *Se
 func (a *Application) CollectionsDelete(c echo.Context, id string) error {
 	subject, err := a.DB.CollectionGet(id)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
+		return c.JSON(http.StatusOK, &Response{Error: true, Message: "not found"})
+	}
+	if subject.RatingKey != "" {
+		if err := app.Plex.DeleteCollection(subject.RatingKey); err != nil {
+			return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error enqueuing job PlexDeleteCollection"})
+		}
 	}
 	if err := a.DB.Collection.Delete(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error deleting Collections"})
