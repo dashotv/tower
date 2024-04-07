@@ -5,10 +5,10 @@ go 1.22.0
 require (
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/caarlos0/env/v10 v10.0.0
-	github.com/dashotv/fae v0.1.4
+	github.com/dashotv/fae v0.1.5
 	github.com/dashotv/flame v0.9.3
 	github.com/dashotv/golem v0.14.8
-	github.com/dashotv/grimoire v0.5.1
+	github.com/dashotv/grimoire v0.5.3
 	github.com/dashotv/mercury v0.3.2
 	github.com/dashotv/minion v0.4.3
 	github.com/dashotv/runic v0.3.1

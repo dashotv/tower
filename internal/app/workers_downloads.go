@@ -277,6 +277,7 @@ func (j *DownloadsProcess) Move() error {
 
 		files, err := DownloadMove(d)
 		if err != nil {
+			app.Log.Debugf("error: %+v", err)
 			return fae.Wrap(err, "move download")
 		}
 
@@ -347,8 +348,11 @@ func DownloadMove(d *Download) ([]string, error) {
 	out := []string{}
 
 	files, err := Files(d)
+	if err != nil {
+		return nil, fae.Wrap(err, "failed to get files")
+	}
 	if len(files) == 0 {
-		return nil, fae.Wrap(err, "no files")
+		return nil, fae.New("no files")
 	}
 
 	for _, source := range files {
