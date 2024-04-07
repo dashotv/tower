@@ -59,6 +59,7 @@ type Application struct {
 	Tmdb     *tmdb.Client
 	Tvdb     *tvdb.Client
 	Importer *importer.Importer
+	Want     *Want
 }
 
 func Setup() error {

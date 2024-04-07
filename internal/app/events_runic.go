@@ -14,42 +14,44 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 		return nil
 	}
 
-	// TODO: misreported sizes are casuing issues
-	// if msg.Size > 0 && msg.Size < 100000000 {
-	// 	// log.Warnf("skipping: %s %02dx%02d: size %d < 100mb", msg.Title, msg.Season, msg.Episode, msg.Size)
-	// 	return nil
-	// }
-
-	series, err := a.DB.SeriesBySearch(msg.Title)
-	if series == nil {
-		return err
-	}
-
-	// disable for now, because I want to see if the matching is working
-	// if !series.Active {
-	// 	return nil
-	// }
-
-	log.Infof("series: '%s' %02dx%02d", msg.Title, msg.Season, msg.Episode)
-
-	episode, err := app.DB.SeriesEpisodeBy(series, msg.Season, msg.Episode)
-	if episode == nil {
-		return err
-	}
-
-	log.Warnf("found: %s s%02de%02d", msg.Title, msg.Season, msg.Episode)
-
-	count, err := a.DB.Download.Query().Where("medium_id", episode.ID).Count()
-	if err != nil {
-		return err
-	}
-	if count > 0 {
-		log.Warnf("skipping: %s s%02de%02d: download exists", msg.Title, msg.Season, msg.Episode)
+	if a.Want == nil {
+		log.Warnf("skipping: want not initialized")
 		return nil
 	}
 
-	d := &Download{}
-	d.MediumID = episode.ID
+	id := a.Want.Release(msg)
+	if id == "" {
+		log.Debugf("skipping: [%s] %s (%d) %dx%d: not wanted", msg.Type, msg.Title, msg.Year, msg.Season, msg.Episode)
+		return nil
+	}
+
+	medium, err := a.DB.Medium.Get(id, &Medium{})
+	if err != nil {
+		return err
+	}
+
+	log.Debugf("found: %s s%02de%02d", msg.Title, msg.Season, msg.Episode)
+
+	var d *Download
+	downloads, err := a.DB.Download.Query().Where("medium_id", medium.ID).Run()
+	if err != nil {
+		return err
+	}
+
+	switch len(downloads) {
+	case 0:
+		d = &Download{MediumID: medium.ID}
+	case 1:
+		if downloads[0].Status != "searching" {
+			log.Warnf("skipping: %s s%02de%02d: download exists", msg.Title, msg.Season, msg.Episode)
+			return nil
+		}
+		d = downloads[0]
+	default:
+		log.Warnf("skipping: %s s%02de%02d: multiple download exists", msg.Title, msg.Season, msg.Episode)
+		return nil
+	}
+
 	if app.Config.Production {
 		d.Status = "loading"
 	} else {

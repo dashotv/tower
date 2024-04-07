@@ -47,6 +47,52 @@ func (m *Medium) AddPathByFullpath(file string) *Path {
 	return path
 }
 
+func (c *Connector) MediumBySearch(title string, season, episode int) (*Medium, error) {
+	// 	title = path(title)
+	// 	var found *Medium
+	//
+	// 	// {_type:{$in:["Series","Movie"]}, $or:[{directory:"alex rider"},{search:"alex rider"}]}
+	// 	q := c.Medium.Query().In("_type", []string{"Series", "Movie"})
+	// 	q.Or(func(qq *grimoire.QueryBuilder[*Medium]) {
+	// 		qq.Where("directory", title).Where("search", title)
+	// 	})
+	// 	list, err := q.Run()
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	if len(list) == 0 {
+	// 		return nil, nil
+	// 	}
+	//
+	// 	if found == nil {
+	// 		return nil, nil
+	// 	}
+	//
+	// 	if found.Type != "Series" {
+	// 		return found, nil
+	// 	}
+	//
+	// 	list, err := c.Medium.Query().Where("series_id", found.ID).Where("completed", false).Where("downloaded", false).Where("skipped", false).Where("season_number", season).Where("episode_number", episode).Run()
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	// c.Log.Debugf("MediumBySearch: %d/%d: %d", season, episode, len(list))
+	// 	if len(list) == 1 {
+	// 		return list[0], nil
+	// 	}
+	//
+	// 	list, err = c.Medium.Query().Where("series_id", found.ID).Where("completed", false).Where("downloaded", false).Where("skipped", false).Where("absolute_number", episode).Run()
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	// c.Log.Debugf("MediumBySearch: abs %d: %d", episode, len(list))
+	// 	if len(list) == 1 {
+	// 		return list[0], nil
+	// 	}
+
+	return nil, nil
+}
+
 func (c *Connector) MediumByFile(f *File) (*Medium, error) {
 	kind, name, file := f.Parts()
 	filename, _ := filenameSplit(file)

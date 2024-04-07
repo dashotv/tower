@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -11,8 +12,13 @@ func init() {
 	initializers = append(initializers, func(app *Application) error {
 		app.Workers.ScheduleFunc("*/5 * * * * *", "plex_session_updates", PlexSessionUpdates)
 		app.Workers.ScheduleFunc("0 */15 * * * *", "PopularReleases", PopularReleases)
+		app.Workers.ScheduleFunc("0 4-59/5 * * * *", "UpdateWanted", UpdateWanted)
 		return nil
 	})
+}
+
+func UpdateWanted() error {
+	return startWant(context.Background(), app)
 }
 
 func PlexSessionUpdates() error {
