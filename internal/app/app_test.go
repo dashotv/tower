@@ -10,6 +10,13 @@ import (
 	"github.com/dashotv/grimoire"
 )
 
+func init() {
+	err := appSetup()
+	if err != nil {
+		panic(err)
+	}
+}
+
 var envVars = []string{"CONNECTIONS", "NATS_URL", "REDIS_ADDRESS", "MINION_URI", "FLAME_URL"}
 
 func appSetup() error {

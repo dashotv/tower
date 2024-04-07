@@ -18,9 +18,6 @@ func TestLayout(t *testing.T) {
 		{id: "655a5b473359bb31b6f4932a", l: "tv/doctor who 2005/doctor who 2005 - 14x01 - TBA"},
 	}
 
-	err := appSetup()
-	require.NoError(t, err)
-
 	for _, tt := range cases {
 		t.Run(tt.l, func(t *testing.T) {
 			m := &Medium{}

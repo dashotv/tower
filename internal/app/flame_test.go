@@ -8,9 +8,7 @@ import (
 )
 
 func TestFlame_Torrent(t *testing.T) {
-	err := appSetup()
-	require.NoError(t, err)
-	err = setupFlame(app)
+	err := setupFlame(app)
 	require.NoError(t, err)
 
 	resp, err := app.Flame.Torrent("9f7cea6ea0d09ca0855c66026fe1c7ea2e274b0e")

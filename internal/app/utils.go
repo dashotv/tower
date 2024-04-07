@@ -376,3 +376,10 @@ func WithTimeout(delegate func() interface{}, timeout time.Duration) (ret interf
 	}
 	return nil, false
 }
+
+func TickTock(tag string) func() {
+	start := time.Now()
+	return func() {
+		app.Log.Debugf("%s: duration %v\n", tag, time.Since(start))
+	}
+}

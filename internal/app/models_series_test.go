@@ -44,9 +44,6 @@ func TestConnector_SeriesBySearch(t *testing.T) {
 }
 
 func TestEvents_SeriesEpisodeByRunic(t *testing.T) {
-	err := appSetup()
-	require.NoError(t, err)
-
 	series, err := app.DB.SeriesBySearch("the age of cosmos exploration")
 	require.NoError(t, err)
 	require.NotNil(t, series)
