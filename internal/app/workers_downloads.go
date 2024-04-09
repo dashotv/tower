@@ -352,7 +352,7 @@ func DownloadMove(d *Download) ([]string, error) {
 		return nil, fae.Wrap(err, "failed to get files")
 	}
 	if len(files) == 0 {
-		return nil, fae.New("no files")
+		return nil, nil
 	}
 
 	for _, source := range files {
