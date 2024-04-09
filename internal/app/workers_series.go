@@ -240,6 +240,32 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 		if _, err := app.DB.Episode.Collection.DeleteMany(ctx, bson.M{"_type": "Episode", "series_id": series.ID, "missing": bson.M{"$ne": nil}, "paths.type": bson.M{"$ne": "video"}}); err != nil {
 			return fae.Wrap(err, "missing delete")
 		}
+
+		// db.media.aggregate([{ $match: { _type: "Episode", series_id: ObjectId("65b572ff28653636fbae17de") } }, { $group: { _id: { s: "$season_number", e: "$episode_number", a: "$absolute_number" }, dups: { $push: '$_id' } } }, { $sort: { dups: -1 } }])
+		cur, err := app.DB.Episode.Collection.Aggregate(ctx, bson.A{
+			bson.M{"$match": bson.M{"_type": "Episode", "series_id": series.ID}},
+			bson.M{"$group": bson.M{
+				"_id":  bson.M{"s": "$season_number", "e": "$episode_number", "a": "$absolute_number"},
+				"dups": bson.M{"$push": "$_id"}},
+			},
+			bson.M{"$sort": bson.M{"dups": -1}}})
+		if err != nil {
+			return fae.Wrap(err, "duplicates")
+		}
+		for cur.Next(ctx) {
+			result := &SeriesDupResult{}
+			if err := cur.Decode(result); err != nil {
+				return fae.Wrap(err, "decoding")
+			}
+			if len(result.Dups) > 1 {
+				for _, id := range result.Dups[1:] {
+					if _, err := app.DB.Episode.Collection.DeleteOne(ctx, bson.M{"_id": id}); err != nil {
+						return fae.Wrap(err, "deleting")
+					}
+				}
+			}
+		}
+
 		return nil
 	})
 
@@ -409,4 +435,11 @@ func episodeSEMap(id string, anime bool) (map[int]map[int]*Episode, error) {
 	}
 
 	return episodeMap, nil
+}
+
+type SeriesDupResult struct {
+	Season   int                  `bson:"_id.s" json:"season"`
+	Episode  int                  `bson:"_id.e" json:"episode"`
+	Absolute int                  `bson:"_id.a" json:"absolute"`
+	Dups     []primitive.ObjectID `bson:"dups" json:"dups"`
 }
