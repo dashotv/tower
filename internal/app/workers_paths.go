@@ -167,3 +167,42 @@ func (j *PathCleanupAll) Work(ctx context.Context, job *minion.Job[*PathCleanupA
 
 	return nil
 }
+
+type PathDeleteAll struct {
+	minion.WorkerDefaults[*PathDeleteAll]
+	MediumID string `bson:"medium_id" json:"medium_id"`
+}
+
+func (j *PathDeleteAll) Kind() string { return "path_delete_all" }
+func (j *PathDeleteAll) Work(ctx context.Context, job *minion.Job[*PathDeleteAll]) error {
+	id := job.Args.MediumID
+
+	m := &Medium{}
+	if err := app.DB.Medium.Find(id, m); err != nil {
+		return fae.Wrap(err, "find medium")
+	}
+
+	paths := m.Paths
+	if m.Type == "Series" {
+		err := app.DB.Episode.Query().Where("series_id", m.ID).Batch(100, func(list []*Episode) error {
+			for _, e := range list {
+				paths = append(paths, e.Paths...)
+			}
+			return nil
+		})
+		if err != nil {
+			return fae.Wrap(err, "listing episodes")
+		}
+	}
+
+	for _, p := range paths {
+		if !p.Exists() {
+			continue
+		}
+		if err := os.Remove(p.LocalPath()); err != nil {
+			return fae.Wrap(err, "remove path")
+		}
+	}
+
+	return nil
+}

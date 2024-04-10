@@ -123,6 +123,10 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "registering worker: nzbget_process (NzbgetProcess)")
 	}
 
+	if err := minion.Register[*PathDeleteAll](m, &PathDeleteAll{}); err != nil {
+		return fae.Wrap(err, "registering worker: path_delete_all (PathDeleteAll)")
+	}
+
 	if err := minion.RegisterWithQueue[*PathImport](m, &PathImport{}, "paths"); err != nil {
 		return fae.Wrap(err, "registering worker: path_import (PathImport)")
 	}
@@ -147,6 +151,10 @@ func setupWorkers(app *Application) error {
 	}
 	if _, err := m.Schedule("0 0 * * * *", &PlexWatchlistUpdates{}); err != nil {
 		return fae.Wrap(err, "scheduling worker: plex_watchlist_updates (PlexWatchlistUpdates)")
+	}
+
+	if err := minion.Register[*SeriesDelete](m, &SeriesDelete{}); err != nil {
+		return fae.Wrap(err, "registering worker: series_delete (SeriesDelete)")
 	}
 
 	if err := minion.RegisterWithQueue[*SeriesImage](m, &SeriesImage{}, "series"); err != nil {

@@ -196,8 +196,8 @@ func (a *Application) SeriesDelete(c echo.Context, id string) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 	}
-	if err := a.DB.Series.Delete(subject); err != nil {
-		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error deleting Series"})
+	if err := a.Workers.Enqueue(&SeriesDelete{ID: id}); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 	}
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }

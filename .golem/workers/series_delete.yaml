@@ -1,0 +1,4 @@
+name: series_delete
+fields:
+    - name: id
+      type: string

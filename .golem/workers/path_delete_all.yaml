@@ -1,0 +1,4 @@
+name: path_delete_all
+fields:
+    - name: medium_id
+      type: string

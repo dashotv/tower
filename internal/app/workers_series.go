@@ -17,6 +17,36 @@ import (
 	"github.com/dashotv/tower/internal/importer"
 )
 
+type SeriesDelete struct {
+	minion.WorkerDefaults[*SeriesDelete]
+	ID string `bson:"id" json:"id"`
+}
+
+func (j *SeriesDelete) Kind() string { return "series_delete" }
+func (j *SeriesDelete) Work(ctx context.Context, job *minion.Job[*SeriesDelete]) error {
+	id := job.Args.ID
+
+	series := &Series{}
+	if err := app.DB.Series.Find(id, series); err != nil {
+		return fae.Wrap(err, "finding series")
+	}
+
+	_, err := app.DB.Episode.Collection.DeleteMany(ctx, bson.M{"_type": "Episode", "series_id": series.ID})
+	if err != nil {
+		return fae.Wrap(err, "deleting episodes")
+	}
+
+	if err := app.DB.Series.Delete(series); err != nil {
+		return fae.Wrap(err, "deleting series")
+	}
+
+	if err := app.Workers.Enqueue(&PathDeleteAll{MediumID: series.ID.Hex()}); err != nil {
+		return fae.Wrap(err, "enqueueing paths")
+	}
+
+	return nil
+}
+
 type SeriesUpdateAll struct {
 	minion.WorkerDefaults[*SeriesUpdateAll]
 }
