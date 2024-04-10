@@ -162,7 +162,7 @@ func (c *Connector) DownloadByStatus(status string) ([]*Download, error) {
 }
 
 func (c *Connector) processDownloads(list []*Download) {
-	for i, d := range list {
+	for _, d := range list {
 		m := &Medium{}
 		err := app.DB.Medium.FindByID(d.MediumID, m)
 		if err != nil {
@@ -179,17 +179,19 @@ func (c *Connector) processDownloads(list []*Download) {
 		d.Favorite = m.Favorite
 
 		d.Search = &DownloadSearch{
-			Type:       m.SearchParams.Type,
-			Source:     m.SearchParams.Source,
-			SourceID:   m.SourceID,
-			Title:      m.Search,
-			Resolution: m.SearchParams.Resolution,
-			Group:      m.SearchParams.Group,
-			Website:    m.SearchParams.Group,
-			Exact:      false,
-			Verified:   m.SearchParams.Verified,
-			Uncensored: m.SearchParams.Uncensored,
-			Bluray:     m.SearchParams.Bluray,
+			SourceID: m.SourceID,
+			Title:    m.Search,
+			Exact:    false,
+		}
+		if m.SearchParams != nil {
+			d.Search.Type = m.SearchParams.Type
+			d.Search.Source = m.SearchParams.Source
+			d.Search.Resolution = m.SearchParams.Resolution
+			d.Search.Group = m.SearchParams.Group
+			d.Search.Website = m.SearchParams.Group
+			d.Search.Verified = m.SearchParams.Verified
+			d.Search.Uncensored = m.SearchParams.Uncensored
+			d.Search.Bluray = m.SearchParams.Bluray
 		}
 
 		if m.Type == "Movie" {
@@ -274,11 +276,11 @@ func (c *Connector) processDownloads(list []*Download) {
 					continue
 				}
 
-				list[i].Files[j].Medium = fm
+				d.Files[j].Medium = fm
 			}
 		}
 
-		list[i].Medium = m
+		// list[i].Medium = m
 	}
 }
 
