@@ -207,14 +207,14 @@ func (c *Connector) processDownloads(list []*Download) {
 				continue
 			}
 
-			parts := strings.Split(s.Title, ":")
+			parts := strings.Split(s.Search, ":")
 			title := parts[0]
 			var shift int64
 			if len(parts) > 1 {
 				shift, _ = strconv.ParseInt(parts[1], 10, 64)
 			}
 
-			d.Title = title
+			d.Title = s.Title
 			d.Kind = s.Kind
 			d.Source = s.Source
 			d.SourceID = s.SourceID
@@ -224,7 +224,7 @@ func (c *Connector) processDownloads(list []*Download) {
 
 			d.Search.Source = s.Source
 			d.Search.SourceID = s.SourceID
-			d.Search.Title = s.Search
+			d.Search.Title = title
 			d.Search.Type = s.SearchParams.Type
 			d.Search.Source = s.SearchParams.Source
 			d.Search.Resolution = s.SearchParams.Resolution
