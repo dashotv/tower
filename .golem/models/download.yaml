@@ -46,14 +46,8 @@ fields:
   - name: kind
     type: primitive.Symbol
     bson: "-"
-  - name: search
-    type: string
-    bson: "-"
   - name: directory
     type: string
-    bson: "-"
-  - name: search_params
-    type: "*SearchParams"
     bson: "-"
   - name: active
     type: bool
@@ -69,6 +63,9 @@ fields:
     bson: "-"
   - name: background
     type: string
+    bson: "-"
+  - name: search
+    type: "*DownloadSearch"
     bson: "-"
 # not used
 #  - name: timestamps

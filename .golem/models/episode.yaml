@@ -15,10 +15,6 @@ fields:
     type: string
   - name: description
     type: string
-  - name: directory
-    type: string
-  - name: search
-    type: string
   - name: season_number
     type: int
   - name: episode_number

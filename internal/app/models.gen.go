@@ -305,30 +305,29 @@ type Download struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	MediumID     primitive.ObjectID `bson:"medium_id" json:"medium_id"`
-	Auto         bool               `bson:"auto" json:"auto"`
-	Multi        bool               `bson:"multi" json:"multi"`
-	Force        bool               `bson:"force" json:"force"`
-	URL          string             `bson:"url" json:"url"`
-	ReleaseID    string             `bson:"tdo_id" json:"release_id"`
-	Thash        string             `bson:"thash" json:"thash"`
-	Selected     string             `bson:"selected" json:"selected"`
-	Status       string             `bson:"status" json:"status"`
-	Files        []*DownloadFile    `bson:"download_files" json:"files"`
-	Medium       *Medium            `bson:"-" json:"medium"`
-	Title        string             `bson:"-" json:"title"`
-	Display      string             `bson:"-" json:"display"`
-	Source       string             `bson:"-" json:"source"`
-	SourceID     string             `bson:"-" json:"source_id"`
-	Kind         primitive.Symbol   `bson:"-" json:"kind"`
-	Search       string             `bson:"-" json:"search"`
-	Directory    string             `bson:"-" json:"directory"`
-	SearchParams *SearchParams      `bson:"-" json:"search_params"`
-	Active       bool               `bson:"-" json:"active"`
-	Favorite     bool               `bson:"-" json:"favorite"`
-	Unwatched    int                `bson:"-" json:"unwatched"`
-	Cover        string             `bson:"-" json:"cover"`
-	Background   string             `bson:"-" json:"background"`
+	MediumID   primitive.ObjectID `bson:"medium_id" json:"medium_id"`
+	Auto       bool               `bson:"auto" json:"auto"`
+	Multi      bool               `bson:"multi" json:"multi"`
+	Force      bool               `bson:"force" json:"force"`
+	URL        string             `bson:"url" json:"url"`
+	ReleaseID  string             `bson:"tdo_id" json:"release_id"`
+	Thash      string             `bson:"thash" json:"thash"`
+	Selected   string             `bson:"selected" json:"selected"`
+	Status     string             `bson:"status" json:"status"`
+	Files      []*DownloadFile    `bson:"download_files" json:"files"`
+	Medium     *Medium            `bson:"-" json:"medium"`
+	Title      string             `bson:"-" json:"title"`
+	Display    string             `bson:"-" json:"display"`
+	Source     string             `bson:"-" json:"source"`
+	SourceID   string             `bson:"-" json:"source_id"`
+	Kind       primitive.Symbol   `bson:"-" json:"kind"`
+	Directory  string             `bson:"-" json:"directory"`
+	Active     bool               `bson:"-" json:"active"`
+	Favorite   bool               `bson:"-" json:"favorite"`
+	Unwatched  int                `bson:"-" json:"unwatched"`
+	Cover      string             `bson:"-" json:"cover"`
+	Background string             `bson:"-" json:"background"`
+	Search     *DownloadSearch    `bson:"-" json:"search"`
 }
 
 type DownloadFile struct { // struct
@@ -337,6 +336,24 @@ type DownloadFile struct { // struct
 	Medium      *Medium            `bson:"medium" json:"medium"`
 	Num         int                `bson:"num" json:"num"`
 	TorrentFile *TorrentFile       `bson:"-" json:"-"`
+}
+
+type DownloadSearch struct { // struct
+	Type       string `bson:"type" json:"type"`
+	Source     string `bson:"source" json:"source"`
+	SourceID   string `bson:"source_id" json:"source_id"`
+	Title      string `bson:"title" json:"title"`
+	Year       int    `bson:"year" json:"year"`
+	Season     int    `bson:"season" json:"season"`
+	Episode    int    `bson:"episode" json:"episode"`
+	Resolution int    `bson:"resolution" json:"resolution"`
+	Group      string `bson:"group" json:"group"`
+	Website    string `bson:"website" json:"website"`
+	Exact      bool   `bson:"exact" json:"exact"`
+	Verified   bool   `bson:"verified" json:"verified"`
+	Uncensored bool   `bson:"uncensored" json:"uncensored"`
+	Bluray     bool   `bson:"bluray" json:"bluray"`
+	ThreeD     bool   `bson:"three_d" json:"three_d"`
 }
 
 type Downloading struct { // struct
@@ -371,8 +388,6 @@ type Episode struct { // model
 	SourceID        string             `bson:"source_id" json:"source_id"`
 	Title           string             `bson:"title" json:"title"`
 	Description     string             `bson:"description" json:"description"`
-	Directory       string             `bson:"directory" json:"directory"`
-	Search          string             `bson:"search" json:"search"`
 	SeasonNumber    int                `bson:"season_number" json:"season_number"`
 	EpisodeNumber   int                `bson:"episode_number" json:"episode_number"`
 	AbsoluteNumber  int                `bson:"absolute_number" json:"absolute_number"`

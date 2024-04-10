@@ -119,6 +119,10 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "registering worker: file_walk (FileWalk)")
 	}
 
+	if err := minion.Register[*MovieDelete](m, &MovieDelete{}); err != nil {
+		return fae.Wrap(err, "registering worker: movie_delete (MovieDelete)")
+	}
+
 	if err := minion.Register[*NzbgetProcess](m, &NzbgetProcess{}); err != nil {
 		return fae.Wrap(err, "registering worker: nzbget_process (NzbgetProcess)")
 	}

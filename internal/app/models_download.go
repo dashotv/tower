@@ -3,6 +3,8 @@ package app
 import (
 	"fmt"
 	"regexp"
+	"strconv"
+	"strings"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -168,6 +170,32 @@ func (c *Connector) processDownloads(list []*Download) {
 			continue
 		}
 
+		d.Title = m.Title
+		d.Kind = m.Kind
+		d.Source = m.Source
+		d.SourceID = m.SourceID
+		d.Directory = m.Directory
+		d.Active = m.Active
+		d.Favorite = m.Favorite
+
+		d.Search = &DownloadSearch{
+			Type:       m.SearchParams.Type,
+			Source:     m.SearchParams.Source,
+			SourceID:   m.SourceID,
+			Title:      m.Search,
+			Resolution: m.SearchParams.Resolution,
+			Group:      m.SearchParams.Group,
+			Website:    m.SearchParams.Group,
+			Exact:      false,
+			Verified:   m.SearchParams.Verified,
+			Uncensored: m.SearchParams.Uncensored,
+			Bluray:     m.SearchParams.Bluray,
+		}
+
+		if m.Type == "Movie" {
+			d.Search.SourceID = m.ImdbID
+		}
+
 		paths := m.Paths
 		if m.Type == "Episode" && !m.SeriesID.IsZero() {
 			s := &Series{}
@@ -177,30 +205,52 @@ func (c *Connector) processDownloads(list []*Download) {
 				continue
 			}
 
+			parts := strings.Split(s.Title, ":")
+			title := parts[0]
+			var shift int64
+			if len(parts) > 1 {
+				shift, _ = strconv.ParseInt(parts[1], 10, 64)
+			}
+
+			d.Title = title
+			d.Kind = s.Kind
+			d.Source = s.Source
+			d.SourceID = s.SourceID
+			d.Directory = s.Directory
+			d.Active = s.Active
+			d.Favorite = s.Favorite
+
+			d.Search.Source = s.Source
+			d.Search.SourceID = s.SourceID
+			d.Search.Title = s.Search
+			d.Search.Type = s.SearchParams.Type
+			d.Search.Source = s.SearchParams.Source
+			d.Search.Resolution = s.SearchParams.Resolution
+			d.Search.Group = s.SearchParams.Group
+			d.Search.Website = s.SearchParams.Group
+			d.Search.Verified = s.SearchParams.Verified
+			d.Search.Uncensored = s.SearchParams.Uncensored
+			d.Search.Bluray = s.SearchParams.Bluray
+
+			if isAnimeKind(string(s.Kind)) && m.AbsoluteNumber > 0 {
+				n := m.AbsoluteNumber
+				if shift > 0 && n > int(shift) {
+					n = n - int(shift)
+				}
+				d.Search.Episode = n
+				d.Display = fmt.Sprintf("#%d %s", m.AbsoluteNumber, m.Title)
+			} else {
+				d.Search.Season = m.SeasonNumber
+				d.Search.Episode = m.EpisodeNumber
+				d.Display = fmt.Sprintf("%02dx%02d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)
+			}
+
 			unwatched, err := app.DB.SeriesUserUnwatched(s)
 			if err != nil {
 				c.Log.Errorf("could not get unwatched count: %s: %s", s.ID.Hex(), err)
 			}
 			d.Unwatched = unwatched
 
-			if isAnimeKind(string(s.Kind)) && m.AbsoluteNumber > 0 {
-				d.Display = fmt.Sprintf("#%d %s", m.AbsoluteNumber, m.Title)
-			} else {
-				d.Display = fmt.Sprintf("%02dx%02d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)
-			}
-			d.Title = s.Title
-			d.Kind = s.Kind
-
-			d.Source = s.Source
-			d.SourceID = s.SourceID
-			d.Search = s.Search
-			if d.Search == "" {
-				d.Search = s.Title
-			}
-			d.SearchParams = s.SearchParams
-			d.Directory = s.Directory
-			d.Active = s.Active
-			d.Favorite = s.Favorite
 			paths = s.Paths
 		}
 

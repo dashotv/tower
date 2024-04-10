@@ -1,0 +1,33 @@
+name: download_search
+type: struct
+fields:
+  - name: type
+    type: string
+  - name: source
+    type: string
+  - name: source_id
+    type: string
+  - name: title
+    type: string
+  - name: year
+    type: int
+  - name: season
+    type: int
+  - name: episode
+    type: int
+  - name: resolution
+    type: int
+  - name: group
+    type: string
+  - name: website
+    type: string
+  - name: exact
+    type: bool
+  - name: verified
+    type: bool
+  - name: uncensored
+    type: bool
+  - name: bluray
+    type: bool
+  - name: three_d
+    type: bool

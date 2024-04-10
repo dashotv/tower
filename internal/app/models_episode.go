@@ -190,7 +190,6 @@ func (c *Connector) processSeriesEpisode(s *Series, e *Episode) {
 		c.Log.Errorf("getting unwatched %s: %s", s.ID.Hex(), err)
 	}
 	e.SeriesUnwatched = unwatched
-	e.Directory = s.Directory
 	e.SeriesActive = s.Active
 	e.SeriesFavorite = s.Favorite
 	e.Title = s.Display
