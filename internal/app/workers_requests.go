@@ -48,7 +48,7 @@ func (j *CreateMediaFromRequests) Work(ctx context.Context, job *minion.Job[*Cre
 			return fae.Wrap(err, "updating request")
 		}
 
-		if err := app.Events.Send("tower.requests", &EventRequests{Event: "update", Id: r.ID.Hex(), Request: r}); err != nil {
+		if err := app.Events.Send("tower.requests", &EventRequests{Event: "update", ID: r.ID.Hex(), Request: r}); err != nil {
 			return fae.Wrap(err, "sending event")
 		}
 	}
@@ -56,7 +56,7 @@ func (j *CreateMediaFromRequests) Work(ctx context.Context, job *minion.Job[*Cre
 }
 
 func createShowFromRequest(r *Request) error {
-	count, err := app.DB.Series.Count(bson.M{"_type": "Series", "source": r.Source, "source_id": r.SourceId})
+	count, err := app.DB.Series.Count(bson.M{"_type": "Series", "source": r.Source, "source_id": r.SourceID})
 	if err != nil {
 		return fae.Wrap(err, "counting series")
 	}
@@ -67,7 +67,7 @@ func createShowFromRequest(r *Request) error {
 	s := &Series{
 		Type:     "Series",
 		Source:   r.Source,
-		SourceId: r.SourceId,
+		SourceID: r.SourceID,
 		Title:    r.Title,
 		Kind:     "tv",
 	}
@@ -84,7 +84,7 @@ func createShowFromRequest(r *Request) error {
 }
 
 func createMovieFromRequest(r *Request) error {
-	count, err := app.DB.Series.Count(bson.M{"_type": "Movie", "source": r.Source, "source_id": r.SourceId})
+	count, err := app.DB.Series.Count(bson.M{"_type": "Movie", "source": r.Source, "source_id": r.SourceID})
 	if err != nil {
 		return fae.Wrap(err, "counting series")
 	}
@@ -95,7 +95,7 @@ func createMovieFromRequest(r *Request) error {
 	m := &Movie{
 		Type:     "Movie",
 		Source:   r.Source,
-		SourceId: r.SourceId,
+		SourceID: r.SourceID,
 		Title:    r.Title,
 		Kind:     "movies",
 	}

@@ -48,7 +48,7 @@ func (n *Notifier) log(level, title, message string) {
 	if err := app.DB.Message.Save(l); err != nil {
 		app.Events.Log.Errorf("error saving log: %s", err)
 	}
-	app.Events.Send("tower.logs", &EventLogs{Event: "new", Id: l.ID.Hex(), Log: l})
+	app.Events.Send("tower.logs", &EventLogs{Event: "new", ID: l.ID.Hex(), Log: l})
 }
 
 func (n *Notifier) Notify(level, title, message string) {

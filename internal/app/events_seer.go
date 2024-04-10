@@ -37,7 +37,7 @@ func onSeerDownloads(app *Application, msg *EventSeerDownload) (*EventDownloads,
 	if err != nil {
 		return nil, fae.Wrap(err, "loading download")
 	}
-	return &EventDownloads{Event: msg.Event, Id: d.ID.Hex(), Download: d}, nil
+	return &EventDownloads{Event: msg.Event, ID: d.ID.Hex(), Download: d}, nil
 }
 
 func onSeerEpisodes(app *Application, msg *EventSeerEpisode) (*EventEpisodes, error) {
@@ -45,7 +45,7 @@ func onSeerEpisodes(app *Application, msg *EventSeerEpisode) (*EventEpisodes, er
 	if err != nil {
 		return nil, fae.Wrap(err, "loading episode")
 	}
-	return &EventEpisodes{Event: msg.Event, Id: ep.ID.Hex(), Episode: ep}, nil
+	return &EventEpisodes{Event: msg.Event, ID: ep.ID.Hex(), Episode: ep}, nil
 }
 
 func onSeerLogs(app *Application, msg *EventSeerLog) (*EventLogs, error) {
@@ -58,7 +58,7 @@ func onSeerLogs(app *Application, msg *EventSeerLog) (*EventLogs, error) {
 	if err != nil {
 		app.Events.Log.Errorf("error saving log: %s", err)
 	}
-	return &EventLogs{Event: "new", Id: l.ID.Hex(), Log: l}, nil
+	return &EventLogs{Event: "new", ID: l.ID.Hex(), Log: l}, nil
 }
 
 func onSeerNotices(app *Application, msg *EventSeerNotice) (*EventNotices, error) {
@@ -80,7 +80,7 @@ func onSeerNotices(app *Application, msg *EventSeerNotice) (*EventNotices, error
 		Level:   msg.Level,
 		Message: msg.Message,
 	}
-	if err := app.Events.Send("tower.logs", &EventLogs{Event: "new", Id: l.ID.Hex(), Log: l}); err != nil {
+	if err := app.Events.Send("tower.logs", &EventLogs{Event: "new", ID: l.ID.Hex(), Log: l}); err != nil {
 		app.Events.Log.Errorf("error sending log: %s", err)
 	}
 	return n, nil

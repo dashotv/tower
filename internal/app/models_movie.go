@@ -84,7 +84,7 @@ func (c *Connector) MovieUpdate(id string, data *Movie) error {
 	m.Directory = data.Directory
 	m.Kind = data.Kind
 	m.Source = data.Source
-	m.SourceId = data.SourceId
+	m.SourceID = data.SourceID
 	m.Search = data.Search
 
 	return c.Movie.Update(m)

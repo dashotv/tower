@@ -25,13 +25,13 @@ func (c *Connector) DownloadGet(id string) (*Download, error) {
 }
 
 func (d *Download) GetURL() (string, error) {
-	if d.Url != "" {
-		return d.Url, nil
+	if d.URL != "" {
+		return d.URL, nil
 	}
 
-	if d.ReleaseId != "" {
+	if d.ReleaseID != "" {
 		r := &Release{}
-		err := app.DB.Release.Find(d.ReleaseId, r)
+		err := app.DB.Release.Find(d.ReleaseID, r)
 		if err != nil {
 			return "", err
 		}
@@ -162,18 +162,18 @@ func (c *Connector) DownloadByStatus(status string) ([]*Download, error) {
 func (c *Connector) processDownloads(list []*Download) {
 	for i, d := range list {
 		m := &Medium{}
-		err := app.DB.Medium.FindByID(d.MediumId, m)
+		err := app.DB.Medium.FindByID(d.MediumID, m)
 		if err != nil {
-			c.Log.Errorf("could not find medium: %s", d.MediumId)
+			c.Log.Errorf("could not find medium: %s", d.MediumID)
 			continue
 		}
 
 		paths := m.Paths
-		if m.Type == "Episode" && !m.SeriesId.IsZero() {
+		if m.Type == "Episode" && !m.SeriesID.IsZero() {
 			s := &Series{}
-			err := app.DB.Series.FindByID(m.SeriesId, s)
+			err := app.DB.Series.FindByID(m.SeriesID, s)
 			if err != nil {
-				c.Log.Errorf("could not find series: %s: %s", d.MediumId, err)
+				c.Log.Errorf("could not find series: %s: %s", d.MediumID, err)
 				continue
 			}
 
@@ -181,46 +181,46 @@ func (c *Connector) processDownloads(list []*Download) {
 			if err != nil {
 				c.Log.Errorf("could not get unwatched count: %s: %s", s.ID.Hex(), err)
 			}
-			m.Unwatched = unwatched
+			d.Unwatched = unwatched
 
-			if isAnimeKind(string(s.Kind)) {
-				m.Display = fmt.Sprintf("#%d %s", m.AbsoluteNumber, m.Title)
+			if isAnimeKind(string(s.Kind)) && m.AbsoluteNumber > 0 {
+				d.Display = fmt.Sprintf("#%d %s", m.AbsoluteNumber, m.Title)
 			} else {
-				m.Display = fmt.Sprintf("%02dx%02d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)
+				d.Display = fmt.Sprintf("%02dx%02d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)
 			}
-			m.Title = s.Title
-			m.Kind = s.Kind
+			d.Title = s.Title
+			d.Kind = s.Kind
 
-			m.Source = s.Source
-			m.SourceId = s.SourceId
-			m.Search = s.Search
-			if m.Search == "" {
-				m.Search = s.Title
+			d.Source = s.Source
+			d.SourceID = s.SourceID
+			d.Search = s.Search
+			if d.Search == "" {
+				d.Search = s.Title
 			}
-			m.SearchParams = s.SearchParams
-			m.Directory = s.Directory
-			m.Active = s.Active
-			m.Favorite = s.Favorite
+			d.SearchParams = s.SearchParams
+			d.Directory = s.Directory
+			d.Active = s.Active
+			d.Favorite = s.Favorite
 			paths = s.Paths
 		}
 
 		for _, p := range paths {
 			if p.Type == "cover" {
-				m.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+				d.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
 				continue
 			}
 			if p.Type == "background" {
-				m.Background = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+				d.Background = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
 				continue
 			}
 		}
 
 		for j, f := range d.Files {
-			if !f.MediumId.IsZero() {
+			if !f.MediumID.IsZero() {
 				fm := &Medium{}
-				err := app.DB.Medium.FindByID(f.MediumId, fm)
+				err := app.DB.Medium.FindByID(f.MediumID, fm)
 				if err != nil {
-					c.Log.Errorf("could not find medium: %s", d.MediumId)
+					c.Log.Errorf("could not find medium: %s", d.MediumID)
 					continue
 				}
 
@@ -251,7 +251,7 @@ func (c *Connector) DownloadSetting(id, setting string, value bool) error {
 	return c.Download.Update(d)
 }
 
-func (c *Connector) DownloadSelect(id, mediumId string, num int) error {
+func (c *Connector) DownloadSelect(id, mediumID string, num int) error {
 	download := &Download{}
 	err := app.DB.Download.Find(id, download)
 	if err != nil {
@@ -262,13 +262,13 @@ func (c *Connector) DownloadSelect(id, mediumId string, num int) error {
 		if f.Num == num {
 			mid := primitive.ObjectID{}
 
-			if mediumId != "" {
-				mid, err = primitive.ObjectIDFromHex(mediumId)
+			if mediumID != "" {
+				mid, err = primitive.ObjectIDFromHex(mediumID)
 				if err != nil {
 					return err
 				}
 			}
-			f.MediumId = mid
+			f.MediumID = mid
 
 			return c.Download.Update(download)
 		}

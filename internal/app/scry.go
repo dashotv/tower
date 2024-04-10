@@ -162,7 +162,7 @@ func (s *Scry) Search(options *SearchOptions) (*search.ReleaseSearchResponse, er
 
 func (s *Scry) ScrySearchEpisode(ep *Medium) (*search.Release, error) {
 	series := &Series{}
-	err := app.DB.Series.FindByID(ep.SeriesId, series)
+	err := app.DB.Series.FindByID(ep.SeriesID, series)
 	if err != nil {
 		return nil, err
 	}

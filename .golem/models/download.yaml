@@ -30,6 +30,46 @@ fields:
   - name: medium
     type: "*Medium"
     bson: "-"
+  # for the UI
+  - name: title
+    type: string
+    bson: "-"
+  - name: display
+    type: string
+    bson: "-"
+  - name: source
+    type: string
+    bson: "-"
+  - name: source_id
+    type: string
+    bson: "-"
+  - name: kind
+    type: primitive.Symbol
+    bson: "-"
+  - name: search
+    type: string
+    bson: "-"
+  - name: directory
+    type: string
+    bson: "-"
+  - name: search_params
+    type: "*SearchParams"
+    bson: "-"
+  - name: active
+    type: bool
+    bson: "-"
+  - name: favorite
+    type: bool
+    bson: "-"
+  - name: unwatched
+    type: int
+    bson: "-"
+  - name: cover
+    type: string
+    bson: "-"
+  - name: background
+    type: string
+    bson: "-"
 # not used
 #  - name: timestamps
 #    type: struct

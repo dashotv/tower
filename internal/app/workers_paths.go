@@ -29,7 +29,7 @@ func (j *PathImport) Work(ctx context.Context, job *minion.Job[*PathImport]) err
 	}
 
 	list := lo.Filter(m.Paths, func(p *Path, i int) bool {
-		return p.Id.Hex() == job.Args.PathID
+		return p.ID.Hex() == job.Args.PathID
 	})
 	if len(list) == 0 {
 		return fae.New("no matching path in list")
@@ -99,7 +99,7 @@ func (j *PathCleanup) Work(ctx context.Context, job *minion.Job[*PathCleanup]) e
 		}
 		if queuedPaths[p.LocalPath()] == 0 {
 			// app.Workers.Log.Debugf("path import: %s", p.LocalPath())
-			if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: p.Id.Hex(), Title: p.LocalPath()}); err != nil {
+			if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: p.ID.Hex(), Title: p.LocalPath()}); err != nil {
 				return fae.Wrap(err, "enqueue path import")
 			}
 			queuedPaths[p.LocalPath()]++

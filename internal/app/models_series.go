@@ -104,7 +104,7 @@ func (c *Connector) SeriesUnwatched(s *Series, user string) (int, error) {
 	}
 
 	grpwatches := lo.GroupBy(watches, func(e *Watch) primitive.ObjectID {
-		return e.MediumId
+		return e.MediumID
 	})
 	wids := lo.Keys(grpwatches)
 	wids = lo.Uniq[primitive.ObjectID](wids)
@@ -237,7 +237,7 @@ func (c *Connector) SeriesUpdate(id string, data *Series) error {
 	s.Directory = data.Directory
 	s.Kind = data.Kind
 	s.Source = data.Source
-	s.SourceId = data.SourceId
+	s.SourceID = data.SourceID
 	s.Search = data.Search
 	s.SearchParams = data.SearchParams
 
@@ -353,8 +353,8 @@ func (c *Connector) SeriesWatches(id string) ([]*Watch, error) {
 	}
 
 	for _, w := range watches {
-		//c.log.Infof("watch %s: %#v", w.MediumId.Hex(), w.MediumId)
-		w.Medium = mmap[w.MediumId]
+		//c.log.Infof("watch %s: %#v", w.MediumID.Hex(), w.MediumID)
+		w.Medium = mmap[w.MediumID]
 	}
 
 	return watches, nil

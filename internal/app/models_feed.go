@@ -57,7 +57,7 @@ func (c *Connector) FeedUpdate(id string, data *Feed) error {
 	}
 
 	f.Name = data.Name
-	f.Url = data.Url
+	f.URL = data.URL
 	f.Source = data.Source
 	f.Type = data.Type
 	f.Active = data.Active

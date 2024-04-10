@@ -130,10 +130,10 @@ func (c *Connector) CombinationChildren(name string) ([]*CombinationChild, error
 			stuff := &CombinationChild{
 				RatingKey:    child.RatingKey,
 				Key:          child.Key,
-				Guid:         child.GUID,
+				GUID:         child.GUID,
 				Type:         child.Type,
 				Title:        child.Title,
-				LibraryId:    child.LibraryID,
+				LibraryID:    child.LibraryID,
 				LibraryTitle: child.LibraryTitle,
 				LibraryKey:   child.LibraryKey,
 				Summary:      child.Summary,

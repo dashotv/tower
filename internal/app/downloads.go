@@ -102,7 +102,7 @@ func Destination(m *Medium) (string, error) {
 
 func destinationEpisode(m *Medium) (string, error) {
 	s := &Series{}
-	err := app.DB.Series.FindByID(m.SeriesId, s)
+	err := app.DB.Series.FindByID(m.SeriesID, s)
 	if err != nil {
 		return "", err
 	}

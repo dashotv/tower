@@ -30,11 +30,11 @@ func (a *Application) DownloadsLast(c echo.Context) error {
 }
 
 type DownloadRequest struct {
-	MediumId string `json:"medium_id"`
+	MediumID string `json:"medium_id"`
 }
 
 func (a *Application) DownloadsCreate(c echo.Context, data *Download) error {
-	if data.MediumId == primitive.NilObjectID {
+	if data.MediumID == primitive.NilObjectID {
 		return fae.New("medium_id is required")
 	}
 
@@ -45,7 +45,7 @@ func (a *Application) DownloadsCreate(c echo.Context, data *Download) error {
 	}
 
 	m := &Medium{}
-	err = app.DB.Medium.FindByID(data.MediumId, m)
+	err = app.DB.Medium.FindByID(data.MediumID, m)
 	if err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ func (a *Application) DownloadsUpdate(c echo.Context, id string, data *Download)
 
 	if data.Status == "deleted" {
 		m := &Medium{}
-		err = app.DB.Medium.Find(data.MediumId.Hex(), m)
+		err = app.DB.Medium.Find(data.MediumID.Hex(), m)
 		if err != nil {
 			return err
 		}
@@ -93,7 +93,7 @@ func (a *Application) DownloadsUpdate(c echo.Context, id string, data *Download)
 		if err != nil {
 			return err
 		}
-	} else if data.Status == "loading" && (data.Url != "" || data.ReleaseId != "") {
+	} else if data.Status == "loading" && (data.URL != "" || data.ReleaseID != "") {
 		if err := app.Workers.Enqueue(&DownloadsProcess{}); err != nil {
 			return err
 		}
@@ -129,7 +129,7 @@ func (a *Application) DownloadsRecent(c echo.Context, page int, mid string) erro
 }
 
 type DownloadSelector struct {
-	MediumId string
+	MediumID string
 	Num      int
 }
 
@@ -157,7 +157,7 @@ func (a *Application) DownloadsMedium(c echo.Context, id string) error {
 	}
 
 	if download.Medium.Type == "Series" {
-		return a.SeriesSeasonEpisodesAll(c, download.MediumId.Hex())
+		return a.SeriesSeasonEpisodesAll(c, download.MediumID.Hex())
 	}
 
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: []*Medium{download.Medium}})

@@ -32,9 +32,9 @@ func (c *Connector) CollectionList(page, limit int) ([]*Collection, error) {
 // func (c *Connector) processCollections(collections []*Collection) error {
 // 	for _, collection := range collections {
 // 		for _, cm := range collection.Media {
-// 			m, err := c.Medium.Get(cm.MediumId.Hex(), &Medium{})
+// 			m, err := c.Medium.Get(cm.MediumID.Hex(), &Medium{})
 // 			if err != nil {
-// 				c.Log.Warnf("failed to get medium %s: %s", cm.MediumId.Hex(), err)
+// 				c.Log.Warnf("failed to get medium %s: %s", cm.MediumID.Hex(), err)
 // 				continue
 // 			}
 // 			cm.Medium = m

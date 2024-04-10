@@ -43,8 +43,8 @@ func (e *Episode) Saving() error {
 		e.Paths = []*Path{}
 	}
 	for _, p := range e.Paths {
-		if p.Id.IsZero() {
-			p.Id = primitive.NewObjectID()
+		if p.ID.IsZero() {
+			p.ID = primitive.NewObjectID()
 		}
 		if p.UpdatedAt.IsZero() {
 			p.UpdatedAt = time.Now()
@@ -82,8 +82,8 @@ func (m *Movie) Saving() error {
 		m.Paths = []*Path{}
 	}
 	for _, p := range m.Paths {
-		if p.Id.IsZero() {
-			p.Id = primitive.NewObjectID()
+		if p.ID.IsZero() {
+			p.ID = primitive.NewObjectID()
 		}
 		if p.UpdatedAt.IsZero() {
 			p.UpdatedAt = time.Now()
@@ -138,8 +138,8 @@ func (s *Series) Saving() error {
 		s.Paths = []*Path{}
 	}
 	for _, p := range s.Paths {
-		if p.Id.IsZero() {
-			p.Id = primitive.NewObjectID()
+		if p.ID.IsZero() {
+			p.ID = primitive.NewObjectID()
 		}
 		if p.UpdatedAt.IsZero() {
 			p.UpdatedAt = time.Now()
@@ -188,8 +188,8 @@ func (m *Medium) Saving() error {
 		m.Paths = []*Path{}
 	}
 	for _, p := range m.Paths {
-		if p.Id.IsZero() {
-			p.Id = primitive.NewObjectID()
+		if p.ID.IsZero() {
+			p.ID = primitive.NewObjectID()
 		}
 		if p.UpdatedAt.IsZero() {
 			p.UpdatedAt = time.Now()

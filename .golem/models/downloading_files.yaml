@@ -1,0 +1,7 @@
+name: downloading_files
+type: struct
+fields:
+  - name: completed
+    type: int
+  - name: selected
+    type: int

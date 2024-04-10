@@ -31,14 +31,14 @@ func (m *Medium) AddPathByFullpath(file string) *Path {
 		return p.Local == dest && p.Extension == ext
 	})
 	if ok && path != nil {
-		if path.Id == primitive.NilObjectID {
-			path.Id = primitive.NewObjectID()
+		if path.ID == primitive.NilObjectID {
+			path.ID = primitive.NewObjectID()
 		}
 		return path
 	}
 
 	path = &Path{
-		Id:        primitive.NewObjectID(),
+		ID:        primitive.NewObjectID(),
 		Local:     dest,
 		Extension: ext,
 		Type:      primitive.Symbol(fileType(fmt.Sprintf("%s.%s", dest, ext))),

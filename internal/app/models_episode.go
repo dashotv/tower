@@ -5,7 +5,8 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/exp/maps"
+
+	"github.com/samber/lo"
 
 	"github.com/dashotv/fae"
 	"github.com/dashotv/grimoire"
@@ -24,7 +25,7 @@ func (c *Connector) UpcomingQuery() *grimoire.QueryBuilder[*Episode] {
 		Asc("release_date").Asc("season_number").Asc("episode_number")
 }
 
-func (c *Connector) Upcoming() ([]*Episode, error) {
+func (c *Connector) Upcoming() ([]*Upcoming, error) {
 	utc := time.Now().UTC()
 	today := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC)
 	later := today.Add(time.Hour * 24 * 90)
@@ -35,7 +36,7 @@ func (c *Connector) Upcoming() ([]*Episode, error) {
 	return c.UpcomingFrom(q)
 }
 
-func (c *Connector) UpcomingNow() ([]*Episode, error) {
+func (c *Connector) UpcomingNow() ([]*Upcoming, error) {
 	utc := time.Now().UTC()
 	today := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC)
 	tomorrow := today.Add(time.Hour * 24)
@@ -46,7 +47,7 @@ func (c *Connector) UpcomingNow() ([]*Episode, error) {
 	return c.UpcomingFrom(q)
 }
 
-func (c *Connector) UpcomingFrom(query *grimoire.QueryBuilder[*Episode]) ([]*Episode, error) {
+func (c *Connector) UpcomingFrom(query *grimoire.QueryBuilder[*Episode]) ([]*Upcoming, error) {
 	seriesMap := map[primitive.ObjectID]*Series{}
 	list, err := query.Run()
 	if err != nil {
@@ -59,7 +60,7 @@ func (c *Connector) UpcomingFrom(query *grimoire.QueryBuilder[*Episode]) ([]*Epi
 	// Create a slice of ids
 	sids := make([]primitive.ObjectID, 0)
 	for _, e := range list {
-		sids = append(sids, e.SeriesId)
+		sids = append(sids, e.SeriesID)
 	}
 
 	series, err := c.Series.Query().In("_id", sids).Limit(-1).Run()
@@ -74,14 +75,18 @@ func (c *Connector) UpcomingFrom(query *grimoire.QueryBuilder[*Episode]) ([]*Epi
 	}
 
 	for _, e := range list {
-		sid := e.SeriesId
+		sid := e.SeriesID
 		if seriesMap[sid] != nil {
 			c.processSeriesEpisode(seriesMap[sid], e)
 		}
 	}
 
-	c.Log.Infof("episodes %d sids %d series %d seriesmap %d", len(list), len(sids), len(series), len(maps.Keys(seriesMap)))
-	return list, nil
+	upcoming := lo.Map(list, func(e *Episode, i int) *Upcoming {
+		return c.processSeriesUpcoming(seriesMap[e.SeriesID], e)
+	})
+
+	// c.Log.Infof("episodes %d sids %d series %d seriesmap %d", len(list), len(sids), len(series), len(maps.Keys(seriesMap)))
+	return upcoming, nil
 }
 
 func (c *Connector) SeriesDownloadCounts() (map[string]int, error) {
@@ -94,12 +99,12 @@ func (c *Connector) SeriesDownloadCounts() (map[string]int, error) {
 
 	for _, d := range list {
 		m := &Medium{}
-		err := c.Medium.Find(d.MediumId.Hex(), m)
+		err := c.Medium.Find(d.MediumID.Hex(), m)
 		if err != nil {
 			return nil, err
 		}
 		if m.Type == "Episode" {
-			counts[m.SeriesId.Hex()]++
+			counts[m.SeriesID.Hex()]++
 		}
 	}
 
@@ -118,7 +123,7 @@ func (c *Connector) EpisodeGet(id string) (*Episode, error) {
 
 func (c *Connector) processEpisode(e *Episode) error {
 	s := &Series{}
-	err := c.Series.Find(e.SeriesId.Hex(), s)
+	err := c.Series.Find(e.SeriesID.Hex(), s)
 	if err != nil {
 		return fae.Wrap(err, "processEpisode")
 	}
@@ -127,27 +132,75 @@ func (c *Connector) processEpisode(e *Episode) error {
 	return nil
 }
 
-func (c *Connector) processSeriesEpisode(s *Series, e *Episode) {
+func (c *Connector) processSeriesUpcoming(s *Series, e *Episode) *Upcoming {
+	u := &Upcoming{
+		ID:             e.ID,
+		Type:           "Episode",
+		Title:          s.Title,
+		SourceID:       e.SourceID,
+		Description:    e.Description,
+		SeasonNumber:   e.SeasonNumber,
+		EpisodeNumber:  e.EpisodeNumber,
+		AbsoluteNumber: e.AbsoluteNumber,
+		ReleaseDate:    e.ReleaseDate,
+		Skipped:        e.Skipped,
+		Downloaded:     e.Downloaded,
+		Completed:      e.Completed,
+
+		SeriesKind:     s.Kind,
+		SeriesSource:   s.Source,
+		Directory:      s.Directory,
+		SeriesActive:   s.Active,
+		SeriesFavorite: s.Favorite,
+	}
+
 	if isAnimeKind(string(s.Kind)) {
-		e.Display = fmt.Sprintf("#%d %s", e.AbsoluteNumber, e.Title)
+		u.Display = fmt.Sprintf("#%d %s", e.AbsoluteNumber, e.Title)
 	} else {
-		e.Display = fmt.Sprintf("%02dx%02d %s", e.SeasonNumber, e.EpisodeNumber, e.Title)
+		u.Display = fmt.Sprintf("%02dx%02d %s", e.SeasonNumber, e.EpisodeNumber, e.Title)
 	}
 	unwatched, err := c.SeriesUserUnwatched(s)
 	if err != nil {
 		c.Log.Errorf("getting unwatched %s: %s", s.ID.Hex(), err)
 	}
-	e.Unwatched = unwatched
+	u.SeriesUnwatched = unwatched
+
+	for _, p := range s.Paths {
+		if p.Type == "cover" {
+			u.SeriesCover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+			u.SeriesCoverUpdated = p.UpdatedAt
+			continue
+		}
+		if p.Type == "background" {
+			u.SeriesBackground = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+			u.SeriesBackgroundUpdated = p.UpdatedAt
+			continue
+		}
+	}
+
+	return u
+}
+func (c *Connector) processSeriesEpisode(s *Series, e *Episode) {
+	if isAnimeKind(string(s.Kind)) {
+		e.SeriesDisplay = fmt.Sprintf("#%d %s", e.AbsoluteNumber, e.Title)
+	} else {
+		e.SeriesDisplay = fmt.Sprintf("%02dx%02d %s", e.SeasonNumber, e.EpisodeNumber, e.Title)
+	}
+	unwatched, err := c.SeriesUserUnwatched(s)
+	if err != nil {
+		c.Log.Errorf("getting unwatched %s: %s", s.ID.Hex(), err)
+	}
+	e.SeriesUnwatched = unwatched
 	e.Directory = s.Directory
-	e.Active = s.Active
-	e.Favorite = s.Favorite
+	e.SeriesActive = s.Active
+	e.SeriesFavorite = s.Favorite
 	e.Title = s.Display
 	if e.Title == "" {
 		e.Title = s.Title
 	}
-	e.Kind = s.Kind
-	e.Source = s.Source
-	e.SourceId = s.SourceId
+	e.SeriesKind = s.Kind
+	e.SeriesSource = s.Source
+	e.SourceID = s.SourceID
 	for _, p := range s.Paths {
 		if p.Type == "cover" {
 			e.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
@@ -194,7 +247,7 @@ func groupEpisodes(list []*Episode) []*Episode {
 	out := []*Episode{}
 
 	for _, e := range list {
-		sid := e.SeriesId.Hex()
+		sid := e.SeriesID.Hex()
 		if !track[sid] {
 			out = append(out, e)
 			track[sid] = true

@@ -1,17 +1,15 @@
-name: episode
-type: model
-imports:
-  - time
-  - go.mongodb.org/mongo-driver/bson/primitive
+name: upcoming
+type: struct
 fields:
+  - name: id # This is the episode ID
+    type: primitive.ObjectID
   - name: type
     type: string
-    bson: _type
-  - name: series_id
-    type: primitive.ObjectID
   - name: source_id
     type: string
   - name: title
+    type: string
+  - name: display
     type: string
   - name: description
     type: string
@@ -31,46 +29,30 @@ fields:
     type: bool
   - name: skipped
     type: bool
-  - name: missing
-    type: "*time.Time"
   - name: release_date
     type: time.Time
-  - name: paths
-    type: "[]*Path"
-    bson: "paths,omitempty"
-  # Simplified paths for images
-  - name: cover
-    type: string
-    bson: "-"
-  - name: background
-    type: string
-    bson: "-"
-  # Simplified access to watched status
-  - name: watched
-    type: bool
-    bson: "-"
-  - name: watched_any
-    type: bool
-    bson: "-"
   # Series-related fields
-  - name: series_title
-    type: string
-    bson: "-"
-  - name: series_display
-    type: string
-    bson: "-"
+  - name: series_id
+    type: primitive.ObjectID
   - name: series_source
     type: string
-    bson: "-"
+  - name: series_title
+    type: string
   - name: series_kind
     type: primitive.Symbol
-    bson: "-"
   - name: series_active
     type: bool
-    bson: "-"
   - name: series_favorite
     type: bool
-    bson: "-"
   - name: series_unwatched
     type: int
-    bson: "-"
+  - name: series_unwatched_all
+    type: int
+  - name: series_cover
+    type: string
+  - name: series_cover_updated
+    type: time.Time
+  - name: series_background
+    type: string
+  - name: series_background_updated
+    type: time.Time

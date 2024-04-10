@@ -123,7 +123,7 @@ func (j *SeriesUpdateToday) Work(ctx context.Context, job *minion.Job[*SeriesUpd
 	}
 
 	seriesIds := lo.Map(list, func(e *Episode, i int) string {
-		return e.SeriesId.Hex()
+		return e.SeriesID.Hex()
 	})
 	seriesIds = lo.Uniq(seriesIds)
 
@@ -158,7 +158,7 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 		return nil
 	}
 
-	tvdbid, err := strconv.ParseInt(series.SourceId, 10, 64)
+	tvdbid, err := strconv.ParseInt(series.SourceID, 10, 64)
 	if err != nil {
 		return fae.Wrap(err, "converting source id")
 	}
@@ -215,8 +215,8 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 			}
 
 			episode.Type = "Episode"
-			episode.SeriesId = series.ID
-			episode.SourceId = fmt.Sprintf("%d", e.ID)
+			episode.SeriesID = series.ID
+			episode.SourceID = fmt.Sprintf("%d", e.ID)
 			episode.SeasonNumber = e.Season
 			episode.EpisodeNumber = e.Episode
 			episode.AbsoluteNumber = e.Absolute
@@ -241,7 +241,7 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 			return fae.Wrap(err, "missing delete")
 		}
 
-		// db.media.aggregate([{ $match: { _type: "Episode", series_id: ObjectId("65b572ff28653636fbae17de") } }, { $group: { _id: { s: "$season_number", e: "$episode_number", a: "$absolute_number" }, dups: { $push: '$_id' } } }, { $sort: { dups: -1 } }])
+		// db.media.aggregate([{ $match: { _type: "Episode", series_id: ObjectID("65b572ff28653636fbae17de") } }, { $group: { _id: { s: "$season_number", e: "$episode_number", a: "$absolute_number" }, dups: { $push: '$_id' } } }, { $sort: { dups: -1 } }])
 		cur, err := app.DB.Episode.Collection.Aggregate(ctx, bson.A{
 			bson.M{"$match": bson.M{"_type": "Episode", "series_id": series.ID}},
 			bson.M{"$group": bson.M{
@@ -397,7 +397,7 @@ func episodeMap(id string) (map[int64]*Episode, error) {
 	}
 
 	for _, e := range episodes {
-		sid, err := strconv.ParseInt(e.SourceId, 10, 64)
+		sid, err := strconv.ParseInt(e.SourceID, 10, 64)
 		if err != nil {
 			return nil, fae.Wrap(err, "converting source id")
 		}

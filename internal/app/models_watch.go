@@ -17,20 +17,20 @@ func (c *Connector) MediumWatchedAny(id primitive.ObjectID) bool {
 	return len(watches) > 0
 }
 
-func (c *Connector) Watches(mediumId, username string) ([]*Watch, error) {
+func (c *Connector) Watches(mediumID, username string) ([]*Watch, error) {
 	query := c.Watch.Query().Limit(100).Desc("watched_at")
 	if username != "" {
 		query = query.Where("username", username)
 	}
 
-	if mediumId != "" {
-		id, err := primitive.ObjectIDFromHex(mediumId)
+	if mediumID != "" {
+		id, err := primitive.ObjectIDFromHex(mediumID)
 		if err != nil {
 			return nil, err
 		}
 
 		m := &Medium{}
-		if err := c.Medium.Find(mediumId, m); err != nil {
+		if err := c.Medium.Find(mediumID, m); err != nil {
 			return nil, err
 		}
 
@@ -61,13 +61,13 @@ func (c *Connector) Watches(mediumId, username string) ([]*Watch, error) {
 
 	for _, w := range watches {
 		m := &Medium{}
-		if err := c.Medium.FindByID(w.MediumId, m); err != nil {
+		if err := c.Medium.FindByID(w.MediumID, m); err != nil {
 			return nil, err
 		}
 		w.Medium = m
 		if m.Type == "Episode" {
 			s := &Series{}
-			if err := c.Series.FindByID(m.SeriesId, s); err != nil {
+			if err := c.Series.FindByID(m.SeriesID, s); err != nil {
 				return nil, err
 			}
 

@@ -28,7 +28,7 @@ func (j *TmdbUpdateMovie) Work(ctx context.Context, job *minion.Job[*TmdbUpdateM
 	}
 	app.DB.processMovies([]*Movie{movie})
 
-	mid, err := strconv.Atoi(movie.SourceId)
+	mid, err := strconv.Atoi(movie.SourceID)
 	if err != nil {
 		return fae.Wrap(err, "converting source id")
 	}
@@ -48,7 +48,7 @@ func (j *TmdbUpdateMovie) Work(ctx context.Context, job *minion.Job[*TmdbUpdateM
 	if movie.Directory == "" {
 		movie.Directory = path(movie.Title)
 	}
-	movie.ImdbId = tmdb.StringValue(resp.ImdbID)
+	movie.ImdbID = tmdb.StringValue(resp.ImdbID)
 	movie.Description = tmdb.StringValue(resp.Overview)
 	d, err := time.Parse("2006-01-02", tmdb.StringValue(resp.ReleaseDate))
 	if err != nil {

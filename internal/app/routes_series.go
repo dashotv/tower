@@ -73,7 +73,7 @@ func (a *Application) SeriesIndex(c echo.Context, page, limit int, kind, source 
 
 // POST /series/
 func (a *Application) SeriesCreate(c echo.Context, subject *Series) error {
-	if subject.SourceId == "" || subject.Source == "" {
+	if subject.SourceID == "" || subject.Source == "" {
 		return fae.New("id and source are required")
 	}
 
@@ -270,7 +270,7 @@ func (a *Application) SeriesCovers(c echo.Context, id string) error {
 		return fae.New("series not from tvdb")
 	}
 
-	tvdbid, err := strconv.Atoi(series.SourceId)
+	tvdbid, err := strconv.Atoi(series.SourceID)
 	if err != nil {
 		return fae.Wrap(err, "converting tvdb id")
 	}
@@ -298,7 +298,7 @@ func (a *Application) SeriesBackgrounds(c echo.Context, id string) error {
 		return fae.New("series not from tvdb")
 	}
 
-	tvdbid, err := strconv.Atoi(series.SourceId)
+	tvdbid, err := strconv.Atoi(series.SourceID)
 	if err != nil {
 		return fae.Wrap(err, "converting tvdb id")
 	}

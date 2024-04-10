@@ -53,12 +53,12 @@ func (a *Application) PlexIndex(c echo.Context) error {
 
 func (a *Application) PlexAuth(c echo.Context) error {
 	id := c.QueryParam("pin")
-	pinId, err := strconv.Atoi(id)
+	pinID, err := strconv.Atoi(id)
 	if err != nil {
 		return err
 	}
 
-	list, err := app.DB.Pin.Query().Where("pin", int64(pinId)).Run()
+	list, err := app.DB.Pin.Query().Where("pin", int64(pinID)).Run()
 	if err != nil {
 		return err
 	}

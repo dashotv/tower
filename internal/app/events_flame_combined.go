@@ -19,22 +19,6 @@ type FlameCombined struct {
 	Metrics   *flame.Metrics
 }
 
-type Downloading struct {
-	ID           string           `json:"id,omitempty"`
-	MediumID     string           `json:"medium_id,omitempty"`
-	Multi        bool             `json:"multi,omitempty"`
-	Infohash     string           `json:"infohash,omitempty"`
-	Torrent      *qbt.TorrentJSON `json:"torrent,omitempty"`
-	Queue        float64          `json:"queue"`
-	Progress     float64          `json:"progress"`
-	Eta          string           `json:"eta,omitempty"`
-	TorrentState string           `json:"torrent_state,omitempty"`
-	Files        struct {
-		Completed int `json:"completed,omitempty"`
-		Selected  int `json:"selected,omitempty"`
-	} `json:"files,omitempty"`
-}
-
 func onFlameCombined(app *Application, c *FlameCombined) (*EventDownloading, error) {
 	list, err := app.DB.ActiveDownloads()
 	if err != nil {
@@ -51,9 +35,14 @@ func onFlameCombined(app *Application, c *FlameCombined) (*EventDownloading, err
 			Multi:    d.Multi,
 		}
 
-		if !d.MediumId.IsZero() {
-			g.MediumID = d.MediumId.Hex()
+		if !d.MediumID.IsZero() {
+			g.MediumID = d.MediumID.Hex()
 		}
+
+		g.Title = d.Title
+		g.Display = d.Display
+		g.Cover = d.Cover
+		g.Background = d.Background
 
 		if len(c.Torrents) > 0 {
 			t := lo.Filter(c.Torrents, func(torrent *qbt.TorrentJSON, _ int) bool {
@@ -75,12 +64,12 @@ func onFlameCombined(app *Application, c *FlameCombined) (*EventDownloading, err
 					// })
 					completed := lo.Filter(d.Files, func(file *DownloadFile, _ int) bool {
 						tf := t[0].Files[file.Num]
-						return !file.MediumId.IsZero() && tf.Progress == 100
+						return !file.MediumID.IsZero() && tf.Progress == 100
 					})
 					g.Files.Completed = len(completed)
 
 					selected := lo.Filter(d.Files, func(file *DownloadFile, _ int) bool {
-						return !file.MediumId.IsZero()
+						return !file.MediumID.IsZero()
 					})
 					g.Files.Selected = len(selected)
 				}

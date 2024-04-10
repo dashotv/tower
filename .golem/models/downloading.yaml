@@ -1,0 +1,35 @@
+name: downloading
+type: struct
+imports:
+  - time
+  - go.mongodb.org/mongo-driver/bson/primitive
+  - github.com/dashotv/flame/qbt
+fields:
+  - name: id
+    type: string
+  - name: medium_id
+    type: string
+  - name: multi
+    type: bool
+  - name: infohash
+    type: string
+  - name: torrent
+    type: "*qbt.TorrentJSON"
+  - name: queue
+    type: float64
+  - name: progress
+    type: float64
+  - name: eta
+    type: string
+  - name: torrent_state
+    type: string
+  - name: files
+    type: "*DownloadingFiles"
+  - name: title
+    type: string
+  - name: display
+    type: string
+  - name: cover
+    type: string
+  - name: background
+    type: string

@@ -342,31 +342,31 @@ type EventDownloading struct { // downloading
 
 type EventDownloads struct { // downloads
 	Event    string    `bson:"event" json:"event"`
-	Id       string    `bson:"id" json:"id"`
+	ID       string    `bson:"id" json:"id"`
 	Download *Download `bson:"download" json:"download"`
 }
 
 type EventEpisodes struct { // episodes
 	Event   string   `bson:"event" json:"event"`
-	Id      string   `bson:"id" json:"id"`
+	ID      string   `bson:"id" json:"id"`
 	Episode *Episode `bson:"episode" json:"episode"`
 }
 
 type EventJobs struct { // jobs
 	Event string  `bson:"event" json:"event"`
-	Id    string  `bson:"id" json:"id"`
+	ID    string  `bson:"id" json:"id"`
 	Job   *Minion `bson:"job" json:"job"`
 }
 
 type EventLogs struct { // logs
 	Event string   `bson:"event" json:"event"`
-	Id    string   `bson:"id" json:"id"`
+	ID    string   `bson:"id" json:"id"`
 	Log   *Message `bson:"log" json:"log"`
 }
 
 type EventMovies struct { // movies
 	Event string `bson:"event" json:"event"`
-	Id    string `bson:"id" json:"id"`
+	ID    string `bson:"id" json:"id"`
 	Movie *Movie `bson:"movie" json:"movie"`
 }
 
@@ -384,12 +384,12 @@ type EventPlexSessions struct { // plex_sessions
 
 type EventRequests struct { // requests
 	Event   string   `bson:"event" json:"event"`
-	Id      string   `bson:"id" json:"id"`
+	ID      string   `bson:"id" json:"id"`
 	Request *Request `bson:"request" json:"request"`
 }
 
 type EventSeries struct { // series
 	Event  string  `bson:"event" json:"event"`
-	Id     string  `bson:"id" json:"id"`
+	ID     string  `bson:"id" json:"id"`
 	Series *Series `bson:"series" json:"series"`
 }

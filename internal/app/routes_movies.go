@@ -59,7 +59,7 @@ func (a *Application) MoviesIndex(c echo.Context, page int, limit int, kind, sou
 
 // POST /movies/
 func (a *Application) MoviesCreate(c echo.Context, subject *Movie) error {
-	if subject.SourceId == "" || subject.Source == "" {
+	if subject.SourceID == "" || subject.Source == "" {
 		return fae.New("id and source are required")
 	}
 

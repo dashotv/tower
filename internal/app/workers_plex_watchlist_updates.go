@@ -94,7 +94,7 @@ func createMovieRequest(user, title string, guids []plex.GUID) error {
 		User:     user,
 		Title:    title,
 		Source:   "tmdb",
-		SourceId: source_id,
+		SourceID: source_id,
 		Type:     "movie",
 		Status:   requestDefaultStatus,
 	}
@@ -125,7 +125,7 @@ func createShowRequest(user, title string, guids []plex.GUID) error {
 		User:     user,
 		Title:    title,
 		Source:   "tvdb",
-		SourceId: source_id,
+		SourceID: source_id,
 		Type:     "series",
 		Status:   requestDefaultStatus,
 	}

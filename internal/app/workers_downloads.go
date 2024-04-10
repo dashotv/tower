@@ -50,19 +50,19 @@ func (j *DownloadsProcess) Create() error {
 
 	for _, ep := range list {
 		//app.Workers.Log.Debugf("DownloadsProcess: create: %s %s", ep.Title, ep.Display)
-		if !ep.Active {
+		if !ep.SeriesActive {
 			//app.Workers.Log.Debugf("DownloadsProcess: create: %s %s: not active", ep.Title, ep.Display)
 			continue
 		}
 
-		if seriesDownloads[ep.SeriesId.Hex()] >= 3 {
+		if seriesDownloads[ep.SeriesID.Hex()] >= 3 {
 			//app.Workers.Log.Debugf("DownloadsProcess: create: %s %s: series downloads", ep.Title, ep.Display)
 			continue
 		}
 
-		if !ep.Favorite && ep.Unwatched >= 3 {
+		if !ep.SeriesFavorite && ep.SeriesUnwatched >= 3 {
 			// If I'm not watching it, see if others are
-			unwatched, err := app.DB.SeriesUnwatchedByID(ep.SeriesId.Hex())
+			unwatched, err := app.DB.SeriesUnwatchedByID(ep.SeriesID.Hex())
 			if err != nil {
 				return fae.Wrap(err, "failed to get unwatched")
 			}
@@ -75,11 +75,11 @@ func (j *DownloadsProcess) Create() error {
 
 		app.Workers.Log.Debugf("DownloadsProcess: create: %s %s", ep.Title, ep.Display)
 		notifier.Info("Downloads::Create", fmt.Sprintf("%s %s", ep.Title, ep.Display))
-		seriesDownloads[ep.SeriesId.Hex()]++
+		seriesDownloads[ep.SeriesID.Hex()]++
 
 		d := &Download{
 			Status:   "searching",
-			MediumId: ep.ID,
+			MediumID: ep.ID,
 			Auto:     true,
 		}
 		err = app.DB.Download.Save(d)
@@ -124,9 +124,9 @@ func (j *DownloadsProcess) Search() error {
 
 		d.Status = "loading"
 		if match.NZB {
-			d.Url = match.Download
+			d.URL = match.Download
 		} else {
-			d.ReleaseId = match.ID
+			d.ReleaseID = match.ID
 		}
 
 		err = app.DB.Download.Save(d)
@@ -144,7 +144,7 @@ func (j *DownloadsProcess) Load() error {
 	}
 
 	for _, d := range list {
-		if d.ReleaseId == "" && d.Url == "" {
+		if d.ReleaseID == "" && d.URL == "" {
 			app.DB.Log.Debugf("DownloadsProcess: load: %s %s: no release", d.Medium.Title, d.Medium.Display)
 			continue
 		}
@@ -245,7 +245,7 @@ func (j *DownloadsProcess) Manage() error {
 			continue
 		}
 
-		d.Files[0].MediumId = d.MediumId
+		d.Files[0].MediumID = d.MediumID
 		d.Status = "downloading"
 
 		err = app.DB.Download.Save(d)
@@ -330,7 +330,7 @@ func updateMedium(m *Medium, files []string) error {
 	for _, f := range files {
 		path := m.AddPathByFullpath(f)
 
-		if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: path.Id.Hex(), Title: path.Local}); err != nil {
+		if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: path.ID.Hex(), Title: path.Local}); err != nil {
 			return fae.Errorf("enqueue path: %s", err)
 		}
 	}

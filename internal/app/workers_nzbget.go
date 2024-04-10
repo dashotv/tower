@@ -28,22 +28,22 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 	}
 	dir = app.Config.DirectoriesNzbget + dir
 
-	download, err := app.DB.DownloadByHash(p.Id)
+	download, err := app.DB.DownloadByHash(p.ID)
 	if err != nil {
 		return fae.Wrap(err, "getting download by hash")
 	}
 	if download == nil {
-		return fae.Errorf("download not found: %s", p.Id)
+		return fae.Errorf("download not found: %s", p.ID)
 	}
 	if download.Status == "reviewing" {
-		return fae.Errorf("download reviewing: %s", p.Id)
+		return fae.Errorf("download reviewing: %s", p.ID)
 	}
 	if download.Status == "done" {
-		return fae.Errorf("download done: %s", p.Id)
+		return fae.Errorf("download done: %s", p.ID)
 	}
 
 	if download.Medium == nil {
-		return fae.Errorf("download has no medium: %s", p.Id)
+		return fae.Errorf("download has no medium: %s", p.ID)
 	}
 
 	if p.Status != "SUCCESS" {
@@ -55,7 +55,7 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 		return nil
 	}
 
-	l.Debugf("nzbget process: %s: %s %s", p.Id, download.Medium.Title, download.Medium.Display)
+	l.Debugf("nzbget process: %s: %s %s", p.ID, download.Medium.Title, download.Medium.Display)
 
 	// list all files in dir
 	files, err := j.GetFiles(dir)
@@ -82,7 +82,7 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 
 	destination := filepath.Join(app.Config.DirectoriesCompleted, fmt.Sprintf("%s.%s", dest, ext))
 	source := filepath.Join(dir, file)
-	l.Debugf("nzbget process: %s: %s => %s", p.Id, source, destination)
+	l.Debugf("nzbget process: %s: %s => %s", p.ID, source, destination)
 
 	if !app.Config.Production {
 		l.Debugf("skipping move in dev mode")
