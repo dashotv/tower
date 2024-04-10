@@ -280,7 +280,7 @@ func (c *Connector) processDownloads(list []*Download) {
 			}
 		}
 
-		// list[i].Medium = m
+		d.Medium = m
 	}
 }
 
