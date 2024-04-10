@@ -74,16 +74,15 @@ func (c *Connector) UpcomingFrom(query *grimoire.QueryBuilder[*Episode]) ([]*Upc
 		}
 	}
 
-	for _, e := range list {
-		sid := e.SeriesID
-		if seriesMap[sid] != nil {
-			c.processSeriesEpisode(seriesMap[sid], e)
-		}
-	}
-
 	upcoming := lo.Map(list, func(e *Episode, i int) *Upcoming {
+		if seriesMap[e.SeriesID] == nil {
+			c.Log.Errorf("series not found %s", e.SeriesID.Hex())
+			notifier.log("error", "series not found", fmt.Sprintf("series not found %s (e:%s) %s", e.SeriesID.Hex(), e.ID.Hex(), e.Title))
+			return nil
+		}
 		return c.processSeriesUpcoming(seriesMap[e.SeriesID], e)
 	})
+	upcoming = lo.Compact(upcoming)
 
 	// c.Log.Infof("episodes %d sids %d series %d seriesmap %d", len(list), len(sids), len(series), len(maps.Keys(seriesMap)))
 	return upcoming, nil
