@@ -48,36 +48,40 @@ func (c *Connector) UpcomingNow() ([]*Upcoming, error) {
 }
 
 func (c *Connector) UpcomingFrom(query *grimoire.QueryBuilder[*Episode]) ([]*Upcoming, error) {
+	defer TickTock("UpcomingFrom")()
 	seriesMap := map[primitive.ObjectID]*Series{}
+
 	list, err := query.Run()
 	if err != nil {
 		return nil, err
 	}
 
-	c.Log.Debugf("upcoming: %d", len(list))
+	// c.Log.Debugf("upcoming: %d", len(list))
 	list = groupEpisodes(list)
 
-	// Create a slice of ids
-	sids := make([]primitive.ObjectID, 0)
-	for _, e := range list {
-		sids = append(sids, e.SeriesID)
-	}
+	// Create a slice of series ids
+	sids := lo.Map(list, func(e *Episode, i int) primitive.ObjectID {
+		return e.SeriesID
+	})
+	sids = lo.Uniq(sids)
+	// c.Log.Debugf("upcoming series: %d", len(sids))
 
-	series, err := c.Series.Query().In("_id", sids).Limit(-1).Run()
+	// create map of series id to series
+	err = c.Series.Query().In("_id", sids).Batch(100, func(results []*Series) error {
+		for _, s := range results {
+			seriesMap[s.ID] = s
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
-
-	for _, s := range series {
-		if seriesMap[s.ID] == nil {
-			seriesMap[s.ID] = s
-		}
-	}
+	// c.Log.Debugf("upcoming series map: %d", len(seriesMap))
 
 	upcoming := lo.Map(list, func(e *Episode, i int) *Upcoming {
 		if seriesMap[e.SeriesID] == nil {
 			c.Log.Errorf("series not found %s", e.SeriesID.Hex())
-			notifier.log("error", "series not found", fmt.Sprintf("series not found %s (e:%s) %s", e.SeriesID.Hex(), e.ID.Hex(), e.Title))
+			notifier.log("error", "upcoming", fmt.Sprintf("series not found %s (e:%s) %s", e.SeriesID.Hex(), e.ID.Hex(), e.Title))
 			return nil
 		}
 		return c.processSeriesUpcoming(seriesMap[e.SeriesID], e)
@@ -146,6 +150,7 @@ func (c *Connector) processSeriesUpcoming(s *Series, e *Episode) *Upcoming {
 		Downloaded:     e.Downloaded,
 		Completed:      e.Completed,
 
+		SeriesID:       s.ID,
 		SeriesKind:     s.Kind,
 		SeriesSource:   s.Source,
 		Directory:      s.Directory,

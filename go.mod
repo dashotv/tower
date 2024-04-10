@@ -8,7 +8,7 @@ require (
 	github.com/dashotv/fae v0.1.5
 	github.com/dashotv/flame v0.9.3
 	github.com/dashotv/golem v0.14.8
-	github.com/dashotv/grimoire v0.5.3
+	github.com/dashotv/grimoire v0.5.4
 	github.com/dashotv/mercury v0.3.2
 	github.com/dashotv/minion v0.4.3
 	github.com/dashotv/runic v0.3.1
@@ -110,7 +110,7 @@ require (
 	github.com/kataras/pio v0.0.13 // indirect
 	github.com/kataras/sitemap v0.0.6 // indirect
 	github.com/kataras/tunnel v0.0.4 // indirect
-	github.com/klauspost/compress v1.17.7 // indirect
+	github.com/klauspost/compress v1.17.8 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/labstack/echo-jwt/v4 v4.2.0 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
