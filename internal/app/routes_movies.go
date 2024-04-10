@@ -124,10 +124,10 @@ func (a *Application) MoviesSettings(c echo.Context, id string, setting *Setting
 func (a *Application) MoviesDelete(c echo.Context, id string) error {
 	subject, err := a.DB.MovieGet(id)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "not found"})
 	}
-	if err := a.DB.Movie.Delete(subject); err != nil {
-		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error deleting Movies"})
+	if err := a.Workers.Enqueue(&MovieDelete{ID: id}); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 	}
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
