@@ -55,7 +55,7 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 	} else {
 		d.Status = "reviewing"
 	}
-	d.URL = "metube://" + msg.Download
+	d.URL = msg.Download
 
 	if err := a.DB.Download.Save(d); err != nil {
 		return err
