@@ -3,7 +3,7 @@ package app
 import (
 	"fmt"
 
-	runic "github.com/dashotv/runic/app"
+	runic "github.com/dashotv/runic/client"
 )
 
 func onRunicReleases(a *Application, msg *runic.Release) error {

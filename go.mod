@@ -1,17 +1,19 @@
 module github.com/dashotv/tower
 
-go 1.22.0
+go 1.22.1
+
+toolchain go1.22.2
 
 require (
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/dashotv/fae v0.1.5
 	github.com/dashotv/flame v0.9.3
-	github.com/dashotv/golem v0.14.8
+	github.com/dashotv/golem v0.14.17
 	github.com/dashotv/grimoire v0.5.4
 	github.com/dashotv/mercury v0.3.2
 	github.com/dashotv/minion v0.4.3
-	github.com/dashotv/runic v0.3.1
+	github.com/dashotv/runic v0.4.0
 	github.com/dashotv/scry v0.0.0-20231229215934-5ab6a66ca665
 	github.com/dashotv/tmdb v0.2.0
 	github.com/dashotv/tvdb v0.3.0
@@ -63,7 +65,6 @@ require (
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
 	github.com/clerk/clerk-sdk-go/v2 v2.0.0 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
-	github.com/dashotv/rift v0.1.2 // indirect
 	github.com/deepmap/oapi-codegen v1.16.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/ericlagergren/decimal v0.0.0-20240305081647-93d586550569 // indirect
@@ -166,15 +167,15 @@ require (
 	github.com/yosssi/ace v0.0.5 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.infratographer.com/x v0.5.1 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0 // indirect
-	go.opentelemetry.io/otel v1.24.0 // indirect
-	go.opentelemetry.io/otel/metric v1.24.0 // indirect
-	go.opentelemetry.io/otel/trace v1.24.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.50.0 // indirect
+	go.opentelemetry.io/otel v1.25.0 // indirect
+	go.opentelemetry.io/otel/metric v1.25.0 // indirect
+	go.opentelemetry.io/otel/trace v1.25.0 // indirect
 	go.uber.org/mock v0.4.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.7.0 // indirect
 	golang.org/x/crypto v0.22.0 // indirect
-	golang.org/x/exp v0.0.0-20240404231335-c0f41cb1a7a0 // indirect
+	golang.org/x/exp v0.0.0-20240409090435-93d18d7e34b8 // indirect
 	golang.org/x/image v0.15.0 // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.24.0 // indirect

@@ -13,7 +13,7 @@ import (
 	flame "github.com/dashotv/flame/app"
 	"github.com/dashotv/mercury"
 	"github.com/dashotv/minion"
-	runic "github.com/dashotv/runic/app"
+	runic "github.com/dashotv/runic/client"
 	"github.com/dashotv/tower/internal/plex"
 )
 
