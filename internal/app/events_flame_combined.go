@@ -7,7 +7,7 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/dashotv/fae"
-	flame "github.com/dashotv/flame/app"
+	flame "github.com/dashotv/flame/client"
 	"github.com/dashotv/flame/nzbget"
 	"github.com/dashotv/flame/qbt"
 )

@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/dashotv/fae"
-	flame "github.com/dashotv/flame/app"
+	flame "github.com/dashotv/flame/client"
 	"github.com/dashotv/mercury"
 	"github.com/dashotv/minion"
 	runic "github.com/dashotv/runic/client"
