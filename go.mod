@@ -12,7 +12,7 @@ require (
 	github.com/dashotv/golem v0.14.17
 	github.com/dashotv/grimoire v0.5.4
 	github.com/dashotv/mercury v0.3.2
-	github.com/dashotv/minion v0.4.3
+	github.com/dashotv/minion v0.4.4
 	github.com/dashotv/runic v0.4.0
 	github.com/dashotv/scry v0.0.0-20231229215934-5ab6a66ca665
 	github.com/dashotv/tmdb v0.2.0

@@ -124,6 +124,8 @@ github.com/dashotv/mercury v0.3.2 h1:88bvWsp5l823wTR1XbIB+LBiAFeCRZfe+JyIKf4nV/0
 github.com/dashotv/mercury v0.3.2/go.mod h1:OZ140gozVBT0iyOwKIJSoSd3yyPgjgq2fI4baqtFBGs=
 github.com/dashotv/minion v0.4.3 h1:8lHVr+D3MOeiHq8knpJCXjLRooJn4yJ9VIu/jvDHM6g=
 github.com/dashotv/minion v0.4.3/go.mod h1:qFvFgM1NivZLv2c6ISV7RoVYYqWNe8cDzDIBftOBN9I=
+github.com/dashotv/minion v0.4.4 h1:PM660mNPthzTSo2I5G9WRv1P7XXaRPI2EqUwhWfQK0U=
+github.com/dashotv/minion v0.4.4/go.mod h1:jucyUCo+l5smP1ahPuVDEMh4hLdEw2FpiSUDnQu6FyI=
 github.com/dashotv/runic v0.4.0 h1:6kFUSSOhmuQcYFaHENN2BgTnXRszYo85mkVH+u4HSxQ=
 github.com/dashotv/runic v0.4.0/go.mod h1:i2559Dc9Y79Fz363E5idhmd5GWHZkBf0ZnT7np6Mtgg=
 github.com/dashotv/scry v0.0.0-20231229215934-5ab6a66ca665 h1:wTHdKQaInDaoGfA0BtsshjG6lAgOsTL4LNt57RK6iRs=
