@@ -7,12 +7,12 @@ toolchain go1.22.2
 require (
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/caarlos0/env/v10 v10.0.0
-	github.com/dashotv/fae v0.1.5
-	github.com/dashotv/flame v0.10.0
-	github.com/dashotv/golem v0.14.17
+	github.com/dashotv/fae v0.1.6
+	github.com/dashotv/flame v0.10.1
+	github.com/dashotv/golem v0.14.19
 	github.com/dashotv/grimoire v0.5.4
 	github.com/dashotv/mercury v0.3.2
-	github.com/dashotv/minion v0.4.4
+	github.com/dashotv/minion v0.4.3
 	github.com/dashotv/runic v0.4.0
 	github.com/dashotv/scry v0.0.0-20231229215934-5ab6a66ca665
 	github.com/dashotv/tmdb v0.2.0
@@ -134,7 +134,7 @@ require (
 	github.com/olivere/elastic v6.2.37+incompatible // indirect
 	github.com/olivere/elastic/v6 v6.2.1 // indirect
 	github.com/onsi/ginkgo/v2 v2.17.1 // indirect
-	github.com/pelletier/go-toml/v2 v2.2.0 // indirect
+	github.com/pelletier/go-toml/v2 v2.2.1 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/philippgille/gokv/encoding v0.7.0 // indirect
 	github.com/philippgille/gokv/util v0.7.0 // indirect
