@@ -9,6 +9,7 @@ import (
 
 	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
+	scry "github.com/dashotv/scry/client"
 	"github.com/dashotv/tmdb"
 	"github.com/dashotv/tower/internal/importer"
 	"github.com/dashotv/tower/internal/plex"
@@ -52,7 +53,7 @@ type Application struct {
 
 	Fanart   *Fanart
 	Flame    *Flame
-	Scry     *Scry
+	Scry     *scry.Client
 	Plex     *plex.Client
 	Tmdb     *tmdb.Client
 	Tvdb     *tvdb.Client

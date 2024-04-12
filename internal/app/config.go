@@ -26,6 +26,7 @@ type Config struct {
 	Logger                string   `env:"LOGGER" envDefault:"dev"`
 	Port                  int      `env:"PORT" envDefault:"9000"`
 	FlameURL              string   `env:"FLAME_URL"`
+	ScryURL               string   `env:"SCRY_URL"`
 	Plex                  string   `env:"PLEX"`
 	PlexToken             string   `env:"PLEX_TOKEN"`
 	PlexAppName           string   `env:"PLEX_APP_NAME"`
@@ -45,7 +46,6 @@ type Config struct {
 	TmdbToken             string   `env:"TMDB_TOKEN"`
 	TmdbImages            string   `env:"TMDB_IMAGES"`
 	TvdbKey               string   `env:"TVDB_KEY"`
-	ScryURL               string   `env:"SCRY_URL"`
 	DownloadsPreferred    []string `env:"DOWNLOADS_PREFERRED" envSeparator:","`
 	DownloadsGroups       []string `env:"DOWNLOADS_GROUPS" envSeparator:","`
 	ExtensionsVideo       []string `env:"EXTENSIONS_VIDEO" envSeparator:","`

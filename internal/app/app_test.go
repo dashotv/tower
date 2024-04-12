@@ -17,7 +17,7 @@ func init() {
 	}
 }
 
-var envVars = []string{"CONNECTIONS", "NATS_URL", "REDIS_ADDRESS", "MINION_URI", "FLAME_URL"}
+var envVars = []string{"CONNECTIONS", "NATS_URL", "REDIS_ADDRESS", "MINION_URI", "FLAME_URL", "SCRY_URL"}
 
 func appSetup() error {
 	if app != nil {

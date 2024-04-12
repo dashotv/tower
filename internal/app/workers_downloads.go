@@ -112,7 +112,7 @@ func (j *DownloadsProcess) Search() error {
 		}
 
 		//app.Workers.Log.Debugf("DownloadsProcess: search: %s %s", d.Medium.Title, d.Medium.Display)
-		match, err := app.Scry.ScrySearchEpisode(d.Medium)
+		match, err := app.ScrySearchEpisode(d.Search)
 		if err != nil {
 			return fae.Wrap(err, "failed to search releases")
 		}

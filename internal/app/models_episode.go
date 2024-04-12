@@ -53,7 +53,7 @@ func (c *Connector) UpcomingFrom(query *grimoire.QueryBuilder[*Episode]) ([]*Upc
 
 	list, err := query.Run()
 	if err != nil {
-		return nil, err
+		return nil, fae.Wrap(err, "running query")
 	}
 
 	// c.Log.Debugf("upcoming: %d", len(list))
@@ -74,7 +74,7 @@ func (c *Connector) UpcomingFrom(query *grimoire.QueryBuilder[*Episode]) ([]*Upc
 		return nil
 	})
 	if err != nil {
-		return nil, err
+		return nil, fae.Wrap(err, "getting series")
 	}
 	// c.Log.Debugf("upcoming series map: %d", len(seriesMap))
 
