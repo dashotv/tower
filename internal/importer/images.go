@@ -209,11 +209,11 @@ func (i *Importer) loadSeriesBackgroundsFanart(tvdbid int64) ([]string, error) {
 		return nil, fae.Wrap(err, "backgrounds")
 	}
 
-	if len(ftv.Posters) == 0 {
+	if len(ftv.Backgrounds) == 0 {
 		return nil, fae.New("backgrounds: no data")
 	}
 
-	for _, fanart := range ftv.Posters {
+	for _, fanart := range ftv.Backgrounds {
 		backgrounds = append(backgrounds, fanart.URL)
 	}
 

@@ -317,7 +317,7 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 			}
 			if len(backgrounds) > 0 {
 				eg.Go(func() error {
-					seriesImage(series, "background", backgrounds[0], backgroundRatio)
+					err := seriesImage(series, "background", backgrounds[0], backgroundRatio)
 					if err != nil {
 						app.Log.Errorf("series %s background: %v", series.ID.Hex(), err)
 					}
