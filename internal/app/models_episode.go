@@ -48,7 +48,7 @@ func (c *Connector) UpcomingNow() ([]*Upcoming, error) {
 }
 
 func (c *Connector) UpcomingFrom(query *grimoire.QueryBuilder[*Episode]) ([]*Upcoming, error) {
-	defer TickTock("UpcomingFrom")()
+	// defer TickTock("UpcomingFrom")()
 	seriesMap := map[primitive.ObjectID]*Series{}
 
 	list, err := query.Run()
