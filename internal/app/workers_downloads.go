@@ -30,7 +30,8 @@ func (j *DownloadsProcess) Work(ctx context.Context, job *minion.Job[*DownloadsP
 	for _, f := range funcs {
 		err := f()
 		if err != nil {
-			return err
+			app.Log.Named("DownloadsProcess").Errorf("failed to process downloads: %s", err)
+			return fae.Wrap(err, "failed to process downloads")
 		}
 	}
 
@@ -264,6 +265,10 @@ func (j *DownloadsProcess) Move() error {
 	}
 
 	moved := []string{}
+
+	if len(list) == 0 {
+		return nil
+	}
 
 	for _, d := range list {
 		if d.Medium == nil {

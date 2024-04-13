@@ -7,12 +7,12 @@ toolchain go1.22.2
 require (
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/caarlos0/env/v10 v10.0.0
-	github.com/dashotv/fae v0.1.6
+	github.com/dashotv/fae v0.1.9
 	github.com/dashotv/flame v0.10.1
 	github.com/dashotv/golem v0.14.20
 	github.com/dashotv/grimoire v0.5.4
 	github.com/dashotv/mercury v0.3.2
-	github.com/dashotv/minion v0.4.3
+	github.com/dashotv/minion v0.4.10
 	github.com/dashotv/runic v0.4.0
 	github.com/dashotv/scry v0.10.4
 	github.com/dashotv/tmdb v0.2.0
@@ -33,7 +33,7 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091
 	github.com/stretchr/testify v1.9.0
-	go.mongodb.org/mongo-driver v1.14.0
+	go.mongodb.org/mongo-driver v1.15.0
 	go.uber.org/ratelimit v0.3.1
 	go.uber.org/zap v1.27.0
 	golang.org/x/sync v0.7.0
