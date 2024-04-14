@@ -61,7 +61,7 @@ func (j *DownloadsProcess) Create() error {
 			return fae.Wrap(err, "failed to get unwatched")
 		}
 
-		if unwatched+seriesDownloads[ep.SeriesID.Hex()] > 3 {
+		if unwatched+seriesDownloads[ep.SeriesID.Hex()] >= 3 {
 			continue
 		}
 
