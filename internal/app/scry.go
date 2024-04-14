@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"strings"
 
 	"github.com/samber/lo"
 
@@ -20,6 +21,9 @@ func setupScry(app *Application) error {
 }
 
 func (a *Application) ScrySearchEpisode(search *DownloadSearch) (*search.Release, error) {
+	if search == nil {
+		return nil, fae.New("search is nil")
+	}
 	req := &scry.ReleasesIndexRequest{
 		Type:       search.Type,
 		Text:       search.Title,
@@ -29,6 +33,10 @@ func (a *Application) ScrySearchEpisode(search *DownloadSearch) (*search.Release
 		Bluray:     search.Bluray,
 		Verified:   search.Verified,
 		Exact:      search.Exact,
+		Year:       -1,
+		Season:     -1,
+		Episode:    -1,
+		Resolution: -1,
 	}
 	if search.Year > 0 {
 		req.Year = search.Year
@@ -47,6 +55,8 @@ func (a *Application) ScrySearchEpisode(search *DownloadSearch) (*search.Release
 	if err != nil {
 		return nil, fae.Wrap(err, "failed to search releases")
 	}
+
+	// fmt.Printf("ScrySearchEpisode(): %s => %d search: %s\n", search.Title, len(resp.Result.Releases), resp.Result.Search)
 	if len(resp.Result.Releases) == 0 {
 		return nil, nil
 	}
@@ -54,64 +64,77 @@ func (a *Application) ScrySearchEpisode(search *DownloadSearch) (*search.Release
 	return selectRelease(search, resp.Result.Releases)
 }
 
+type Chooser struct {
+	Group string
+	Title string
+	Exact bool
+	data  map[string]map[string][]*search.Release
+}
+
+func (c *Chooser) add(r *search.Release) {
+	k := "tors"
+	if r.NZB {
+		k = "nzbs"
+	}
+
+	if lo.Contains(app.Config.DownloadsPreferred, strings.ToLower(r.Group)) {
+		c.data[k]["preferred"] = append(c.data[k]["preferred"], r)
+	}
+	if lo.Contains(app.Config.DownloadsGroups, strings.ToLower(r.Group)) {
+		c.data[k]["good"] = append(c.data[k]["good"], r)
+	}
+}
+
+func (c *Chooser) choose() *search.Release {
+	if len(c.data["nzbs"]["preferred"]) > 0 {
+		return c.data["nzbs"]["preferred"][0]
+	}
+	if len(c.data["nzbs"]["good"]) > 0 {
+		return c.data["nzbs"]["good"][0]
+	}
+	if len(c.data["tors"]["preferred"]) > 0 {
+		return c.data["tors"]["preferred"][0]
+	}
+
+	var r *search.Release
+	if len(c.data["tors"]["good"]) > 0 {
+		r = c.data["tors"]["good"][0]
+	}
+
+	if r == nil {
+		return nil
+	}
+
+	if c.Group == r.Group {
+		return r
+	}
+	if c.Exact && r.Name == c.Title {
+		return r
+	}
+
+	return nil
+}
+
 func selectRelease(s *DownloadSearch, releases []*search.Release) (*search.Release, error) {
-	nzbs := lo.Filter(releases, func(item *search.Release, i int) bool {
-		return item.NZB
-	})
-	for _, r := range nzbs {
-		if Preferred(s, r) {
-			return r, nil
-		}
-	}
-	for _, r := range nzbs {
-		if Good(s, r) {
-			return r, nil
-		}
-	}
-
-	tors := lo.Filter(releases, func(item *search.Release, i int) bool {
-		return !item.NZB
-	})
-	for _, r := range tors {
-		if Preferred(s, r) {
-			return r, nil
-		}
-	}
-	for _, r := range tors {
-		if Good(s, r) {
-			return r, nil
-		}
+	c := &Chooser{
+		Group: s.Group,
+		Title: s.Title,
+		Exact: s.Exact,
+		data: map[string]map[string][]*search.Release{
+			"nzbs": {
+				"preferred": {},
+				"good":      {},
+			},
+			"tors": {
+				"preferred": {},
+				"good":      {},
+			},
+		},
 	}
 
-	return nil, nil
-}
-
-func Preferred(s *DownloadSearch, r *search.Release) bool {
-	for _, g := range app.Config.DownloadsPreferred {
-		if s.Group == g {
-			return true
-		}
+	for _, r := range releases {
+		c.add(r)
 	}
 
-	return false
-}
-
-func Good(s *DownloadSearch, r *search.Release) bool {
-	group := false
-	for _, g := range app.Config.DownloadsGroups {
-		if r.Group == g {
-			group = true
-			break
-		}
-	}
-
-	if !group && s.Group != r.Group {
-		return false
-	}
-
-	if s.Exact && s.Title != r.Name {
-		return false
-	}
-
-	return true
+	return c.choose(), nil
 }

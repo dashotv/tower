@@ -153,6 +153,7 @@ func (c *Connector) processSeriesUpcoming(s *Series, e *Episode) *Upcoming {
 		SeriesID:       s.ID,
 		SeriesKind:     s.Kind,
 		SeriesSource:   s.Source,
+		SeriesTitle:    s.Title,
 		Directory:      s.Directory,
 		SeriesActive:   s.Active,
 		SeriesFavorite: s.Favorite,

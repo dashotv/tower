@@ -152,6 +152,8 @@ github.com/dashotv/minion v0.4.9-rc9 h1:KdtdaKkDkmHWquSFAhHAA+VShpANIY2YGsN0HHnl
 github.com/dashotv/minion v0.4.9-rc9/go.mod h1:9WtlEve/3RZ0lnLR8HWLP/dQVxqrSBaDT7Hnw+agd9g=
 github.com/dashotv/minion v0.4.10 h1:iW2K1zo5Aemo90QzpxBhRTivk4Q4R/ojer2aX/YPdb8=
 github.com/dashotv/minion v0.4.10/go.mod h1:T+cFjfuIlT6dF6HTrpgFLqrQnLppqFy2FeKEJLiQgAo=
+github.com/dashotv/minion v0.4.11 h1:j9OT8wo/nayEpv+tQvdYolVDJ00z8KyCgXtBZ6mAP6c=
+github.com/dashotv/minion v0.4.11/go.mod h1:T+cFjfuIlT6dF6HTrpgFLqrQnLppqFy2FeKEJLiQgAo=
 github.com/dashotv/runic v0.4.0 h1:6kFUSSOhmuQcYFaHENN2BgTnXRszYo85mkVH+u4HSxQ=
 github.com/dashotv/runic v0.4.0/go.mod h1:i2559Dc9Y79Fz363E5idhmd5GWHZkBf0ZnT7np6Mtgg=
 github.com/dashotv/scry v0.10.4 h1:JzN5yMhZU+CneYGFUBcuVVFqehJUQlo+frFGYKYHOgo=

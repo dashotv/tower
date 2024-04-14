@@ -21,7 +21,7 @@ func (j *DownloadsProcess) Work(ctx context.Context, job *minion.Job[*DownloadsP
 	// notifier.Info("Downloads", "processing downloads")
 	funcs := []func() error{
 		j.Create,
-		// j.Search,
+		j.Search,
 		j.Load,
 		j.Manage,
 		j.Move,
@@ -74,8 +74,8 @@ func (j *DownloadsProcess) Create() error {
 			}
 		}
 
-		app.Workers.Log.Debugf("DownloadsProcess: create: %s %s", ep.Title, ep.Display)
-		notifier.Info("Downloads::Create", fmt.Sprintf("%s %s", ep.Title, ep.Display))
+		app.Workers.Log.Debugf("DownloadsProcess: create: %s %s", ep.SeriesTitle, ep.Display)
+		notifier.Info("Downloads::Create", fmt.Sprintf("%s - %s", ep.SeriesTitle, ep.Display))
 		seriesDownloads[ep.SeriesID.Hex()]++
 
 		d := &Download{
@@ -121,9 +121,10 @@ func (j *DownloadsProcess) Search() error {
 			continue
 		}
 
-		notifier.Info("Downloads::Found", fmt.Sprintf("%s %s", d.Medium.Title, d.Medium.Display))
+		app.Workers.Log.Debugf("DownloadsProcess: found: %s - %s", d.Title, d.Display)
+		notifier.Info("Downloads::Found", fmt.Sprintf("%s - %s", d.Title, d.Display))
 
-		d.Status = "loading"
+		d.Status = "reviewing" // TODO: review
 		if match.NZB {
 			d.URL = match.Download
 		} else {
