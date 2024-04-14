@@ -55,7 +55,7 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 		return nil
 	}
 
-	l.Debugf("nzbget process: %s: %s %s", p.ID, download.Medium.Title, download.Medium.Display)
+	l.Debugf("nzbget process: %s: %s %s", p.ID, download.Title, download.Display)
 
 	// list all files in dir
 	files, err := j.GetFiles(dir)
@@ -106,7 +106,7 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 		return fae.Wrap(err, "saving download")
 	}
 
-	notifier.Success("Downloads::Completed", fmt.Sprintf("%s %s", download.Medium.Title, download.Medium.Display))
+	notifier.Success("Downloads::Completed", fmt.Sprintf("%s - %s", download.Title, download.Display))
 	return nil
 }
 
