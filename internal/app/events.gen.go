@@ -179,7 +179,7 @@ func NewEvents(app *Application) (*Events, error) {
 }
 
 func (e *Events) Start() error {
-	e.Log.Infof("starting events...")
+	e.Log.Debugf("starting events...")
 	go func() {
 		// wire up receivers
 		for {

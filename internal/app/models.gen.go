@@ -9,6 +9,7 @@ import (
 
 	"github.com/dashotv/flame/qbt"
 	"github.com/dashotv/grimoire"
+	"github.com/kamva/mgm/v3"
 )
 
 func init() {
@@ -51,180 +52,125 @@ type Connector struct {
 	Watch       *grimoire.Store[*Watch]
 }
 
-func NewConnector(app *Application) (*Connector, error) {
-	var s *Connection
-	var err error
-
-	s, err = app.Config.ConnectionFor("collection")
+func connection[T mgm.Model](name string) (*grimoire.Store[T], error) {
+	s, err := app.Config.ConnectionFor(name)
 	if err != nil {
 		return nil, err
 	}
-	collection, err := grimoire.New[*Collection](s.URI, s.Database, s.Collection)
+	c, err := grimoire.New[T](s.URI, s.Database, s.Collection)
+	if err != nil {
+		return nil, err
+	}
+	return c, nil
+}
+
+func NewConnector(app *Application) (*Connector, error) {
+	collection, err := connection[*Collection]("collection")
 	if err != nil {
 		return nil, err
 	}
 
 	grimoire.Indexes[*Collection](collection, &Collection{})
 
-	s, err = app.Config.ConnectionFor("combination")
-	if err != nil {
-		return nil, err
-	}
-	combination, err := grimoire.New[*Combination](s.URI, s.Database, s.Collection)
+	combination, err := connection[*Combination]("combination")
 	if err != nil {
 		return nil, err
 	}
 
 	grimoire.Indexes[*Combination](combination, &Combination{})
 
-	s, err = app.Config.ConnectionFor("download")
-	if err != nil {
-		return nil, err
-	}
-	download, err := grimoire.New[*Download](s.URI, s.Database, s.Collection)
+	download, err := connection[*Download]("download")
 	if err != nil {
 		return nil, err
 	}
 
 	grimoire.Indexes[*Download](download, &Download{})
 
-	s, err = app.Config.ConnectionFor("episode")
-	if err != nil {
-		return nil, err
-	}
-	episode, err := grimoire.New[*Episode](s.URI, s.Database, s.Collection)
+	episode, err := connection[*Episode]("episode")
 	if err != nil {
 		return nil, err
 	}
 
 	grimoire.Indexes[*Episode](episode, &Episode{})
 
-	s, err = app.Config.ConnectionFor("feed")
-	if err != nil {
-		return nil, err
-	}
-	feed, err := grimoire.New[*Feed](s.URI, s.Database, s.Collection)
+	feed, err := connection[*Feed]("feed")
 	if err != nil {
 		return nil, err
 	}
 
 	grimoire.Indexes[*Feed](feed, &Feed{})
 
-	s, err = app.Config.ConnectionFor("file")
-	if err != nil {
-		return nil, err
-	}
-	file, err := grimoire.New[*File](s.URI, s.Database, s.Collection)
+	file, err := connection[*File]("file")
 	if err != nil {
 		return nil, err
 	}
 
 	grimoire.Indexes[*File](file, &File{})
 
-	s, err = app.Config.ConnectionFor("medium")
-	if err != nil {
-		return nil, err
-	}
-	medium, err := grimoire.New[*Medium](s.URI, s.Database, s.Collection)
+	medium, err := connection[*Medium]("medium")
 	if err != nil {
 		return nil, err
 	}
 
 	grimoire.Indexes[*Medium](medium, &Medium{})
 
-	s, err = app.Config.ConnectionFor("message")
-	if err != nil {
-		return nil, err
-	}
-	message, err := grimoire.New[*Message](s.URI, s.Database, s.Collection)
+	message, err := connection[*Message]("message")
 	if err != nil {
 		return nil, err
 	}
 
 	grimoire.Indexes[*Message](message, &Message{})
 
-	s, err = app.Config.ConnectionFor("minion")
-	if err != nil {
-		return nil, err
-	}
-	minion, err := grimoire.New[*Minion](s.URI, s.Database, s.Collection)
+	minion, err := connection[*Minion]("minion")
 	if err != nil {
 		return nil, err
 	}
 
 	grimoire.Indexes[*Minion](minion, &Minion{})
 
-	s, err = app.Config.ConnectionFor("movie")
-	if err != nil {
-		return nil, err
-	}
-	movie, err := grimoire.New[*Movie](s.URI, s.Database, s.Collection)
+	movie, err := connection[*Movie]("movie")
 	if err != nil {
 		return nil, err
 	}
 
 	grimoire.Indexes[*Movie](movie, &Movie{})
 
-	s, err = app.Config.ConnectionFor("pin")
-	if err != nil {
-		return nil, err
-	}
-	pin, err := grimoire.New[*Pin](s.URI, s.Database, s.Collection)
+	pin, err := connection[*Pin]("pin")
 	if err != nil {
 		return nil, err
 	}
 
 	grimoire.Indexes[*Pin](pin, &Pin{})
 
-	s, err = app.Config.ConnectionFor("release")
-	if err != nil {
-		return nil, err
-	}
-	release, err := grimoire.New[*Release](s.URI, s.Database, s.Collection)
+	release, err := connection[*Release]("release")
 	if err != nil {
 		return nil, err
 	}
 
 	grimoire.Indexes[*Release](release, &Release{})
 
-	s, err = app.Config.ConnectionFor("request")
-	if err != nil {
-		return nil, err
-	}
-	request, err := grimoire.New[*Request](s.URI, s.Database, s.Collection)
+	request, err := connection[*Request]("request")
 	if err != nil {
 		return nil, err
 	}
 
 	grimoire.Indexes[*Request](request, &Request{})
 
-	s, err = app.Config.ConnectionFor("series")
-	if err != nil {
-		return nil, err
-	}
-	series, err := grimoire.New[*Series](s.URI, s.Database, s.Collection)
+	series, err := connection[*Series]("series")
 	if err != nil {
 		return nil, err
 	}
 
 	grimoire.Indexes[*Series](series, &Series{})
 
-	s, err = app.Config.ConnectionFor("user")
-	if err != nil {
-		return nil, err
-	}
-	user, err := grimoire.New[*User](s.URI, s.Database, s.Collection)
+	user, err := connection[*User]("user")
 	if err != nil {
 		return nil, err
 	}
 
 	grimoire.Indexes[*User](user, &User{})
 
-	s, err = app.Config.ConnectionFor("watch")
-	if err != nil {
-		return nil, err
-	}
-	watch, err := grimoire.New[*Watch](s.URI, s.Database, s.Collection)
+	watch, err := connection[*Watch]("watch")
 	if err != nil {
 		return nil, err
 	}
