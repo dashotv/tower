@@ -56,23 +56,13 @@ func (j *DownloadsProcess) Create() error {
 			continue
 		}
 
-		// TODO: should be downloads and unwatched combined < 3
-		if seriesDownloads[ep.SeriesID.Hex()] >= 3 {
-			//app.Workers.Log.Debugf("DownloadsProcess: create: %s %s: series downloads", ep.Title, ep.Display)
-			continue
+		unwatched, err := app.DB.SeriesUnwatchedByID(ep.SeriesID.Hex())
+		if err != nil {
+			return fae.Wrap(err, "failed to get unwatched")
 		}
 
-		if !ep.SeriesFavorite && ep.SeriesUnwatched >= 3 {
-			// If I'm not watching it, see if others are
-			unwatched, err := app.DB.SeriesUnwatchedByID(ep.SeriesID.Hex())
-			if err != nil {
-				return fae.Wrap(err, "failed to get unwatched")
-			}
-
-			if unwatched >= 3 {
-				//app.Workers.Log.Debugf("DownloadsProcess: create: %s %s: unwatched >3", ep.Title, ep.Display)
-				continue
-			}
+		if unwatched+seriesDownloads[ep.SeriesID.Hex()] > 3 {
+			continue
 		}
 
 		app.Workers.Log.Debugf("DownloadsProcess: create: %s %s", ep.SeriesTitle, ep.Display)
