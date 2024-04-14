@@ -65,7 +65,7 @@ func (j *DownloadsProcess) Create() error {
 			continue
 		}
 
-		app.Workers.Log.Debugf("DownloadsProcess: create: %s %s", ep.SeriesTitle, ep.Display)
+		app.Workers.Log.Debugf("DownloadsProcess: create: %s - %s", ep.SeriesTitle, ep.Display)
 		notifier.Info("Downloads::Create", fmt.Sprintf("%s - %s", ep.SeriesTitle, ep.Display))
 		seriesDownloads[ep.SeriesID.Hex()]++
 
