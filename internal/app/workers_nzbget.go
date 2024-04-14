@@ -18,7 +18,7 @@ type NzbgetProcess struct {
 }
 
 func (j *NzbgetProcess) Kind() string { return "nzbget_process" }
-func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess]) error {
+func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess]) (err error) {
 	l := app.Log.Named("workers.nzbget")
 	p := job.Args.Payload
 
@@ -55,6 +55,15 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 		return nil
 	}
 
+	defer func() {
+		if err != nil {
+			download.Status = "reviewing"
+			if err := app.DB.Download.Save(download); err != nil {
+				l.Error("saving download", "error", err)
+			}
+		}
+	}()
+
 	l.Debugf("nzbget process: %s: %s %s", p.ID, download.Title, download.Display)
 
 	// list all files in dir
@@ -66,7 +75,7 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 		return fae.Errorf("no files found: %s", dir)
 	}
 	if len(files) > 1 {
-		return fae.Errorf("multiple files found: %s", dir)
+		return fae.Errorf("multiple files found: %s: %+v", dir, files)
 	}
 
 	file := files[0]
