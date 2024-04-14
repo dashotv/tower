@@ -116,11 +116,7 @@ func (j *DownloadsProcess) Search() error {
 		notifier.Info("Downloads::Found", fmt.Sprintf("%s - %s", d.Title, d.Display))
 
 		d.Status = "reviewing" // TODO: review
-		if match.NZB {
-			d.URL = match.Download
-		} else {
-			d.ReleaseID = match.ID
-		}
+		d.URL = match.Download
 
 		err = app.DB.Download.Save(d)
 		if err != nil {
