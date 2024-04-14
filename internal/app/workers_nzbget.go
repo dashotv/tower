@@ -102,7 +102,7 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 		return fae.Wrap(err, "linking file")
 	}
 
-	if err := updateMedium(download.Medium, []string{fmt.Sprintf("%s.%s", dest, ext)}); err != nil {
+	if err := updateMedium(download.Medium, []string{destination}); err != nil {
 		return fae.Wrap(err, "updating medium")
 	}
 
