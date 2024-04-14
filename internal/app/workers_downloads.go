@@ -39,14 +39,14 @@ func (j *DownloadsProcess) Work(ctx context.Context, job *minion.Job[*DownloadsP
 }
 
 func (j *DownloadsProcess) Create() error {
-	list, err := app.DB.UpcomingNow()
-	if err != nil {
-		return fae.Wrap(err, "failed to get upcoming episodes")
-	}
-
 	seriesDownloads, err := app.DB.SeriesDownloadCounts()
 	if err != nil {
 		return fae.Wrap(err, "failed to get series download counts")
+	}
+
+	list, err := app.DB.UpcomingNow()
+	if err != nil {
+		return fae.Wrap(err, "failed to get upcoming episodes")
 	}
 
 	for _, ep := range list {
@@ -56,6 +56,7 @@ func (j *DownloadsProcess) Create() error {
 			continue
 		}
 
+		// TODO: should be downloads and unwatched combined < 3
 		if seriesDownloads[ep.SeriesID.Hex()] >= 3 {
 			//app.Workers.Log.Debugf("DownloadsProcess: create: %s %s: series downloads", ep.Title, ep.Display)
 			continue
@@ -147,7 +148,7 @@ func (j *DownloadsProcess) Load() error {
 
 	for _, d := range list {
 		if d.ReleaseID == "" && d.URL == "" {
-			app.DB.Log.Debugf("DownloadsProcess: load: %s %s: no release", d.Medium.Title, d.Medium.Display)
+			app.DB.Log.Debugf("DownloadsProcess: load: %s %s: no release", d.Title, d.Display)
 			continue
 		}
 

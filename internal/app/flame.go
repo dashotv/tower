@@ -45,6 +45,7 @@ func (a *Application) FlameMetubeHistory() (*metube.HistoryResponse, error) {
 }
 
 func (a *Application) FlameAdd(d *Download) (string, error) {
+	a.Log.Named("flame").Debugf("FlameAdd: %s - %s :: %s", d.Title, d.Display, d.URL)
 	if d.IsNzb() {
 		return a.FlameNzbAdd(d)
 	}
@@ -96,6 +97,7 @@ func (a *Application) FlameMetubeAdd(d *Download) (string, error) {
 	if err != nil {
 		return "", fae.Wrap(err, "getting url")
 	}
+	url = strings.Replace(url, "metube://", "", 1)
 	enc := base64.StdEncoding.EncodeToString([]byte(url))
 	did := d.ID.Hex()
 
