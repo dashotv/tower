@@ -164,7 +164,8 @@ func (c *Connector) processSeriesUpcoming(s *Series, e *Episode) *Upcoming {
 	} else {
 		u.Display = fmt.Sprintf("%02dx%02d %s", e.SeasonNumber, e.EpisodeNumber, e.Title)
 	}
-	unwatched, err := c.SeriesUserUnwatched(s)
+
+	unwatched, err := c.SeriesUnwatched(s, "")
 	if err != nil {
 		c.Log.Errorf("getting unwatched %s: %s", s.ID.Hex(), err)
 	}
@@ -191,11 +192,13 @@ func (c *Connector) processSeriesEpisode(s *Series, e *Episode) {
 	} else {
 		e.SeriesDisplay = fmt.Sprintf("%02dx%02d %s", e.SeasonNumber, e.EpisodeNumber, e.Title)
 	}
-	unwatched, err := c.SeriesUserUnwatched(s)
+
+	unwatched, err := c.SeriesUnwatched(s, "")
 	if err != nil {
 		c.Log.Errorf("getting unwatched %s: %s", s.ID.Hex(), err)
 	}
 	e.SeriesUnwatched = unwatched
+
 	e.SeriesActive = s.Active
 	e.SeriesFavorite = s.Favorite
 	e.Title = s.Display
