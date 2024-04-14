@@ -7,22 +7,32 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFlame_Torrent(t *testing.T) {
+func TestFlame_TorrentAdd(t *testing.T) {
 	err := setupFlame(app)
 	require.NoError(t, err)
 
-	resp, err := app.Flame.Torrent("9f7cea6ea0d09ca0855c66026fe1c7ea2e274b0e")
+	d := &Download{URL: "https://webtorrent.io/torrents/big-buck-bunny.torrent", Status: "loading"}
+
+	resp, err := app.FlameTorrentAdd(d)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 	fmt.Printf("%+v\n", resp)
 }
 
-func TestFlame_RemoveTorrent(t *testing.T) {
-	err := appSetup()
-	require.NoError(t, err)
-	err = setupFlame(app)
+func TestFlame_Torrent(t *testing.T) {
+	err := setupFlame(app)
 	require.NoError(t, err)
 
-	err = app.Flame.RemoveTorrent("9f7cea6ea0d09ca0855c66026fe1c7ea2e274b0e")
+	resp, err := app.FlameTorrent("dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c")
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	fmt.Printf("%+v\n", resp)
+}
+
+func TestFlame_TorrentRemove(t *testing.T) {
+	err := setupFlame(app)
+	require.NoError(t, err)
+
+	err = app.FlameTorrentRemove("dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c")
 	require.NoError(t, err)
 }

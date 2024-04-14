@@ -151,39 +151,16 @@ func (j *DownloadsProcess) Load() error {
 			continue
 		}
 
-		url, err := d.GetURL()
+		res, err := app.FlameAdd(d)
 		if err != nil {
-			return fae.Wrap(err, "failed to get url")
+			return fae.Wrap(err, "failed to add to flame")
 		}
 
-		if nzbgeekRegex.MatchString(url) {
-			id, err := app.Flame.LoadNzb(d, url)
-			if err != nil {
-				return fae.Wrap(err, "failed to load nzb")
-			}
-			d.Status = "downloading"
-			d.Thash = id
-		} else if metubeRegex.MatchString(url) {
-			autoStart := false
-			if app.Config.Production {
-				autoStart = true
-			}
-			app.Log.Named("downloads").Debugf("loading metube: %s", url)
-			url = strings.Replace(url, "metube://", "", 1)
-			err := app.Flame.LoadMetube(d.ID.Hex(), url, autoStart)
-			if err != nil {
-				return fae.Wrap(err, "load metube")
-			}
-			d.Status = "downloading"
-			d.Thash = "M"
-		} else {
-			thash, err := app.Flame.LoadTorrent(d, url)
-			if err != nil {
-				return fae.Wrap(err, "failed to load torrent")
-			}
+		d.Status = "downloading"
+		if d.IsTorrent() {
 			d.Status = "managing"
-			d.Thash = strings.ToLower(thash)
 		}
+		d.Thash = res
 
 		err = app.DB.Download.Save(d)
 		if err != nil {
@@ -212,7 +189,7 @@ func (j *DownloadsProcess) Manage() error {
 			continue
 		}
 
-		t, err := app.Flame.Torrent(d.Thash)
+		t, err := app.FlameTorrent(d.Thash)
 		if err != nil {
 			app.Log.Named("downloads.manage").Errorf("failed to get torrent: %s", err)
 			continue
@@ -306,7 +283,7 @@ func (j *DownloadsProcess) Move() error {
 		}
 
 		if d.IsTorrent() {
-			if err := app.Flame.RemoveTorrent(d.Thash); err != nil {
+			if err := app.FlameTorrentRemove(d.Thash); err != nil {
 				return fae.Wrap(err, "failed to remove torrent")
 			}
 		}

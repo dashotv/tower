@@ -33,7 +33,7 @@ func Files(d *Download) ([]string, error) {
 		return FilesMetube(d)
 	}
 
-	t, err := app.Flame.Torrent(d.Thash)
+	t, err := app.FlameTorrent(d.Thash)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func FilesMetube(download *Download) ([]string, error) {
 		return nil, nil
 	}
 
-	history, err := app.Flame.MetubeHistory()
+	history, err := app.FlameMetubeHistory()
 	if err != nil {
 		return nil, fae.Wrap(err, "metube history")
 	}

@@ -176,7 +176,7 @@ func (a *Application) DownloadsTorrent(c echo.Context, id string) error {
 		return c.JSON(http.StatusOK, &Response{Error: false, Message: "No torrent hash available"})
 	}
 
-	torrent, err := app.Flame.Torrent(download.Thash)
+	torrent, err := app.FlameTorrent(download.Thash)
 	if err != nil {
 		return err
 	}

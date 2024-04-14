@@ -8,7 +8,7 @@ require (
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/dashotv/fae v0.1.9
-	github.com/dashotv/flame v0.10.1
+	github.com/dashotv/flame v0.10.4
 	github.com/dashotv/golem v0.14.20
 	github.com/dashotv/grimoire v0.5.4
 	github.com/dashotv/mercury v0.3.2

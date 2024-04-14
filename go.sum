@@ -114,8 +114,8 @@ github.com/cpuguy83/go-md2man v1.0.10/go.mod h1:SmD6nW6nTyfqj6ABTjUi3V3JVMnlJmwc
 github.com/cpuguy83/go-md2man/v2 v2.0.3/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/dashotv/fae v0.1.9 h1:tB4ECFDSGTTF5fJF9xegUyAgGiT5dZGgeeiVfvZaGwE=
 github.com/dashotv/fae v0.1.9/go.mod h1:+deep7H052Bz6GxW7HXiel4S+Rqkva1mPETS+3tQOVU=
-github.com/dashotv/flame v0.10.1 h1:NT56OTKRZZUanT34zK7zcpcVFfyz2fhO6bGDkIrZwwk=
-github.com/dashotv/flame v0.10.1/go.mod h1:8A7GDRXAPP0izHTD1+6kAO06E7TAAFywIxp+wY+wwGg=
+github.com/dashotv/flame v0.10.4 h1:d+VnfI9dSR4kXHpSh2iRapdGXu1HDCoD5Nm+6EWWIgw=
+github.com/dashotv/flame v0.10.4/go.mod h1:NMvu3OYoljqh0HsVt/sxt+/JR1jf75VbJgkBM6Zhxuo=
 github.com/dashotv/golem v0.14.20 h1:QB9p1Hmw3isC63IZhhI7rneO/0swJ/2jNio9Ru6AT94=
 github.com/dashotv/golem v0.14.20/go.mod h1:JMnR38w66hIs8IT8JR2k+Ifkq1dgVMMNbBsQVn/BVmM=
 github.com/dashotv/grimoire v0.5.4 h1:rr9p4YK9Sp6qcwiLjlHAcpBwfLfTX3kzUzTrLouqcME=

@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/dashotv/fae"
+	flame "github.com/dashotv/flame/client"
 	"github.com/dashotv/minion"
 	scry "github.com/dashotv/scry/client"
 	"github.com/dashotv/tmdb"
@@ -52,7 +53,7 @@ type Application struct {
 	//golem:template:app/app_partial_definitions
 
 	Fanart   *Fanart
-	Flame    *Flame
+	Flame    *flame.Client
 	Scry     *scry.Client
 	Plex     *plex.Client
 	Tmdb     *tmdb.Client
