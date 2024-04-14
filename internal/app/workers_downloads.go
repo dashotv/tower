@@ -292,7 +292,7 @@ func (j *DownloadsProcess) Move() error {
 		}
 
 		moved = append(moved, files...)
-		notifier.Success("Downloads::Completed", fmt.Sprintf("%s %s", d.Medium.Title, d.Medium.Display))
+		notifier.Success("Downloads::Completed", fmt.Sprintf("%s - %s", d.Title, d.Display))
 
 		d.Status = "done"
 		// update medium and add path
