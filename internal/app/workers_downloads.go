@@ -103,7 +103,6 @@ func (j *DownloadsProcess) Search() error {
 			continue
 		}
 
-		//app.Workers.Log.Debugf("DownloadsProcess: search: %s %s", d.Medium.Title, d.Medium.Display)
 		match, err := app.ScrySearchEpisode(d.Search)
 		if err != nil {
 			return fae.Wrap(err, "failed to search releases")
@@ -165,14 +164,7 @@ func (j *DownloadsProcess) Manage() error {
 	}
 
 	for _, d := range list {
-		if d.Thash == "" {
-			continue
-		}
-		if d.Thash == "M" {
-			continue
-		}
-
-		if d.IsNzb() {
+		if d.Thash == "" || !d.IsTorrent() {
 			continue
 		}
 

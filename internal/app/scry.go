@@ -56,7 +56,7 @@ func (a *Application) ScrySearchEpisode(search *DownloadSearch) (*search.Release
 		return nil, fae.Wrap(err, "failed to search releases")
 	}
 
-	// fmt.Printf("ScrySearchEpisode(): %s => %d search: %s\n", search.Title, len(resp.Result.Releases), resp.Result.Search)
+	app.Log.Named("search").Warnf("ScrySearchEpisode(): %s (%d) %02dx%02d => %d search: %s\n", search.Title, search.Year, search.Season, search.Episode, len(resp.Result.Releases), resp.Result.Search)
 	if len(resp.Result.Releases) == 0 {
 		return nil, nil
 	}
