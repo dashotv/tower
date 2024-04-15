@@ -3,12 +3,16 @@ package app
 import (
 	"fmt"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
+	"github.com/samber/lo"
+
 	"github.com/dashotv/fae"
+	"github.com/dashotv/flame/qbt"
 )
 
 var nzbgeekRegex = regexp.MustCompile("^https://api.nzbgeek")
@@ -42,6 +46,25 @@ func (d *Download) GetURL() (string, error) {
 	}
 
 	return "", fae.New("no url or release")
+}
+
+func (d *Download) SortedFileNums(t *qbt.Torrent) ([]string, error) {
+	if t == nil {
+		return nil, fae.New("no torrent")
+	}
+	grouped := lo.GroupBy(d.Files, func(df *DownloadFile) string {
+		if df.MediumID.IsZero() {
+			return fmt.Sprintf("100%03d", df.Num)
+		}
+		return fmt.Sprintf("%03d%03d", df.Medium.SeasonNumber, df.Medium.EpisodeNumber)
+	})
+	keys := lo.Keys(grouped)
+	sort.Strings(keys)
+	list := lo.FilterMap(keys, func(key string, i int) (string, bool) {
+		df := grouped[key][0]
+		return fmt.Sprintf("%d", df.Num), df.MediumID != primitive.NilObjectID && t.Files[df.Num].Progress < 100 && !df.Medium.Downloaded
+	})
+	return list, nil
 }
 
 func (c *Connector) DownloadByHash(hash string) (*Download, error) {

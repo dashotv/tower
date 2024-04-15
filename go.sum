@@ -136,8 +136,14 @@ github.com/dashotv/minion v0.4.11 h1:j9OT8wo/nayEpv+tQvdYolVDJ00z8KyCgXtBZ6mAP6c
 github.com/dashotv/minion v0.4.11/go.mod h1:T+cFjfuIlT6dF6HTrpgFLqrQnLppqFy2FeKEJLiQgAo=
 github.com/dashotv/minion v0.4.12 h1:ROxSEyMItIMM8faNsagnQnxdTDK1Itd6cNuBIa01N7g=
 github.com/dashotv/minion v0.4.12/go.mod h1:T+cFjfuIlT6dF6HTrpgFLqrQnLppqFy2FeKEJLiQgAo=
+github.com/dashotv/rift v0.3.3 h1:alfwVFrkrwGaeroL25TMoe3muxxNWii6siUBCt4vRws=
+github.com/dashotv/rift v0.3.3/go.mod h1:8ZzJE+hiKPTyH0UKri8bzMnb1wjx+I0E+lXPA1NjuWk=
 github.com/dashotv/runic v0.4.0 h1:6kFUSSOhmuQcYFaHENN2BgTnXRszYo85mkVH+u4HSxQ=
 github.com/dashotv/runic v0.4.0/go.mod h1:i2559Dc9Y79Fz363E5idhmd5GWHZkBf0ZnT7np6Mtgg=
+github.com/dashotv/runic v0.4.1 h1:UGtE2QGzs36eOsMICYZKfhTp2HePdDGWlvBwM7d5O/Q=
+github.com/dashotv/runic v0.4.1/go.mod h1:tQ+soetDc/QxHTz9bKf5HfrA9Xg5lk+woSqUWWWzJxQ=
+github.com/dashotv/runic v0.4.2 h1:gYt8GN482DM2nHepGmbpsW7MRMIz9WxzkDGb2CLcGlg=
+github.com/dashotv/runic v0.4.2/go.mod h1:tQ+soetDc/QxHTz9bKf5HfrA9Xg5lk+woSqUWWWzJxQ=
 github.com/dashotv/scry v0.10.4 h1:JzN5yMhZU+CneYGFUBcuVVFqehJUQlo+frFGYKYHOgo=
 github.com/dashotv/scry v0.10.4/go.mod h1:1ko2kJ1EZQKhnOukC9V5BvwJG1JOLvVbLWEWscuKFfA=
 github.com/dashotv/tmdb v0.2.0 h1:Vd8DKZrrzVqob5k8wsNRfyyFUDj2jix5gIyJR6OWpdo=

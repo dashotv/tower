@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/samber/lo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
@@ -167,6 +168,7 @@ func (j *DownloadsProcess) Manage() error {
 	}
 
 	for _, d := range list {
+		// TODO: manage metube? show files while downloading?
 		if d.Thash == "" || !d.IsTorrent() {
 			continue
 		}
@@ -201,16 +203,97 @@ func (j *DownloadsProcess) Manage() error {
 			continue
 		}
 
-		if len(d.Files) > 1 {
-			app.Workers.Log.Warnf("download has multiple files: %s", d.ID.Hex())
+		if len(d.Files) == 1 {
+			d.Files[0].MediumID = d.MediumID
+			d.Status = "downloading"
+
+			err = app.DB.Download.Save(d)
+			if err != nil {
+				return fae.Wrap(err, "failed to save download")
+			}
+
 			continue
 		}
 
-		d.Files[0].MediumID = d.MediumID
-		d.Status = "downloading"
+		if !d.Multi {
+			app.Workers.Log.Warnf("multiple files, but not multi", d.ID.Hex())
 
-		err = app.DB.Download.Save(d)
+			d.Status = "reviewing"
+			err = app.DB.Download.Save(d)
+			if err != nil {
+				return fae.Wrap(err, "failed to save download")
+			}
+
+			continue
+		}
+
+		for _, df := range d.Files {
+			if df.MediumID != primitive.NilObjectID {
+				// already has media
+				continue
+			}
+
+			if d.Medium.Type != "Series" {
+				// only handle series for now
+				app.Workers.Log.Warnf("multi not series", d.ID.Hex())
+
+				d.Status = "reviewing"
+				err = app.DB.Download.Save(d)
+				if err != nil {
+					return fae.Wrap(err, "failed to save download")
+				}
+			}
+
+			file := t.Files[df.Num]
+
+			// find the episode based on the name
+			ep, err := app.RunicFindEpisode(d.MediumID, file.Name, "tv")
+			if err != nil {
+				return fae.Wrap(err, "failed to find episode")
+			}
+
+			if ep == nil {
+				app.Workers.Log.Warnf("episode not found: %s", file.Name)
+				continue
+			}
+
+			df.MediumID = ep.ID
+		}
+
+		// TODO: handle want more / none / etc
+		wanted := false
+		for _, f := range t.Files {
+			if f.Priority > 0 {
+				wanted = true
+				break
+			}
+		}
+
+		if wanted && t.Progress != 100 {
+			err := app.FlameTorrentWant(d.Thash, "none")
+			if err != nil {
+				return fae.Wrap(err, "want none")
+			}
+		}
+
+		list, err := d.SortedFileNums(t)
 		if err != nil {
+			return fae.Wrap(err, "failed to sort files")
+		}
+
+		if len(list) != 0 {
+			if len(list) > 3 {
+				list = list[:3]
+			}
+			err := app.FlameTorrentWant(d.Thash, strings.Join(list, ","))
+			if err != nil {
+				return fae.Wrap(err, "want next")
+			}
+		}
+
+		// save updates to download files
+		d.Status = "downloading"
+		if err := app.DB.Download.Save(d); err != nil {
 			return fae.Wrap(err, "failed to save download")
 		}
 	}

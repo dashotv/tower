@@ -13,7 +13,7 @@ require (
 	github.com/dashotv/grimoire v0.5.4
 	github.com/dashotv/mercury v0.3.2
 	github.com/dashotv/minion v0.4.12
-	github.com/dashotv/runic v0.4.0
+	github.com/dashotv/runic v0.4.2
 	github.com/dashotv/scry v0.10.4
 	github.com/dashotv/tmdb v0.2.0
 	github.com/dashotv/tvdb v0.3.0
@@ -67,6 +67,7 @@ require (
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/cloudwego/base64x v0.1.0 // indirect
 	github.com/cloudwego/iasm v0.1.0 // indirect
+	github.com/dashotv/rift v0.3.3 // indirect
 	github.com/deepmap/oapi-codegen v1.16.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/ericlagergren/decimal v0.0.0-20240411145413-00de7ca16731 // indirect

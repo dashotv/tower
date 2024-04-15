@@ -27,6 +27,7 @@ type Config struct {
 	Port                  int      `env:"PORT" envDefault:"9000"`
 	FlameURL              string   `env:"FLAME_URL"`
 	ScryURL               string   `env:"SCRY_URL"`
+	RunicURL              string   `env:"RUNIC_URL"`
 	Plex                  string   `env:"PLEX"`
 	PlexToken             string   `env:"PLEX_TOKEN"`
 	PlexAppName           string   `env:"PLEX_APP_NAME"`

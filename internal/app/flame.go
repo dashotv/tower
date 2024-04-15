@@ -152,6 +152,23 @@ func (a *Application) FlameTorrentRemove(thash string) error {
 	return nil
 }
 
+func (a *Application) FlameTorrentWant(thash string, files_or_none string) error {
+	req := &flame.QbittorrentsWantRequest{
+		Infohash: thash,
+		Files:    files_or_none,
+	}
+
+	resp, err := a.Flame.Qbittorrents.Want(context.Background(), req)
+	if err != nil {
+		return fae.Wrap(err, "failed to remove torrent")
+	}
+	if resp.Error {
+		return fae.New(resp.Message)
+	}
+
+	return nil
+}
+
 // type Flame struct {
 // 	URL string
 // 	c   *resty.Client
