@@ -36,7 +36,7 @@ func (m *Mover) List() ([]string, error) {
 	for _, f := range m.Torrent.Files {
 		file := fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, f.Name)
 		if f.Progress == 100 && shouldDownloadFile(f.Name) && exists(file) {
-			out = append(out, file)
+			out = append(out, f.Name)
 		}
 	}
 
@@ -93,7 +93,7 @@ func (m *Mover) moveFile(name string, medium *Medium) error {
 	source := fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, name)
 	ext := Extension(name)
 
-	if medium == nil || medium.Downloaded {
+	if medium == nil || medium.Completed {
 		m.Log.Debugf("skipping %s", source)
 		return nil
 	}
