@@ -16,20 +16,24 @@ import (
 var regexPathTv = regexp.MustCompile(`(?i)(?P<season>\d+)x(?P<episode>\d+)`)
 var regexPathAnime = regexp.MustCompile(`(?i)(?P<season>\d+)x(?P<episode>\d+)(?:\s+#(?P<absolute>\d+))*`)
 
+// this is confusing
 func (m *Medium) Destination() string {
 	return filepath.Join(string(m.Kind), m.Directory)
+}
+
+func (m *Medium) BaseDir() string {
+	return filepath.Join(app.Config.DirectoriesCompleted, string(m.Kind))
 }
 
 // AddPathByFullpath adds a path to the medium by the full path of the file. it ensures
 // that the path has a unique id and returns the path.
 func (m *Medium) AddPathByFullpath(file string) *Path {
-	dir := filepath.Join(app.Config.DirectoriesCompleted, m.Destination())
-	dest := strings.Replace(file, dir+"/", "", 1)
-	dest = strings.TrimSuffix(dest, filepath.Ext(file))
+	local := strings.Replace(file, app.Config.DirectoriesCompleted+"/", "", 1)
+	local = strings.TrimSuffix(local, filepath.Ext(file))
 	ext := Extension(file)
 
 	path, ok := lo.Find(m.Paths, func(p *Path) bool {
-		return p.Local == dest && p.Extension == ext
+		return p.Local == local && p.Extension == ext
 	})
 	if ok && path != nil {
 		if path.ID == primitive.NilObjectID {
@@ -40,7 +44,7 @@ func (m *Medium) AddPathByFullpath(file string) *Path {
 
 	path = &Path{
 		ID:        primitive.NewObjectID(),
-		Local:     dest,
+		Local:     local,
 		Extension: ext,
 		Type:      primitive.Symbol(fileType(file)),
 	}
