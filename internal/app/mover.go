@@ -10,22 +10,28 @@ import (
 	"github.com/dashotv/flame/qbt"
 )
 
+func NewMover(log *zap.SugaredLogger, download *Download, torrent *qbt.Torrent) *Mover {
+	m := &Mover{
+		Log:      log,
+		Download: download,
+		Torrent:  torrent,
+		moved:    []string{},
+		movefunc: FileLink,
+	}
+
+	return m
+}
+
 type Mover struct {
 	Log      *zap.SugaredLogger
 	Download *Download
 	Torrent  *qbt.Torrent
 	moved    []string
+	movefunc func(string, string, bool) error
 }
 
 func (m *Mover) List() ([]string, error) {
 	out := []string{}
-
-	if m.Download.Thash == "" || m.Download.IsNzb() {
-		return out, nil
-	}
-	if m.Download.IsMetube() {
-		return FilesMetube(m.Download)
-	}
 
 	for _, f := range m.Torrent.Files {
 		file := fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, f.Name)
@@ -126,10 +132,19 @@ func (m *Mover) moveFile(name string, medium *Medium) error {
 		return nil
 	}
 
-	if err := FileLink(source, destination, m.Download.Force); err != nil {
+	if err := m.movefunc(source, destination, m.Download.Force); err != nil {
 		return fae.Wrap(err, "link")
 	}
 
 	m.moved = append(m.moved, destination)
+	return nil
+}
+
+func testFileLink(source, destination string, force bool) error {
+	if force {
+		fmt.Printf("linking %s -> %s (force)\n", source, destination)
+		return nil
+	}
+	fmt.Printf("linking %s -> %s\n", source, destination)
 	return nil
 }

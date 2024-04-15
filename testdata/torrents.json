@@ -1,0 +1,536 @@
+[
+  {
+    "Hash": "49c5e074fd824922e7206e8e03ecc56f7d8a9b8b",
+    "Status": 0,
+    "State": "uploading",
+    "Name": "[SubsPlease] Kami wa Game ni Ueteiru - 03 (480p) [F2C07A61].mkv",
+    "Size": 383481108,
+    "Progress": 10000,
+    "Downloaded": 386127919,
+    "Uploaded": 1227176414,
+    "Ratio": 3.1781602769832347,
+    "UploadRate": 0,
+    "DownloadRate": 0,
+    "Finish": 0,
+    "Label": "",
+    "Queue": 0,
+    "Path": "",
+    "Files": [
+      {
+        "id": 0,
+        "name": "[SubsPlease] Kami wa Game ni Ueteiru - 03 (480p) [F2C07A61].mkv",
+        "size": 383481108,
+        "progress": 100,
+        "priority": 1,
+        "is_seed": true
+      }
+    ]
+  },
+  {
+    "Hash": "ee1b48e6eed216440e3940f5031ce5ef2bfa0fbf",
+    "Status": 0,
+    "State": "stalledUP",
+    "Name": "Ze Tian Ji (Way of Choices)",
+    "Size": 1052770304,
+    "Progress": 10000,
+    "Downloaded": 1061167421,
+    "Uploaded": 0,
+    "Ratio": 0,
+    "UploadRate": 0,
+    "DownloadRate": 0,
+    "Finish": 0,
+    "Label": "",
+    "Queue": 0,
+    "Path": "",
+    "Files": [
+      {
+        "id": 0,
+        "name": "Ze Tian Ji (Way of Choices)/Season 1/[HaxTalks] Ze Tian Ji - Way of Choices - Ep 01 Eng Sub.mkv",
+        "size": 171581121,
+        "progress": 100,
+        "priority": 0,
+        "is_seed": true
+      },
+      {
+        "id": 1,
+        "name": "Ze Tian Ji (Way of Choices)/Season 1/[HaxTalks] Ze Tian Ji - Way of Choices - Ep 02 Eng Sub.mkv",
+        "size": 350331122,
+        "progress": 100,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 2,
+        "name": "Ze Tian Ji (Way of Choices)/Season 1/[HaxTalks] Ze Tian Ji - Way of Choices - Ep 03 Eng Sub.mkv",
+        "size": 332868053,
+        "progress": 100,
+        "priority": 1,
+        "is_seed": false
+      },
+      {
+        "id": 3,
+        "name": "Ze Tian Ji (Way of Choices)/Season 1/[HaxTalks] Ze Tian Ji - Way of Choices - Ep 04 Eng Sub.mkv",
+        "size": 355334286,
+        "progress": 100,
+        "priority": 1,
+        "is_seed": false
+      },
+      {
+        "id": 4,
+        "name": "Ze Tian Ji (Way of Choices)/Season 1/[HaxTalks] Ze Tian Ji - Way of Choices - Ep 05 Eng Sub.mkv",
+        "size": 361325608,
+        "progress": 100,
+        "priority": 1,
+        "is_seed": false
+      },
+      {
+        "id": 5,
+        "name": "Ze Tian Ji (Way of Choices)/Season 1/[HaxTalks] Ze Tian Ji - Way of Choices - Ep 06 Eng Sub.mkv",
+        "size": 323126060,
+        "progress": 28.607825688834875,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 6,
+        "name": "Ze Tian Ji (Way of Choices)/Season 1/[HaxTalks] Ze Tian Ji - Way of Choices - Ep 07 Eng Sub.mkv",
+        "size": 378799663,
+        "progress": 27.460321684605088,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 7,
+        "name": "Ze Tian Ji (Way of Choices)/Season 1/[HaxTalks] Ze Tian Ji - Way of Choices - Ep 08 Eng Sub.mkv",
+        "size": 354275315,
+        "progress": 17.166707762294983,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 8,
+        "name": "Ze Tian Ji (Way of Choices)/Season 1/[HaxTalks] Ze Tian Ji - Way of Choices - Ep 09 Eng Sub.mkv",
+        "size": 359438823,
+        "progress": 22.754617132718575,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 9,
+        "name": "Ze Tian Ji (Way of Choices)/Season 1/[HaxTalks] Ze Tian Ji - Way of Choices - Ep 10 Eng Sub.mkv",
+        "size": 377286749,
+        "progress": 25.01329300595182,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 10,
+        "name": "Ze Tian Ji (Way of Choices)/Season 1/[HaxTalks] Ze Tian Ji - Way of Choices - Ep 11 Eng Sub.mkv",
+        "size": 365131142,
+        "progress": 28.717791483258363,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 11,
+        "name": "Ze Tian Ji (Way of Choices)/Season 1/[HaxTalks] Ze Tian Ji - Way of Choices - Ep 12 Eng Sub.mkv",
+        "size": 349716511,
+        "progress": 27.584912054667043,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 12,
+        "name": "Ze Tian Ji (Way of Choices)/Season 1/[HaxTalks] Ze Tian Ji - Way of Choices - Ep 13 Eng Sub.mkv",
+        "size": 428861531,
+        "progress": 33.25230306096165,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 13,
+        "name": "Ze Tian Ji (Way of Choices)/Season 2/[HaxTalks] Ze Tian Ji S2 - Episode 01 Eng Sub.mkv",
+        "size": 506985784,
+        "progress": 33.50573474857039,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 14,
+        "name": "Ze Tian Ji (Way of Choices)/Season 2/[HaxTalks] Ze Tian Ji S2 - Episode 02 Eng Sub.mkv",
+        "size": 477898297,
+        "progress": 32.47327914206817,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 15,
+        "name": "Ze Tian Ji (Way of Choices)/Season 2/[HaxTalks] Ze Tian Ji S2 - Episode 03 Eng Sub.mkv",
+        "size": 439306996,
+        "progress": 30.074771675159027,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 16,
+        "name": "Ze Tian Ji (Way of Choices)/Season 2/[HaxTalks] Ze Tian Ji S2 - Episode 04 Eng Sub.mkv",
+        "size": 439770015,
+        "progress": 22.61533087925515,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 17,
+        "name": "Ze Tian Ji (Way of Choices)/Season 2/[HaxTalks] Ze Tian Ji S2 - Episode 05 Eng Sub.mkv",
+        "size": 523790947,
+        "progress": 39.067417482494214,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 18,
+        "name": "Ze Tian Ji (Way of Choices)/Season 2/[HaxTalks] Ze Tian Ji S2 - Episode 06 Eng Sub.mkv",
+        "size": 439857738,
+        "progress": 36.2007083753975,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 19,
+        "name": "Ze Tian Ji (Way of Choices)/Season 2/[HaxTalks] Ze Tian Ji S2 - Episode 07 Eng Sub.mkv",
+        "size": 458204236,
+        "progress": 28.867587989736528,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 20,
+        "name": "Ze Tian Ji (Way of Choices)/Season 2/[HaxTalks] Ze Tian Ji S2 - Episode 08 Eng Sub.mkv",
+        "size": 462417282,
+        "progress": 27.211162925351047,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 21,
+        "name": "Ze Tian Ji (Way of Choices)/Season 2/[HaxTalks] Ze Tian Ji S2 - Episode 09 Eng Sub.mkv",
+        "size": 468855384,
+        "progress": 32.65230628129035,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 22,
+        "name": "Ze Tian Ji (Way of Choices)/Season 2/[HaxTalks] Ze Tian Ji S2 - Episode 10 Eng Sub.mkv",
+        "size": 478449991,
+        "progress": 25.258092647764308,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 23,
+        "name": "Ze Tian Ji (Way of Choices)/Season 2/[HaxTalks] Ze Tian Ji S2 - Episode 11 Eng Sub.mkv",
+        "size": 538662361,
+        "progress": 26.028081995504415,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 24,
+        "name": "Ze Tian Ji (Way of Choices)/Season 2/[HaxTalks] Ze Tian Ji S2 - Episode 12 Eng Sub.mkv",
+        "size": 549575392,
+        "progress": 25.765775371543565,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 25,
+        "name": "Ze Tian Ji (Way of Choices)/Season 3/[HaxTalks] Ze Tian Ji S3 - Episode 01 Eng Sub.mp4",
+        "size": 316506877,
+        "progress": 35.117422108967325,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 26,
+        "name": "Ze Tian Ji (Way of Choices)/Season 3/[HaxTalks] Ze Tian Ji S3 - Episode 02 Eng Sub.mp4",
+        "size": 258884230,
+        "progress": 32.32561906146233,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 27,
+        "name": "Ze Tian Ji (Way of Choices)/Season 3/[HaxTalks] Ze Tian Ji S3 - Episode 03 Eng Sub.mp4",
+        "size": 251174148,
+        "progress": 28.46762637371422,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 28,
+        "name": "Ze Tian Ji (Way of Choices)/Season 3/[HaxTalks] Ze Tian Ji S3 - Episode 04 Eng Sub.mp4",
+        "size": 271043130,
+        "progress": 38.68668429264376,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 29,
+        "name": "Ze Tian Ji (Way of Choices)/Season 3/[HaxTalks] Ze Tian Ji S3 - Episode 05 Eng Sub.mp4",
+        "size": 221398428,
+        "progress": 21.786286576524382,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 30,
+        "name": "Ze Tian Ji (Way of Choices)/Season 3/[HaxTalks] Ze Tian Ji S3 - Episode 06 Eng Sub.mp4",
+        "size": 293239039,
+        "progress": 19.30953811371616,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 31,
+        "name": "Ze Tian Ji (Way of Choices)/Season 3/[HaxTalks] Ze Tian Ji S3 - Episode 07 Eng Sub.mp4",
+        "size": 213191703,
+        "progress": 28.52709891810377,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 32,
+        "name": "Ze Tian Ji (Way of Choices)/Season 3/[HaxTalks] Ze Tian Ji S3 - Episode 08 Eng Sub.mp4",
+        "size": 299408578,
+        "progress": 40.62502711595658,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 33,
+        "name": "Ze Tian Ji (Way of Choices)/Season 3/[HaxTalks] Ze Tian Ji S3 - Episode 09 Eng Sub.mp4",
+        "size": 356356303,
+        "progress": 18.831956509549936,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 34,
+        "name": "Ze Tian Ji (Way of Choices)/Season 3/Ze Tian Ji Season 3 episode 10 - izfanmade.com.mp4",
+        "size": 301210841,
+        "progress": 29.938343421045726,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 35,
+        "name": "Ze Tian Ji (Way of Choices)/Season 3/Ze Tian Ji Season 3 episode 11 - izfanmade.com.mp4",
+        "size": 318701834,
+        "progress": 22.373002095745704,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 36,
+        "name": "Ze Tian Ji (Way of Choices)/Season 3/Ze Tian Ji Season 3 episode 12 - izfanmade.com.mp4",
+        "size": 296502827,
+        "progress": 19.80428200099421,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 37,
+        "name": "Ze Tian Ji (Way of Choices)/Season 4/Ze Tian Ji Season 4 episode 01 - izfanmade.com.mkv",
+        "size": 316959872,
+        "progress": 32.940324067268676,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 38,
+        "name": "Ze Tian Ji (Way of Choices)/Season 4/Ze Tian Ji Season 4 episode 02 - izfanmade.com.mkv",
+        "size": 315168057,
+        "progress": 24.76285691604844,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 39,
+        "name": "Ze Tian Ji (Way of Choices)/Season 4/Ze Tian Ji Season 4 episode 03 - izfanmade.com.mkv",
+        "size": 343250260,
+        "progress": 26.72606453378943,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 40,
+        "name": "Ze Tian Ji (Way of Choices)/Season 4/Ze Tian Ji Season 4 episode 04 - izfanmade.com.mkv",
+        "size": 352978158,
+        "progress": 21.54095721696185,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 41,
+        "name": "Ze Tian Ji (Way of Choices)/Season 4/Ze Tian Ji Season 4 episode 05 - izfanmade.com.mkv",
+        "size": 320255497,
+        "progress": 14.908395780010608,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 42,
+        "name": "Ze Tian Ji (Way of Choices)/Season 4/Ze Tian Ji Season 4 episode 06 - izfanmade.com.mkv",
+        "size": 303040878,
+        "progress": 32.8725070549723,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 43,
+        "name": "Ze Tian Ji (Way of Choices)/Season 4/Ze Tian Ji Season 4 episode 07 - izfanmade.com.mkv",
+        "size": 280218555,
+        "progress": 29.735585853691955,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 44,
+        "name": "Ze Tian Ji (Way of Choices)/Season 4/Ze Tian Ji Season 4 episode 08 - izfanmade.com.mkv",
+        "size": 300889108,
+        "progress": 23.949413948211113,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 45,
+        "name": "Ze Tian Ji (Way of Choices)/Season 4/Ze Tian Ji Season 4 episode 09 - izfanmade.com.mkv",
+        "size": 298323599,
+        "progress": 33.217003057139976,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 46,
+        "name": "Ze Tian Ji (Way of Choices)/Season 4/Ze Tian Ji Season 4 episode 10 - izfanmade.com.mkv",
+        "size": 370946163,
+        "progress": 30.74767887543832,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 47,
+        "name": "Ze Tian Ji (Way of Choices)/Season 4/Ze Tian Ji Season 4 episode 11 - izfanmade.com.mkv",
+        "size": 295614118,
+        "progress": 21.282664179117454,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 48,
+        "name": "Ze Tian Ji (Way of Choices)/Season 4/Ze Tian Ji Season 4 episode 12 - izfanmade.com.mkv",
+        "size": 311037560,
+        "progress": 17.530343280727898,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 49,
+        "name": "Ze Tian Ji (Way of Choices)/Season 5/Ze Tian Ji Season 5 episode 01 - izfanmade.com.mp4",
+        "size": 339591444,
+        "progress": 25.75067409531083,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 50,
+        "name": "Ze Tian Ji (Way of Choices)/Season 5/Ze Tian Ji Season 5 episode 02 - izfanmade.com.mp4",
+        "size": 386626938,
+        "progress": 35.96369428350592,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 51,
+        "name": "Ze Tian Ji (Way of Choices)/Season 5/Ze Tian Ji Season 5 episode 03 - izfanmade.com.mp4",
+        "size": 478091093,
+        "progress": 24.125812358524737,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 52,
+        "name": "Ze Tian Ji (Way of Choices)/Season 5/Ze Tian Ji Season 5 episode 04 - izfanmade.com.mp4",
+        "size": 494841332,
+        "progress": 26.69958377688629,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 53,
+        "name": "Ze Tian Ji (Way of Choices)/Season 5/Ze Tian Ji Season 5 episode 05 - izfanmade.com.mp4",
+        "size": 363825982,
+        "progress": 27.667978918558926,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 54,
+        "name": "Ze Tian Ji (Way of Choices)/Season 5/Ze Tian Ji Season 5 episode 06 - izfanmade.com.mp4",
+        "size": 357684591,
+        "progress": 29.3329532890054,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 55,
+        "name": "Ze Tian Ji (Way of Choices)/Season 5/Ze Tian Ji Season 5 episode 07 - izfanmade.com.mp4",
+        "size": 403114482,
+        "progress": 22.875098295277816,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 56,
+        "name": "Ze Tian Ji (Way of Choices)/Season 5/Ze Tian Ji Season 5 episode 08 - izfanmade.com.mp4",
+        "size": 348363492,
+        "progress": 22.49203426861963,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 57,
+        "name": "Ze Tian Ji (Way of Choices)/Season 5/Ze Tian Ji Season 5 episode 09 - izfanmade.com.mp4",
+        "size": 216353159,
+        "progress": 20.004690571677763,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 58,
+        "name": "Ze Tian Ji (Way of Choices)/Season 5/Ze Tian Ji Season 5 episode 10 - izfanmade.com.mp4",
+        "size": 200993443,
+        "progress": 27.512697516207034,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 59,
+        "name": "Ze Tian Ji (Way of Choices)/Season 5/Ze Tian Ji Season 5 episode 11 - izfanmade.com.mp4",
+        "size": 198345421,
+        "progress": 19.69953316945996,
+        "priority": 0,
+        "is_seed": false
+      },
+      {
+        "id": 60,
+        "name": "Ze Tian Ji (Way of Choices)/Season 5/Ze Tian Ji Season 5 episode 12 - izfanmade.com.mp4",
+        "size": 622185437,
+        "progress": 21.90904381453724,
+        "priority": 0,
+        "is_seed": false
+      }
+    ]
+  }
+]

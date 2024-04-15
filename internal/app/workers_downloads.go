@@ -325,7 +325,7 @@ func (j *DownloadsProcess) Move() error {
 			return fae.Wrap(err, "getting torrent")
 		}
 
-		mover := &Mover{Download: d, Torrent: t, Log: app.Log.Named("mover")}
+		mover := NewMover(app.Log.Named("mover"), d, t)
 		files, err := mover.Move()
 		// files, err := DownloadMove(d)
 		if err != nil {

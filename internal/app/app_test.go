@@ -1,6 +1,7 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -44,6 +45,18 @@ func appSetup() error {
 		}
 	}
 
+	return nil
+}
+
+func fixture(name string, v interface{}) error {
+	data, err := os.ReadFile(fmt.Sprintf("../../testdata/%s.json", name))
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(data, v)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
