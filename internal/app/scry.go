@@ -56,7 +56,7 @@ func (a *Application) ScrySearchEpisode(search *DownloadSearch) (*search.Release
 		return nil, fae.Wrap(err, "failed to search releases")
 	}
 
-	// app.Log.Named("search").Warnf("ScrySearchEpisode(): %s (%d) %02dx%02d => %d search: %s\n", search.Title, search.Year, search.Season, search.Episode, len(resp.Result.Releases), resp.Result.Search)
+	app.Log.Named("search").Warnf("ScrySearchEpisode(): %s (%d) %02dx%02d => %d search: %s\n", search.Title, search.Year, search.Season, search.Episode, len(resp.Result.Releases), resp.Result.Search)
 	if len(resp.Result.Releases) == 0 {
 		return nil, nil
 	}
@@ -86,6 +86,7 @@ func (c *Chooser) add(r *search.Release) {
 }
 
 func (c *Chooser) choose() *search.Release {
+	app.Log.Debugf("chooser: %+v", c.data)
 	if len(c.data["nzbs"]["preferred"]) > 0 {
 		return c.data["nzbs"]["preferred"][0]
 	}
@@ -95,22 +96,28 @@ func (c *Chooser) choose() *search.Release {
 	if len(c.data["tors"]["preferred"]) > 0 {
 		return c.data["tors"]["preferred"][0]
 	}
-
-	var r *search.Release
 	if len(c.data["tors"]["good"]) > 0 {
-		r = c.data["tors"]["good"][0]
+		if !c.Exact {
+			return c.data["tors"]["good"][0]
+		}
+
+		for _, r := range c.data["tors"]["good"] {
+			if c.Title == r.Name {
+				return r
+			}
+		}
 	}
 
-	if r == nil {
-		return nil
-	}
-
-	if c.Group == r.Group {
-		return r
-	}
-	if c.Exact && r.Name == c.Title {
-		return r
-	}
+	// 	if r == nil {
+	// 		return nil
+	// 	}
+	//
+	// 	if c.Group == r.Group {
+	// 		return r
+	// 	}
+	// 	if c.Exact && r.Name == c.Title {
+	// 		return r
+	// 	}
 
 	return nil
 }
