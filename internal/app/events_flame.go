@@ -33,6 +33,7 @@ func onFlameCombined(app *Application, c *FlameCombined) (*EventDownloading, err
 			ID:       d.ID.Hex(),
 			Infohash: d.Thash,
 			Multi:    d.Multi,
+			Files:    &DownloadingFiles{},
 		}
 
 		if !d.MediumID.IsZero() {
