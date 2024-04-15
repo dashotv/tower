@@ -30,3 +30,25 @@ func TestLayout(t *testing.T) {
 		})
 	}
 }
+func TestFiles(t *testing.T) {
+	cases := []struct {
+		id string
+		n  int
+	}{
+		{id: "661cba2a8b9c20e8890c01e9", n: 1},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.id, func(t *testing.T) {
+			d := &Download{}
+			err := app.DB.Download.Find(tt.id, d)
+			require.NoError(t, err)
+
+			app.DB.processDownloads([]*Download{d})
+
+			f, err := Files(d)
+			assert.NoError(t, err)
+			assert.Len(t, f, tt.n)
+		})
+	}
+}

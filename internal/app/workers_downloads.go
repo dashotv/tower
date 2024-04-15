@@ -281,18 +281,21 @@ func (j *DownloadsProcess) Manage() error {
 			return fae.Wrap(err, "failed to sort files")
 		}
 
-		if len(list) != 0 {
-			if len(list) > 3 {
-				list = list[:3]
+		if d.HasMedia() {
+			if len(list) != 0 {
+				if len(list) > 3 {
+					list = list[:3]
+				}
+				err := app.FlameTorrentWant(d.Thash, strings.Join(list, ","))
+				if err != nil {
+					return fae.Wrap(err, "want next")
+				}
 			}
-			err := app.FlameTorrentWant(d.Thash, strings.Join(list, ","))
-			if err != nil {
-				return fae.Wrap(err, "want next")
-			}
+
+			// save updates to download files
+			d.Status = "downloading"
 		}
 
-		// save updates to download files
-		d.Status = "downloading"
 		if err := app.DB.Download.Save(d); err != nil {
 			return fae.Wrap(err, "failed to save download")
 		}

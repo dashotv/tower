@@ -67,6 +67,18 @@ func (d *Download) SortedFileNums(t *qbt.Torrent) ([]string, error) {
 	return list, nil
 }
 
+func (d *Download) HasMedia() bool {
+	if !d.Multi {
+		return d.MediumID != primitive.NilObjectID
+	}
+
+	has := lo.Filter(d.Files, func(f *DownloadFile, _ int) bool {
+		return !f.MediumID.IsZero()
+	})
+
+	return len(has) > 0
+}
+
 func (c *Connector) DownloadByHash(hash string) (*Download, error) {
 	list, err := c.Download.Query().Where("thash", hash).Run()
 	if err != nil {

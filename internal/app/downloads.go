@@ -52,7 +52,7 @@ func FilesMetube(download *Download) ([]string, error) {
 	out := []string{}
 
 	if download.Medium.Type != "Episode" {
-		return nil, nil
+		return nil, fae.Errorf("unsupported medium type: %s", download.Medium.Type)
 	}
 
 	history, err := app.FlameMetubeHistory()
@@ -61,6 +61,7 @@ func FilesMetube(download *Download) ([]string, error) {
 	}
 
 	done, ok := lo.Find(history.Done, func(h *metube.Download) bool {
+		fmt.Printf("find: %s == %s\n", h.CustomNamePrefix, download.ID.Hex())
 		return h.CustomNamePrefix == download.ID.Hex()
 	})
 	if !ok || done == nil {
