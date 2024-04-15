@@ -114,7 +114,10 @@ func (j *DownloadsProcess) Search() error {
 		app.Workers.Log.Debugf("DownloadsProcess: found: %s - %s", d.Title, d.Display)
 		notifier.Info("Downloads::Found", fmt.Sprintf("%s - %s", d.Title, d.Display))
 
-		d.Status = "reviewing" // TODO: review
+		d.Status = "loading" // TODO: review
+		if !app.Config.Production {
+			d.Status = "reviewing"
+		}
 		d.URL = match.Download
 
 		err = app.DB.Download.Save(d)
