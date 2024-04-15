@@ -13,6 +13,8 @@ import (
 	"github.com/dashotv/minion"
 )
 
+var downloadMultiFiles = 3
+
 type DownloadsProcess struct {
 	minion.WorkerDefaults[*DownloadsProcess]
 }
@@ -276,17 +278,10 @@ func (j *DownloadsProcess) Manage() error {
 			}
 		}
 
-		list, err := d.SortedFileNums(t)
-		if err != nil {
-			return fae.Wrap(err, "failed to sort files")
-		}
-
 		if d.HasMedia() {
-			if len(list) != 0 {
-				if len(list) > 3 {
-					list = list[:3]
-				}
-				err := app.FlameTorrentWant(d.Thash, strings.Join(list, ","))
+			nums := d.NextFileNums(t, downloadMultiFiles)
+			if nums != "" {
+				err := app.FlameTorrentWant(d.Thash, nums)
 				if err != nil {
 					return fae.Wrap(err, "want next")
 				}
@@ -320,13 +315,19 @@ func (j *DownloadsProcess) Move() error {
 		if d.Medium == nil {
 			continue
 		}
-
-		// for now only handle "singular" downloads
-		if d.Medium.Type != "Episode" && d.Medium.Type != "Movie" {
+		if d.Thash == "" {
 			continue
 		}
 
-		files, err := DownloadMove(d)
+		t, err := app.FlameTorrent(d.Thash)
+		if err != nil {
+			app.Log.Debugf("error: %+v", err)
+			return fae.Wrap(err, "getting torrent")
+		}
+
+		mover := &Mover{Download: d, Torrent: t, Log: app.Log.Named("mover")}
+		files, err := mover.Move()
+		// files, err := DownloadMove(d)
 		if err != nil {
 			app.Log.Debugf("error: %+v", err)
 			return fae.Wrap(err, "move download")
@@ -336,15 +337,30 @@ func (j *DownloadsProcess) Move() error {
 			continue
 		}
 
-		moved = append(moved, files...)
-		notifier.Success("Downloads::Completed", fmt.Sprintf("%s - %s", d.Title, d.Display))
-
-		d.Status = "done"
 		// update medium and add path
 		if err := updateMedium(d.Medium, files); err != nil {
 			d.Status = "reviewing"
 		}
 
+		if d.Multi {
+			nums := d.NextFileNums(t, 3)
+			if nums != "" {
+				err := app.FlameTorrentWant(d.Thash, nums)
+				if err != nil {
+					return fae.Wrap(err, "want next")
+				}
+			}
+
+			continue
+		}
+
+		notifier.Success("Downloads::Completed", fmt.Sprintf("%s - %s", d.Title, d.Display))
+
+		moved = append(moved, files...)
+
+		if d.Status != "reviewing" {
+			d.Status = "done"
+		}
 		err = app.DB.Download.Save(d)
 		if err != nil {
 			return fae.Wrap(err, "failed to save download")
@@ -407,10 +423,15 @@ func DownloadMove(d *Download) ([]string, error) {
 	}
 
 	for _, source := range files {
+		var dest string
+		var err error
 		ext := Extension(source)
 
-		// TODO: move to configurable templates
-		dest, err := Destination(d.Medium)
+		if d.Medium.Type == "Series" {
+			dest, err = Destination(d.Medium)
+		} else {
+			dest, err = Destination(d.Medium)
+		}
 		if err != nil {
 			return nil, fae.Wrap(err, "failed to get destination")
 		}
@@ -442,7 +463,7 @@ func DownloadMove(d *Download) ([]string, error) {
 
 		if !app.Config.Production {
 			l.Debugf("skipping move in dev mode")
-			return nil, nil
+			continue
 		}
 
 		if err := FileLink(source, destination, d.Force); err != nil {

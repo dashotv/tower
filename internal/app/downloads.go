@@ -48,6 +48,31 @@ func Files(d *Download) ([]string, error) {
 	return out, nil
 }
 
+func FilesExtended(d *Download) ([]string, error) {
+	out := []string{}
+
+	if d.Thash == "" || d.IsNzb() {
+		return out, nil
+	}
+	if d.IsMetube() {
+		return FilesMetube(d)
+	}
+
+	t, err := app.FlameTorrent(d.Thash)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, f := range t.Files {
+		file := fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, f.Name)
+		if f.Progress == 100 && shouldDownloadFile(f.Name) && exists(file) {
+			out = append(out, file)
+		}
+	}
+
+	return out, nil
+}
+
 func FilesMetube(download *Download) ([]string, error) {
 	out := []string{}
 

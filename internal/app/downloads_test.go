@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -30,12 +31,17 @@ func TestLayout(t *testing.T) {
 		})
 	}
 }
+
 func TestFiles(t *testing.T) {
+	err := setupFlame(app)
+	require.NoError(t, err)
+
 	cases := []struct {
 		id string
 		n  int
 	}{
-		{id: "661cba2a8b9c20e8890c01e9", n: 1},
+		// {id: "661cba2a8b9c20e8890c01e9", n: 1},
+		{id: "661b394d81cc27eb3db2f484", n: 5},
 	}
 
 	for _, tt := range cases {
@@ -49,6 +55,32 @@ func TestFiles(t *testing.T) {
 			f, err := Files(d)
 			assert.NoError(t, err)
 			assert.Len(t, f, tt.n)
+		})
+	}
+}
+
+func TestWantNext(t *testing.T) {
+	err := setupFlame(app)
+	require.NoError(t, err)
+
+	cases := []struct {
+		id string
+	}{
+		{id: "661b394d81cc27eb3db2f484"},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.id, func(t *testing.T) {
+			d := &Download{}
+			err := app.DB.Download.Find(tt.id, d)
+			require.NoError(t, err)
+
+			app.DB.processDownloads([]*Download{d})
+			torrent, err := app.FlameTorrent(d.Thash)
+			assert.NoError(t, err)
+
+			nums := d.NextFileNums(torrent, downloadMultiFiles)
+			fmt.Printf("WANT: %s\n", nums)
 		})
 	}
 }

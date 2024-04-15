@@ -67,6 +67,21 @@ func (d *Download) SortedFileNums(t *qbt.Torrent) ([]string, error) {
 	return list, nil
 }
 
+func (d *Download) NextFileNums(t *qbt.Torrent, n int) string {
+	list, err := d.SortedFileNums(t)
+	if err != nil {
+		return ""
+	}
+	if len(list) == 0 {
+		return ""
+	}
+
+	if len(list) > 3 {
+		list = list[:3]
+	}
+	return strings.Join(list, ",")
+}
+
 func (d *Download) HasMedia() bool {
 	if !d.Multi {
 		return d.MediumID != primitive.NilObjectID

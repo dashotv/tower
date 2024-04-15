@@ -23,8 +23,9 @@ func (m *Medium) Destination() string {
 // AddPathByFullpath adds a path to the medium by the full path of the file. it ensures
 // that the path has a unique id and returns the path.
 func (m *Medium) AddPathByFullpath(file string) *Path {
-	d := filepath.Join(app.Config.DirectoriesCompleted, m.Destination())
-	dest := strings.Replace(file, d+"/", "", 1)
+	dir := filepath.Join(app.Config.DirectoriesCompleted, m.Destination())
+	dest := strings.Replace(file, dir+"/", "", 1)
+	dest = strings.TrimSuffix(dest, filepath.Ext(file))
 	ext := Extension(file)
 
 	path, ok := lo.Find(m.Paths, func(p *Path) bool {
@@ -41,7 +42,7 @@ func (m *Medium) AddPathByFullpath(file string) *Path {
 		ID:        primitive.NewObjectID(),
 		Local:     dest,
 		Extension: ext,
-		Type:      primitive.Symbol(fileType(fmt.Sprintf("%s.%s", dest, ext))),
+		Type:      primitive.Symbol(fileType(file)),
 	}
 	m.Paths = append(m.Paths, path)
 	return path
