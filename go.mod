@@ -8,11 +8,11 @@ require (
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/dashotv/fae v0.1.9
-	github.com/dashotv/flame v0.10.4
+	github.com/dashotv/flame v0.10.5
 	github.com/dashotv/golem v0.14.20
 	github.com/dashotv/grimoire v0.5.4
 	github.com/dashotv/mercury v0.3.2
-	github.com/dashotv/minion v0.4.11
+	github.com/dashotv/minion v0.4.12
 	github.com/dashotv/runic v0.4.0
 	github.com/dashotv/scry v0.10.4
 	github.com/dashotv/tmdb v0.2.0
@@ -58,13 +58,15 @@ require (
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/blendle/zapdriver v1.3.1 // indirect
 	github.com/bradfitz/iter v0.0.0-20191230175014-e8f45d346db8 // indirect
-	github.com/bytedance/sonic v1.11.3 // indirect
+	github.com/bytedance/sonic v1.11.4 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
 	github.com/clerk/clerk-sdk-go/v2 v2.0.0 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
+	github.com/cloudwego/base64x v0.1.0 // indirect
+	github.com/cloudwego/iasm v0.1.0 // indirect
 	github.com/deepmap/oapi-codegen v1.16.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/ericlagergren/decimal v0.0.0-20240411145413-00de7ca16731 // indirect

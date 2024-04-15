@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-resty/resty/v2"
-
 	"github.com/dashotv/fae"
 	flame "github.com/dashotv/flame/client"
 	"github.com/dashotv/flame/metube"
@@ -154,151 +152,151 @@ func (a *Application) FlameTorrentRemove(thash string) error {
 	return nil
 }
 
-type Flame struct {
-	URL string
-	c   *resty.Client
-}
-type FlameNzbAddResponse struct {
-	Error bool `json:"error"`
-	ID    int  `json:"id"`
-}
-
-func (c *Flame) Torrent(thash string) (*qbt.Torrent, error) {
-	res := &qbt.Response{}
-	resp, err := c.c.R().
-		SetHeader("Accept", "application/json").
-		SetResult(res).
-		ForceContentType("application/json").
-		Get("/qbittorrents/")
-	if err != nil {
-		return nil, fae.Wrap(err, "failed to load torrent")
-	}
-	if resp.IsError() {
-		return nil, fae.Errorf("failed to load torrent: %s", resp.Status())
-	}
-
-	for _, t := range res.Torrents {
-		if strings.ToLower(t.Hash) == strings.ToLower(thash) {
-			return t, nil
-		}
-	}
-
-	return nil, fae.Errorf("torrent not found: %s", thash)
-}
-
-func (c *Flame) LoadNzb(d *Download, url string) (string, error) {
-	enc := base64.StdEncoding.EncodeToString([]byte(url))
-	did := d.ID.Hex()
-	hash := did[len(did)-4:]
-	res := &FlameNzbAddResponse{}
-
-	resp, err := c.c.R().
-		SetQueryParam("url", enc).
-		SetQueryParam("category", "Series").
-		SetQueryParam("name", fmt.Sprintf("[%s] %s %s", hash, d.Medium.Title, d.Medium.Display)).
-		SetResult(res).
-		Get("/nzbs/add")
-	if err != nil {
-		return "", fae.Wrap(err, "failed to load nzb")
-	}
-	if resp.IsError() {
-		return "", fae.Errorf("failed to load nzb: %s", resp.Status())
-	}
-	if res.Error {
-		return "", fae.New("failed to load nzb")
-	}
-
-	return fmt.Sprintf("%d", res.ID), nil
-}
-
-type flameTorrentAddResponse struct {
-	Error    bool   `json:"error"`
-	Infohash string `json:"infohash"`
-}
-
-func (c *Flame) LoadTorrent(_ *Download, url string) (string, error) {
-	enc := base64.StdEncoding.EncodeToString([]byte(url))
-	res := &flameTorrentAddResponse{}
-	resp, err := c.c.R().
-		SetQueryParam("url", enc).
-		SetResult(res).
-		Get("/qbittorrents/add")
-	if err != nil {
-		return "", fae.Wrap(err, "failed to load torrent")
-	}
-	if resp.IsError() {
-		return "", fae.Errorf("failed to load torrent: %s", resp.Status())
-	}
-	if res.Error {
-		return "", fae.New("failed to load torrent")
-	}
-
-	return res.Infohash, nil
-}
-
-func (c *Flame) RemoveTorrent(thash string) error {
-	resp, err := c.c.R().
-		SetQueryParam("infohash", thash).
-		Get("/qbittorrents/remove")
-	if err != nil {
-		return fae.Wrap(err, "failed to remove torrent")
-	}
-	if resp.IsError() {
-		return fae.Errorf("failed to remove torrent: %s", resp.Status())
-	}
-
-	app.Log.Debugf("Flame::RemoveTorrent: %s", resp.Body())
-	return nil
-}
-
-type MetubeAddResponse struct {
-	Error   bool   `json:"error"`
-	Message string `json:"message"`
-}
-
-func (c *Flame) LoadMetube(name string, url string, autoStart bool) error {
-	app.Log.Named("flame").Debugf("LoadMetube: %s %s %t", name, url, autoStart)
-	enc := base64.StdEncoding.EncodeToString([]byte(url))
-	res := &MetubeAddResponse{}
-	resp, err := c.c.R().
-		SetQueryParam("url", enc).
-		SetQueryParam("name", name).
-		SetQueryParam("auto_start", fmt.Sprintf("%t", autoStart)).
-		SetResult(res).
-		Get("/metube/add")
-	if err != nil {
-		return fae.Wrap(err, "failed to load metube")
-	}
-	if resp.IsError() {
-		return fae.Errorf("failed to load metube: %s", resp.Status())
-	}
-	if res.Error {
-		return fae.Errorf("failed to load metube: %s", res.Message)
-	}
-
-	return nil
-}
-
-type MetubeHistory struct {
-	Error   bool                    `json:"error"`
-	History *metube.HistoryResponse `json:"history"`
-}
-
-func (c *Flame) MetubeHistory() (*metube.HistoryResponse, error) {
-	res := &MetubeHistory{}
-	resp, err := c.c.R().
-		SetResult(res).
-		SetHeader("Accept", "application/json").
-		Get("/metube/")
-	if err != nil {
-		return nil, fae.Wrap(err, "failed to load history")
-	}
-	if resp.IsError() {
-		return nil, fae.Errorf("failed to load history: %s", resp.Status())
-	}
-	if res.Error {
-		return nil, fae.New("failed to load history")
-	}
-
-	return res.History, nil
-}
+// type Flame struct {
+// 	URL string
+// 	c   *resty.Client
+// }
+// type FlameNzbAddResponse struct {
+// 	Error bool `json:"error"`
+// 	ID    int  `json:"id"`
+// }
+//
+// func (c *Flame) Torrent(thash string) (*qbt.Torrent, error) {
+// 	res := &qbt.Response{}
+// 	resp, err := c.c.R().
+// 		SetHeader("Accept", "application/json").
+// 		SetResult(res).
+// 		ForceContentType("application/json").
+// 		Get("/qbittorrents/")
+// 	if err != nil {
+// 		return nil, fae.Wrap(err, "failed to load torrent")
+// 	}
+// 	if resp.IsError() {
+// 		return nil, fae.Errorf("failed to load torrent: %s", resp.Status())
+// 	}
+//
+// 	for _, t := range res.Torrents {
+// 		if strings.ToLower(t.Hash) == strings.ToLower(thash) {
+// 			return t, nil
+// 		}
+// 	}
+//
+// 	return nil, fae.Errorf("torrent not found: %s", thash)
+// }
+//
+// func (c *Flame) LoadNzb(d *Download, url string) (string, error) {
+// 	enc := base64.StdEncoding.EncodeToString([]byte(url))
+// 	did := d.ID.Hex()
+// 	hash := did[len(did)-4:]
+// 	res := &FlameNzbAddResponse{}
+//
+// 	resp, err := c.c.R().
+// 		SetQueryParam("url", enc).
+// 		SetQueryParam("category", "Series").
+// 		SetQueryParam("name", fmt.Sprintf("[%s] %s %s", hash, d.Medium.Title, d.Medium.Display)).
+// 		SetResult(res).
+// 		Get("/nzbs/add")
+// 	if err != nil {
+// 		return "", fae.Wrap(err, "failed to load nzb")
+// 	}
+// 	if resp.IsError() {
+// 		return "", fae.Errorf("failed to load nzb: %s", resp.Status())
+// 	}
+// 	if res.Error {
+// 		return "", fae.New("failed to load nzb")
+// 	}
+//
+// 	return fmt.Sprintf("%d", res.ID), nil
+// }
+//
+// type flameTorrentAddResponse struct {
+// 	Error    bool   `json:"error"`
+// 	Infohash string `json:"infohash"`
+// }
+//
+// func (c *Flame) LoadTorrent(_ *Download, url string) (string, error) {
+// 	enc := base64.StdEncoding.EncodeToString([]byte(url))
+// 	res := &flameTorrentAddResponse{}
+// 	resp, err := c.c.R().
+// 		SetQueryParam("url", enc).
+// 		SetResult(res).
+// 		Get("/qbittorrents/add")
+// 	if err != nil {
+// 		return "", fae.Wrap(err, "failed to load torrent")
+// 	}
+// 	if resp.IsError() {
+// 		return "", fae.Errorf("failed to load torrent: %s", resp.Status())
+// 	}
+// 	if res.Error {
+// 		return "", fae.New("failed to load torrent")
+// 	}
+//
+// 	return res.Infohash, nil
+// }
+//
+// func (c *Flame) RemoveTorrent(thash string) error {
+// 	resp, err := c.c.R().
+// 		SetQueryParam("infohash", thash).
+// 		Get("/qbittorrents/remove")
+// 	if err != nil {
+// 		return fae.Wrap(err, "failed to remove torrent")
+// 	}
+// 	if resp.IsError() {
+// 		return fae.Errorf("failed to remove torrent: %s", resp.Status())
+// 	}
+//
+// 	app.Log.Debugf("Flame::RemoveTorrent: %s", resp.Body())
+// 	return nil
+// }
+//
+// type MetubeAddResponse struct {
+// 	Error   bool   `json:"error"`
+// 	Message string `json:"message"`
+// }
+//
+// func (c *Flame) LoadMetube(name string, url string, autoStart bool) error {
+// 	app.Log.Named("flame").Debugf("LoadMetube: %s %s %t", name, url, autoStart)
+// 	enc := base64.StdEncoding.EncodeToString([]byte(url))
+// 	res := &MetubeAddResponse{}
+// 	resp, err := c.c.R().
+// 		SetQueryParam("url", enc).
+// 		SetQueryParam("name", name).
+// 		SetQueryParam("auto_start", fmt.Sprintf("%t", autoStart)).
+// 		SetResult(res).
+// 		Get("/metube/add")
+// 	if err != nil {
+// 		return fae.Wrap(err, "failed to load metube")
+// 	}
+// 	if resp.IsError() {
+// 		return fae.Errorf("failed to load metube: %s", resp.Status())
+// 	}
+// 	if res.Error {
+// 		return fae.Errorf("failed to load metube: %s", res.Message)
+// 	}
+//
+// 	return nil
+// }
+//
+// type MetubeHistory struct {
+// 	Error   bool                    `json:"error"`
+// 	History *metube.HistoryResponse `json:"history"`
+// }
+//
+// func (c *Flame) MetubeHistory() (*metube.HistoryResponse, error) {
+// 	res := &MetubeHistory{}
+// 	resp, err := c.c.R().
+// 		SetResult(res).
+// 		SetHeader("Accept", "application/json").
+// 		Get("/metube/")
+// 	if err != nil {
+// 		return nil, fae.Wrap(err, "failed to load history")
+// 	}
+// 	if resp.IsError() {
+// 		return nil, fae.Errorf("failed to load history: %s", resp.Status())
+// 	}
+// 	if res.Error {
+// 		return nil, fae.New("failed to load history")
+// 	}
+//
+// 	return res.History, nil
+// }

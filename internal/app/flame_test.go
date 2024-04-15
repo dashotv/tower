@@ -36,3 +36,13 @@ func TestFlame_TorrentRemove(t *testing.T) {
 	err = app.FlameTorrentRemove("dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c")
 	require.NoError(t, err)
 }
+
+func TestFlame_FlameMetubeHistory(t *testing.T) {
+	err := setupFlame(app)
+	require.NoError(t, err)
+
+	resp, err := app.FlameMetubeHistory()
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	fmt.Printf("%+v\n", resp)
+}
