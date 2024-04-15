@@ -279,8 +279,8 @@ type Download struct { // model
 type DownloadFile struct { // struct
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
 	MediumID    primitive.ObjectID `bson:"medium_id" json:"medium_id"`
-	Medium      *Medium            `bson:"medium" json:"medium"`
 	Num         int                `bson:"num" json:"num"`
+	Medium      *Medium            `bson:"-" json:"medium"`
 	TorrentFile *TorrentFile       `bson:"-" json:"-"`
 }
 

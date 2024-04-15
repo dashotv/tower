@@ -30,7 +30,6 @@ fields:
   - name: medium
     type: "*Medium"
     bson: "-"
-  # for the UI
   - name: title
     type: string
     bson: "-"

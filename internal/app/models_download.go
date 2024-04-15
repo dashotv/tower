@@ -347,16 +347,16 @@ func (c *Connector) DownloadSelect(id, mediumID string, num int) error {
 
 	for _, f := range download.Files {
 		if f.Num == num {
-			mid := primitive.ObjectID{}
+			if mediumID == "" {
+				f.MediumID = primitive.NilObjectID
+				return c.Download.Update(download)
+			}
 
-			if mediumID != "" {
-				mid, err = primitive.ObjectIDFromHex(mediumID)
-				if err != nil {
-					return err
-				}
+			mid, err := primitive.ObjectIDFromHex(mediumID)
+			if err != nil {
+				return err
 			}
 			f.MediumID = mid
-
 			return c.Download.Update(download)
 		}
 	}

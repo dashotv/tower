@@ -6,12 +6,13 @@ fields:
     bson: _id
   - name: medium_id
     type: primitive.ObjectID
-  - name: medium
-    type: "*Medium"
   - name: num
     type: int
     json: num
     bson: num
+  - name: medium
+    type: "*Medium"
+    bson: "-"
   - name: torrent_file # used by the ui
     type: "*TorrentFile"
     bson: "-"
