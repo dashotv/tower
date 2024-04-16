@@ -33,6 +33,7 @@ func (j *DownloadsProcess) Work(ctx context.Context, job *minion.Job[*DownloadsP
 	}
 	defer downloadProcessMutex.Unlock()
 
+	// defer TickTock("DownloadsProcess: start")()
 	// notifier.Info("Downloads", "processing downloads")
 	funcs := []func() error{
 		j.Create,
@@ -54,6 +55,7 @@ func (j *DownloadsProcess) Work(ctx context.Context, job *minion.Job[*DownloadsP
 }
 
 func (j *DownloadsProcess) Create() error {
+	// defer TickTock("DownloadsProcess: Create")()
 	seriesDownloads, err := app.DB.SeriesDownloadCounts()
 	if err != nil {
 		return fae.Wrap(err, "failed to get series download counts")
@@ -104,6 +106,7 @@ func (j *DownloadsProcess) Create() error {
 }
 
 func (j *DownloadsProcess) Search() error {
+	// defer TickTock("DownloadsProcess: Search")()
 	list, err := app.DB.DownloadByStatus("searching")
 	if err != nil {
 		return fae.Wrap(err, "failed to get downloads")
@@ -144,6 +147,7 @@ func (j *DownloadsProcess) Search() error {
 }
 
 func (j *DownloadsProcess) Load() error {
+	// defer TickTock("DownloadsProcess: Load")()
 	list, err := app.DB.DownloadByStatus("loading")
 	if err != nil {
 		return fae.Wrap(err, "failed to get downloads")
@@ -176,6 +180,7 @@ func (j *DownloadsProcess) Load() error {
 }
 
 func (j *DownloadsProcess) Manage() error {
+	// defer TickTock("DownloadsProcess: Manage")()
 	list, err := app.DB.DownloadByStatus("managing")
 	if err != nil {
 		return fae.Wrap(err, "get downloads")
@@ -312,6 +317,7 @@ func (j *DownloadsProcess) Manage() error {
 }
 
 func (j *DownloadsProcess) Move() error {
+	// defer TickTock("DownloadsProcess: Move")()
 	list, err := app.DB.DownloadByStatus("downloading")
 	if err != nil {
 		return fae.Wrap(err, "failed to get downloads")
