@@ -27,13 +27,13 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 	}
 
 	if msg.Title == "" {
-		log.Debugf("skipping: empty title")
+		// log.Debugf("skipping: empty title")
 		return nil
 	}
 
 	id := a.Want.Release(msg)
 	if id == "" {
-		log.Debugf("skipping: [%s] %s (%d) %dx%d: not wanted", msg.Type, msg.Title, msg.Year, msg.Season, msg.Episode)
+		// log.Debugf("skipping: [%s] %s (%d) %dx%d: not wanted", msg.Type, msg.Title, msg.Year, msg.Season, msg.Episode)
 		return nil
 	}
 

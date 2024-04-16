@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -36,20 +37,22 @@ func (a *Application) EpisodesUpdate(c echo.Context, id string, subject *Episode
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
 
+// PATCH /episodes/settings
 func (a *Application) EpisodesSettingsBatch(c echo.Context, settings *SettingsBatch) error {
+	ids := lo.Map(settings.IDs, func(id string, i int) primitive.ObjectID {
+		oid, _ := primitive.ObjectIDFromHex(id)
+		return oid
+	})
 	if settings.Name == "watched" {
-		for _, sid := range settings.IDs {
-			id, err := primitive.ObjectIDFromHex(sid)
-			if err != nil {
-				return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
-			}
+		for _, id := range ids {
 			// TODO: need CreateOrUpdate method
 			if err := app.DB.Watch.Save(&Watch{MediumID: id, Username: "someone", WatchedAt: time.Now()}); err != nil {
 				return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 			}
 		}
 	} else {
-		_, err := app.DB.Episode.Collection.UpdateMany(context.Background(), bson.M{"_id": bson.M{"$in": settings.IDs}}, bson.M{"$set": bson.M{settings.Name: settings.Value}})
+		// a.Log.Debugf("settings: %s => %t :: %s", settings.Name, settings.Value, strings.Join(settings.IDs, ","))
+		_, err := app.DB.Episode.Collection.UpdateMany(context.Background(), bson.M{"_id": bson.M{"$in": ids}}, bson.M{"$set": bson.M{settings.Name: settings.Value}})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 		}
