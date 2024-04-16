@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/dashotv/fae"
+	"github.com/dashotv/grimoire"
 	runic "github.com/dashotv/runic/client"
 )
 
@@ -66,7 +68,7 @@ func (w *Want) Release(r *runic.Release) string {
 		return ""
 	}
 
-	if !lo.Contains(w.preferred, r.Group) && !lo.Contains(w.groups, r.Group) {
+	if r.Source != "rift" && !lo.Contains(w.preferred, r.Group) && !lo.Contains(w.groups, r.Group) {
 		return ""
 	}
 
@@ -92,6 +94,26 @@ func (w *Want) Movie(title string) string {
 		return ""
 	}
 	return f
+}
+
+func (w *Want) SeriesWanted(seriesID string) (*Wanted, error) {
+	names := []string{}
+	for t, id := range w.series_titles {
+		if id == seriesID {
+			names = append(names, t)
+		}
+	}
+
+	eps := lo.Map(w.series_episodes[seriesID], func(e *Episode, _ int) string {
+		return fmt.Sprintf("%02dx%02d #%03d %s", e.SeasonNumber, e.EpisodeNumber, e.AbsoluteNumber, e.Title)
+	})
+
+	wanted := &Wanted{
+		Names:    names,
+		Episodes: eps,
+	}
+
+	return wanted, nil
 }
 
 func (w *Want) Episode(seriesTitle string, season int, episode int) string {
@@ -126,6 +148,7 @@ func (w *Want) NextEpisode(seriesID string) *Episode {
 }
 
 func (w *Want) addSeries(s *Series) error {
+	// w.log.Debugf("addSeries: %s: %s\n", s.ID.Hex(), s.Title)
 	unwatched, err := w.db.SeriesUnwatchedByID(s.ID.Hex())
 	if err != nil {
 		return err
@@ -169,9 +192,9 @@ func (w *Want) addEpisode(e *Episode) {
 
 func (w *Want) Build() error {
 	utc := time.Now().UTC()
-	after := time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
+	start := time.Date(1974, 1, 1, 0, 0, 0, 0, time.UTC)
 	today := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC)
-	tomorrow := today.Add(time.Hour * 24)
+	later := today.Add(3 * time.Hour * 24)
 
 	seriesDownloads, err := app.DB.SeriesDownloadCounts()
 	if err != nil {
@@ -179,7 +202,10 @@ func (w *Want) Build() error {
 	}
 	w.series_downloads = seriesDownloads
 
-	err = w.db.Series.Query().Where("active", true).Batch(100, func(results []*Series) error {
+	err = w.db.Series.Query().ComplexOr(func(qq, qr *grimoire.QueryBuilder[*Series]) {
+		qq.Where("active", true)
+		qr.Where("kind", "donghua")
+	}).Batch(100, func(results []*Series) error {
 		for _, s := range results {
 			w.addSeries(s)
 		}
@@ -201,7 +227,7 @@ func (w *Want) Build() error {
 
 	q := w.db.Episode.Query().
 		In("series_id", w.series_ids).
-		GreaterThan("release_date", after).LessThan("release_date", tomorrow).
+		GreaterThan("release_date", start).LessThan("release_date", later).
 		Where("completed", false).
 		Where("skipped", false).
 		In("missing", []interface{}{false, nil}).

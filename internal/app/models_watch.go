@@ -16,6 +16,17 @@ func (c *Connector) MediumWatchedAny(id primitive.ObjectID) bool {
 	watches, _ := c.Watch.Query().Where("medium_id", id).Run()
 	return len(watches) > 0
 }
+func (c *Connector) WatchGet(id primitive.ObjectID, username string) (*Watch, error) {
+	// TODO: add user name to config
+	watches, err := c.Watch.Query().Where("medium_id", id).Where("username", username).Run()
+	if err != nil {
+		return nil, err
+	}
+	if len(watches) == 0 {
+		return nil, nil
+	}
+	return watches[0], nil
+}
 
 func (c *Connector) Watches(mediumID, username string) ([]*Watch, error) {
 	query := c.Watch.Query().Limit(100).Desc("watched_at")

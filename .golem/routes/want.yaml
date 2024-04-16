@@ -1,0 +1,19 @@
+name: want
+path: /want
+routes:
+  - name: series
+    path: /series
+    result: "*Wanted"
+    method: GET
+    params:
+      - name: id
+        type: string
+        query: true
+  - name: movie
+    path: /movie
+    method: GET
+    result: "*Wanted"
+    params:
+      - name: id
+        type: string
+        query: true

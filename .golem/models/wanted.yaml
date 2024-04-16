@@ -1,0 +1,7 @@
+name: wanted
+type: struct
+fields:
+  - name: names
+    type: "[]string"
+  - name: episodes
+    type: "[]string"

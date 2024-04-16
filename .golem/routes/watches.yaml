@@ -13,3 +13,14 @@ routes:
       - name: username
         type: string
         query: true
+  - name: create
+    path: /
+    method: POST
+    result: "*Watch"
+    params:
+      - name: medium_id
+        type: string
+        query: true
+      - name: username
+        type: string
+        query: true

@@ -21,7 +21,7 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 
 	id := a.Want.Release(msg)
 	if id == "" {
-		// log.Debugf("skipping: [%s] %s (%d) %dx%d: not wanted", msg.Type, msg.Title, msg.Year, msg.Season, msg.Episode)
+		log.Debugf("skipping: [%s] %s (%d) %dx%d: not wanted", msg.Type, msg.Title, msg.Year, msg.Season, msg.Episode)
 		return nil
 	}
 

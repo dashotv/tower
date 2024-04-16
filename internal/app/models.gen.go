@@ -671,6 +671,11 @@ type User struct { // model
 	Admin bool   `bson:"admin" json:"admin"`
 }
 
+type Wanted struct { // struct
+	Names    []string `bson:"names" json:"names"`
+	Episodes []string `bson:"episodes" json:"episodes"`
+}
+
 type Watch struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`

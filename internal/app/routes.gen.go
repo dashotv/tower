@@ -200,8 +200,13 @@ func (a *Application) Routes() {
 	users := a.Router.Group("/users")
 	users.GET("/", a.UsersIndexHandler)
 
+	want := a.Router.Group("/want")
+	want.GET("/series", a.WantSeriesHandler)
+	want.GET("/movie", a.WantMovieHandler)
+
 	watches := a.Router.Group("/watches")
 	watches.GET("/", a.WatchesIndexHandler)
+	watches.POST("/", a.WatchesCreateHandler)
 
 }
 
@@ -224,6 +229,7 @@ func (a *Application) indexHandler(c echo.Context) error {
 			"series":       "/series",
 			"upcoming":     "/upcoming",
 			"users":        "/users",
+			"want":         "/want",
 			"watches":      "/watches",
 		},
 	})
@@ -727,9 +733,24 @@ func (a *Application) UsersIndexHandler(c echo.Context) error {
 	return a.UsersIndex(c)
 }
 
+// Want (/want)
+func (a *Application) WantSeriesHandler(c echo.Context) error {
+	id := router.QueryParamString(c, "id")
+	return a.WantSeries(c, id)
+}
+func (a *Application) WantMovieHandler(c echo.Context) error {
+	id := router.QueryParamString(c, "id")
+	return a.WantMovie(c, id)
+}
+
 // Watches (/watches)
 func (a *Application) WatchesIndexHandler(c echo.Context) error {
 	medium_id := router.QueryParamString(c, "medium_id")
 	username := router.QueryParamString(c, "username")
 	return a.WatchesIndex(c, medium_id, username)
+}
+func (a *Application) WatchesCreateHandler(c echo.Context) error {
+	medium_id := router.QueryParamString(c, "medium_id")
+	username := router.QueryParamString(c, "username")
+	return a.WatchesCreate(c, medium_id, username)
 }
