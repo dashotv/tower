@@ -93,7 +93,7 @@ func (m *Mover) moveFile(name string, medium *Medium) error {
 	source := fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, name)
 	ext := Extension(name)
 
-	if medium == nil || medium.Completed {
+	if medium == nil || (medium.Completed && !m.Download.Force) {
 		m.Log.Debugf("skipping %s", source)
 		return nil
 	}
