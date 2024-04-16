@@ -323,55 +323,61 @@ func (j *DownloadsProcess) Move() error {
 	}
 
 	for _, d := range list {
-		if d.Medium == nil {
-			continue
-		}
-		if d.Thash == "" {
+		if d.Medium == nil || d.Thash == "" || d.IsNzb() {
 			continue
 		}
 
-		t, err := app.FlameTorrent(d.Thash)
-		if err != nil {
-			app.Log.Debugf("error: %+v", err)
-			return fae.Wrap(err, "getting torrent")
-		}
-
-		mover := NewMover(app.Log.Named("mover"), d, t)
-		files, err := mover.Move()
-		// files, err := DownloadMove(d)
-		if err != nil {
-			app.Log.Debugf("error: %+v", err)
-			return fae.Wrap(err, "move download")
-		}
-
-		if files == nil || len(files) == 0 {
-			continue
-		}
-
-		// update medium and add path
-		if err := updateMedium(d.Medium, files); err != nil {
-			d.Status = "reviewing"
-		}
-
-		if d.Multi {
-			nums := d.NextFileNums(t, 3)
-			if nums != "" {
-				err := app.FlameTorrentWant(d.Thash, nums)
-				if err != nil {
-					return fae.Wrap(err, "want next")
-				}
+		if d.IsMetube() {
+			files, err := DownloadMove(d)
+			if err != nil {
+				return fae.Wrap(err, "metube move")
 			}
 
+			moved = append(moved, files...)
 			continue
+		} else {
+			t, err := app.FlameTorrent(d.Thash)
+			if err != nil {
+				app.Log.Debugf("error: %+v", err)
+				return fae.Wrap(err, "getting torrent")
+			}
+
+			mover := NewMover(app.Log.Named("mover"), d, t)
+			files, err := mover.Move()
+			// files, err := DownloadMove(d)
+			if err != nil {
+				app.Log.Debugf("error: %+v", err)
+				return fae.Wrap(err, "move download")
+			}
+
+			if files == nil || len(files) == 0 {
+				continue
+			}
+
+			moved = append(moved, files...)
+			// update medium and add path
+			if err := updateMedium(d.Medium, files); err != nil {
+				d.Status = "reviewing"
+			}
+
+			if d.Multi {
+				nums := d.NextFileNums(t, 3)
+				if nums != "" {
+					err := app.FlameTorrentWant(d.Thash, nums)
+					if err != nil {
+						return fae.Wrap(err, "want next")
+					}
+				}
+
+				continue
+			}
 		}
 
 		notifier.Success("Downloads::Completed", fmt.Sprintf("%s - %s", d.Title, d.Display))
-
-		moved = append(moved, files...)
-
 		if d.Status != "reviewing" {
 			d.Status = "done"
 		}
+
 		err = app.DB.Download.Save(d)
 		if err != nil {
 			return fae.Wrap(err, "failed to save download")
