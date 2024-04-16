@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"time"
 
 	runic "github.com/dashotv/runic/client"
 )
@@ -15,7 +16,18 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 	}
 
 	if a.Want == nil {
-		log.Warnf("skipping: want not initialized")
+		log.Warnf("want not initialized, retrying in 10 seconds...")
+		for a.Want == nil {
+			time.Sleep(1 * time.Second)
+		}
+		if a.Want == nil {
+			log.Errorf("want not initialized")
+			return nil
+		}
+	}
+
+	if msg.Title == "" {
+		log.Debugf("skipping: empty title")
 		return nil
 	}
 
@@ -31,7 +43,6 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 	}
 
 	log.Debugf("found: %s s%02de%02d", msg.Title, msg.Season, msg.Episode)
-
 	var d *Download
 	downloads, err := a.DB.Download.Query().Where("medium_id", medium.ID).Run()
 	if err != nil {
@@ -63,6 +74,6 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 		return err
 	}
 
-	notifier.Info("Download Created", fmt.Sprintf("found: %s S%02dE%02d", msg.Title, msg.Season, msg.Episode))
+	notifier.Info("Found", fmt.Sprintf("%s (%d) S%02dE%02d", msg.Title, msg.Year, msg.Season, msg.Episode))
 	return nil
 }
