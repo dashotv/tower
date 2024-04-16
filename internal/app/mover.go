@@ -110,7 +110,7 @@ func (m *Mover) moveFile(name string, medium *Medium) error {
 	}
 	if exists(destination) {
 		if !m.Download.Force {
-			notifier.Log.Warn("DownloadMove", fmt.Sprintf("destination exists, force false: %s", destination))
+			// notifier.Log.Warn("DownloadMove", fmt.Sprintf("destination exists, force false: %s", destination))
 			return nil
 		}
 
@@ -124,9 +124,7 @@ func (m *Mover) moveFile(name string, medium *Medium) error {
 		}
 	}
 
-	m.Log.Debugf("mover: %s", source)
-	m.Log.Debugf("    -> %s", destination)
-
+	m.Log.Debugf("%s => %s", source, destination)
 	if !app.Config.Production {
 		m.Log.Debugf("skipping move in dev mode")
 		return nil

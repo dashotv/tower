@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -13,6 +14,7 @@ import (
 	"github.com/dashotv/minion"
 )
 
+var downloadProcessMutex = &CtxMutex{ch: make(chan struct{}, 1)}
 var downloadMultiFiles = 3
 
 type DownloadsProcess struct {
@@ -21,6 +23,15 @@ type DownloadsProcess struct {
 
 func (j *DownloadsProcess) Kind() string { return "DownloadsProcess" }
 func (j *DownloadsProcess) Work(ctx context.Context, job *minion.Job[*DownloadsProcess]) error {
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	defer cancel()
+
+	if !downloadProcessMutex.Lock(ctx) {
+		app.Log.Named("DownloadsProcess").Warn("failed to lock mutex")
+		return nil
+	}
+	defer downloadProcessMutex.Unlock()
+
 	// notifier.Info("Downloads", "processing downloads")
 	funcs := []func() error{
 		j.Create,
