@@ -23,10 +23,10 @@ type DownloadsProcess struct {
 
 func (j *DownloadsProcess) Kind() string { return "DownloadsProcess" }
 func (j *DownloadsProcess) Work(ctx context.Context, job *minion.Job[*DownloadsProcess]) error {
-	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	muctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
-	if !downloadProcessMutex.Lock(ctx) {
+	if !downloadProcessMutex.Lock(muctx) {
 		app.Log.Named("DownloadsProcess").Warn("failed to lock mutex")
 		return nil
 	}
