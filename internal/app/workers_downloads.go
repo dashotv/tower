@@ -466,7 +466,7 @@ func DownloadMove(d *Download) ([]string, error) {
 		}
 		if exists(destination) {
 			if !d.Force {
-				notifier.Log.Warn("DownloadMove", fmt.Sprintf("destination exists, force false: %s", destination))
+				// notifier.Log.Warn("DownloadMove", fmt.Sprintf("destination exists, force false: %s", destination))
 				return nil, nil
 			}
 
