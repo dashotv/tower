@@ -2,11 +2,15 @@ package app
 
 import (
 	"fmt"
+	"io/fs"
+	"path/filepath"
+	"strings"
 
 	"github.com/samber/lo"
 	"go.uber.org/zap"
 
 	"github.com/dashotv/fae"
+	"github.com/dashotv/flame/metube"
 	"github.com/dashotv/flame/qbt"
 )
 
@@ -31,6 +35,10 @@ type Mover struct {
 }
 
 func (m *Mover) List() ([]string, error) {
+	return m.torrentList()
+}
+
+func (m *Mover) torrentList() ([]string, error) {
 	out := []string{}
 
 	for _, f := range m.Torrent.Files {
@@ -43,7 +51,52 @@ func (m *Mover) List() ([]string, error) {
 	return out, nil
 }
 
+func (m *Mover) metubeList() ([]string, error) {
+	out := []string{}
+
+	if m.Download.Medium.Type != "Episode" {
+		return nil, fae.Errorf("unsupported medium type: %s", m.Download.Medium.Type)
+	}
+
+	history, err := app.FlameMetubeHistory()
+	if err != nil {
+		return nil, fae.Wrap(err, "metube history")
+	}
+
+	done, ok := lo.Find(history.Done, func(h *metube.Download) bool {
+		fmt.Printf("find: %s == %s\n", h.CustomNamePrefix, m.Download.ID.Hex())
+		return h.CustomNamePrefix == m.Download.ID.Hex()
+	})
+	if !ok || done == nil {
+		return nil, nil
+	}
+
+	err = filepath.WalkDir(app.Config.DirectoriesMetube, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		if strings.Contains(path, m.Download.ID.Hex()) && shouldDownloadFile(path) {
+			out = append(out, path)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, fae.Wrap(err, "walk")
+	}
+
+	return out, nil
+}
+
 func (m *Mover) Move() ([]string, error) {
+	if m.Download.IsMetube() {
+		return m.moveMetube()
+	}
 	if m.Download.Medium.Type == "Series" {
 		return m.moveSeries()
 	}
@@ -75,6 +128,22 @@ func (m *Mover) moveSeries() ([]string, error) {
 
 func (m *Mover) moveFiles() ([]string, error) {
 	files, err := m.List()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, file := range files {
+		err := m.moveFile(file, m.Download.Medium)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return m.moved, nil
+}
+
+func (m *Mover) moveMetube() ([]string, error) {
+	files, err := m.metubeList()
 	if err != nil {
 		return nil, err
 	}
