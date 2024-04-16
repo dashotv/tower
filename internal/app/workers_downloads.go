@@ -373,11 +373,13 @@ func (j *DownloadsProcess) Move() error {
 			}
 		}
 
-		notifier.Success("Downloads::Completed", fmt.Sprintf("%s - %s", d.Title, d.Display))
-		if d.Status != "reviewing" {
+		if err := updateMedium(d.Medium, moved); err != nil {
+			d.Status = "reviewing"
+		} else {
 			d.Status = "done"
 		}
 
+		notifier.Success("Downloads::Completed", fmt.Sprintf("%s - %s", d.Title, d.Display))
 		err = app.DB.Download.Save(d)
 		if err != nil {
 			return fae.Wrap(err, "failed to save download")
