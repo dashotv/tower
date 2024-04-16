@@ -156,7 +156,7 @@ func (c *Connector) SeriesSeasons(id string) ([]int, error) {
 }
 
 func (c *Connector) SeriesSeasonEpisodes(id string, season string) ([]*Episode, error) {
-	oid, err := primitive.ObjectIDFromHex(id)
+	series, err := c.Series.Get(id, &Series{})
 	if err != nil {
 		return nil, err
 	}
@@ -166,20 +166,38 @@ func (c *Connector) SeriesSeasonEpisodes(id string, season string) ([]*Episode, 
 		return nil, err
 	}
 
-	q := c.Episode.Query()
+	q := c.Episode.Query().
+		Asc("season_number").Asc("episode_number").Asc("absolute_number").
+		Where("series_id", series.ID)
+	if !isAnimeKind(string(series.Kind)) {
+		q = q.Where("season_number", s)
+	}
 	eps, err := q.
-		Where("series_id", oid).
-		Where("season_number", s).
-		Asc("episode_number").
 		Limit(-1).
 		Run()
 	if err != nil {
 		return nil, err
 	}
 
+	eids := map[primitive.ObjectID]*Episode{}
 	for _, e := range eps {
-		e.Watched = c.MediumWatched(e.ID)
-		e.WatchedAny = c.MediumWatchedAny(e.ID)
+		eids[e.ID] = e
+	}
+
+	watches, err := c.Watch.Query().In("medium_id", lo.Keys(eids)).Limit(-1).Run()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, w := range watches {
+		e, ok := eids[w.MediumID]
+		if ok {
+			if w.Username == "xenonsoul" {
+				e.Watched = true
+			} else {
+				e.WatchedAny = true
+			}
+		}
 	}
 
 	return eps, nil

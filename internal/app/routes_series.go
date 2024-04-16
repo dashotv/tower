@@ -129,16 +129,21 @@ func (a *Application) SeriesShow(c echo.Context, id string) error {
 		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: err.Error()})
 	}
 
-	//Seasons
-	result.Seasons, err = app.DB.SeriesSeasons(id)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: err.Error()})
-	}
+	if isAnimeKind(string(result.Kind)) {
+		result.Seasons = []int{1}
+		result.CurrentSeason = 1
+	} else {
+		//Seasons
+		result.Seasons, err = app.DB.SeriesSeasons(id)
+		if err != nil {
+			return c.JSON(http.StatusNotFound, &Response{Error: true, Message: err.Error()})
+		}
 
-	//CurrentSeason
-	result.CurrentSeason, err = app.DB.SeriesCurrentSeason(id)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, &Response{Error: true, Message: err.Error()})
+		//CurrentSeason
+		result.CurrentSeason, err = app.DB.SeriesCurrentSeason(id)
+		if err != nil {
+			return c.JSON(http.StatusNotFound, &Response{Error: true, Message: err.Error()})
+		}
 	}
 
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: result})
