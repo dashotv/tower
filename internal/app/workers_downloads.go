@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/fae"
+	"github.com/dashotv/flame/qbt"
 	"github.com/dashotv/minion"
 )
 
@@ -327,50 +328,44 @@ func (j *DownloadsProcess) Move() error {
 			continue
 		}
 
-		if d.IsMetube() {
-			files, err := DownloadMove(d)
-			if err != nil {
-				return fae.Wrap(err, "metube move")
-			}
-
-			moved = append(moved, files...)
-			continue
-		} else {
-			t, err := app.FlameTorrent(d.Thash)
+		var t *qbt.Torrent
+		var err error
+		if d.IsTorrent() {
+			t, err = app.FlameTorrent(d.Thash)
 			if err != nil {
 				app.Log.Debugf("error: %+v", err)
 				return fae.Wrap(err, "getting torrent")
 			}
+		}
 
-			mover := NewMover(app.Log.Named("mover"), d, t)
-			files, err := mover.Move()
-			// files, err := DownloadMove(d)
-			if err != nil {
-				app.Log.Debugf("error: %+v", err)
-				return fae.Wrap(err, "move download")
-			}
+		mover := NewMover(app.Log.Named("mover"), d, t)
+		files, err := mover.Move()
+		// files, err := DownloadMove(d)
+		if err != nil {
+			app.Log.Debugf("error: %+v", err)
+			return fae.Wrap(err, "move download")
+		}
 
-			if files == nil || len(files) == 0 {
-				continue
-			}
+		if files == nil || len(files) == 0 {
+			continue
+		}
 
-			moved = append(moved, files...)
-			// update medium and add path
-			if err := updateMedium(d.Medium, files); err != nil {
-				d.Status = "reviewing"
-			}
+		moved = append(moved, files...)
+		// update medium and add path
+		if err := updateMedium(d.Medium, files); err != nil {
+			d.Status = "reviewing"
+		}
 
-			if d.Multi {
-				nums := d.NextFileNums(t, 3)
-				if nums != "" {
-					err := app.FlameTorrentWant(d.Thash, nums)
-					if err != nil {
-						return fae.Wrap(err, "want next")
-					}
+		if d.Multi {
+			nums := d.NextFileNums(t, 3)
+			if nums != "" {
+				err := app.FlameTorrentWant(d.Thash, nums)
+				if err != nil {
+					return fae.Wrap(err, "want next")
 				}
-
-				continue
 			}
+
+			continue
 		}
 
 		if err := updateMedium(d.Medium, moved); err != nil {
