@@ -117,7 +117,7 @@ func (m *Mover) moveSeries() ([]string, error) {
 	for _, tf := range tfiles {
 		medium := numToDf[tf.ID].Medium
 
-		err := m.moveFile(tf.Name, medium)
+		err := m.moveFile(fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, tf.Name), medium)
 		if err != nil {
 			return nil, err
 		}
@@ -133,7 +133,7 @@ func (m *Mover) moveFiles() ([]string, error) {
 	}
 
 	for _, file := range files {
-		err := m.moveFile(file, m.Download.Medium)
+		err := m.moveFile(fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, file), m.Download.Medium)
 		if err != nil {
 			return nil, err
 		}
@@ -149,7 +149,7 @@ func (m *Mover) moveMetube() ([]string, error) {
 	}
 
 	for _, file := range files {
-		err := m.moveFile(file, m.Download.Medium)
+		err := m.moveFile(fmt.Sprintf("%s/%s", app.Config.DirectoriesMetube, file), m.Download.Medium)
 		if err != nil {
 			return nil, err
 		}
@@ -158,9 +158,8 @@ func (m *Mover) moveMetube() ([]string, error) {
 	return m.moved, nil
 }
 
-func (m *Mover) moveFile(name string, medium *Medium) error {
-	source := fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, name)
-	ext := Extension(name)
+func (m *Mover) moveFile(source string, medium *Medium) error {
+	ext := Extension(source)
 
 	if medium == nil || (medium.Completed && !m.Download.Force) {
 		m.Log.Debugf("skipping %s", source)

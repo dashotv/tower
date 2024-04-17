@@ -374,12 +374,6 @@ func (j *DownloadsProcess) Move() error {
 			continue
 		}
 
-		if err := updateMedium(d.Medium, moved); err != nil {
-			d.Status = "reviewing"
-		} else {
-			d.Status = "done"
-		}
-
 		notifier.Success("Downloads::Completed", fmt.Sprintf("%s - %s", d.Title, d.Display))
 		err = app.DB.Download.Save(d)
 		if err != nil {
