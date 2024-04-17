@@ -90,6 +90,8 @@ func Start() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	ctx = ContextSet(ctx, "app", app)
+
 	if app == nil {
 		if err := Setup(); err != nil {
 			return err

@@ -2,18 +2,18 @@ package app
 
 import (
 	"fmt"
-	"io/fs"
 	"path/filepath"
 	"regexp"
-	"strings"
 
 	"github.com/samber/lo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/fae"
-	"github.com/dashotv/flame/metube"
+	"github.com/dashotv/flame/qbt"
 )
 
 var titleRegex = regexp.MustCompile(`(?i)^(?:episode|chapter)`)
+var downloadMultiFiles = 3
 
 func Extension(path string) string {
 	ext := filepath.Ext(path)
@@ -21,98 +21,6 @@ func Extension(path string) string {
 		ext = ext[1:]
 	}
 	return ext
-}
-
-func Files(d *Download) ([]string, error) {
-	out := []string{}
-
-	if d.Thash == "" || d.IsNzb() {
-		return out, nil
-	}
-	if d.IsMetube() {
-		return FilesMetube(d)
-	}
-
-	t, err := app.FlameTorrent(d.Thash)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, f := range t.Files {
-		file := fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, f.Name)
-		if f.Progress == 100 && shouldDownloadFile(f.Name) && exists(file) {
-			out = append(out, file)
-		}
-	}
-
-	return out, nil
-}
-
-func FilesExtended(d *Download) ([]string, error) {
-	out := []string{}
-
-	if d.Thash == "" || d.IsNzb() {
-		return out, nil
-	}
-	if d.IsMetube() {
-		return FilesMetube(d)
-	}
-
-	t, err := app.FlameTorrent(d.Thash)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, f := range t.Files {
-		file := fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, f.Name)
-		if f.Progress == 100 && shouldDownloadFile(f.Name) && exists(file) {
-			out = append(out, file)
-		}
-	}
-
-	return out, nil
-}
-
-func FilesMetube(download *Download) ([]string, error) {
-	out := []string{}
-
-	if download.Medium.Type != "Episode" {
-		return nil, fae.Errorf("unsupported medium type: %s", download.Medium.Type)
-	}
-
-	history, err := app.FlameMetubeHistory()
-	if err != nil {
-		return nil, fae.Wrap(err, "metube history")
-	}
-
-	done, ok := lo.Find(history.Done, func(h *metube.Download) bool {
-		fmt.Printf("find: %s == %s\n", h.CustomNamePrefix, download.ID.Hex())
-		return h.CustomNamePrefix == download.ID.Hex()
-	})
-	if !ok || done == nil {
-		return nil, nil
-	}
-
-	err = filepath.WalkDir(app.Config.DirectoriesMetube, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if d.IsDir() {
-			return nil
-		}
-
-		if strings.Contains(path, download.ID.Hex()) && shouldDownloadFile(path) {
-			out = append(out, path)
-		}
-
-		return nil
-	})
-	if err != nil {
-		return nil, fae.Wrap(err, "walk")
-	}
-
-	return out, nil
 }
 
 func Destination(m *Medium) (string, error) {
@@ -151,4 +59,374 @@ func destinationEpisode(m *Medium) (string, error) {
 	}
 
 	return out, nil
+}
+
+func updateMedium(m *Medium, files []string) error {
+	m.Completed = true
+
+	for _, f := range files {
+		path := m.AddPathByFullpath(f)
+
+		if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: path.ID.Hex(), Title: path.Local}); err != nil {
+			return fae.Errorf("enqueue path: %s", err)
+		}
+	}
+
+	if err := app.DB.Medium.Save(m); err != nil {
+		return fae.Wrap(err, "failed to save medium")
+	}
+
+	return nil
+}
+
+func (a *Application) downloadsCreate() error {
+	// defer TickTock("DownloadsProcess: Create")()
+	seriesDownloads, err := app.DB.SeriesDownloadCounts()
+	if err != nil {
+		return fae.Wrap(err, "failed to get series download counts")
+	}
+
+	list, err := app.DB.UpcomingNow()
+	if err != nil {
+		return fae.Wrap(err, "failed to get upcoming episodes")
+	}
+
+	for _, ep := range list {
+		//app.Workers.Log.Debugf("DownloadsProcess: create: %s %s", ep.Title, ep.Display)
+		if !ep.SeriesActive {
+			//app.Workers.Log.Debugf("DownloadsProcess: create: %s %s: not active", ep.Title, ep.Display)
+			continue
+		}
+
+		unwatched, err := app.DB.SeriesUnwatchedByID(ep.SeriesID.Hex())
+		if err != nil {
+			return fae.Wrap(err, "failed to get unwatched")
+		}
+
+		if unwatched+seriesDownloads[ep.SeriesID.Hex()] >= 3 {
+			continue
+		}
+
+		app.Workers.Log.Debugf("DownloadsProcess: create: %s - %s", ep.SeriesTitle, ep.Display)
+		notifier.Info("Downloads::Create", fmt.Sprintf("%s - %s", ep.SeriesTitle, ep.Display))
+		seriesDownloads[ep.SeriesID.Hex()]++
+
+		d := &Download{
+			Status:   "searching",
+			MediumID: ep.ID,
+			Auto:     true,
+		}
+		err = app.DB.Download.Save(d)
+		if err != nil {
+			return fae.Wrap(err, "failed to save download")
+		}
+
+		err = app.DB.EpisodeSetting(ep.ID.Hex(), "downloaded", true)
+		if err != nil {
+			return fae.Wrap(err, "failed to save episode")
+		}
+	}
+
+	return nil
+}
+
+func (a *Application) downloadsSearch() error {
+	// defer TickTock("DownloadsProcess: Search")()
+	list, err := app.DB.DownloadByStatus("searching")
+	if err != nil {
+		return fae.Wrap(err, "failed to get downloads")
+	}
+
+	for _, d := range list {
+		if d.Medium == nil {
+			continue
+		}
+		if d.Medium.Type != "Episode" {
+			//TODO: handle movies
+			continue
+		}
+
+		match, err := app.ScrySearchEpisode(d.Search)
+		if err != nil {
+			return fae.Wrap(err, "failed to search releases")
+		}
+		if match == nil {
+			continue
+		}
+
+		app.Workers.Log.Debugf("DownloadsProcess: found: %s - %s", d.Title, d.Display)
+		notifier.Info("Downloads::Found", fmt.Sprintf("%s - %s", d.Title, d.Display))
+
+		d.Status = "loading" // TODO: review
+		if !app.Config.Production {
+			d.Status = "reviewing"
+		}
+		d.URL = match.Download
+
+		err = app.DB.Download.Save(d)
+		if err != nil {
+			return fae.Wrap(err, "failed to save download")
+		}
+	}
+
+	return nil
+}
+
+func (a *Application) downloadsLoad() error {
+	// defer TickTock("DownloadsProcess: Load")()
+	list, err := app.DB.DownloadByStatus("loading")
+	if err != nil {
+		return fae.Wrap(err, "failed to get downloads")
+	}
+
+	for _, d := range list {
+		if d.ReleaseID == "" && d.URL == "" {
+			app.DB.Log.Debugf("DownloadsProcess: load: %s %s: no release", d.Title, d.Display)
+			continue
+		}
+
+		res, err := app.FlameAdd(d)
+		if err != nil {
+			return fae.Wrap(err, "failed to add to flame")
+		}
+
+		d.Status = "downloading"
+		if d.IsTorrent() {
+			d.Status = "managing"
+		}
+		d.Thash = res
+
+		err = app.DB.Download.Save(d)
+		if err != nil {
+			return fae.Wrap(err, "failed to save download")
+		}
+	}
+
+	return nil
+}
+
+func (a *Application) downloadsManage() error {
+	// defer TickTock("DownloadsProcess: Manage")()
+	list, err := app.DB.DownloadByStatus("managing")
+	if err != nil {
+		return fae.Wrap(err, "get downloads")
+	}
+
+	for _, d := range list {
+		// TODO: manage metube? show files while downloading?
+		if d.Thash == "" || !d.IsTorrent() {
+			continue
+		}
+
+		t, err := app.FlameTorrent(d.Thash)
+		if err != nil {
+			app.Log.Named("downloads.manage").Errorf("failed to get torrent: %s", err)
+			continue
+		}
+
+		if len(t.Files) == 0 {
+			continue
+		}
+
+		dfs := d.Files
+		numToDf := map[int]*DownloadFile{}
+		for _, df := range dfs {
+			numToDf[df.Num] = df
+		}
+
+		for _, f := range t.Files {
+			if shouldDownloadFile(f.Name) {
+				if _, ok := numToDf[f.ID]; !ok {
+					// if it doesn't already exist, add it
+					d.Files = append(d.Files, &DownloadFile{Num: f.ID})
+				}
+			}
+		}
+
+		if len(d.Files) == 0 {
+			app.Workers.Log.Warnf("download has no files: %s", d.ID.Hex())
+			continue
+		}
+
+		if len(d.Files) == 1 {
+			d.Files[0].MediumID = d.MediumID
+			d.Status = "downloading"
+
+			err = app.DB.Download.Save(d)
+			if err != nil {
+				return fae.Wrap(err, "failed to save download")
+			}
+
+			continue
+		}
+
+		if !d.Multi {
+			app.Workers.Log.Warnf("multiple files, but not multi", d.ID.Hex())
+
+			d.Status = "reviewing"
+			err = app.DB.Download.Save(d)
+			if err != nil {
+				return fae.Wrap(err, "failed to save download")
+			}
+
+			continue
+		}
+
+		for _, df := range d.Files {
+			if df.MediumID != primitive.NilObjectID {
+				// already has media
+				continue
+			}
+
+			if d.Medium.Type != "Series" {
+				// only handle series for now
+				app.Workers.Log.Warnf("multi not series", d.ID.Hex())
+
+				d.Status = "reviewing"
+				err = app.DB.Download.Save(d)
+				if err != nil {
+					return fae.Wrap(err, "failed to save download")
+				}
+			}
+
+			file := t.Files[df.Num]
+
+			// find the episode based on the name
+			ep, err := app.RunicFindEpisode(d.MediumID, file.Name, "tv")
+			if err != nil {
+				return fae.Wrap(err, "failed to find episode")
+			}
+
+			if ep == nil {
+				app.Workers.Log.Warnf("episode not found: %s", file.Name)
+				continue
+			}
+
+			df.MediumID = ep.ID
+		}
+
+		// TODO: handle want more / none / etc
+		wanted := false
+		for _, f := range t.Files {
+			if f.Priority > 0 {
+				wanted = true
+				break
+			}
+		}
+
+		if wanted && t.Progress != 100 {
+			err := app.FlameTorrentWant(d.Thash, "none")
+			if err != nil {
+				return fae.Wrap(err, "want none")
+			}
+		}
+
+		if d.HasMedia() {
+			nums := d.NextFileNums(t, downloadMultiFiles)
+			if nums != "" {
+				err := app.FlameTorrentWant(d.Thash, nums)
+				if err != nil {
+					return fae.Wrap(err, "want next")
+				}
+			}
+
+			// save updates to download files
+			d.Status = "downloading"
+		}
+
+		if err := app.DB.Download.Save(d); err != nil {
+			return fae.Wrap(err, "failed to save download")
+		}
+	}
+
+	return nil
+}
+
+func (a *Application) downloadsMove() error {
+	// defer TickTock("DownloadsProcess: Move")()
+	list, err := app.DB.DownloadByStatus("downloading")
+	if err != nil {
+		return fae.Wrap(err, "failed to get downloads")
+	}
+
+	moved := []string{}
+
+	if len(list) == 0 {
+		return nil
+	}
+
+	for _, d := range list {
+		if d.Medium == nil || d.Thash == "" || d.IsNzb() {
+			continue
+		}
+
+		var t *qbt.Torrent
+		var err error
+		if d.IsTorrent() {
+			t, err = app.FlameTorrent(d.Thash)
+			if err != nil {
+				app.Log.Debugf("error: %+v", err)
+				return fae.Wrap(err, "getting torrent")
+			}
+		}
+
+		mover := NewMover(app.Log.Named("mover"), d, t)
+		files, err := mover.Move()
+		// files, err := DownloadMove(d)
+		if err != nil {
+			app.Log.Debugf("error: %+v", err)
+			return fae.Wrap(err, "move download")
+		}
+
+		if files == nil || len(files) == 0 {
+			continue
+		}
+
+		moved = append(moved, files...)
+		// update medium and add path
+		if err := updateMedium(d.Medium, files); err != nil {
+			d.Status = "reviewing"
+		}
+
+		if d.Multi {
+			nums := d.NextFileNums(t, 3)
+			if nums != "" {
+				err := app.FlameTorrentWant(d.Thash, nums)
+				if err != nil {
+					return fae.Wrap(err, "want next")
+				}
+			}
+
+			continue
+		}
+
+		notifier.Success("Downloads::Completed", fmt.Sprintf("%s - %s", d.Title, d.Display))
+		err = app.DB.Download.Save(d)
+		if err != nil {
+			return fae.Wrap(err, "failed to save download")
+		}
+
+		if d.IsTorrent() {
+			if err := app.FlameTorrentRemove(d.Thash); err != nil {
+				return fae.Wrap(err, "failed to remove torrent")
+			}
+		}
+	}
+
+	if len(moved) > 0 {
+		dirs := lo.Map(moved, func(s string, i int) string {
+			return filepath.Dir(s)
+		})
+		dirs = lo.Uniq(dirs)
+
+		for _, dir := range dirs {
+			notifier.Log.Info("downloads: refresh: ", dir)
+			err := app.Plex.RefreshLibraryPath(dir)
+			if err != nil {
+				return fae.Wrap(err, "failed to refresh library")
+			}
+		}
+	}
+
+	return nil
 }

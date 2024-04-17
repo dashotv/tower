@@ -94,7 +94,7 @@ func (a *Application) DownloadsUpdate(c echo.Context, id string, data *Download)
 			return err
 		}
 	} else if data.Status == "loading" && (data.URL != "" || data.ReleaseID != "") {
-		if err := app.Workers.Enqueue(&DownloadsProcess{}); err != nil {
+		if err := app.Workers.Enqueue(&DownloadsProcessLoad{}); err != nil {
 			return err
 		}
 	}
