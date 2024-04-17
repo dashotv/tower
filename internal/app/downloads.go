@@ -107,8 +107,7 @@ func (a *Application) downloadsCreate() error {
 			continue
 		}
 
-		app.Workers.Log.Debugf("DownloadsProcess: create: %s - %s", ep.SeriesTitle, ep.Display)
-		notifier.Info("Downloads::Create", fmt.Sprintf("%s - %s", ep.SeriesTitle, ep.Display))
+		app.Workers.Log.Debugf("download created %s - %s", ep.SeriesTitle, ep.Display)
 		seriesDownloads[ep.SeriesID.Hex()]++
 
 		d := &Download{
@@ -154,7 +153,7 @@ func (a *Application) downloadsSearch() error {
 			continue
 		}
 
-		app.Workers.Log.Debugf("DownloadsProcess: found: %s - %s", d.Title, d.Display)
+		app.Workers.Log.Debugf("download found %s - %s", d.Title, d.Display)
 		notifier.Info("Downloads::Found", fmt.Sprintf("%s - %s", d.Title, d.Display))
 
 		d.Status = "loading" // TODO: review
