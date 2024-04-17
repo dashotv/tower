@@ -42,7 +42,6 @@ type Connector struct {
 	File        *grimoire.Store[*File]
 	Medium      *grimoire.Store[*Medium]
 	Message     *grimoire.Store[*Message]
-	Minion      *grimoire.Store[*Minion]
 	Movie       *grimoire.Store[*Movie]
 	Pin         *grimoire.Store[*Pin]
 	Release     *grimoire.Store[*Release]
@@ -121,13 +120,6 @@ func NewConnector(app *Application) (*Connector, error) {
 
 	grimoire.Indexes[*Message](message, &Message{})
 
-	minion, err := connection[*Minion]("minion")
-	if err != nil {
-		return nil, err
-	}
-
-	grimoire.Indexes[*Minion](minion, &Minion{})
-
 	movie, err := connection[*Movie]("movie")
 	if err != nil {
 		return nil, err
@@ -187,7 +179,6 @@ func NewConnector(app *Application) (*Connector, error) {
 		File:        file,
 		Medium:      medium,
 		Message:     message,
-		Minion:      minion,
 		Movie:       movie,
 		Pin:         pin,
 		Release:     release,
@@ -423,26 +414,6 @@ type Message struct { // model
 	Level    string `bson:"level" json:"level"`
 	Facility string `bson:"facility" json:"facility"`
 	Message  string `bson:"message" json:"message"`
-}
-
-type Minion struct { // model
-	grimoire.Document `bson:",inline"` // includes default model settings
-	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
-	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Kind     string           `bson:"kind" json:"kind"`
-	Args     string           `bson:"args" json:"args"`
-	Status   string           `bson:"status" json:"status"`
-	Queue    string           `bson:"queue" json:"queue"`
-	Attempts []*MinionAttempt `bson:"attempts" json:"attempts"`
-}
-
-type MinionAttempt struct { // struct
-	StartedAt  time.Time `bson:"started_at" json:"started_at"`
-	Duration   float64   `bson:"duration" json:"duration"`
-	Status     string    `bson:"status" json:"status"`
-	Error      string    `bson:"error" json:"error"`
-	Stacktrace []string  `bson:"stacktrace" json:"stacktrace"`
 }
 
 type Movie struct { // model

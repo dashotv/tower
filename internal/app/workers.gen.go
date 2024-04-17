@@ -72,13 +72,6 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "scheduling worker: clean_plex_pins (CleanPlexPins)")
 	}
 
-	if err := minion.Register[*CleanupJobs](m, &CleanupJobs{}); err != nil {
-		return fae.Wrap(err, "registering worker: cleanup_jobs (CleanupJobs)")
-	}
-	if _, err := m.Schedule("0 10 11 * * *", &CleanupJobs{}); err != nil {
-		return fae.Wrap(err, "scheduling worker: cleanup_jobs (CleanupJobs)")
-	}
-
 	if err := minion.Register[*CleanupLogs](m, &CleanupLogs{}); err != nil {
 		return fae.Wrap(err, "registering worker: cleanup_logs (CleanupLogs)")
 	}
@@ -98,6 +91,10 @@ func setupWorkers(app *Application) error {
 	}
 	if _, err := m.Schedule("30 * * * * *", &DownloadsProcess{}); err != nil {
 		return fae.Wrap(err, "scheduling worker: downloads_process (DownloadsProcess)")
+	}
+
+	if err := minion.Register[*DownloadsProcessLoad](m, &DownloadsProcessLoad{}); err != nil {
+		return fae.Wrap(err, "registering worker: downloads_process_load (DownloadsProcessLoad)")
 	}
 
 	if err := minion.Register[*FileMatch](m, &FileMatch{}); err != nil {

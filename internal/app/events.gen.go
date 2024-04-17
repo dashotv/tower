@@ -58,7 +58,6 @@ type Events struct {
 	Downloads     chan *EventDownloads
 	Episodes      chan *EventEpisodes
 	FlameCombined chan *FlameCombined
-	Jobs          chan *EventJobs
 	Logs          chan *EventLogs
 	Movies        chan *EventMovies
 	Notices       chan *EventNotices
@@ -88,7 +87,6 @@ func NewEvents(app *Application) (*Events, error) {
 		Downloads:     make(chan *EventDownloads),
 		Episodes:      make(chan *EventEpisodes),
 		FlameCombined: make(chan *FlameCombined),
-		Jobs:          make(chan *EventJobs),
 		Logs:          make(chan *EventLogs),
 		Movies:        make(chan *EventMovies),
 		Notices:       make(chan *EventNotices),
@@ -117,10 +115,6 @@ func NewEvents(app *Application) (*Events, error) {
 	}
 
 	if err := e.Merc.Receiver("flame.combined", e.FlameCombined); err != nil {
-		return nil, err
-	}
-
-	if err := e.Merc.Sender("tower.jobs", e.Jobs); err != nil {
 		return nil, err
 	}
 
@@ -266,13 +260,6 @@ func (e *Events) doSend(topic EventsTopic, data any) error {
 		}
 		e.Episodes <- m
 
-	case "tower.jobs":
-		m, ok := data.(*EventJobs)
-		if !ok {
-			return fae.Errorf("events.send: wrong data type: %t", data)
-		}
-		e.Jobs <- m
-
 	case "tower.logs":
 		m, ok := data.(*EventLogs)
 		if !ok {
@@ -350,12 +337,6 @@ type EventEpisodes struct { // episodes
 	Event   string   `bson:"event" json:"event"`
 	ID      string   `bson:"id" json:"id"`
 	Episode *Episode `bson:"episode" json:"episode"`
-}
-
-type EventJobs struct { // jobs
-	Event string  `bson:"event" json:"event"`
-	ID    string  `bson:"id" json:"id"`
-	Job   *Minion `bson:"job" json:"job"`
 }
 
 type EventLogs struct { // logs
