@@ -29,6 +29,7 @@ type Config struct {
 	ScryURL               string   `env:"SCRY_URL"`
 	RunicURL              string   `env:"RUNIC_URL"`
 	Plex                  string   `env:"PLEX"`
+	PlexUsername          string   `env:"PLEX_USERNAME"`
 	PlexToken             string   `env:"PLEX_TOKEN"`
 	PlexAppName           string   `env:"PLEX_APP_NAME"`
 	PlexMachineIdentifier string   `env:"PLEX_MACHINE_IDENTIFIER"`

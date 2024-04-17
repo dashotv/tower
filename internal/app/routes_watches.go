@@ -31,11 +31,20 @@ func (a *Application) WatchesCreate(c echo.Context, medium_id string, username s
 		return c.JSON(http.StatusOK, &Response{Error: false, Message: "watch exists", Result: w})
 	}
 
-	watch := &Watch{
-		MediumID:  m.ID,
-		Username:  username,
-		WatchedAt: time.Now(),
+	watch := &Watch{}
+	if username == app.Config.PlexUsername {
+		sw, err := app.DB.WatchGet(m.ID, "someone") // generic user from the UI
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "loading watch:" + err.Error()})
+		}
+		if sw != nil {
+			watch = sw
+		}
 	}
+
+	watch.MediumID = m.ID
+	watch.Username = username
+	watch.WatchedAt = time.Now()
 
 	if err := app.DB.Watch.Save(watch); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "saving:" + err.Error()})

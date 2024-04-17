@@ -114,7 +114,7 @@ func (c *Connector) SeriesUnwatched(s *Series, user string) (int, error) {
 }
 
 func (c *Connector) SeriesUserUnwatched(s *Series) (int, error) {
-	return c.SeriesUnwatched(s, "xenonsoul")
+	return c.SeriesUnwatched(s, app.Config.PlexUsername)
 }
 
 // func (c *Connector) SeriesUserUnwatchedCached(s *Series) (int, error) {
@@ -192,7 +192,7 @@ func (c *Connector) SeriesSeasonEpisodes(id string, season string) ([]*Episode, 
 	for _, w := range watches {
 		e, ok := eids[w.MediumID]
 		if ok {
-			if w.Username == "xenonsoul" {
+			if w.Username == app.Config.PlexUsername {
 				e.Watched = true
 			} else {
 				e.WatchedAny = true

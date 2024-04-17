@@ -8,7 +8,7 @@ import (
 
 func (c *Connector) MediumWatched(id primitive.ObjectID) bool {
 	// TODO: add user name to config
-	watches, _ := c.Watch.Query().Where("medium_id", id).Where("username", "xenonsoul").Run()
+	watches, _ := c.Watch.Query().Where("medium_id", id).Where("username", app.Config.PlexUsername).Run()
 	return len(watches) > 0
 }
 func (c *Connector) MediumWatchedAny(id primitive.ObjectID) bool {
