@@ -207,6 +207,8 @@ func (a *Application) Routes() {
 	watches := a.Router.Group("/watches")
 	watches.GET("/", a.WatchesIndexHandler)
 	watches.POST("/", a.WatchesCreateHandler)
+	watches.DELETE("/:id", a.WatchesDeleteHandler)
+	watches.DELETE("/medium", a.WatchesDeleteMediumHandler)
 
 }
 
@@ -753,4 +755,12 @@ func (a *Application) WatchesCreateHandler(c echo.Context) error {
 	medium_id := router.QueryParamString(c, "medium_id")
 	username := router.QueryParamString(c, "username")
 	return a.WatchesCreate(c, medium_id, username)
+}
+func (a *Application) WatchesDeleteHandler(c echo.Context) error {
+	id := c.Param("id")
+	return a.WatchesDelete(c, id)
+}
+func (a *Application) WatchesDeleteMediumHandler(c echo.Context) error {
+	medium_id := router.QueryParamString(c, "medium_id")
+	return a.WatchesDeleteMedium(c, medium_id)
 }
