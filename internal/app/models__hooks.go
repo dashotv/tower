@@ -10,9 +10,15 @@ import (
 )
 
 func (d *Download) Created(ctx context.Context) error {
+	if d.Title == "" {
+		app.DB.processDownloads([]*Download{d})
+	}
 	return app.Events.Send("tower.downloads", &EventDownloads{"created", d.ID.Hex(), d})
 }
 func (d *Download) Updated(ctx context.Context, result *mongo.UpdateResult) error {
+	if d.Title == "" {
+		app.DB.processDownloads([]*Download{d})
+	}
 	return app.Events.Send("tower.downloads", &EventDownloads{"updated", d.ID.Hex(), d})
 }
 func (d *Download) Saving() error {
