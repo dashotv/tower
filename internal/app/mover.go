@@ -64,7 +64,7 @@ func (m *Mover) metubeList() ([]string, error) {
 	}
 
 	done, ok := lo.Find(history.Done, func(h *metube.Download) bool {
-		fmt.Printf("find: %s == %s\n", h.CustomNamePrefix, m.Download.ID.Hex())
+		// m.Log.Debugf("find: %s == %s\n", h.CustomNamePrefix, m.Download.ID.Hex())
 		return h.CustomNamePrefix == m.Download.ID.Hex()
 	})
 	if !ok || done == nil {
@@ -149,7 +149,7 @@ func (m *Mover) moveMetube() ([]string, error) {
 	}
 
 	for _, file := range files {
-		err := m.moveFile(fmt.Sprintf("%s/%s", app.Config.DirectoriesMetube, file), m.Download.Medium)
+		err := m.moveFile(file, m.Download.Medium)
 		if err != nil {
 			return nil, err
 		}
