@@ -62,6 +62,10 @@ func destinationEpisode(m *Medium) (string, error) {
 }
 
 func updateMedium(m *Medium, files []string) error {
+	if m.Type == "Series" {
+		return fae.New("update medium: series not supported")
+	}
+
 	m.Downloaded = true
 	m.Completed = true
 
@@ -75,6 +79,42 @@ func updateMedium(m *Medium, files []string) error {
 
 	if err := app.DB.Medium.Save(m); err != nil {
 		return fae.Wrap(err, "failed to save medium")
+	}
+
+	return nil
+}
+
+func updateSeries(d *Download, t *qbt.Torrent, files []string) error {
+	s := &Series{}
+	if err := app.DB.Series.FindByID(d.Medium.ID, s); err != nil {
+		return fae.Wrap(err, "failed to find series")
+	}
+
+	dfiles := d.Files
+	numToDf := map[int]*DownloadFile{}
+	for _, df := range dfiles {
+		numToDf[df.Num] = df
+	}
+
+	tfiles := lo.Filter(t.Files, func(f *qbt.TorrentFile, _ int) bool {
+		return numToDf[f.ID].Medium != nil && lo.Contains(files, fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, f.Name))
+	})
+
+	for _, tf := range tfiles {
+		df, ok := numToDf[tf.ID]
+		if !ok {
+			continue
+		}
+
+		medium := df.Medium
+		if medium == nil {
+			continue
+		}
+
+		err := updateMedium(medium, []string{fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, tf.Name)})
+		if err != nil {
+			return fae.Wrapf(err, "failed to update medium: %s", medium.ID.Hex())
+		}
 	}
 
 	return nil
@@ -383,6 +423,11 @@ func (a *Application) downloadsMove() error {
 		}
 
 		if d.Multi && d.Medium.Type == "Series" {
+			// update medium and add path
+			if err := updateSeries(d, t, files); err != nil {
+				return fae.Wrap(err, "update medium")
+			}
+
 			nums := d.NextFileNums(t, 3)
 			if nums != "" {
 				err := app.FlameTorrentWant(d.Thash, nums)
@@ -395,6 +440,7 @@ func (a *Application) downloadsMove() error {
 		}
 
 		moved = append(moved, files...)
+
 		// update medium and add path
 		if err := updateMedium(d.Medium, files); err != nil {
 			return fae.Wrap(err, "update medium")
