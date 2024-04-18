@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // GET /watches/
@@ -78,7 +79,12 @@ func (a *Application) WatchesDeleteMedium(c echo.Context, medium_id string) erro
 		return c.JSON(http.StatusBadRequest, &Response{Error: true, Message: "medium_id is required"})
 	}
 
-	if _, err := app.DB.Watch.Collection.DeleteMany(context.Background(), bson.M{"medium_id": medium_id}); err != nil {
+	mid, err := primitive.ObjectIDFromHex(medium_id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, &Response{Error: true, Message: "invalid medium_id"})
+	}
+
+	if _, err := app.DB.Watch.Collection.DeleteMany(context.Background(), bson.M{"medium_id": mid}); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "deleting watch:" + err.Error()})
 	}
 
