@@ -62,6 +62,7 @@ func destinationEpisode(m *Medium) (string, error) {
 }
 
 func updateMedium(m *Medium, files []string) error {
+	m.Downloaded = true
 	m.Completed = true
 
 	for _, f := range files {
@@ -381,13 +382,7 @@ func (a *Application) downloadsMove() error {
 			continue
 		}
 
-		moved = append(moved, files...)
-		// update medium and add path
-		if err := updateMedium(d.Medium, files); err != nil {
-			d.Status = "reviewing"
-		}
-
-		if d.Multi {
+		if d.Multi && d.Medium.Type == "Series" {
 			nums := d.NextFileNums(t, 3)
 			if nums != "" {
 				err := app.FlameTorrentWant(d.Thash, nums)
@@ -399,10 +394,10 @@ func (a *Application) downloadsMove() error {
 			continue
 		}
 
-		notifier.Success("Downloads::Completed", fmt.Sprintf("%s - %s", d.Title, d.Display))
-		err = app.DB.Download.Save(d)
-		if err != nil {
-			return fae.Wrap(err, "failed to save download")
+		moved = append(moved, files...)
+		// update medium and add path
+		if err := updateMedium(d.Medium, files); err != nil {
+			return fae.Wrap(err, "update medium")
 		}
 
 		if d.IsTorrent() {
@@ -410,6 +405,14 @@ func (a *Application) downloadsMove() error {
 				return fae.Wrap(err, "failed to remove torrent")
 			}
 		}
+
+		d.Status = "done"
+		err = app.DB.Download.Save(d)
+		if err != nil {
+			return fae.Wrap(err, "failed to save download")
+		}
+
+		notifier.Success("Downloads::Completed", fmt.Sprintf("%s - %s", d.Title, d.Display))
 	}
 
 	if len(moved) > 0 {
