@@ -1,12 +1,44 @@
 package app
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/dashotv/flame/qbt"
 )
+
+func TestMover_MoveDownload(t *testing.T) {
+	err := setupFlame(app)
+	assert.NoError(t, err)
+
+	did := "6621e4c3d63b246fcfc732b0"
+	download := &Download{}
+	err = app.DB.Download.Find(did, download)
+	assert.NoError(t, err)
+
+	app.DB.processDownloads([]*Download{download})
+
+	torrent, err := app.FlameTorrent(download.Thash)
+	assert.NoError(t, err)
+	assert.NotNil(t, torrent)
+
+	mover := NewMover(app.Log.Named("TESTMOVER"), download, torrent)
+	mover.movefunc = testFileLink
+
+	// list, err := mover.Move()
+	// assert.NoError(t, err)
+	// assert.NotEmpty(t, list)
+
+	moved, err := mover.Move()
+	assert.NoError(t, err)
+	assert.NotEmpty(t, moved)
+
+	for _, f := range moved {
+		fmt.Printf("MOVED: %s\n", f.Destination)
+	}
+}
 
 func TestMover_Move(t *testing.T) {
 	var downloads []*Download

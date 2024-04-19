@@ -78,6 +78,7 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 		return fae.Errorf("multiple files found: %s: %+v", dir, files)
 	}
 
+	// TODO: use Mover
 	file := files[0]
 	ext := filepath.Ext(file)
 	if len(ext) > 0 && ext[0] == '.' {
@@ -102,7 +103,7 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 		return fae.Wrap(err, "linking file")
 	}
 
-	if err := updateMedium(download.Medium, []string{destination}); err != nil {
+	if err := updateMedia([]*MoverFile{{Medium: download.Medium, Source: source, Destination: destination}}); err != nil {
 		return fae.Wrap(err, "updating medium")
 	}
 

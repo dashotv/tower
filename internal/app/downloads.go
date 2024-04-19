@@ -61,16 +61,13 @@ func destinationEpisode(m *Medium) (string, error) {
 	return out, nil
 }
 
-func updateMedium(m *Medium, files []string) error {
-	if m.Type == "Series" {
-		return fae.New("update medium: series not supported")
-	}
-
+func updateMedium(m *Medium, files []*MoverFile) error {
+	fmt.Printf("updateMedium: %s %+v\n", m.ID.Hex(), files)
 	m.Downloaded = true
 	m.Completed = true
 
 	for _, f := range files {
-		path := m.AddPathByFullpath(f)
+		path := m.AddPathByFullpath(f.Destination)
 
 		if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: path.ID.Hex(), Title: path.Local}); err != nil {
 			return fae.Errorf("enqueue path: %s", err)
@@ -84,36 +81,10 @@ func updateMedium(m *Medium, files []string) error {
 	return nil
 }
 
-func updateSeries(d *Download, t *qbt.Torrent, files []string) error {
-	s := &Series{}
-	if err := app.DB.Series.FindByID(d.Medium.ID, s); err != nil {
-		return fae.Wrap(err, "failed to find series")
-	}
-
-	dfiles := d.Files
-	numToDf := map[int]*DownloadFile{}
-	for _, df := range dfiles {
-		numToDf[df.Num] = df
-	}
-
-	tfiles := lo.Filter(t.Files, func(f *qbt.TorrentFile, _ int) bool {
-		return numToDf[f.ID].Medium != nil && lo.Contains(files, fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, f.Name))
-	})
-
-	for _, tf := range tfiles {
-		df, ok := numToDf[tf.ID]
-		if !ok {
-			continue
-		}
-
-		medium := df.Medium
-		if medium == nil {
-			continue
-		}
-
-		err := updateMedium(medium, []string{fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, tf.Name)})
-		if err != nil {
-			return fae.Wrapf(err, "failed to update medium: %s", medium.ID.Hex())
+func updateMedia(files []*MoverFile) error {
+	for _, f := range files {
+		if err := updateMedium(f.Medium, []*MoverFile{f}); err != nil {
+			return fae.Wrapf(err, "update medium: %s", f.Destination)
 		}
 	}
 
@@ -389,7 +360,7 @@ func (a *Application) downloadsMove() error {
 		return fae.Wrap(err, "failed to get downloads")
 	}
 
-	moved := []string{}
+	moved := []*MoverFile{}
 
 	if len(list) == 0 {
 		return nil
@@ -412,7 +383,6 @@ func (a *Application) downloadsMove() error {
 
 		mover := NewMover(app.Log.Named("mover"), d, t)
 		files, err := mover.Move()
-		// files, err := DownloadMove(d)
 		if err != nil {
 			app.Log.Debugf("error: %+v", err)
 			return fae.Wrap(err, "move download")
@@ -424,7 +394,7 @@ func (a *Application) downloadsMove() error {
 
 		if d.Multi && d.Medium.Type == "Series" {
 			// update medium and add path
-			if err := updateSeries(d, t, files); err != nil {
+			if err := updateMedia(files); err != nil {
 				return fae.Wrap(err, "update medium")
 			}
 
@@ -442,7 +412,7 @@ func (a *Application) downloadsMove() error {
 		moved = append(moved, files...)
 
 		// update medium and add path
-		if err := updateMedium(d.Medium, files); err != nil {
+		if err := updateMedia(files); err != nil {
 			return fae.Wrap(err, "update medium")
 		}
 
@@ -462,8 +432,8 @@ func (a *Application) downloadsMove() error {
 	}
 
 	if len(moved) > 0 {
-		dirs := lo.Map(moved, func(s string, i int) string {
-			return filepath.Dir(s)
+		dirs := lo.Map(moved, func(f *MoverFile, i int) string {
+			return filepath.Dir(f.Destination)
 		})
 		dirs = lo.Uniq(dirs)
 

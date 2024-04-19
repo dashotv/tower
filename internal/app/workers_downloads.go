@@ -30,11 +30,11 @@ func (j *DownloadsProcess) Work(ctx context.Context, job *minion.Job[*DownloadsP
 	// defer TickTock("DownloadsProcess: start")()
 	// notifier.Info("Downloads", "processing downloads")
 	funcs := []func() error{
+		a.downloadsMove,
 		a.downloadsCreate,
 		a.downloadsSearch,
 		a.downloadsLoad,
 		a.downloadsManage,
-		a.downloadsMove,
 	}
 
 	for _, f := range funcs {

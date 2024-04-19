@@ -19,7 +19,7 @@ func NewMover(log *zap.SugaredLogger, download *Download, torrent *qbt.Torrent) 
 		Log:      log,
 		Download: download,
 		Torrent:  torrent,
-		moved:    []string{},
+		moved:    []*MoverFile{},
 		movefunc: FileLink,
 	}
 
@@ -30,8 +30,13 @@ type Mover struct {
 	Log      *zap.SugaredLogger
 	Download *Download
 	Torrent  *qbt.Torrent
-	moved    []string
+	moved    []*MoverFile
 	movefunc func(string, string, bool) error
+}
+type MoverFile struct {
+	Source      string
+	Destination string
+	Medium      *Medium
 }
 
 func (m *Mover) List() ([]string, error) {
@@ -93,7 +98,7 @@ func (m *Mover) metubeList() ([]string, error) {
 	return out, nil
 }
 
-func (m *Mover) Move() ([]string, error) {
+func (m *Mover) Move() ([]*MoverFile, error) {
 	if m.Download.IsMetube() {
 		return m.moveMetube()
 	}
@@ -103,7 +108,7 @@ func (m *Mover) Move() ([]string, error) {
 	return m.moveFiles()
 }
 
-func (m *Mover) moveSeries() ([]string, error) {
+func (m *Mover) moveSeries() ([]*MoverFile, error) {
 	dfiles := m.Download.Files
 	numToDf := map[int]*DownloadFile{}
 	for _, df := range dfiles {
@@ -126,7 +131,7 @@ func (m *Mover) moveSeries() ([]string, error) {
 	return m.moved, nil
 }
 
-func (m *Mover) moveFiles() ([]string, error) {
+func (m *Mover) moveFiles() ([]*MoverFile, error) {
 	files, err := m.List()
 	if err != nil {
 		return nil, err
@@ -142,7 +147,7 @@ func (m *Mover) moveFiles() ([]string, error) {
 	return m.moved, nil
 }
 
-func (m *Mover) moveMetube() ([]string, error) {
+func (m *Mover) moveMetube() ([]*MoverFile, error) {
 	files, err := m.metubeList()
 	if err != nil {
 		return nil, err
@@ -187,7 +192,7 @@ func (m *Mover) moveFile(source string, medium *Medium) error {
 			return fae.Errorf("failed to sum files")
 		}
 		if match {
-			notifier.Log.Warn("DownloadMove", fmt.Sprintf("destination exists, sums match: %s", destination))
+			// notifier.Log.Warn("DownloadMove", fmt.Sprintf("destination exists, sums match: %s", destination))
 			return nil
 		}
 	}
@@ -202,7 +207,7 @@ func (m *Mover) moveFile(source string, medium *Medium) error {
 		return fae.Wrap(err, "link")
 	}
 
-	m.moved = append(m.moved, destination)
+	m.moved = append(m.moved, &MoverFile{Source: source, Destination: destination, Medium: medium})
 	return nil
 }
 
