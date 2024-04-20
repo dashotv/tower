@@ -5,15 +5,14 @@ routes:
   - name: index
     path: /
     method: GET
-    result: "[]*Movie"
     params:
       - name: page
         type: int
-        default: 1
+        default: "1"
         query: true
       - name: limit
         type: int
-        default: 25
+        default: "25"
         query: true
       - name: kind
         type: string
@@ -30,31 +29,32 @@ routes:
       - name: broken
         type: bool
         query: true
+    result: "[]*Movie"
   - name: create
     path: /
     method: POST
-    result: "*Movie"
     params:
       - name: subject
         type: "*Movie"
         bind: true
+    result: "*Movie"
   - name: show
     path: /:id
     method: GET
-    result: "*Movie"
     params:
       - name: id
         type: string
+    result: "*Movie"
   - name: update
     path: /:id
     method: PUT
-    result: "*Movie"
     params:
       - name: id
         type: string
       - name: subject
         type: "*Movie"
         bind: true
+    result: "*Movie"
   - name: settings
     path: /:id
     method: PATCH
@@ -67,10 +67,10 @@ routes:
   - name: delete
     path: /:id
     method: DELETE
-    result: "*Movie"
     params:
       - name: id
         type: string
+    result: "*Movie"
   - name: refresh
     path: /:id/refresh
     method: PUT
@@ -80,7 +80,16 @@ routes:
   - name: paths
     path: /:id/paths
     method: GET
-    result: "[]*Path"
     params:
       - name: id
         type: string
+    result: "[]*Path"
+  - name: jobs
+    path: /:id/jobs
+    method: POST
+    params:
+      - name: id
+        type: string
+      - name: name
+        type: string
+        query: true

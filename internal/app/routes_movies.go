@@ -149,3 +149,25 @@ func (a *Application) MoviesPaths(c echo.Context, id string) error {
 	}
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: results})
 }
+
+func moviesJob(name string, id string) error {
+	switch name {
+	case "refresh":
+		return app.Workers.Enqueue(&TmdbUpdateMovie{ID: id})
+	case "paths":
+		return app.Workers.Enqueue(&PathCleanup{ID: id})
+	case "files":
+		return app.Workers.Enqueue(&FileMatchMedium{ID: id})
+	default:
+		return fae.Errorf("unknown job: %s", name)
+	}
+}
+
+// POST /movies/:id/jobs
+func (a *Application) MoviesJobs(c echo.Context, id string, name string) error {
+	if err := moviesJob(name, id); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, &Response{Error: false})
+}

@@ -143,6 +143,7 @@ func (a *Application) Routes() {
 	movies.DELETE("/:id", a.MoviesDeleteHandler)
 	movies.PUT("/:id/refresh", a.MoviesRefreshHandler)
 	movies.GET("/:id/paths", a.MoviesPathsHandler)
+	movies.POST("/:id/jobs", a.MoviesJobsHandler)
 
 	plex := a.Router.Group("/plex")
 	plex.GET("/auth", a.PlexAuthHandler)
@@ -509,6 +510,11 @@ func (a *Application) MoviesRefreshHandler(c echo.Context) error {
 func (a *Application) MoviesPathsHandler(c echo.Context) error {
 	id := c.Param("id")
 	return a.MoviesPaths(c, id)
+}
+func (a *Application) MoviesJobsHandler(c echo.Context) error {
+	id := c.Param("id")
+	name := router.QueryParamString(c, "name")
+	return a.MoviesJobs(c, id, name)
 }
 
 // Plex (/plex)
