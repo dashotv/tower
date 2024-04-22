@@ -1,0 +1,7 @@
+name: destination_template
+type: model
+fields:
+  - name: name
+    type: string
+  - name: template
+    type: string

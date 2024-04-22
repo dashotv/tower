@@ -1,0 +1,4 @@
+name: destination_template
+path: /destination_template
+rest: true
+model: "*DestinationTemplate"

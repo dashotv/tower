@@ -1,0 +1,4 @@
+name: release_type
+path: /release_type
+rest: true
+model: '*ReleaseType'

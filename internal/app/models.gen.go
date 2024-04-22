@@ -33,22 +33,25 @@ func checkDb(app *Application) (err error) {
 }
 
 type Connector struct {
-	Log         *zap.SugaredLogger
-	Collection  *grimoire.Store[*Collection]
-	Combination *grimoire.Store[*Combination]
-	Download    *grimoire.Store[*Download]
-	Episode     *grimoire.Store[*Episode]
-	Feed        *grimoire.Store[*Feed]
-	File        *grimoire.Store[*File]
-	Medium      *grimoire.Store[*Medium]
-	Message     *grimoire.Store[*Message]
-	Movie       *grimoire.Store[*Movie]
-	Pin         *grimoire.Store[*Pin]
-	Release     *grimoire.Store[*Release]
-	Request     *grimoire.Store[*Request]
-	Series      *grimoire.Store[*Series]
-	User        *grimoire.Store[*User]
-	Watch       *grimoire.Store[*Watch]
+	Log                 *zap.SugaredLogger
+	Collection          *grimoire.Store[*Collection]
+	Combination         *grimoire.Store[*Combination]
+	DestinationTemplate *grimoire.Store[*DestinationTemplate]
+	Download            *grimoire.Store[*Download]
+	Episode             *grimoire.Store[*Episode]
+	Feed                *grimoire.Store[*Feed]
+	File                *grimoire.Store[*File]
+	Library             *grimoire.Store[*Library]
+	Medium              *grimoire.Store[*Medium]
+	Message             *grimoire.Store[*Message]
+	Movie               *grimoire.Store[*Movie]
+	Pin                 *grimoire.Store[*Pin]
+	Release             *grimoire.Store[*Release]
+	ReleaseType         *grimoire.Store[*ReleaseType]
+	Request             *grimoire.Store[*Request]
+	Series              *grimoire.Store[*Series]
+	User                *grimoire.Store[*User]
+	Watch               *grimoire.Store[*Watch]
 }
 
 func connection[T mgm.Model](name string) (*grimoire.Store[T], error) {
@@ -78,6 +81,13 @@ func NewConnector(app *Application) (*Connector, error) {
 
 	grimoire.Indexes[*Combination](combination, &Combination{})
 
+	destination_template, err := connection[*DestinationTemplate]("destination_template")
+	if err != nil {
+		return nil, err
+	}
+
+	grimoire.Indexes[*DestinationTemplate](destination_template, &DestinationTemplate{})
+
 	download, err := connection[*Download]("download")
 	if err != nil {
 		return nil, err
@@ -105,6 +115,13 @@ func NewConnector(app *Application) (*Connector, error) {
 	}
 
 	grimoire.Indexes[*File](file, &File{})
+
+	library, err := connection[*Library]("library")
+	if err != nil {
+		return nil, err
+	}
+
+	grimoire.Indexes[*Library](library, &Library{})
 
 	medium, err := connection[*Medium]("medium")
 	if err != nil {
@@ -141,6 +158,13 @@ func NewConnector(app *Application) (*Connector, error) {
 
 	grimoire.Indexes[*Release](release, &Release{})
 
+	release_type, err := connection[*ReleaseType]("release_type")
+	if err != nil {
+		return nil, err
+	}
+
+	grimoire.Indexes[*ReleaseType](release_type, &ReleaseType{})
+
 	request, err := connection[*Request]("request")
 	if err != nil {
 		return nil, err
@@ -170,22 +194,25 @@ func NewConnector(app *Application) (*Connector, error) {
 	grimoire.Indexes[*Watch](watch, &Watch{})
 
 	c := &Connector{
-		Log:         app.Log.Named("db"),
-		Collection:  collection,
-		Combination: combination,
-		Download:    download,
-		Episode:     episode,
-		Feed:        feed,
-		File:        file,
-		Medium:      medium,
-		Message:     message,
-		Movie:       movie,
-		Pin:         pin,
-		Release:     release,
-		Request:     request,
-		Series:      series,
-		User:        user,
-		Watch:       watch,
+		Log:                 app.Log.Named("db"),
+		Collection:          collection,
+		Combination:         combination,
+		DestinationTemplate: destination_template,
+		Download:            download,
+		Episode:             episode,
+		Feed:                feed,
+		File:                file,
+		Library:             library,
+		Medium:              medium,
+		Message:             message,
+		Movie:               movie,
+		Pin:                 pin,
+		Release:             release,
+		ReleaseType:         release_type,
+		Request:             request,
+		Series:              series,
+		User:                user,
+		Watch:               watch,
 	}
 
 	return c, nil
@@ -235,6 +262,14 @@ type CombinationChild struct { // struct
 	LastViewedAt int64  `bson:"last_viewed_at" json:"last_viewed_at"`
 	AddedAt      int64  `bson:"added_at" json:"added_at"`
 	UpdatedAt    int64  `bson:"updated_at" json:"updated_at"`
+}
+
+type DestinationTemplate struct { // model
+	grimoire.Document `bson:",inline"` // includes default model settings
+	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
+	Name string `bson:"name" json:"name"`
 }
 
 type Download struct { // model
@@ -370,6 +405,17 @@ type File struct { // model
 	Size       int64              `bson:"size" json:"size"`
 	ModifiedAt int64              `bson:"modified_at" json:"modified_at"`
 	MediumID   primitive.ObjectID `bson:"medium_id" json:"medium_id"`
+}
+
+type Library struct { // model
+	grimoire.Document `bson:",inline"` // includes default model settings
+	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
+	Name                  string             `bson:"name" json:"name"`
+	Path                  string             `bson:"path" json:"path"`
+	ReleaseTypeID         primitive.ObjectID `bson:"release_type_id" json:"release_type_id"`
+	DestinationTemplateID primitive.ObjectID `bson:"destination_template_id" json:"destination_template_id"`
 }
 
 type Medium struct { // model
@@ -526,6 +572,14 @@ type Release struct { // model
 	Encoding    string    `bson:"encoding" json:"encoding"`
 	Quality     string    `bson:"quality" json:"quality"`
 	PublishedAt time.Time `bson:"published_at" json:"published_at"`
+}
+
+type ReleaseType struct { // model
+	grimoire.Document `bson:",inline"` // includes default model settings
+	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
+	Name string `bson:"name" json:"name"`
 }
 
 type Request struct { // model

@@ -1,0 +1,4 @@
+name: library
+path: /library
+rest: true
+model: '*Library'
