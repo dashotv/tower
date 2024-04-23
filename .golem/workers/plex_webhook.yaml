@@ -1,0 +1,4 @@
+name: plex_webhook
+fields:
+    - name: payload
+      type: '*plex.WebhookPayload'

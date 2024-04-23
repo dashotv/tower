@@ -129,7 +129,7 @@ func (a *Application) Routes() {
 	feeds.DELETE("/:id", a.FeedsDeleteHandler)
 
 	hooks := a.Router.Group("/hooks")
-	hooks.GET("/plex", a.HooksPlexHandler)
+	hooks.POST("/plex", a.HooksPlexHandler)
 	hooks.POST("/nzbget", a.HooksNzbgetHandler)
 
 	library := a.Router.Group("/library")

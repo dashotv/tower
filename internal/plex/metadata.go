@@ -36,16 +36,66 @@ type LeavesMetadata struct {
 	UpdatedAt        int64    `json:"updatedAt"`
 	Media            []*Media `json:"Media"`
 }
+type KeyResponse struct {
+	MediaContainer struct {
+		Size                int64                  `json:"size"`
+		AllowSync           bool                   `json:"allowSync"`
+		Identifier          string                 `json:"identifier"`
+		LibrarySectionID    int64                  `json:"librarySectionID"`
+		LibrarySectionTitle string                 `json:"librarySectionTitle"`
+		LibrarySectionUUID  string                 `json:"librarySectionUUID"`
+		MediaTagPrefix      string                 `json:"mediaTagPrefix"`
+		MediaTagVersion     int64                  `json:"mediaTagVersion"`
+		Metadata            []*KeyResponseMetadata `json:"Metadata"`
+	} `json:"MediaContainer"`
+}
 
-func (p *Client) GetMetadataByKey(key string) (string, error) {
-	resp, err := p._server().SetFormDataFromValues(p.data).Get("/library/metadata/" + key)
+type KeyResponseMetadata struct {
+	RatingKey             string   `json:"ratingKey"`
+	Key                   string   `json:"key"`
+	ParentRatingKey       string   `json:"parentRatingKey"`
+	GrandparentRatingKey  string   `json:"grandparentRatingKey"`
+	MetadatumGUID         string   `json:"guid"`
+	ParentGUID            string   `json:"parentGuid"`
+	GrandparentGUID       string   `json:"grandparentGuid"`
+	GrandparentSlug       string   `json:"grandparentSlug"`
+	Type                  string   `json:"type"`
+	Title                 string   `json:"title"`
+	GrandparentKey        string   `json:"grandparentKey"`
+	ParentKey             string   `json:"parentKey"`
+	LibrarySectionTitle   string   `json:"librarySectionTitle"`
+	LibrarySectionID      int64    `json:"librarySectionID"`
+	LibrarySectionKey     string   `json:"librarySectionKey"`
+	GrandparentTitle      string   `json:"grandparentTitle"`
+	ParentTitle           string   `json:"parentTitle"`
+	Summary               string   `json:"summary"`
+	Index                 int64    `json:"index"`
+	ParentIndex           int64    `json:"parentIndex"`
+	SkipCount             int64    `json:"skipCount"`
+	Year                  int64    `json:"year"`
+	Thumb                 string   `json:"thumb"`
+	Art                   string   `json:"art"`
+	ParentThumb           string   `json:"parentThumb"`
+	GrandparentThumb      string   `json:"grandparentThumb"`
+	GrandparentArt        string   `json:"grandparentArt"`
+	Duration              int64    `json:"duration"`
+	OriginallyAvailableAt string   `json:"originallyAvailableAt"`
+	AddedAt               int64    `json:"addedAt"`
+	UpdatedAt             int64    `json:"updatedAt"`
+	Media                 []*Media `json:"Media"`
+	GUID                  []*GUID  `json:"Guid"`
+}
+
+func (p *Client) GetMetadataByKey(key string) ([]*KeyResponseMetadata, error) {
+	m := &KeyResponse{}
+	resp, err := p._server().SetResult(m).SetFormDataFromValues(p.data).Get("/library/metadata/" + key)
 	if err != nil {
-		return "", fae.Wrap(err, "failed to make request")
+		return nil, fae.Wrap(err, "failed to make request")
 	}
 	if !resp.IsSuccess() {
-		return "", fae.Errorf("failed to get metadata: %s", resp.Status())
+		return nil, fae.Errorf("failed to get metadata: %s", resp.Status())
 	}
-	return resp.String(), nil
+	return m.MediaContainer.Metadata, nil
 }
 func (p *Client) GetViewedByKey(key string) (*LibraryMetadata, error) {
 	m := &LibraryMetadataContainer{}

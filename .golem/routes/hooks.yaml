@@ -3,7 +3,11 @@ path: /hooks
 routes:
   - name: plex
     path: /plex
-    method: GET
+    method: POST
+    # params:
+    #   - name: payload
+    #     type: "*PlexWebhook"
+    #     bind: true
   - name: nzbget
     path: /nzbget
     method: POST

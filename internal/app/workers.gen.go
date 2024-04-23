@@ -158,6 +158,10 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "scheduling worker: plex_watchlist_updates (PlexWatchlistUpdates)")
 	}
 
+	if err := minion.Register[*PlexWebhook](m, &PlexWebhook{}); err != nil {
+		return fae.Wrap(err, "registering worker: plex_webhook (PlexWebhook)")
+	}
+
 	if err := minion.Register[*SeriesDelete](m, &SeriesDelete{}); err != nil {
 		return fae.Wrap(err, "registering worker: series_delete (SeriesDelete)")
 	}

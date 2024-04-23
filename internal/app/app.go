@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
@@ -97,6 +98,13 @@ func Start() error {
 		}
 	}
 
+	// app.Engine.Debug = true
+	// app.Engine.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+	// 	fmt.Printf("req: %s\n", reqBody)
+	// 	fmt.Printf("res: %s\n", resBody)
+	// }))
+	app.Engine.HTTPErrorHandler = customHTTPErrorHandler
+
 	for _, f := range starters {
 		if err := f(ctx, app); err != nil {
 			return err
@@ -122,4 +130,13 @@ func (a *Application) Health() (map[string]bool, error) {
 	}
 
 	return resp, nil
+}
+
+func customHTTPErrorHandler(err error, c echo.Context) {
+	code := http.StatusInternalServerError
+	if he, ok := err.(*echo.HTTPError); ok {
+		code = he.Code
+	}
+	// app.Log.Named("router").Errorf("error: [%d] %s", code, err.Error())
+	c.JSON(code, &Response{Error: true, Message: err.Error()})
 }
