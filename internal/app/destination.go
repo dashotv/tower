@@ -85,6 +85,14 @@ type Destinator struct {
 // 	return nil
 // }
 
+func (d *Destinator) Library(name string) (*Library, error) {
+	lib, ok := d.libraries[name]
+	if !ok || lib == nil {
+		return nil, fae.Errorf("library not found: %s", name)
+	}
+	return lib, nil
+}
+
 func (d *Destinator) Destination(kind primitive.Symbol, m *Medium) (string, error) {
 	if string(kind) == "" {
 		return "", fae.Errorf("kind is empty")
