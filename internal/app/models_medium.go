@@ -27,6 +27,7 @@ func (m *Medium) BaseDir() string {
 
 // AddPathByFullpath adds a path to the medium by the full path of the file. it ensures
 // that the path has a unique id and returns the path.
+// TODO: local should just be the filename? everything else (kind, directory, etc) is derived.
 func (m *Medium) AddPathByFullpath(file string) *Path {
 	local := strings.Replace(file, app.Config.DirectoriesCompleted+"/", "", 1)
 	local = strings.TrimSuffix(local, filepath.Ext(file))

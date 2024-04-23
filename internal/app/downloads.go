@@ -69,7 +69,7 @@ func updateMedium(m *Medium, files []*MoverFile) error {
 	for _, f := range files {
 		path := m.AddPathByFullpath(f.Destination)
 
-		if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: path.ID.Hex(), Title: path.Local}); err != nil {
+		if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: path.ID.Hex(), Title: f.Destination}); err != nil {
 			return fae.Errorf("enqueue path: %s", err)
 		}
 	}
