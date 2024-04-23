@@ -38,3 +38,9 @@ routes:
       - name: subject
         type: "*Combination"
         bind: true
+  - name: delete
+    path: /:id
+    method: DELETE
+    params:
+      - name: id
+        type: string

@@ -97,6 +97,7 @@ func (a *Application) Routes() {
 	combinations.GET("/:name", a.CombinationsShowHandler)
 	combinations.POST("/", a.CombinationsCreateHandler)
 	combinations.PUT("/:id", a.CombinationsUpdateHandler)
+	combinations.DELETE("/:id", a.CombinationsDeleteHandler)
 
 	config := a.Router.Group("/config")
 	config.PATCH("/:id", a.ConfigSettingsHandler)
@@ -341,6 +342,10 @@ func (a *Application) CombinationsUpdateHandler(c echo.Context) error {
 		return err
 	}
 	return a.CombinationsUpdate(c, id, subject)
+}
+func (a *Application) CombinationsDeleteHandler(c echo.Context) error {
+	id := c.Param("id")
+	return a.CombinationsDelete(c, id)
 }
 
 // Config (/config)
