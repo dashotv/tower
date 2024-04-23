@@ -176,7 +176,7 @@ func (m *Mover) moveFile(source string, medium *Medium) error {
 		return fae.Wrap(err, "getting destination")
 	}
 
-	destination := fmt.Sprintf("%s/%s.%s", app.Config.DirectoriesCompleted, dest, ext)
+	destination := fmt.Sprintf("%s.%s", dest, ext)
 
 	if !exists(source) {
 		return fae.Errorf("source does not exist: %s", source)

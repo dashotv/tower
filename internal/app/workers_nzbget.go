@@ -90,7 +90,7 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 		return fae.Wrap(err, "getting destination")
 	}
 
-	destination := filepath.Join(app.Config.DirectoriesCompleted, fmt.Sprintf("%s.%s", dest, ext))
+	destination := fmt.Sprintf("%s.%s", dest, ext)
 	source := filepath.Join(dir, file)
 	l.Debugf("nzbget process: %s: %s => %s", p.ID, source, destination)
 
