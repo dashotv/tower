@@ -111,14 +111,6 @@ func (d *Destinator) Destination(kind primitive.Symbol, m *Medium) (string, erro
 	}
 	data.path = lib.Path
 	data.kind = string(kind)
-	// &DestinatorData{
-	// 	path:      lib.Path,
-	// 	kind:      string(kind),
-	// 	directory: m.Directory,
-	// 	season:    m.SeasonNumber,
-	// 	episode:   m.EpisodeNumber,
-	// 	absolute:  m.AbsoluteNumber,
-	// }
 
 	tmpl, err := template.New("destination").Parse(t.Template)
 	if err != nil {
