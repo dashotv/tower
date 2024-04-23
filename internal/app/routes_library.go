@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -20,6 +21,9 @@ func (a *Application) LibraryCreate(c echo.Context, subject *Library) error {
 	// TODO: process the subject
 	if err := a.DB.Library.Save(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Library"})
+	}
+	if err := startDestination(context.Background(), a); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error starting destination"})
 	}
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }
@@ -45,6 +49,9 @@ func (a *Application) LibraryUpdate(c echo.Context, id string, subject *Library)
 	// data.Name = subject.Name ...
 	if err := a.DB.Library.Save(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Library"})
+	}
+	if err := startDestination(context.Background(), a); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error starting destination"})
 	}
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }

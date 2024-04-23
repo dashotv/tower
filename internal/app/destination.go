@@ -86,25 +86,39 @@ type Destinator struct {
 // }
 
 func (d *Destinator) Destination(kind primitive.Symbol, m *Medium) (string, error) {
+	if string(kind) == "" {
+		return "", fae.Errorf("kind is empty")
+	}
+
 	lib, ok := d.libraries[string(kind)]
-	if !ok {
+	if !ok || lib == nil {
 		return "", fae.Errorf("library not found for kind: %s", m.Kind)
 	}
 
+	if lib.Path == "" {
+		return "", fae.Errorf("library path is empty for library: %s", lib.Name)
+	}
+
 	t, ok := d.templates[lib.LibraryTemplate.Name]
-	if !ok {
+	if !ok || t == nil {
 		return "", fae.Errorf("template not found for library: %s", lib.Name)
 	}
 
 	out := &strings.Builder{}
-	data := &DestinatorData{
-		path:      lib.Path,
-		kind:      string(kind),
-		directory: m.Directory,
-		season:    m.SeasonNumber,
-		episode:   m.EpisodeNumber,
-		absolute:  m.AbsoluteNumber,
+	data, err := NewDestinatorData(m)
+	if err != nil {
+		return "", fae.Wrap(err, "creating data")
 	}
+	data.path = lib.Path
+	data.kind = string(kind)
+	// &DestinatorData{
+	// 	path:      lib.Path,
+	// 	kind:      string(kind),
+	// 	directory: m.Directory,
+	// 	season:    m.SeasonNumber,
+	// 	episode:   m.EpisodeNumber,
+	// 	absolute:  m.AbsoluteNumber,
+	// }
 
 	tmpl, err := template.New("destination").Parse(t.Template)
 	if err != nil {
@@ -137,4 +151,23 @@ func (d *DestinatorData) Absolute() string {
 		return fmt.Sprintf("%02dx%02d", d.season, d.episode)
 	}
 	return fmt.Sprintf("01x%03d", d.absolute)
+}
+
+func NewDestinatorData(m *Medium) (*DestinatorData, error) {
+	d := &DestinatorData{
+		directory: m.Directory,
+		season:    m.SeasonNumber,
+		episode:   m.EpisodeNumber,
+		absolute:  m.AbsoluteNumber,
+	}
+	if m.Type == "Episode" {
+		s := &Series{}
+		err := app.DB.Series.FindByID(m.SeriesID, s)
+		if err != nil {
+			return nil, fae.Wrap(err, "finding series")
+		}
+		d.directory = s.Directory
+	}
+
+	return d, nil
 }
