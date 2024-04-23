@@ -1,11 +1,17 @@
 name: library
 type: model
 fields:
-    - name: name
-      type: string
-    - name: path
-      type: string
-    - name: release_type_id
-      type: primitive.ObjectID
-    - name: destination_template_id
-      type: primitive.ObjectID
+  - name: name
+    type: string
+  - name: path
+    type: string
+  - name: release_type_id
+    type: primitive.ObjectID
+  - name: destination_template_id
+    type: primitive.ObjectID
+  - name: release_type
+    type: "*ReleaseType"
+    bson: "-"
+  - name: destination_template
+    type: "*DestinationTemplate"
+    bson: "-"

@@ -413,10 +413,12 @@ type Library struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Name                  string             `bson:"name" json:"name"`
-	Path                  string             `bson:"path" json:"path"`
-	ReleaseTypeID         primitive.ObjectID `bson:"release_type_id" json:"release_type_id"`
-	DestinationTemplateID primitive.ObjectID `bson:"destination_template_id" json:"destination_template_id"`
+	Name                  string               `bson:"name" json:"name"`
+	Path                  string               `bson:"path" json:"path"`
+	ReleaseTypeID         primitive.ObjectID   `bson:"release_type_id" json:"release_type_id"`
+	DestinationTemplateID primitive.ObjectID   `bson:"destination_template_id" json:"destination_template_id"`
+	ReleaseType           *ReleaseType         `bson:"-" json:"release_type"`
+	DestinationTemplate   *DestinationTemplate `bson:"-" json:"destination_template"`
 }
 
 type Medium struct { // model
