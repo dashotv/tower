@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/samber/lo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
@@ -202,6 +203,63 @@ func (j *PathDeleteAll) Work(ctx context.Context, job *minion.Job[*PathDeleteAll
 		if err := os.Remove(p.LocalPath()); err != nil {
 			return fae.Wrap(err, "remove path")
 		}
+	}
+
+	return nil
+}
+
+type PathDelete struct {
+	minion.WorkerDefaults[*PathDelete]
+	MediumID string `bson:"medium_id" json:"medium_id"` // medium
+	PathID   string `bson:"path_id" json:"path_id"`     // path
+	Title    string `bson:"title" json:"title"`
+}
+
+func (j *PathDelete) Kind() string { return "path_delete" }
+func (j *PathDelete) Work(ctx context.Context, job *minion.Job[*PathDelete]) error {
+	a := ContextApp(ctx)
+	if a == nil {
+		return fae.New("no app in context")
+	}
+
+	path_id := job.Args.PathID
+
+	oid, err := primitive.ObjectIDFromHex(path_id)
+	if err != nil {
+		return fae.Wrap(err, "invalid id")
+	}
+
+	media, err := a.DB.Medium.Query().Where("paths._id", oid).Run()
+	if err != nil {
+		return fae.Wrap(err, "error querying media")
+	}
+	if len(media) == 0 {
+		return fae.Wrap(err, "no media found")
+	}
+	if len(media) > 1 {
+		return fae.Wrap(err, "duplicate media found")
+	}
+
+	m := media[0]
+	list := lo.Filter(m.Paths, func(p *Path, i int) bool {
+		return p.ID != oid
+	})
+
+	removed, _ := lo.Difference(m.Paths, list)
+	if len(removed) > 0 {
+		for _, p := range removed {
+			a.Log.Named("path_delete").Debugf("removing path: %s", p.LocalPath())
+			if p.Exists() {
+				if err := os.Remove(p.LocalPath()); err != nil {
+					return fae.Wrap(err, "removing path")
+				}
+			}
+		}
+	}
+
+	m.Paths = list
+	if err := a.DB.Medium.Save(m); err != nil {
+		return fae.Wrap(err, "error saving Paths")
 	}
 
 	return nil

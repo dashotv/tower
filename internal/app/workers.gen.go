@@ -124,6 +124,10 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "registering worker: nzbget_process (NzbgetProcess)")
 	}
 
+	if err := minion.Register[*PathDelete](m, &PathDelete{}); err != nil {
+		return fae.Wrap(err, "registering worker: path_delete (PathDelete)")
+	}
+
 	if err := minion.Register[*PathDeleteAll](m, &PathDeleteAll{}); err != nil {
 		return fae.Wrap(err, "registering worker: path_delete_all (PathDeleteAll)")
 	}

@@ -44,18 +44,8 @@ func (a *Application) PathsUpdate(c echo.Context, id string, medium_id string, p
 
 // DELETE /paths/:id
 func (a *Application) PathsDelete(c echo.Context, id string, medium_id string) error {
-	m, err := a.DB.Medium.Get(medium_id, &Medium{})
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "not found"})
-	}
-
-	list := lo.Filter(m.Paths, func(p *Path, i int) bool {
-		return p.ID.Hex() != id
-	})
-	m.Paths = list
-
-	if err := a.DB.Medium.Save(m); err != nil {
-		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Paths"})
+	if err := a.Workers.Enqueue(&PathDelete{MediumID: medium_id, PathID: id}); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error deleting Paths"})
 	}
 	return c.JSON(http.StatusOK, &Response{Error: false})
 }
