@@ -100,14 +100,6 @@ func (a *Application) Routes() {
 	config := a.Router.Group("/config")
 	config.PATCH("/:id", a.ConfigSettingsHandler)
 
-	destination_template := a.Router.Group("/destination_template")
-	destination_template.GET("/", a.DestinationTemplateIndexHandler)
-	destination_template.POST("/", a.DestinationTemplateCreateHandler)
-	destination_template.GET("/:id", a.DestinationTemplateShowHandler)
-	destination_template.PUT("/:id", a.DestinationTemplateUpdateHandler)
-	destination_template.PATCH("/:id", a.DestinationTemplateSettingsHandler)
-	destination_template.DELETE("/:id", a.DestinationTemplateDeleteHandler)
-
 	downloads := a.Router.Group("/downloads")
 	downloads.GET("/", a.DownloadsIndexHandler)
 	downloads.POST("/", a.DownloadsCreateHandler)
@@ -146,6 +138,22 @@ func (a *Application) Routes() {
 	library.PATCH("/:id", a.LibrarySettingsHandler)
 	library.DELETE("/:id", a.LibraryDeleteHandler)
 
+	library_template := a.Router.Group("/library_template")
+	library_template.GET("/", a.LibraryTemplateIndexHandler)
+	library_template.POST("/", a.LibraryTemplateCreateHandler)
+	library_template.GET("/:id", a.LibraryTemplateShowHandler)
+	library_template.PUT("/:id", a.LibraryTemplateUpdateHandler)
+	library_template.PATCH("/:id", a.LibraryTemplateSettingsHandler)
+	library_template.DELETE("/:id", a.LibraryTemplateDeleteHandler)
+
+	library_type := a.Router.Group("/library_type")
+	library_type.GET("/", a.LibraryTypeIndexHandler)
+	library_type.POST("/", a.LibraryTypeCreateHandler)
+	library_type.GET("/:id", a.LibraryTypeShowHandler)
+	library_type.PUT("/:id", a.LibraryTypeUpdateHandler)
+	library_type.PATCH("/:id", a.LibraryTypeSettingsHandler)
+	library_type.DELETE("/:id", a.LibraryTypeDeleteHandler)
+
 	messages := a.Router.Group("/messages")
 	messages.GET("/", a.MessagesIndexHandler)
 	messages.POST("/", a.MessagesCreateHandler)
@@ -176,14 +184,6 @@ func (a *Application) Routes() {
 	plex.GET("/play", a.PlexPlayHandler)
 	plex.GET("/sessions", a.PlexSessionsHandler)
 	plex.GET("/stop", a.PlexStopHandler)
-
-	release_type := a.Router.Group("/release_type")
-	release_type.GET("/", a.ReleaseTypeIndexHandler)
-	release_type.POST("/", a.ReleaseTypeCreateHandler)
-	release_type.GET("/:id", a.ReleaseTypeShowHandler)
-	release_type.PUT("/:id", a.ReleaseTypeUpdateHandler)
-	release_type.PATCH("/:id", a.ReleaseTypeSettingsHandler)
-	release_type.DELETE("/:id", a.ReleaseTypeDeleteHandler)
 
 	releases := a.Router.Group("/releases")
 	releases.GET("/", a.ReleasesIndexHandler)
@@ -241,26 +241,26 @@ func (a *Application) indexHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, router.H{
 		"name": "tower",
 		"routes": router.H{
-			"collections":          "/collections",
-			"combinations":         "/combinations",
-			"config":               "/config",
-			"destination_template": "/destination_template",
-			"downloads":            "/downloads",
-			"episodes":             "/episodes",
-			"feeds":                "/feeds",
-			"hooks":                "/hooks",
-			"library":              "/library",
-			"messages":             "/messages",
-			"movies":               "/movies",
-			"plex":                 "/plex",
-			"release_type":         "/release_type",
-			"releases":             "/releases",
-			"requests":             "/requests",
-			"series":               "/series",
-			"upcoming":             "/upcoming",
-			"users":                "/users",
-			"want":                 "/want",
-			"watches":              "/watches",
+			"collections":      "/collections",
+			"combinations":     "/combinations",
+			"config":           "/config",
+			"downloads":        "/downloads",
+			"episodes":         "/episodes",
+			"feeds":            "/feeds",
+			"hooks":            "/hooks",
+			"library":          "/library",
+			"library_template": "/library_template",
+			"library_type":     "/library_type",
+			"messages":         "/messages",
+			"movies":           "/movies",
+			"plex":             "/plex",
+			"releases":         "/releases",
+			"requests":         "/requests",
+			"series":           "/series",
+			"upcoming":         "/upcoming",
+			"users":            "/users",
+			"want":             "/want",
+			"watches":          "/watches",
 		},
 	})
 }
@@ -337,44 +337,6 @@ func (a *Application) ConfigSettingsHandler(c echo.Context) error {
 		return err
 	}
 	return a.ConfigSettings(c, id, settings)
-}
-
-// DestinationTemplate (/destination_template)
-func (a *Application) DestinationTemplateIndexHandler(c echo.Context) error {
-	page := router.QueryParamIntDefault(c, "page", "1")
-	limit := router.QueryParamIntDefault(c, "limit", "25")
-	return a.DestinationTemplateIndex(c, page, limit)
-}
-func (a *Application) DestinationTemplateCreateHandler(c echo.Context) error {
-	subject := &DestinationTemplate{}
-	if err := c.Bind(subject); err != nil {
-		return err
-	}
-	return a.DestinationTemplateCreate(c, subject)
-}
-func (a *Application) DestinationTemplateShowHandler(c echo.Context) error {
-	id := c.Param("id")
-	return a.DestinationTemplateShow(c, id)
-}
-func (a *Application) DestinationTemplateUpdateHandler(c echo.Context) error {
-	id := c.Param("id")
-	subject := &DestinationTemplate{}
-	if err := c.Bind(subject); err != nil {
-		return err
-	}
-	return a.DestinationTemplateUpdate(c, id, subject)
-}
-func (a *Application) DestinationTemplateSettingsHandler(c echo.Context) error {
-	id := c.Param("id")
-	setting := &Setting{}
-	if err := c.Bind(setting); err != nil {
-		return err
-	}
-	return a.DestinationTemplateSettings(c, id, setting)
-}
-func (a *Application) DestinationTemplateDeleteHandler(c echo.Context) error {
-	id := c.Param("id")
-	return a.DestinationTemplateDelete(c, id)
 }
 
 // Downloads (/downloads)
@@ -550,6 +512,82 @@ func (a *Application) LibraryDeleteHandler(c echo.Context) error {
 	return a.LibraryDelete(c, id)
 }
 
+// LibraryTemplate (/library_template)
+func (a *Application) LibraryTemplateIndexHandler(c echo.Context) error {
+	page := router.QueryParamIntDefault(c, "page", "1")
+	limit := router.QueryParamIntDefault(c, "limit", "25")
+	return a.LibraryTemplateIndex(c, page, limit)
+}
+func (a *Application) LibraryTemplateCreateHandler(c echo.Context) error {
+	subject := &LibraryTemplate{}
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.LibraryTemplateCreate(c, subject)
+}
+func (a *Application) LibraryTemplateShowHandler(c echo.Context) error {
+	id := c.Param("id")
+	return a.LibraryTemplateShow(c, id)
+}
+func (a *Application) LibraryTemplateUpdateHandler(c echo.Context) error {
+	id := c.Param("id")
+	subject := &LibraryTemplate{}
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.LibraryTemplateUpdate(c, id, subject)
+}
+func (a *Application) LibraryTemplateSettingsHandler(c echo.Context) error {
+	id := c.Param("id")
+	setting := &Setting{}
+	if err := c.Bind(setting); err != nil {
+		return err
+	}
+	return a.LibraryTemplateSettings(c, id, setting)
+}
+func (a *Application) LibraryTemplateDeleteHandler(c echo.Context) error {
+	id := c.Param("id")
+	return a.LibraryTemplateDelete(c, id)
+}
+
+// LibraryType (/library_type)
+func (a *Application) LibraryTypeIndexHandler(c echo.Context) error {
+	page := router.QueryParamIntDefault(c, "page", "1")
+	limit := router.QueryParamIntDefault(c, "limit", "25")
+	return a.LibraryTypeIndex(c, page, limit)
+}
+func (a *Application) LibraryTypeCreateHandler(c echo.Context) error {
+	subject := &LibraryType{}
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.LibraryTypeCreate(c, subject)
+}
+func (a *Application) LibraryTypeShowHandler(c echo.Context) error {
+	id := c.Param("id")
+	return a.LibraryTypeShow(c, id)
+}
+func (a *Application) LibraryTypeUpdateHandler(c echo.Context) error {
+	id := c.Param("id")
+	subject := &LibraryType{}
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.LibraryTypeUpdate(c, id, subject)
+}
+func (a *Application) LibraryTypeSettingsHandler(c echo.Context) error {
+	id := c.Param("id")
+	setting := &Setting{}
+	if err := c.Bind(setting); err != nil {
+		return err
+	}
+	return a.LibraryTypeSettings(c, id, setting)
+}
+func (a *Application) LibraryTypeDeleteHandler(c echo.Context) error {
+	id := c.Param("id")
+	return a.LibraryTypeDelete(c, id)
+}
+
 // Messages (/messages)
 func (a *Application) MessagesIndexHandler(c echo.Context) error {
 	page := router.QueryParamIntDefault(c, "page", "1")
@@ -671,44 +709,6 @@ func (a *Application) PlexSessionsHandler(c echo.Context) error {
 func (a *Application) PlexStopHandler(c echo.Context) error {
 	session := router.QueryParamString(c, "session")
 	return a.PlexStop(c, session)
-}
-
-// ReleaseType (/release_type)
-func (a *Application) ReleaseTypeIndexHandler(c echo.Context) error {
-	page := router.QueryParamIntDefault(c, "page", "1")
-	limit := router.QueryParamIntDefault(c, "limit", "25")
-	return a.ReleaseTypeIndex(c, page, limit)
-}
-func (a *Application) ReleaseTypeCreateHandler(c echo.Context) error {
-	subject := &ReleaseType{}
-	if err := c.Bind(subject); err != nil {
-		return err
-	}
-	return a.ReleaseTypeCreate(c, subject)
-}
-func (a *Application) ReleaseTypeShowHandler(c echo.Context) error {
-	id := c.Param("id")
-	return a.ReleaseTypeShow(c, id)
-}
-func (a *Application) ReleaseTypeUpdateHandler(c echo.Context) error {
-	id := c.Param("id")
-	subject := &ReleaseType{}
-	if err := c.Bind(subject); err != nil {
-		return err
-	}
-	return a.ReleaseTypeUpdate(c, id, subject)
-}
-func (a *Application) ReleaseTypeSettingsHandler(c echo.Context) error {
-	id := c.Param("id")
-	setting := &Setting{}
-	if err := c.Bind(setting); err != nil {
-		return err
-	}
-	return a.ReleaseTypeSettings(c, id, setting)
-}
-func (a *Application) ReleaseTypeDeleteHandler(c echo.Context) error {
-	id := c.Param("id")
-	return a.ReleaseTypeDelete(c, id)
 }
 
 // Releases (/releases)

@@ -1,0 +1,4 @@
+name: library_type
+path: /library_type
+rest: true
+model: "*LibraryType"

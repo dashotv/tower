@@ -1,5 +1,0 @@
-name: release_type
-type: model
-fields:
-    - name: name
-      type: string

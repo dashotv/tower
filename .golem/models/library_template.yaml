@@ -1,4 +1,4 @@
-name: destination_template
+name: library_template
 type: model
 fields:
   - name: name

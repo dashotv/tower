@@ -25,16 +25,16 @@ func (c *Connector) LibraryList(page, limit int) ([]*Library, error) {
 
 func (c *Connector) processLibraries(list []*Library) {
 	for _, l := range list {
-		dt, err := c.DestinationTemplateGet(l.DestinationTemplateID.Hex())
+		dt, err := c.LibraryTemplateGet(l.LibraryTemplateID.Hex())
 		if err != nil {
 			continue
 		}
-		l.DestinationTemplate = dt
+		l.LibraryTemplate = dt
 
-		rt, err := c.ReleaseTypeGet(l.ReleaseTypeID.Hex())
+		rt, err := c.LibraryTypeGet(l.LibraryTypeID.Hex())
 		if err != nil {
 			continue
 		}
-		l.ReleaseType = rt
+		l.LibraryType = rt
 	}
 }

@@ -1,0 +1,4 @@
+name: library_template
+path: /library_template
+rest: true
+model: "*LibraryTemplate"

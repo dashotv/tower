@@ -1,0 +1,5 @@
+name: library_type
+type: model
+fields:
+  - name: name
+    type: string

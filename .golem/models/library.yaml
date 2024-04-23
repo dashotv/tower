@@ -5,13 +5,13 @@ fields:
     type: string
   - name: path
     type: string
-  - name: release_type_id
+  - name: library_type_id
     type: primitive.ObjectID
-  - name: destination_template_id
+  - name: library_template_id
     type: primitive.ObjectID
-  - name: release_type
-    type: "*ReleaseType"
+  - name: library_type
+    type: "*LibraryType"
     bson: "-"
-  - name: destination_template
-    type: "*DestinationTemplate"
+  - name: library_template
+    type: "*LibraryTemplate"
     bson: "-"
