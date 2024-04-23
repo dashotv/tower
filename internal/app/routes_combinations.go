@@ -31,3 +31,11 @@ func (a *Application) CombinationsShow(c echo.Context, name string) error {
 	}
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: children})
 }
+
+// PUT /combinations/:id
+func (a *Application) CombinationsUpdate(c echo.Context, id string, subject *Combination) error {
+	if err := a.DB.Combination.Update(subject); err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
+}

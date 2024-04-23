@@ -96,6 +96,7 @@ func (a *Application) Routes() {
 	combinations.GET("/", a.CombinationsIndexHandler)
 	combinations.GET("/:name", a.CombinationsShowHandler)
 	combinations.POST("/", a.CombinationsCreateHandler)
+	combinations.PUT("/:id", a.CombinationsUpdateHandler)
 
 	config := a.Router.Group("/config")
 	config.PATCH("/:id", a.ConfigSettingsHandler)
@@ -332,6 +333,14 @@ func (a *Application) CombinationsCreateHandler(c echo.Context) error {
 		return err
 	}
 	return a.CombinationsCreate(c, subject)
+}
+func (a *Application) CombinationsUpdateHandler(c echo.Context) error {
+	id := c.Param("id")
+	subject := &Combination{}
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.CombinationsUpdate(c, id, subject)
 }
 
 // Config (/config)

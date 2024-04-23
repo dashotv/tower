@@ -29,3 +29,12 @@ routes:
       - name: subject
         type: "*Combination"
         bind: true
+  - name: update
+    path: /:id
+    method: PUT
+    params:
+      - name: id
+        type: string
+      - name: subject
+        type: "*Combination"
+        bind: true
