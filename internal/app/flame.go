@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/dashotv/fae"
 	flame "github.com/dashotv/flame/client"
@@ -18,6 +19,7 @@ func init() {
 
 func setupFlame(app *Application) error {
 	app.Flame = flame.New(app.Config.FlameURL)
+	app.Flame.Resty.SetTimeout(60 * time.Second)
 	return nil
 }
 
