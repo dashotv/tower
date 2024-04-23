@@ -85,7 +85,7 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 		ext = ext[1:]
 	}
 
-	dest, err := Destination(download.Medium)
+	dest, err := app.Destinator.Destination(download.Kind, download.Medium)
 	if err != nil {
 		return fae.Wrap(err, "getting destination")
 	}

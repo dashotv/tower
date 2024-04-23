@@ -171,7 +171,7 @@ func (m *Mover) moveFile(source string, medium *Medium) error {
 		return nil
 	}
 
-	dest, err := Destination(medium)
+	dest, err := app.Destinator.Destination(m.Download.Kind, medium)
 	if err != nil {
 		return fae.Wrap(err, "getting destination")
 	}

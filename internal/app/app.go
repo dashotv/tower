@@ -53,15 +53,16 @@ type Application struct {
 
 	//golem:template:app/app_partial_definitions
 
-	Fanart   *Fanart
-	Flame    *flame.Client
-	Scry     *scry.Client
-	Runic    *runic.Client
-	Plex     *plex.Client
-	Tmdb     *tmdb.Client
-	Tvdb     *tvdb.Client
-	Importer *importer.Importer
-	Want     *Want
+	Fanart     *Fanart
+	Flame      *flame.Client
+	Scry       *scry.Client
+	Runic      *runic.Client
+	Plex       *plex.Client
+	Tmdb       *tmdb.Client
+	Tvdb       *tvdb.Client
+	Importer   *importer.Importer
+	Want       *Want
+	Destinator *Destinator
 }
 
 func Setup() error {
