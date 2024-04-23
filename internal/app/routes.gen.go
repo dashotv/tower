@@ -169,6 +169,10 @@ func (a *Application) Routes() {
 	movies.GET("/:id/paths", a.MoviesPathsHandler)
 	movies.POST("/:id/jobs", a.MoviesJobsHandler)
 
+	paths := a.Router.Group("/paths")
+	paths.POST("/:id", a.PathsUpdateHandler)
+	paths.DELETE("/:id", a.PathsDeleteHandler)
+
 	plex := a.Router.Group("/plex")
 	plex.GET("/auth", a.PlexAuthHandler)
 	plex.GET("/", a.PlexIndexHandler)
@@ -253,6 +257,7 @@ func (a *Application) indexHandler(c echo.Context) error {
 			"library_type":     "/library_type",
 			"messages":         "/messages",
 			"movies":           "/movies",
+			"paths":            "/paths",
 			"plex":             "/plex",
 			"releases":         "/releases",
 			"requests":         "/requests",
@@ -656,6 +661,22 @@ func (a *Application) MoviesJobsHandler(c echo.Context) error {
 	id := c.Param("id")
 	name := router.QueryParamString(c, "name")
 	return a.MoviesJobs(c, id, name)
+}
+
+// Paths (/paths)
+func (a *Application) PathsUpdateHandler(c echo.Context) error {
+	id := c.Param("id")
+	medium_id := router.QueryParamString(c, "medium_id")
+	path := &Path{}
+	if err := c.Bind(path); err != nil {
+		return err
+	}
+	return a.PathsUpdate(c, id, medium_id, path)
+}
+func (a *Application) PathsDeleteHandler(c echo.Context) error {
+	id := c.Param("id")
+	medium_id := router.QueryParamString(c, "medium_id")
+	return a.PathsDelete(c, id, medium_id)
 }
 
 // Plex (/plex)

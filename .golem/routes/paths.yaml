@@ -1,0 +1,25 @@
+name: paths
+path: /paths
+routes:
+  - name: update
+    path: /:id
+    method: POST
+    params:
+      - name: id
+        type: string
+      - name: medium_id
+        type: string
+        query: true
+      - name: path
+        type: "*Path"
+        bind: true
+    result: "*Path"
+  - name: delete
+    path: /:id
+    method: DELETE
+    params:
+      - name: id
+        type: string
+      - name: medium_id
+        type: string
+        query: true
