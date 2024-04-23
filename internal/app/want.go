@@ -78,15 +78,15 @@ func (w *Want) Release(r *runic.Release) string {
 
 	switch r.Type {
 	case "movies":
-		return w.Movie(r.Title)
+		return w.releaseMovie(r.Title)
 	case "tv", "anime":
-		return w.Episode(r.Title, r.Season, r.Episode)
+		return w.releaseEpisode(r.Title, r.Season, r.Episode)
 	default:
 		return ""
 	}
 }
 
-func (w *Want) Movie(title string) string {
+func (w *Want) releaseMovie(title string) string {
 	title = path(title)
 	// w.log.Debugf("movie %s", title)
 	f, ok := w.movies[title]
@@ -96,8 +96,28 @@ func (w *Want) Movie(title string) string {
 	return f
 }
 
+func (w *Want) releaseEpisode(seriesTitle string, season int, episode int) string {
+	seriesTitle = path(seriesTitle)
+	w.log.Debugf("series %s", seriesTitle)
+	series, ok := w.series_titles[seriesTitle]
+	if !ok {
+		return ""
+	}
+	// w.log.Debugf("series %s %dx%d", seriesTitle, season, episode)
+	for _, e := range w.series_episodes[series] {
+		if e.SeasonNumber == season && e.EpisodeNumber == episode {
+			return e.ID.Hex()
+		}
+		if e.AbsoluteNumber == episode {
+			return e.ID.Hex()
+		}
+	}
+	return ""
+}
+
 func (w *Want) SeriesWanted(seriesID string) (*Wanted, error) {
 	names := []string{}
+	// we loop so we don't have to load from db
 	for t, id := range w.series_titles {
 		if id == seriesID {
 			names = append(names, t)
@@ -116,23 +136,20 @@ func (w *Want) SeriesWanted(seriesID string) (*Wanted, error) {
 	return wanted, nil
 }
 
-func (w *Want) Episode(seriesTitle string, season int, episode int) string {
-	seriesTitle = path(seriesTitle)
-	w.log.Debugf("series %s", seriesTitle)
-	series, ok := w.series_titles[seriesTitle]
-	if !ok {
-		return ""
-	}
-	// w.log.Debugf("series %s %dx%d", seriesTitle, season, episode)
-	for _, e := range w.series_episodes[series] {
-		if e.SeasonNumber == season && e.EpisodeNumber == episode {
-			return e.ID.Hex()
-		}
-		if e.AbsoluteNumber == episode {
-			return e.ID.Hex()
+func (w *Want) MovieWanted(movieID string) (*Wanted, error) {
+	names := []string{}
+	// we loop so we don't have to load from db
+	for t, id := range w.movies {
+		if id == movieID {
+			names = append(names, t)
 		}
 	}
-	return ""
+
+	wanted := &Wanted{
+		Names: names,
+	}
+
+	return wanted, nil
 }
 
 func (w *Want) NextEpisode(seriesID string) *Episode {

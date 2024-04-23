@@ -8,6 +8,11 @@ import (
 	"github.com/dashotv/minion"
 )
 
+// TODO: Create Movie Downloads
+// TODO: Use runic for searches
+// TODO: Remove Downloads for episodes whose release date change
+// TODO: shift more towards want / evented downloads
+
 var downloadProcessMutex = &CtxMutex{ch: make(chan struct{}, 1)}
 
 type DownloadsProcess struct {
