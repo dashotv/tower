@@ -7,17 +7,14 @@ import (
 )
 
 func (c *Connector) MediumWatched(id primitive.ObjectID) bool {
-	// TODO: add user name to config
 	watches, _ := c.Watch.Query().Where("medium_id", id).Where("username", app.Config.PlexUsername).Run()
 	return len(watches) > 0
 }
 func (c *Connector) MediumWatchedAny(id primitive.ObjectID) bool {
-	// TODO: add user name to config
 	watches, _ := c.Watch.Query().Where("medium_id", id).Run()
 	return len(watches) > 0
 }
 func (c *Connector) WatchGet(id primitive.ObjectID, username string) (*Watch, error) {
-	// TODO: add user name to config
 	watches, err := c.Watch.Query().Where("medium_id", id).Where("username", username).Run()
 	if err != nil {
 		return nil, err

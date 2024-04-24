@@ -153,7 +153,7 @@ func (a *Application) downloadsSearch() error {
 			continue
 		}
 		if d.Medium.Type != "Episode" {
-			//TODO: handle movies
+			//TODO: #4 handle movies
 			continue
 		}
 
@@ -168,7 +168,7 @@ func (a *Application) downloadsSearch() error {
 		app.Workers.Log.Debugf("download found %s - %s", d.Title, d.Display)
 		notifier.Info("Downloads::Found", fmt.Sprintf("%s - %s", d.Title, d.Display))
 
-		d.Status = "loading" // TODO: review
+		d.Status = "loading"
 		if !app.Config.Production {
 			d.Status = "reviewing"
 		}

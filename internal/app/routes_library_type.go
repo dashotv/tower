@@ -18,7 +18,6 @@ func (a *Application) LibraryTypeIndex(c echo.Context, page int, limit int) erro
 
 // POST /release_type/
 func (a *Application) LibraryTypeCreate(c echo.Context, subject *LibraryType) error {
-	// TODO: process the subject
 	if err := a.DB.LibraryType.Save(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving LibraryType"})
 	}
@@ -39,8 +38,6 @@ func (a *Application) LibraryTypeShow(c echo.Context, id string) error {
 
 // PUT /release_type/:id
 func (a *Application) LibraryTypeUpdate(c echo.Context, id string, subject *LibraryType) error {
-	// TODO: process the subject
-
 	// if you need to copy or compare to existing object...
 	// data, err := a.DB.LibraryTypeGet(id)
 	// if err != nil {

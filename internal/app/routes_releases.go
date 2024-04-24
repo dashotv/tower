@@ -31,7 +31,6 @@ func (a *Application) ReleasesIndex(c echo.Context, page int, limit int) error {
 
 // POST /releases/
 func (a *Application) ReleasesCreate(c echo.Context, subject *Release) error {
-	// TODO: process the subject
 	if err := a.DB.Release.Save(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Releases"})
 	}
@@ -50,8 +49,6 @@ func (a *Application) ReleasesShow(c echo.Context, id string) error {
 
 // PUT /releases/:id
 func (a *Application) ReleasesUpdate(c echo.Context, id string, subject *Release) error {
-	// TODO: process the subject
-
 	// if you need to copy or compare to existing object...
 	// data, err := a.DB.ReleaseGet(id)
 	// if err != nil {

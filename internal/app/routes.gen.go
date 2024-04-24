@@ -45,7 +45,7 @@ func setupRoutes(app *Application) error {
 	// authenticated routes (if enabled, otherwise same as default)
 	app.Router = app.Engine.Group("")
 
-	// TODO: fix auth
+	// FIXME: auth
 	if app.Config.Auth {
 		clerkSecret := app.Config.ClerkSecretKey
 		if clerkSecret == "" {

@@ -23,8 +23,6 @@ func (a *Application) EpisodesSettings(c echo.Context, id string, data *Setting)
 
 // PUT /episodes/:id
 func (a *Application) EpisodesUpdate(c echo.Context, id string, subject *Episode) error {
-	// TODO: process the subject
-
 	// if you need to copy or compare to existing object...
 	// data, err := a.DB.EpisodeGet(id)
 	// if err != nil {

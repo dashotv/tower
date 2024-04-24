@@ -1,18 +1,21 @@
 # TODO
 
-- [ ] downloads:
-  - creater
-  - searcher
-  - loader
-  - manager
-  - mover
+- [x] downloads: creater
+- [x] downloads: searcher
+- [x] downloads: loader
+- [x] downloads: manager
+- [x] downloads: mover
+- [x] Add libraries to Tower (kind => library)
+- [x] Allow managing layouts per library
+- [x] Click watched on media
+- [x] plex webhooks (scrobble and new and others?)
+- [ ] downloads: cleaner
+- [ ] downloads: movies
+- [ ] downloads: use runic
+- [ ] downloads: more evented / less polling
 - [ ] Custom layouts for files
-- [ ] Add libraries to Tower (kind => library)
-- [ ] Allow managing layouts per library
 - [ ] custom regex for matching files on torrent
 - [ ] resolution as part of file name? taken from release resolution?
-- [ ] Click watched on media
-- [ ] plex webhooks (scrobble and new and others?)
 - [ ] every file should have plex key
 - [ ] size, resolution, etc pulled from plex
 - [ ] move paths out of medium and into separate model

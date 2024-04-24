@@ -17,7 +17,6 @@ func (a *Application) CollectionsIndex(c echo.Context, page int, limit int) erro
 
 // POST /collections/
 func (a *Application) CollectionsCreate(c echo.Context, subject *Collection) error {
-	// TODO: process the subject
 	if err := a.DB.Collection.Save(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Collections"})
 	}
@@ -35,8 +34,6 @@ func (a *Application) CollectionsShow(c echo.Context, id string) error {
 
 // PUT /collections/:id
 func (a *Application) CollectionsUpdate(c echo.Context, id string, subject *Collection) error {
-	// TODO: process the subject
-
 	// if you need to copy or compare to existing object...
 	// data, err := a.DB.CollectionGet(id)
 	// if err != nil {

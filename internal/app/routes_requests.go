@@ -24,7 +24,6 @@ func (a *Application) RequestsIndex(c echo.Context, page int, limit int) error {
 
 // POST /requests/
 func (a *Application) RequestsCreate(c echo.Context, subject *Request) error {
-	// TODO: process the subject
 	if err := a.DB.Request.Save(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Requests"})
 	}

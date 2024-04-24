@@ -96,8 +96,6 @@ func (a *Application) MoviesShow(c echo.Context, id string) error {
 
 // PUT /movies/:id
 func (a *Application) MoviesUpdate(c echo.Context, id string, subject *Movie) error {
-	// TODO: process the subject
-
 	// if you need to copy or compare to existing object...
 	// data, err := a.DB.MovieGet(id)
 	// if err != nil {

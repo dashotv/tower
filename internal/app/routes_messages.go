@@ -23,7 +23,6 @@ func (a *Application) MessagesIndex(c echo.Context, page int, limit int) error {
 
 // POST /messages/
 func (a *Application) MessagesCreate(c echo.Context, subject *Message) error {
-	// TODO: process the subject
 	if err := a.DB.Message.Save(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Messages"})
 	}

@@ -361,7 +361,6 @@ func (j *SeriesImage) Work(ctx context.Context, job *minion.Job[*SeriesImage]) e
 	return seriesImage(series, t, remote, ratio)
 }
 
-// TODO: make this a function
 func seriesImage(series *Series, t string, remote string, ratio float32) error {
 	extension := filepath.Ext(remote)
 	if len(extension) > 0 && extension[0] == '.' {

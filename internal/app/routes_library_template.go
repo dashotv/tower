@@ -18,7 +18,6 @@ func (a *Application) LibraryTemplateIndex(c echo.Context, page int, limit int) 
 
 // POST /library_template/
 func (a *Application) LibraryTemplateCreate(c echo.Context, subject *LibraryTemplate) error {
-	// TODO: process the subject
 	if err := a.DB.LibraryTemplate.Save(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving LibraryTemplate"})
 	}
@@ -39,8 +38,6 @@ func (a *Application) LibraryTemplateShow(c echo.Context, id string) error {
 
 // PUT /library_template/:id
 func (a *Application) LibraryTemplateUpdate(c echo.Context, id string, subject *LibraryTemplate) error {
-	// TODO: process the subject
-
 	// if you need to copy or compare to existing object...
 	// data, err := a.DB.LibraryTemplateGet(id)
 	// if err != nil {

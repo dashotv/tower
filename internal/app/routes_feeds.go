@@ -17,7 +17,6 @@ func (a *Application) FeedsIndex(c echo.Context, page int, limit int) error {
 
 // POST /feeds/
 func (a *Application) FeedsCreate(c echo.Context, subject *Feed) error {
-	// TODO: process the subject
 	if err := a.DB.Feed.Save(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Feeds"})
 	}
@@ -35,8 +34,6 @@ func (a *Application) FeedsShow(c echo.Context, id string) error {
 
 // PUT /feeds/:id
 func (a *Application) FeedsUpdate(c echo.Context, id string, subject *Feed) error {
-	// TODO: process the subject
-
 	// if you need to copy or compare to existing object...
 	// data, err := a.DB.FeedGet(id)
 	// if err != nil {

@@ -18,7 +18,6 @@ func (a *Application) LibraryIndex(c echo.Context, page int, limit int) error {
 
 // POST /library/
 func (a *Application) LibraryCreate(c echo.Context, subject *Library) error {
-	// TODO: process the subject
 	if err := a.DB.Library.Save(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Library"})
 	}
@@ -39,8 +38,6 @@ func (a *Application) LibraryShow(c echo.Context, id string) error {
 
 // PUT /library/:id
 func (a *Application) LibraryUpdate(c echo.Context, id string, subject *Library) error {
-	// TODO: process the subject
-
 	// if you need to copy or compare to existing object...
 	// data, err := a.DB.LibraryGet(id)
 	// if err != nil {
