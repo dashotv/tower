@@ -84,8 +84,7 @@ func (j *PlexWebhook) mediumFromMetadata(ctx context.Context, metadata *plex.Web
 		return nil, nil
 	}
 
-	file := resp[0].Media[0].Part[0].File
-	kind, name, file, ext, err := pathParts(file)
+	kind, name, file, ext, err := pathParts(resp[0].Media[0].Part[0].File)
 	if err != nil {
 		return nil, fae.Wrap(err, "path parts")
 	}
