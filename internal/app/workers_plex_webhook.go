@@ -20,6 +20,8 @@ func (j *PlexWebhook) Kind() string { return "plex_webhook" }
 func (j *PlexWebhook) Work(ctx context.Context, job *minion.Job[*PlexWebhook]) error {
 	payload := job.Args.Payload
 
+	notifier.Log.Info("plex webhook", payload.Event)
+
 	switch payload.Event {
 	case "library.new":
 		return j.LibraryNew(ctx, payload)
