@@ -44,14 +44,15 @@ func New(opt *ClientOptions) *Client {
 
 	c.Headers = map[string]string{
 		"X-Plex-Token":             c.Token,
-		"strong":                   "true",
-		"Plex-Container-Size":      "50",
+		"X-Plex-Container-Size":    "50",
 		"X-Plex-Container-Start":   "0",
 		"X-Plex-Product":           c.AppName,
 		"X-Plex-Client-Identifier": c.Device,
+		"strong":                   "true",
 		"Accept":                   applicationJson,
 		"ContentType":              applicationJson,
 	}
+
 	data := url.Values{}
 	data.Set("strong", "true")
 	data.Set("X-Plex-Client-Identifier", c.ClientIdentifier)

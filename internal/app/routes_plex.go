@@ -185,3 +185,6 @@ func (a *Application) PlexSessions(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
 }
+func (a *Application) PlexFiles(c echo.Context) error {
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: a.PlexFileCache.files})
+}

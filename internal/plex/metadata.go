@@ -20,8 +20,9 @@ type LibraryMetadata struct {
 
 type LeavesMetadataContainer struct {
 	MediaContainer struct {
-		Size     int64             `json:"size"`
-		Metadata []*LeavesMetadata `json:"Metadata"`
+		Size      int64             `json:"size"`
+		TotalSize int64             `json:"totalSize"`
+		Metadata  []*LeavesMetadata `json:"Metadata"`
 	} `json:"MediaContainer"`
 }
 type LeavesMetadata struct {

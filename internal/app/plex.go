@@ -1,11 +1,15 @@
 package app
 
 import (
+	"context"
+
 	"github.com/dashotv/tower/internal/plex"
 )
 
 func init() {
 	initializers = append(initializers, setupPlex)
+	initializers = append(initializers, setupPlexFiles)
+	starters = append(starters, startPlexFiles)
 }
 
 func setupPlex(app *Application) error {
@@ -22,4 +26,13 @@ func setupPlex(app *Application) error {
 
 	app.Plex = p
 	return nil
+}
+
+func setupPlexFiles(a *Application) error {
+	a.PlexFileCache = &plexFileCache{files: make(map[string]string)}
+	return nil
+}
+
+func startPlexFiles(ctx context.Context, a *Application) error {
+	return a.Workers.Enqueue(&PlexMatch{})
 }

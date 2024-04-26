@@ -45,7 +45,7 @@ func setupRoutes(app *Application) error {
 	// authenticated routes (if enabled, otherwise same as default)
 	app.Router = app.Engine.Group("")
 
-	// FIXME: auth
+	// TODO: fix auth
 	if app.Config.Auth {
 		clerkSecret := app.Config.ClerkSecretKey
 		if clerkSecret == "" {
@@ -190,6 +190,7 @@ func (a *Application) Routes() {
 	plex.GET("/play", a.PlexPlayHandler)
 	plex.GET("/sessions", a.PlexSessionsHandler)
 	plex.GET("/stop", a.PlexStopHandler)
+	plex.GET("/files", a.PlexFilesHandler)
 
 	releases := a.Router.Group("/releases")
 	releases.GET("/", a.ReleasesIndexHandler)
@@ -744,6 +745,9 @@ func (a *Application) PlexSessionsHandler(c echo.Context) error {
 func (a *Application) PlexStopHandler(c echo.Context) error {
 	session := router.QueryParamString(c, "session")
 	return a.PlexStop(c, session)
+}
+func (a *Application) PlexFilesHandler(c echo.Context) error {
+	return a.PlexFiles(c)
 }
 
 // Releases (/releases)

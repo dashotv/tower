@@ -51,6 +51,7 @@ func (j *PathImport) Work(ctx context.Context, job *minion.Job[*PathImport]) err
 
 	path.UpdatedAt = stat.ModTime()
 	path.Size = int(stat.Size())
+	path.Type = primitive.Symbol(fileType(path.LocalPath()))
 
 	// if path.IsVideo() && lo.Contains(app.Config.ExtensionsSubtitles, path.Extension) {
 	// 	path.Type = "subtitle"

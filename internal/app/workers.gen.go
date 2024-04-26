@@ -140,6 +140,10 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "registering worker: plex_collection_update (PlexCollectionUpdate)")
 	}
 
+	if err := minion.Register[*PlexMatch](m, &PlexMatch{}); err != nil {
+		return fae.Wrap(err, "registering worker: plex_match (PlexMatch)")
+	}
+
 	if err := minion.Register[*PlexPinToUsers](m, &PlexPinToUsers{}); err != nil {
 		return fae.Wrap(err, "registering worker: plex_pin_to_users (PlexPinToUsers)")
 	}
