@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -58,6 +59,9 @@ func (n *Notifier) Notify(level, title, message string) {
 	n.notice(level, title, message)
 	n.log(level, title, message)
 }
+func (n *Notifier) Debug(title, message string) {
+	n.Notify("debug", title, message)
+}
 func (n *Notifier) Info(title, message string) {
 	n.Notify("info", title, message)
 }
@@ -71,6 +75,9 @@ func (n *Notifier) Success(title, message string) {
 	n.Notify("success", title, message)
 }
 
+func (n *NotifierLog) Debug(title, message string) {
+	notifier.log("debug", title, message)
+}
 func (n *NotifierLog) Info(title, message string) {
 	notifier.log("info", title, message)
 }
@@ -82,6 +89,21 @@ func (n *NotifierLog) Error(title, message string) {
 }
 func (n *NotifierLog) Success(title, message string) {
 	notifier.log("success", title, message)
+}
+func (n *NotifierLog) Debugf(title, format string, a ...any) {
+	notifier.log("debug", title, fmt.Sprintf(format, a...))
+}
+func (n *NotifierLog) Infof(title, format string, a ...any) {
+	notifier.log("info", title, fmt.Sprintf(format, a...))
+}
+func (n *NotifierLog) Warnf(title, format string, a ...any) {
+	notifier.log("warn", title, fmt.Sprintf(format, a...))
+}
+func (n *NotifierLog) Errorf(title, format string, a ...any) {
+	notifier.log("error", title, fmt.Sprintf(format, a...))
+}
+func (n *NotifierLog) Successf(title, format string, a ...any) {
+	notifier.log("success", title, fmt.Sprintf(format, a...))
 }
 
 func (n *NotifierNotice) Info(title, message string) {
