@@ -392,6 +392,8 @@ func (a *Application) downloadsMove() error {
 			continue
 		}
 
+		moved = append(moved, files...)
+
 		if d.Multi && d.Medium.Type == "Series" {
 			// update medium and add path
 			if err := updateMedia(files); err != nil {
@@ -408,8 +410,6 @@ func (a *Application) downloadsMove() error {
 
 			continue
 		}
-
-		moved = append(moved, files...)
 
 		// update medium and add path
 		if err := updateMedia(files); err != nil {
