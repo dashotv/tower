@@ -20,8 +20,6 @@ func (j *PlexWebhook) Kind() string { return "plex_webhook" }
 func (j *PlexWebhook) Work(ctx context.Context, job *minion.Job[*PlexWebhook]) error {
 	payload := job.Args.Payload
 
-	notifier.Log.Info("plex webhook", payload.Event)
-
 	switch payload.Event {
 	case "library.new":
 		return j.LibraryNew(ctx, payload)
@@ -77,7 +75,7 @@ func (j *PlexWebhook) MediaScrobble(ctx context.Context, payload *plex.WebhookPa
 func (j *PlexWebhook) mediumFromMetadata(ctx context.Context, metadata *plex.WebhookPayloadMetadata) (*Medium, error) {
 	a := ContextApp(ctx)
 
-	resp, err := a.Plex.GetMetadataByKey(metadata.Key)
+	resp, err := a.Plex.GetMetadataByKey(metadata.RatingKey)
 	if err != nil {
 		return nil, fae.Wrap(err, "get metadata")
 	}
