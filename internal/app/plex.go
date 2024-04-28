@@ -8,8 +8,8 @@ import (
 
 func init() {
 	initializers = append(initializers, setupPlex)
-	initializers = append(initializers, setupPlexFiles)
-	starters = append(starters, startPlexFiles)
+	// initializers = append(initializers, setupPlexFiles)
+	// starters = append(starters, startPlexFiles)
 }
 
 func setupPlex(app *Application) error {

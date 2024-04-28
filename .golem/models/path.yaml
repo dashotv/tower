@@ -13,7 +13,7 @@ fields:
   - name: extension
     type: string
   - name: size
-    type: int
+    type: int64
   - name: resolution
     type: int
   - name: bitrate

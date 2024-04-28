@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/fae"
+	"github.com/dashotv/tower/internal/plex"
 )
 
 var regexPathTv = regexp.MustCompile(`(?i)(?P<season>\d+)x(?P<episode>\d+)`)
@@ -23,6 +24,16 @@ func (m *Medium) Destination() string {
 
 func (m *Medium) BaseDir() string {
 	return filepath.Join(app.Config.DirectoriesCompleted, string(m.Kind))
+}
+
+func (m *Medium) FindPathByFullPath(file string) (*Path, bool) {
+	local := strings.Replace(file, app.Config.DirectoriesCompleted+"/", "", 1)
+	local = strings.TrimSuffix(local, filepath.Ext(file))
+	ext := Extension(file)
+
+	return lo.Find(m.Paths, func(p *Path) bool {
+		return p.Local == local && p.Extension == ext
+	})
 }
 
 // AddPathByFullpath adds a path to the medium by the full path of the file. it ensures
@@ -40,6 +51,7 @@ func (m *Medium) AddPathByFullpath(file string) *Path {
 		if path.ID == primitive.NilObjectID {
 			path.ID = primitive.NewObjectID()
 		}
+		path.Type = primitive.Symbol(fileType(file))
 		return path
 	}
 
@@ -51,6 +63,18 @@ func (m *Medium) AddPathByFullpath(file string) *Path {
 	}
 	m.Paths = append(m.Paths, path)
 	return path
+}
+
+func (m *Medium) AddPathsByMetadata(metadata *plex.KeyResponseMetadata) {
+	for _, media := range metadata.Media {
+		for _, part := range media.Part {
+			p := m.AddPathByFullpath(part.File)
+			if p != nil {
+				p.Size = part.Size
+				p.Resolution = metadataResolution(media.VideoResolution)
+			}
+		}
+	}
 }
 
 func (c *Connector) MediumBySearch(title string, season, episode int) (*Medium, error) {
@@ -121,6 +145,24 @@ func (c *Connector) MediumByFile(f *File) (*Medium, error) {
 		return nil, fae.Errorf("unknown kind: %s", kind)
 	}
 }
+
+func (c *Connector) MediumByPlexMedia(media *plex.Media) (*Medium, error) {
+	kind, name, file, ext, err := pathParts(media.Part[0].File)
+	if err != nil {
+		return nil, fae.Wrap(err, "path parts")
+	}
+
+	m, ok, err := c.MediumBy(kind, name, file, ext)
+	if err != nil {
+		return nil, fae.Wrap(err, "medium by")
+	}
+	if !ok || m == nil {
+		return nil, fae.New("medium not found")
+	}
+
+	return m, nil
+}
+
 func (c *Connector) MediumBy(kind, name, file, ext string) (*Medium, bool, error) {
 	if list, err := c.Medium.Query().Where("paths.local", fmt.Sprintf("%s/%s/%s", kind, name, file)).Where("paths.extension", ext).Run(); err != nil {
 		return nil, false, err

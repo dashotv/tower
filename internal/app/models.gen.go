@@ -520,7 +520,7 @@ type Path struct { // struct
 	Remote     string             `bson:"remote" json:"remote"`
 	Local      string             `bson:"local" json:"local"`
 	Extension  string             `bson:"extension" json:"extension"`
-	Size       int                `bson:"size" json:"size"`
+	Size       int64              `bson:"size" json:"size"`
 	Resolution int                `bson:"resolution" json:"resolution"`
 	Bitrate    int                `bson:"bitrate" json:"bitrate"`
 	Checksum   string             `bson:"checksum" json:"checksum"`

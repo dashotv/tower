@@ -2,6 +2,8 @@ package app
 
 import (
 	"context"
+	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/dashotv/fae"
@@ -10,6 +12,7 @@ import (
 )
 
 var plexSupportedHooks = []string{"library.new", "media.scrobble"}
+var resolutionRegex = regexp.MustCompile(`(?i)(\d{3,4})p`)
 
 type PlexWebhook struct {
 	minion.WorkerDefaults[*PlexWebhook]
@@ -82,27 +85,37 @@ func (j *PlexWebhook) mediumFromMetadata(ctx context.Context, metadata *plex.Web
 		return nil, fae.Wrap(err, "get metadata")
 	}
 	if len(resp) == 0 || len(resp[0].Media) == 0 || len(resp[0].Media[0].Part) == 0 {
-		a.Log.Named("plex_library_new").Warn("no media found in metadata")
+		a.Log.Named("plex_library_new").Warn("no media/part found in metadata")
 		return nil, nil
 	}
 
-	kind, name, file, ext, err := pathParts(resp[0].Media[0].Part[0].File)
+	m, err := a.DB.MediumByPlexMedia(resp[0].Media[0])
 	if err != nil {
-		return nil, fae.Wrap(err, "path parts")
+		return nil, fae.Wrap(err, "medium by plex media")
 	}
 
-	m, ok, err := a.DB.MediumBy(kind, name, file, ext)
-	if err != nil {
-		return nil, fae.Wrap(err, "medium by")
-	}
-	if !ok || m == nil {
-		return nil, fae.New("medium not found")
-	}
+	m.AddPathsByMetadata(resp[0])
+	return m, nil
+}
 
+func mediumAddPath(m *Medium, file string, size int64, resolution int) *Path {
 	p := m.AddPathByFullpath(file)
 	if p == nil {
-		return nil, fae.Errorf("failed to add path: %s", file)
+		return nil
 	}
 
-	return m, nil
+	p.Size = size
+	p.Resolution = resolution
+	return p
+}
+
+func metadataResolution(res string) int {
+	if res == "" {
+		return 0
+	}
+	if match := resolutionRegex.FindStringSubmatch(res); len(match) > 1 {
+		r, _ := strconv.Atoi(match[1])
+		return r
+	}
+	return 0
 }
