@@ -30,6 +30,7 @@ func (j *PlexWebhook) Work(ctx context.Context, job *minion.Job[*PlexWebhook]) e
 }
 
 func (j *PlexWebhook) LibraryNew(ctx context.Context, payload *plex.WebhookPayload) error {
+	notifier.Log.Debugf("plex", "added: %s | %s | %s", payload.Metadata.GrandparentTitle, payload.Metadata.ParentTitle, payload.Metadata.Title)
 	a := ContextApp(ctx)
 
 	m, err := j.mediumFromMetadata(ctx, payload.Metadata)
@@ -45,6 +46,7 @@ func (j *PlexWebhook) LibraryNew(ctx context.Context, payload *plex.WebhookPaylo
 }
 
 func (j *PlexWebhook) MediaScrobble(ctx context.Context, payload *plex.WebhookPayload) error {
+	notifier.Log.Debugf("plex", "scrobble: %s - %s | %s | %s", payload.Account.Title, payload.Metadata.GrandparentTitle, payload.Metadata.ParentTitle, payload.Metadata.Title)
 	a := ContextApp(ctx)
 
 	m, err := j.mediumFromMetadata(ctx, payload.Metadata)
