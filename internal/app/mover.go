@@ -166,17 +166,22 @@ func (m *Mover) moveMetube() ([]*MoverFile, error) {
 func (m *Mover) moveFile(source string, medium *Medium) error {
 	ext := Extension(source)
 
-	if medium == nil || (medium.Completed && !m.Download.Force) {
-		m.Log.Debugf("skipping %s", source)
-		return nil
-	}
-
 	dest, err := app.Destinator.Destination(m.Download.Kind, medium)
 	if err != nil {
 		return fae.Wrap(err, "getting destination")
 	}
 
 	destination := fmt.Sprintf("%s.%s", dest, ext)
+
+	m.Log.Debugf("%s => %s", source, destination)
+	if !app.Config.Production {
+		return nil
+	}
+
+	if medium == nil || (medium.Completed && !m.Download.Force) {
+		m.Log.Debugf("skipping %s", source)
+		return nil
+	}
 
 	if !exists(source) {
 		return fae.Errorf("source does not exist: %s", source)
@@ -195,12 +200,6 @@ func (m *Mover) moveFile(source string, medium *Medium) error {
 			// notifier.Log.Warn("DownloadMove", fmt.Sprintf("destination exists, sums match: %s", destination))
 			return nil
 		}
-	}
-
-	m.Log.Debugf("%s => %s", source, destination)
-	if !app.Config.Production {
-		m.Log.Debugf("skipping move in dev mode")
-		return nil
 	}
 
 	if err := m.movefunc(source, destination, m.Download.Force); err != nil {
