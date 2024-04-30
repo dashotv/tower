@@ -147,14 +147,10 @@ func (d *DestinatorData) Directory() string { return d.directory }
 func (d *DestinatorData) Season() string    { return fmt.Sprintf("%02d", d.season) }
 func (d *DestinatorData) Episode() string   { return fmt.Sprintf("%02d", d.episode) }
 func (d *DestinatorData) Absolute() string {
-	if d.absolute == 0 {
+	if d.absolute == 0 || d.season == 0 {
 		return fmt.Sprintf("%02dx%02d", d.season, d.episode)
 	}
-	s := 1
-	if d.season == 0 {
-		s = 0
-	}
-	return fmt.Sprintf("%02dx%03d", s, d.absolute)
+	return fmt.Sprintf("01x%03d", d.absolute)
 }
 
 func NewDestinatorData(m *Medium) (*DestinatorData, error) {
