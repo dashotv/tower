@@ -150,7 +150,11 @@ func (d *DestinatorData) Absolute() string {
 	if d.absolute == 0 {
 		return fmt.Sprintf("%02dx%02d", d.season, d.episode)
 	}
-	return fmt.Sprintf("01x%03d", d.absolute)
+	s := 1
+	if d.season == 0 {
+		s = 0
+	}
+	return fmt.Sprintf("%02dx%03d", s, d.absolute)
 }
 
 func NewDestinatorData(m *Medium) (*DestinatorData, error) {
