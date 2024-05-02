@@ -172,3 +172,54 @@ func (j *FileMatchDir) Work(ctx context.Context, job *minion.Job[*FileMatchDir])
 	}
 	return nil
 }
+
+type FileMatchAnime struct {
+	minion.WorkerDefaults[*FileMatchAnime]
+}
+
+func (j *FileMatchAnime) Kind() string { return "file_match_anime" }
+func (j *FileMatchAnime) Work(ctx context.Context, job *minion.Job[*FileMatchAnime]) error {
+	a := ContextApp(ctx)
+	if err := a.Workers.Enqueue(&FileMatchKind{Input: "anime"}); err != nil {
+		return fae.Wrap(err, "enqueue")
+	}
+	return nil
+}
+
+type FileMatchDonghua struct {
+	minion.WorkerDefaults[*FileMatchDonghua]
+}
+
+func (j *FileMatchDonghua) Kind() string { return "file_match_donghua" }
+func (j *FileMatchDonghua) Work(ctx context.Context, job *minion.Job[*FileMatchDonghua]) error {
+	a := ContextApp(ctx)
+	if err := a.Workers.Enqueue(&FileMatchKind{Input: "donghua"}); err != nil {
+		return fae.Wrap(err, "enqueue")
+	}
+	return nil
+}
+
+type FileMatchKind struct {
+	minion.WorkerDefaults[*FileMatchKind]
+	Input string `bson:"input" json:"input"`
+}
+
+func (j *FileMatchKind) Kind() string { return "file_match_kind" }
+func (j *FileMatchKind) Work(ctx context.Context, job *minion.Job[*FileMatchKind]) error {
+	kind := job.Args.Input
+	a := ContextApp(ctx)
+
+	err := a.DB.Medium.Query().Where("kind", kind).Batch(100, func(media []*Medium) error {
+		for _, m := range media {
+			if err := a.Workers.Enqueue(&FileMatchMedium{ID: m.ID.Hex()}); err != nil {
+				return fae.Wrapf(err, "enqueue medium: %s", m.ID.Hex())
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return fae.Wrap(err, "querying")
+	}
+
+	return nil
+}

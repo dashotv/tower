@@ -104,8 +104,26 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "scheduling worker: file_match (FileMatch)")
 	}
 
+	if err := minion.Register[*FileMatchAnime](m, &FileMatchAnime{}); err != nil {
+		return fae.Wrap(err, "registering worker: file_match_anime (FileMatchAnime)")
+	}
+	if _, err := m.Schedule("0 0 11 * * 0", &FileMatchAnime{}); err != nil {
+		return fae.Wrap(err, "scheduling worker: file_match_anime (FileMatchAnime)")
+	}
+
 	if err := minion.Register[*FileMatchDir](m, &FileMatchDir{}); err != nil {
 		return fae.Wrap(err, "registering worker: file_match_dir (FileMatchDir)")
+	}
+
+	if err := minion.Register[*FileMatchDonghua](m, &FileMatchDonghua{}); err != nil {
+		return fae.Wrap(err, "registering worker: file_match_donghua (FileMatchDonghua)")
+	}
+	if _, err := m.Schedule("0 0 11 * * 0", &FileMatchDonghua{}); err != nil {
+		return fae.Wrap(err, "scheduling worker: file_match_donghua (FileMatchDonghua)")
+	}
+
+	if err := minion.Register[*FileMatchKind](m, &FileMatchKind{}); err != nil {
+		return fae.Wrap(err, "registering worker: file_match_kind (FileMatchKind)")
 	}
 
 	if err := minion.Register[*FileMatchMedium](m, &FileMatchMedium{}); err != nil {
