@@ -158,7 +158,7 @@ func (d *Download) IsTorrent() bool {
 
 func (c *Connector) ActiveDownloads() ([]*Download, error) {
 	q := c.Download.Query()
-	list, err := q.In("status", activeStates).Run()
+	list, err := q.In("status", activeStates).Limit(-1).Run()
 	if err != nil {
 		return nil, err
 	}
