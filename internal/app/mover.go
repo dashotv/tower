@@ -178,7 +178,7 @@ func (m *Mover) moveFile(source string, medium *Medium) error {
 		return nil
 	}
 
-	if medium == nil || (medium.Completed && !m.Download.Force) {
+	if medium == nil {
 		m.Log.Debugf("skipping %s", source)
 		return nil
 	}
