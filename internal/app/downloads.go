@@ -229,6 +229,11 @@ func (a *Application) downloadsManage() error {
 			continue
 		}
 
+		if d.Medium == nil {
+			app.Workers.Log.Warnf("no medium", d.ID.Hex())
+			continue
+		}
+
 		t, err := app.FlameTorrent(d.Thash)
 		if err != nil {
 			app.Log.Named("downloads.manage").Errorf("failed to get torrent: %s", err)
@@ -239,115 +244,129 @@ func (a *Application) downloadsManage() error {
 			continue
 		}
 
-		dfs := d.Files
-		numToDf := map[int]*DownloadFile{}
-		for _, df := range dfs {
-			numToDf[df.Num] = df
+		if err := a.downloadsManageOne(d, t); err != nil {
+			app.Log.Errorf("failed to manage download: %s", err)
 		}
+	}
 
-		for _, f := range t.Files {
-			if shouldDownloadFile(f.Name) {
-				if _, ok := numToDf[f.ID]; !ok {
-					// if it doesn't already exist, add it
-					d.Files = append(d.Files, &DownloadFile{Num: f.ID})
-				}
-			}
-		}
+	return nil
+}
 
-		if len(d.Files) == 0 {
-			app.Workers.Log.Warnf("download has no files: %s", d.ID.Hex())
-			continue
-		}
+func (a *Application) downloadsManageOne(d *Download, t *qbt.Torrent) error {
+	dfs := d.Files
+	numToDf := map[int]*DownloadFile{}
+	for _, df := range dfs {
+		numToDf[df.Num] = df
+	}
 
-		if len(d.Files) == 1 {
-			d.Files[0].MediumID = d.MediumID
-			d.Status = "downloading"
-
-			err = app.DB.Download.Save(d)
-			if err != nil {
-				return fae.Wrap(err, "failed to save download")
-			}
-
-			continue
-		}
-
-		if !d.Multi {
-			app.Workers.Log.Warnf("multiple files, but not multi", d.ID.Hex())
-
-			d.Status = "reviewing"
-			err = app.DB.Download.Save(d)
-			if err != nil {
-				return fae.Wrap(err, "failed to save download")
-			}
-
-			continue
-		}
-
-		for _, df := range d.Files {
-			if df.MediumID != primitive.NilObjectID {
-				// already has media
-				continue
-			}
-
-			if d.Medium.Type != "Series" {
-				// only handle series for now
-				app.Workers.Log.Warnf("multi not series", d.ID.Hex())
-
-				d.Status = "reviewing"
-				err = app.DB.Download.Save(d)
-				if err != nil {
-					return fae.Wrap(err, "failed to save download")
-				}
-			}
-
-			file := t.Files[df.Num]
-
-			// find the episode based on the name
-			ep, err := app.RunicFindEpisode(d.MediumID, file.Name, "tv")
-			if err != nil {
-				return fae.Wrap(err, "failed to find episode")
-			}
-
-			if ep == nil {
-				app.Workers.Log.Warnf("episode not found: %s", file.Name)
-				continue
-			}
-
-			df.MediumID = ep.ID
-		}
-
-		// TODO: handle want more / none / etc
-		wanted := false
-		for _, f := range t.Files {
-			if f.Priority > 0 {
-				wanted = true
-				break
+	for _, f := range t.Files {
+		if shouldDownloadFile(f.Name) {
+			if _, ok := numToDf[f.ID]; !ok {
+				// if it doesn't already exist, add it
+				d.Files = append(d.Files, &DownloadFile{Num: f.ID})
 			}
 		}
+	}
 
-		if wanted && t.Progress != 100 {
-			err := app.FlameTorrentWant(d.Thash, "none")
-			if err != nil {
-				return fae.Wrap(err, "want none")
-			}
-		}
+	if len(d.Files) == 0 {
+		app.Workers.Log.Warnf("download has no files: %s", d.ID.Hex())
+		return nil
+	}
 
-		if d.HasMedia() {
-			nums := d.NextFileNums(t, downloadMultiFiles)
-			if nums != "" {
-				err := app.FlameTorrentWant(d.Thash, nums)
-				if err != nil {
-					return fae.Wrap(err, "want next")
-				}
-			}
+	// TODO: handle downloads with single media file and multiple subtitles
 
-			// save updates to download files
-			d.Status = "downloading"
-		}
+	if len(d.Files) == 1 {
+		d.Files[0].MediumID = d.MediumID
+		d.Status = "downloading"
 
 		if err := app.DB.Download.Save(d); err != nil {
 			return fae.Wrap(err, "failed to save download")
 		}
+
+		return nil
+	}
+
+	if !d.Multi {
+		app.Workers.Log.Warnf("multiple files, but not multi", d.ID.Hex())
+
+		d.Status = "reviewing"
+		if err := app.DB.Download.Save(d); err != nil {
+			return fae.Wrap(err, "failed to save download")
+		}
+
+		return nil
+	}
+
+	if d.Medium.Type != "Series" {
+		// only handle series for now
+		app.Workers.Log.Warnf("multi not series", d.ID.Hex())
+
+		d.Status = "reviewing"
+		if err := app.DB.Download.Save(d); err != nil {
+			return fae.Wrap(err, "failed to save download")
+		}
+
+		return nil
+	}
+
+	for _, df := range d.Files {
+		if df.MediumID != primitive.NilObjectID {
+			// already has media
+			continue
+		}
+
+		file := t.Files[df.Num]
+
+		// find the episode based on the name
+		title := filepath.Base(file.Name)
+		app.Log.Debugf("searching for episode: %s %s", d.Search.Type, title)
+		ep, err := app.RunicFindEpisode(d.MediumID, title, d.Search.Type)
+		if err != nil {
+			return fae.Wrap(err, "failed to find episode")
+		}
+
+		app.Log.Debugf("found: %s", ep.Title)
+		if ep == nil {
+			app.Workers.Log.Warnf("episode not found: %s", file.Name)
+			continue
+		}
+
+		df.MediumID = ep.ID
+	}
+
+	app.DB.processDownloads([]*Download{d})
+
+	// TODO: handle want more / none / etc
+	wanted := false
+	for _, f := range t.Files {
+		if f.Priority > 0 {
+			wanted = true
+			break
+		}
+	}
+
+	if wanted && t.Progress != 100 {
+		err := app.FlameTorrentWant(d.Thash, "none")
+		if err != nil {
+			return fae.Wrap(err, "want none")
+		}
+	}
+
+	if d.HasMedia() {
+		nums := d.NextFileNums(t, downloadMultiFiles)
+		if nums != "" {
+			err := app.FlameTorrentWant(d.Thash, nums)
+			if err != nil {
+				return fae.Wrap(err, "want next")
+			}
+		}
+
+		// save updates to download files
+		d.Status = "downloading"
+	}
+
+	if err := app.DB.Download.Save(d); err != nil {
+		return fae.Wrap(err, "failed to save download")
 	}
 
 	return nil

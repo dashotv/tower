@@ -26,6 +26,8 @@ fields:
     type: "[]*DownloadFile"
     json: files
     bson: download_files
+  - name: regex
+    type: string
   # for the UI
   - name: medium
     type: "*Medium"

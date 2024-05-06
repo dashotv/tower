@@ -58,12 +58,19 @@ func (d *Download) SortedFileNums(t *qbt.Torrent) ([]string, error) {
 		}
 		return fmt.Sprintf("%03d%03d", df.Medium.SeasonNumber, df.Medium.EpisodeNumber)
 	})
+
 	keys := lo.Keys(grouped)
 	sort.Strings(keys)
-	list := lo.FilterMap(keys, func(key string, i int) (string, bool) {
-		df := grouped[key][0]
-		return fmt.Sprintf("%d", df.Num), df.MediumID != primitive.NilObjectID && t.Files[df.Num].Progress < 100 && !df.Medium.Downloaded
-	})
+
+	list := []string{}
+	for _, key := range keys {
+		for _, df := range grouped[key] {
+			if df.MediumID != primitive.NilObjectID && t.Files[df.Num].Progress < 100 && !df.Medium.Downloaded {
+				list = append(list, fmt.Sprintf("%d", df.Num))
+			}
+		}
+	}
+
 	return list, nil
 }
 
