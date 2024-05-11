@@ -33,7 +33,7 @@ func (a *Application) HooksPlex(c echo.Context) error {
 		return fae.Wrap(err, "unmarshal payload")
 	}
 
-	if lo.Contains(plexSupportedHooks, payload.Event) {
+	if lo.Contains(plexSupportedHooks, payload.Event) { // only create jobs for handled events
 		if err := a.Workers.Enqueue(&PlexWebhook{Payload: payload}); err != nil {
 			return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 		}

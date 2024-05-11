@@ -13,6 +13,7 @@
 - [ ] downloads: movies
 - [ ] downloads: use runic
 - [ ] downloads: more evented / less polling
+- [ ] plex: watched (sync for missed scrobbles)
 - [ ] Custom layouts for files
 - [ ] custom regex for matching files on torrent
 - [ ] resolution as part of file name? taken from release resolution?
