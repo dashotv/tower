@@ -88,19 +88,19 @@ const (
 // }
 
 type User struct {
-	ID       string `json:"id"`
-	UUID     string `json:"uuid"`
-	Username string `json:"username"`
-	Title    string `json:"title"`
-	Email    string `json:"email"`
+	ID       string `json:"id" xml:"id,attr"`
+	UUID     string `json:"uuid" xml:"uuid,attr"`
+	Username string `json:"username" xml:"username,attr"`
+	Title    string `json:"title" xml:"title,attr"`
+	Email    string `json:"email" xml:"email,attr"`
 	// FriendlyName      string      `json:"friendlyName"`
 	// Locale            interface{} `json:"locale"`
-	Confirmed bool  `json:"confirmed"`
-	JoinedAt  int64 `json:"joinedAt"`
+	Confirmed bool  `json:"confirmed" xml:"confirmed,attr"`
+	JoinedAt  int64 `json:"joinedAt" xml:"joinedAt,attr"`
 	// EmailOnlyAuth     bool        `json:"emailOnlyAuth"`
 	// HasPassword       bool        `json:"hasPassword"`
 	// Protected         bool        `json:"protected"`
-	Thumb string `json:"thumb"`
+	Thumb string `json:"thumb" xml:"thumb,attr"`
 	// AuthToken         string      `json:"authToken"`
 	// MailingListStatus string      `json:"mailingListStatus"`
 	// MailingListActive bool        `json:"mailingListActive"`
@@ -118,10 +118,10 @@ type User struct {
 	// SubscriptionDescription string `json:"subscriptionDescription"`
 	// Restricted              bool   `json:"restricted"`
 	// Anonymous               bool   `json:"anonymous"`
-	Home bool `json:"home"`
+	Home bool `json:"home" xml:"home,attr"`
 	// Guest                   bool   `json:"guest"`
-	HomeSize  int64 `json:"homeSize"`
-	HomeAdmin bool  `json:"homeAdmin"`
+	HomeSize  int64 `json:"homeSize" xml:"homeSize,attr"`
+	HomeAdmin bool  `json:"homeAdmin" xml:"homeAdmin,attr"`
 	// MaxHomeSize             int64  `json:"maxHomeSize"`
 	// RememberExpiresAt       int64  `json:"rememberExpiresAt"`
 	// Profile                 struct {

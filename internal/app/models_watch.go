@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -23,6 +24,22 @@ func (c *Connector) WatchGet(id primitive.ObjectID, username string) (*Watch, er
 		return nil, nil
 	}
 	return watches[0], nil
+}
+func (c *Connector) WatchMedium(id primitive.ObjectID, username string) error {
+	w, err := c.WatchGet(id, username)
+	if err != nil {
+		return err
+	}
+	if w != nil {
+		return nil
+	}
+
+	watch := &Watch{}
+	watch.MediumID = id
+	watch.Username = username
+	watch.WatchedAt = time.Now()
+
+	return c.Watch.Save(watch)
 }
 
 func (c *Connector) Watches(mediumID, username string) ([]*Watch, error) {

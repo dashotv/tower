@@ -10,14 +10,19 @@ import (
 )
 
 func init() {
-	godotenv.Load("../../.env")
+	err := godotenv.Load("../../.env")
+	if err != nil {
+		fmt.Printf("error loading .env file: %v\n", err)
+	}
 }
 
 func testClient() *Client {
 	return New(&ClientOptions{
-		URL:   os.Getenv("PLEX_SERVER_URL"),
-		Token: os.Getenv("PLEX_TOKEN"),
-		Debug: true,
+		URL:              os.Getenv("PLEX_SERVER_URL"),
+		Token:            os.Getenv("PLEX_TOKEN"),
+		ClientIdentifier: "dashotv-test",
+		Device:           "dashotv-test",
+		Debug:            true,
 	})
 }
 
@@ -27,4 +32,23 @@ func TestGetUser(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, user)
 	fmt.Printf("user: %+v\n", user)
+}
+
+func TestGetAccounts(t *testing.T) {
+	c := testClient()
+	list, err := c.GetAccounts()
+	assert.NoError(t, err)
+	assert.NotNil(t, list)
+	assert.NotEmpty(t, list)
+	for _, a := range list {
+		fmt.Printf("account: %+v\n", a)
+	}
+}
+
+func TestGetAccount(t *testing.T) {
+	c := testClient()
+	account, err := c.GetAccount(2766875)
+	assert.NoError(t, err)
+	assert.NotNil(t, account)
+	fmt.Printf("account: %+v\n", account)
 }

@@ -147,20 +147,22 @@ func (c *Connector) MediumByFile(f *File) (*Medium, error) {
 }
 
 func (c *Connector) MediumByPlexMedia(media *plex.Media) (*Medium, error) {
-	kind, name, file, ext, err := pathParts(media.Part[0].File)
-	if err != nil {
-		return nil, fae.Wrap(err, "path parts")
+	for _, part := range media.Part {
+		kind, name, file, ext, err := pathParts(part.File)
+		if err != nil {
+			return nil, fae.Wrap(err, "path parts")
+		}
+
+		m, ok, err := c.MediumBy(kind, name, file, ext)
+		if err != nil {
+			return nil, fae.Wrap(err, "medium by")
+		}
+		if ok || m != nil {
+			return m, nil
+		}
 	}
 
-	m, ok, err := c.MediumBy(kind, name, file, ext)
-	if err != nil {
-		return nil, fae.Wrap(err, "medium by")
-	}
-	if !ok || m == nil {
-		return nil, fae.New("medium not found")
-	}
-
-	return m, nil
+	return nil, nil
 }
 
 func (c *Connector) MediumBy(kind, name, file, ext string) (*Medium, bool, error) {

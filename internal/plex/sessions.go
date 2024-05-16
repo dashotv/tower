@@ -1,8 +1,33 @@
 package plex
 
+import (
+	"fmt"
+	"time"
+)
+
 func (p *Client) GetSessions() ([]*SessionMetadata, error) {
 	sessions := &SessionContainer{}
 	resp, err := p._server().SetResult(sessions).Get("/status/sessions")
+	if err != nil {
+		return nil, err
+	}
+	if !resp.IsSuccess() {
+		return nil, err
+	}
+	if sessions.MediaContainer.Size == 0 {
+		return nil, nil
+	}
+	return sessions.MediaContainer.Metadata, nil
+}
+
+func (p *Client) GetHistory() ([]*SessionMetadata, error) {
+	sessions := &SessionContainer{}
+	from := time.Now().AddDate(0, 0, -3).Unix()
+	resp, err := p._server().
+		SetResult(sessions).
+		SetQueryParam("viewedAt>", fmt.Sprintf("%d", from)).
+		SetHeader("X-Plex-Container-Size", "200").
+		Get("/status/sessions/history/all")
 	if err != nil {
 		return nil, err
 	}
@@ -23,6 +48,7 @@ type SessionContainer struct {
 }
 
 type SessionMetadata struct {
+	AccountID             int64           `json:"accountID"`
 	AddedAt               int64           `json:"addedAt"`
 	Art                   string          `json:"art"`
 	ContentRating         string          `json:"contentRating"`

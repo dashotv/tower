@@ -2,6 +2,8 @@ package plex
 
 import (
 	"crypto/tls"
+	"encoding/xml"
+	"fmt"
 	"net/url"
 
 	"github.com/go-resty/resty/v2"
@@ -11,7 +13,7 @@ import (
 
 const (
 	defaultMetaURL  = "https://metadata.provider.plex.tv"
-	defaultTVURL    = "https://plex.tv/api/v2"
+	defaultTVURL    = "https://plex.tv/api"
 	applicationXml  = "application/xml"
 	applicationJson = "application/json"
 )
@@ -50,7 +52,7 @@ func New(opt *ClientOptions) *Client {
 		"X-Plex-Client-Identifier": c.Device,
 		"strong":                   "true",
 		"Accept":                   applicationJson,
-		"ContentType":              applicationJson,
+		"Content-type":             applicationJson,
 	}
 
 	data := url.Values{}
@@ -61,7 +63,8 @@ func New(opt *ClientOptions) *Client {
 	c.data = data
 
 	c.server = resty.New().SetDebug(c.Debug).SetBaseURL(c.URL).SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	c.plextv = resty.New().SetDebug(c.Debug).SetBaseURL(c.TVURL)
+	c.plextv = resty.New().SetDebug(c.Debug).SetBaseURL(c.TVURL + "/v2")
+	c.plextvv1 = resty.New().SetDebug(c.Debug).SetBaseURL(c.TVURL)
 	c.metadata = resty.New().SetDebug(c.Debug).SetBaseURL(c.MetadataURL)
 
 	return c
@@ -98,11 +101,16 @@ type Client struct {
 	data     url.Values
 	server   *resty.Client
 	plextv   *resty.Client
+	plextvv1 *resty.Client
 	metadata *resty.Client
+	accounts []*User // cache of users
 }
 
 func (p *Client) _plextv() *resty.Request {
 	return p.plextv.R().SetHeaders(p.Headers)
+}
+func (p *Client) _plextvv1() *resty.Request {
+	return p.plextvv1.R().SetHeaders(p.Headers)
 }
 func (p *Client) _server() *resty.Request {
 	return p.server.R().SetHeaders(p.Headers)
@@ -119,8 +127,55 @@ func (p *Client) GetUser(token string) (*User, error) {
 		return nil, fae.Wrap(err, "failed to make request")
 	}
 	if !resp.IsSuccess() {
-		return nil, fae.Errorf("pin not authorized: %s", resp.Status())
+		return nil, fae.Errorf("getting user: %s", resp.Status())
 	}
 
 	return user, nil
+}
+
+type Accounts struct {
+	XMLName xml.Name `json:"MediaContainer" xml:"MediaContainer"`
+	Size    int64    `json:"size" xml:"size,attr"`
+	Total   int64    `json:"totalSize"  xml:"totalSize,attr"`
+	Users   []*User  `json:"User" xml:"User"`
+}
+
+func (p *Client) GetAccounts() ([]*User, error) {
+	if p.accounts != nil && len(p.accounts) > 0 {
+		return p.accounts, nil
+	}
+	return p.GetAccountsUpdate()
+}
+
+func (p *Client) GetAccountsUpdate() ([]*User, error) {
+	r := &Accounts{}
+	resp, err := p._plextvv1().
+		SetResult(r).
+		Get("/users/")
+	if err != nil {
+		return nil, fae.Wrap(err, "failed to make request")
+	}
+	if !resp.IsSuccess() {
+		return nil, fae.Errorf("getting accounts: %s", resp.Status())
+	}
+
+	p.accounts = r.Users
+	return p.accounts, nil
+}
+
+func (p *Client) GetAccount(id int64) (*User, error) {
+	accounts, err := p.GetAccounts()
+	if err != nil {
+		return nil, err
+	}
+
+	sid := fmt.Sprintf("%d", id)
+
+	for _, a := range accounts {
+		if a.ID == sid {
+			return a, nil
+		}
+	}
+
+	return nil, fae.Errorf("account not found: %s", sid)
 }
