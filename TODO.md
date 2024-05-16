@@ -9,11 +9,14 @@
 - [x] Allow managing layouts per library
 - [x] Click watched on media
 - [x] plex webhooks (scrobble and new and others?)
+- [ ] plex: watched (sync for missed scrobbles)
+  - maybe consider not using local watched status, think through using plex watched status
+    when making decisions about new downloads
+- [ ] something wrong with updates (where images stop working)
 - [ ] downloads: cleaner
 - [ ] downloads: movies
 - [ ] downloads: use runic
 - [ ] downloads: more evented / less polling
-- [ ] plex: watched (sync for missed scrobbles)
 - [ ] Custom layouts for files
 - [ ] custom regex for matching files on torrent
 - [ ] resolution as part of file name? taken from release resolution?

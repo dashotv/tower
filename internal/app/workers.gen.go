@@ -169,9 +169,6 @@ func setupWorkers(app *Application) error {
 	if err := minion.Register[*PlexUserUpdates](m, &PlexUserUpdates{}); err != nil {
 		return fae.Wrap(err, "registering worker: plex_user_updates (PlexUserUpdates)")
 	}
-	if _, err := m.Schedule("0 30 11 * * *", &PlexUserUpdates{}); err != nil {
-		return fae.Wrap(err, "scheduling worker: plex_user_updates (PlexUserUpdates)")
-	}
 
 	if err := minion.Register[*PlexWatchlistUpdates](m, &PlexWatchlistUpdates{}); err != nil {
 		return fae.Wrap(err, "registering worker: plex_watchlist_updates (PlexWatchlistUpdates)")
