@@ -33,6 +33,6 @@ func setupPlexFiles(a *Application) error {
 	return nil
 }
 
-func startPlexFiles(ctx context.Context, a *Application) error {
+func startPlexFiles(_ context.Context, a *Application) error {
 	return a.Workers.Enqueue(&PlexMatch{})
 }
