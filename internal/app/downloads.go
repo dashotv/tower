@@ -426,7 +426,6 @@ func (a *Application) downloadsMove() error {
 			}
 
 			nums := d.NextFileNums(t, 3)
-			notifier.Log.Infof("want: %s", nums)
 			if nums != "" {
 				err := app.FlameTorrentWant(d.Thash, nums)
 				if err != nil {
