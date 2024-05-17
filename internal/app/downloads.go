@@ -62,9 +62,15 @@ func Extension(path string) string {
 // }
 
 func updateMedium(m *Medium, files []*MoverFile) error {
-	fmt.Printf("updateMedium: %s %+v\n", m.ID.Hex(), files)
-	m.Downloaded = true
-	m.Completed = true
+	// fmt.Printf("updateMedium: %s %+v\n", m.ID.Hex(), files)
+	// only mark downloaded/completed if there are videos (so subtitles don't trigger it)
+	videos := lo.Filter(files, func(f *MoverFile, i int) bool {
+		return fileType(f.Destination) == "video"
+	})
+	if len(videos) > 0 {
+		m.Downloaded = true
+		m.Completed = true
+	}
 
 	for _, f := range files {
 		path := m.AddPathByFullpath(f.Destination)
