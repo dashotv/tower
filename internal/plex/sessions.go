@@ -20,13 +20,17 @@ func (p *Client) GetSessions() ([]*SessionMetadata, error) {
 	return sessions.MediaContainer.Metadata, nil
 }
 
-func (p *Client) GetHistory() ([]*SessionMetadata, error) {
+func (p *Client) GetHistoryRecent() ([]*SessionMetadata, error) {
+	from := time.Now().AddDate(0, 0, -3)
+	return p.GetHistorySince(from, 200)
+}
+func (p *Client) GetHistorySince(t time.Time, size int) ([]*SessionMetadata, error) {
 	sessions := &SessionContainer{}
-	from := time.Now().AddDate(0, 0, -3).Unix()
+	from := t.Unix()
 	resp, err := p._server().
 		SetResult(sessions).
 		SetQueryParam("viewedAt>", fmt.Sprintf("%d", from)).
-		SetHeader("X-Plex-Container-Size", "200").
+		SetHeader("X-Plex-Container-Size", fmt.Sprintf("%d", size)).
 		Get("/status/sessions/history/all")
 	if err != nil {
 		return nil, err
@@ -39,10 +43,44 @@ func (p *Client) GetHistory() ([]*SessionMetadata, error) {
 	}
 	return sessions.MediaContainer.Metadata, nil
 }
+func (p *Client) GetHistory(size int, start int) ([]*SessionMetadata, error) {
+	sessions := &SessionContainer{}
+	resp, err := p._server().
+		SetResult(sessions).
+		SetHeader("X-Plex-Container-Size", fmt.Sprintf("%d", size)).
+		SetHeader("X-Plex-Container-Start", fmt.Sprintf("%d", start)).
+		Get("/status/sessions/history/all")
+	if err != nil {
+		return nil, err
+	}
+	if !resp.IsSuccess() {
+		return nil, err
+	}
+	if sessions.MediaContainer.Size == 0 {
+		return nil, nil
+	}
+	return sessions.MediaContainer.Metadata, nil
+}
+func (p *Client) GetHistoryTotal() (int64, error) {
+	sessions := &SessionContainer{}
+	resp, err := p._server().
+		SetResult(sessions).
+		SetHeader("X-Plex-Container-Size", "0").
+		SetHeader("X-Plex-Container-Start", "0").
+		Get("/status/sessions/history/all")
+	if err != nil {
+		return 0, err
+	}
+	if !resp.IsSuccess() {
+		return 0, err
+	}
+	return sessions.MediaContainer.Total, nil
+}
 
 type SessionContainer struct {
 	MediaContainer struct {
 		Size     int64              `json:"size"`
+		Total    int64              `json:"totalSize"`
 		Metadata []*SessionMetadata `json:"Metadata"`
 	} `json:"MediaContainer"`
 }

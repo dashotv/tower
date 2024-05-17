@@ -10,7 +10,7 @@ import (
 
 func TestGetHistory(t *testing.T) {
 	c := testClient()
-	list, err := c.GetHistory()
+	list, err := c.GetHistoryRecent()
 	assert.NoError(t, err)
 	assert.NotNil(t, list)
 	slices.Reverse(list)

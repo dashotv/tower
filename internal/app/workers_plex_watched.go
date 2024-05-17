@@ -23,7 +23,7 @@ func (j *PlexWatched) Work(ctx context.Context, job *minion.Job[*PlexWatched]) e
 		return fae.Wrap(err, "getting accounts")
 	}
 
-	list, err := a.Plex.GetHistory()
+	list, err := a.Plex.GetHistoryRecent()
 	if err != nil {
 		return fae.Wrap(err, "getting history")
 	}
@@ -31,17 +31,6 @@ func (j *PlexWatched) Work(ctx context.Context, job *minion.Job[*PlexWatched]) e
 	if err := a.plexHistoryWatched(list); err != nil {
 		return fae.Wrap(err, "getting history media")
 	}
-
-	// for _, h := range resp {
-	// 	a.Log.Named("plex_watched").Infof("watched: %d %s", h.AccountID, h.Medium.Title)
-	// 	user, err := a.plexAccountTitle(h.AccountID)
-	// 	if err != nil {
-	// 		return fae.Wrap(err, "getting account title")
-	// 	}
-	// 	if err := a.DB.WatchMedium(h.Medium.ID, user); err != nil {
-	// 		return fae.Wrap(err, "watch medium")
-	// 	}
-	// }
 
 	return nil
 }
