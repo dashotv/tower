@@ -236,11 +236,10 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 		found := []int64{}
 
 		for _, e := range eps {
-			episode, ok := episodeMap[e.ID]
-			if ok {
+			episode := episodeMap.Find(e.ID, e.Season, e.Episode, e.Absolute)
+			if episode != nil {
 				found = append(found, e.ID)
-			}
-			if episode == nil {
+			} else {
 				episode = &Episode{}
 			}
 
@@ -259,7 +258,7 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 			}
 		}
 
-		all := lo.Keys(episodeMap)
+		all := lo.Keys(episodeMap.byID)
 		missing, updated := lo.Difference(all, found)
 		if _, err := app.DB.Episode.Collection.UpdateMany(ctx, bson.M{"_type": "Episode", "series_id": series.ID, "source_id": bson.M{"$in": missing}}, bson.M{"$set": bson.M{"missing": time.Now()}}); err != nil {
 			return fae.Wrap(err, "missing")
@@ -413,8 +412,52 @@ func dateFromString(date string) time.Time {
 	return t
 }
 
-func episodeMap(id string) (map[int64]*Episode, error) {
-	episodeMap := make(map[int64]*Episode)
+type EpisodeMap struct {
+	byID  map[int64]*Episode
+	bySE  map[int]map[int]*Episode
+	byAbs map[int]*Episode
+}
+
+func (em *EpisodeMap) Add(e *Episode) error {
+	sid, err := strconv.ParseInt(e.SourceID, 10, 64)
+	if err != nil {
+		return fae.Wrap(err, "converting source id")
+	}
+	em.byID[sid] = e
+	if em.bySE[e.SeasonNumber] == nil {
+		em.bySE[e.SeasonNumber] = map[int]*Episode{}
+	}
+	em.bySE[e.SeasonNumber][e.EpisodeNumber] = e
+	em.byAbs[e.AbsoluteNumber] = e
+	return nil
+}
+func (em *EpisodeMap) Find(id int64, season, episode, absolute int) *Episode {
+	if id != 0 {
+		if e, ok := em.byID[id]; ok {
+			return e
+		}
+	}
+	if season != 0 && episode != 0 {
+		if s, ok := em.bySE[season]; ok {
+			if e, ok := s[episode]; ok {
+				return e
+			}
+		}
+	}
+	if absolute != 0 {
+		if e, ok := em.byAbs[absolute]; ok {
+			return e
+		}
+	}
+	return nil
+}
+
+func episodeMap(id string) (*EpisodeMap, error) {
+	episodeMap := &EpisodeMap{
+		byID:  map[int64]*Episode{},
+		bySE:  map[int]map[int]*Episode{},
+		byAbs: map[int]*Episode{},
+	}
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, fae.Wrap(err, "converting id")
@@ -426,11 +469,7 @@ func episodeMap(id string) (map[int64]*Episode, error) {
 	}
 
 	for _, e := range episodes {
-		sid, err := strconv.ParseInt(e.SourceID, 10, 64)
-		if err != nil {
-			return nil, fae.Wrap(err, "converting source id")
-		}
-		episodeMap[sid] = e
+		episodeMap.Add(e)
 	}
 
 	return episodeMap, nil
