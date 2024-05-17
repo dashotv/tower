@@ -398,9 +398,9 @@ func seriesImage(series *Series, t string, remote string, ratio float32) error {
 	img.Local = local
 	img.Extension = extension
 
-	if err := app.DB.Series.Update(series); err != nil {
-		return fae.Wrap(err, "updating series")
-	}
+	// if err := app.DB.Series.Update(series); err != nil {
+	// 	return fae.Wrap(err, "updating series")
+	// }
 
 	return nil
 }
