@@ -39,7 +39,7 @@ func TestWantNext(t *testing.T) {
 	cases := []struct {
 		id string
 	}{
-		{id: "66382b02fc770ad6447269a7"},
+		{id: "664725cba824430182cb1d29"},
 	}
 
 	for _, tt := range cases {

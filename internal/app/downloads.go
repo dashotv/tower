@@ -413,19 +413,20 @@ func (a *Application) downloadsMove() error {
 			return fae.Wrap(err, "move download")
 		}
 
-		if files == nil || len(files) == 0 {
-			continue
+		if files != nil && len(files) > 0 {
+			moved = append(moved, files...)
 		}
-
-		moved = append(moved, files...)
 
 		if d.Multi && d.Medium.Type == "Series" {
 			// update medium and add path
-			if err := updateMedia(files); err != nil {
-				return fae.Wrap(err, "update medium")
+			if files != nil && len(files) > 0 {
+				if err := updateMedia(files); err != nil {
+					return fae.Wrap(err, "update medium")
+				}
 			}
 
 			nums := d.NextFileNums(t, 3)
+			notifier.Log.Infof("want: %s", nums)
 			if nums != "" {
 				err := app.FlameTorrentWant(d.Thash, nums)
 				if err != nil {
