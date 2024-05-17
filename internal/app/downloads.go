@@ -331,11 +331,11 @@ func (a *Application) downloadsManageOne(d *Download, t *qbt.Torrent) error {
 			return fae.Wrap(err, "failed to find episode")
 		}
 
-		app.Log.Debugf("found: %s", ep.Title)
 		if ep == nil {
 			app.Workers.Log.Warnf("episode not found: %s", file.Name)
 			continue
 		}
+		app.Log.Debugf("found: %s", ep.Title)
 
 		df.MediumID = ep.ID
 	}
