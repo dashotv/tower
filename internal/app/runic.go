@@ -40,7 +40,7 @@ func (a *Application) RunicFindEpisode(seriesID primitive.ObjectID, title, type_
 			q.Where("absolute_number", info.Episode)
 		})
 	} else {
-		q = q.Where("season", info.Season).Where("episode", info.Episode)
+		q = q.Where("season_number", info.Season).Where("episode_number", info.Episode)
 	}
 	eps, err := q.Run()
 	if err != nil {
