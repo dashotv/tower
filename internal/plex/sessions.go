@@ -80,6 +80,7 @@ type SessionMetadata struct {
 	Title                 string          `json:"title"`
 	Type                  string          `json:"type"`
 	UpdatedAt             int64           `json:"updatedAt"`
+	ViewedAt              int64           `json:"viewedAt"`
 	ViewOffset            int64           `json:"viewOffset"`
 	Year                  int64           `json:"year"`
 	Media                 []*SessionMedia `json:"Media"`

@@ -25,7 +25,7 @@ func (c *Connector) WatchGet(id primitive.ObjectID, username string) (*Watch, er
 	}
 	return watches[0], nil
 }
-func (c *Connector) WatchMedium(id primitive.ObjectID, username string) error {
+func (c *Connector) WatchMedium(id primitive.ObjectID, username string, seconds int64) error {
 	w, err := c.WatchGet(id, username)
 	if err != nil {
 		return err
@@ -37,7 +37,11 @@ func (c *Connector) WatchMedium(id primitive.ObjectID, username string) error {
 	watch := &Watch{}
 	watch.MediumID = id
 	watch.Username = username
-	watch.WatchedAt = time.Now()
+	if seconds > 0 {
+		watch.WatchedAt = time.Unix(seconds, 0)
+	} else {
+		watch.WatchedAt = time.Now()
+	}
 
 	return c.Watch.Save(watch)
 }
