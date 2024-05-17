@@ -43,7 +43,7 @@ func (p *Client) GetHistorySince(t time.Time, size int) ([]*SessionMetadata, err
 	}
 	return sessions.MediaContainer.Metadata, nil
 }
-func (p *Client) GetHistory(size int, start int) ([]*SessionMetadata, error) {
+func (p *Client) GetHistory(size int64, start int64) ([]*SessionMetadata, error) {
 	sessions := &SessionContainer{}
 	resp, err := p._server().
 		SetResult(sessions).

@@ -100,14 +100,14 @@ func setupWorkers(app *Application) error {
 	if err := minion.Register[*FileMatch](m, &FileMatch{}); err != nil {
 		return fae.Wrap(err, "registering worker: file_match (FileMatch)")
 	}
-	if _, err := m.Schedule("0 0 12 * * *", &FileMatch{}); err != nil {
+	if _, err := m.Schedule("0 0 12 * * 0", &FileMatch{}); err != nil {
 		return fae.Wrap(err, "scheduling worker: file_match (FileMatch)")
 	}
 
 	if err := minion.Register[*FileMatchAnime](m, &FileMatchAnime{}); err != nil {
 		return fae.Wrap(err, "registering worker: file_match_anime (FileMatchAnime)")
 	}
-	if _, err := m.Schedule("0 0 11 * * 0", &FileMatchAnime{}); err != nil {
+	if _, err := m.Schedule("0 0 11 * * *", &FileMatchAnime{}); err != nil {
 		return fae.Wrap(err, "scheduling worker: file_match_anime (FileMatchAnime)")
 	}
 
@@ -118,7 +118,7 @@ func setupWorkers(app *Application) error {
 	if err := minion.Register[*FileMatchDonghua](m, &FileMatchDonghua{}); err != nil {
 		return fae.Wrap(err, "registering worker: file_match_donghua (FileMatchDonghua)")
 	}
-	if _, err := m.Schedule("0 0 11 * * 0", &FileMatchDonghua{}); err != nil {
+	if _, err := m.Schedule("0 0 11 * * *", &FileMatchDonghua{}); err != nil {
 		return fae.Wrap(err, "scheduling worker: file_match_donghua (FileMatchDonghua)")
 	}
 
@@ -173,8 +173,15 @@ func setupWorkers(app *Application) error {
 	if err := minion.Register[*PlexWatched](m, &PlexWatched{}); err != nil {
 		return fae.Wrap(err, "registering worker: plex_watched (PlexWatched)")
 	}
-	if _, err := m.Schedule("0 11 * * * *", &PlexWatched{}); err != nil {
+	if _, err := m.Schedule("0 0 * * * *", &PlexWatched{}); err != nil {
 		return fae.Wrap(err, "scheduling worker: plex_watched (PlexWatched)")
+	}
+
+	if err := minion.Register[*PlexWatchedAll](m, &PlexWatchedAll{}); err != nil {
+		return fae.Wrap(err, "registering worker: plex_watched_all (PlexWatchedAll)")
+	}
+	if _, err := m.Schedule("0 0 11 * * 0", &PlexWatchedAll{}); err != nil {
+		return fae.Wrap(err, "scheduling worker: plex_watched_all (PlexWatchedAll)")
 	}
 
 	if err := minion.Register[*PlexWatchlistUpdates](m, &PlexWatchlistUpdates{}); err != nil {

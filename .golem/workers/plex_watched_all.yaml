@@ -1,0 +1,2 @@
+name: plex_watched_all
+schedule: 0 0 11 * * 0
