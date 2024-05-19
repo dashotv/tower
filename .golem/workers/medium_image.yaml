@@ -1,0 +1,10 @@
+name: medium_image
+fields:
+    - name: id
+      type: string
+    - name: type
+      type: string
+    - name: path
+      type: string
+    - name: ratio
+      type: float32

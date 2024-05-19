@@ -165,19 +165,21 @@ func (a *Application) SeriesUpdate(c echo.Context, id string, subject *Series) e
 		return fae.New("ID mismatch")
 	}
 
-	if !strings.HasPrefix(subject.Cover, "/media-images") {
-		cover := subject.GetCover()
-		if cover == nil || cover.Remote != subject.Cover {
-			if err := app.Workers.Enqueue(&SeriesImage{ID: id, Type: "cover", Path: subject.Cover, Ratio: posterRatio}); err != nil {
+	if subject.Cover != "" && !strings.HasPrefix(subject.Cover, "/media-images") {
+		remote := subject.Cover
+		image := subject.GetCover()
+		if image == nil || image.Remote != remote {
+			if err := app.Workers.Enqueue(&MediumImage{ID: id, Type: "cover", Path: remote, Ratio: posterRatio}); err != nil {
 				return err
 			}
 		}
 	}
 
-	if !strings.HasPrefix(subject.Background, "/media-images") {
-		background := subject.GetBackground()
-		if background == nil || background.Remote != subject.Background {
-			if err := app.Workers.Enqueue(&SeriesImage{ID: id, Type: "background", Path: subject.Background, Ratio: backgroundRatio}); err != nil {
+	if subject.Background != "" && !strings.HasPrefix(subject.Background, "/media-images") {
+		remote := subject.Background
+		image := subject.GetBackground()
+		if image == nil || image.Remote != remote {
+			if err := app.Workers.Enqueue(&MediumImage{ID: id, Type: "background", Path: subject.Background, Ratio: backgroundRatio}); err != nil {
 				return err
 			}
 		}

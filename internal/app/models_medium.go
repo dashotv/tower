@@ -285,6 +285,24 @@ func (c *Connector) MediumByFilePartsAnime(kind, name, file string) (*Medium, er
 	return list[0], nil
 }
 
+func (m *Medium) GetCover() *Path {
+	for _, p := range m.Paths {
+		if p.Type == "cover" {
+			return p
+		}
+	}
+	return nil
+}
+
+func (m *Medium) GetBackground() *Path {
+	for _, p := range m.Paths {
+		if p.Type == "background" {
+			return p
+		}
+	}
+	return nil
+}
+
 func Background(m Medium) string {
 	for _, p := range m.Paths {
 		if p.Type == "background" {

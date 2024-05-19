@@ -134,6 +134,10 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "registering worker: file_walk (FileWalk)")
 	}
 
+	if err := minion.Register[*MediumImage](m, &MediumImage{}); err != nil {
+		return fae.Wrap(err, "registering worker: medium_image (MediumImage)")
+	}
+
 	if err := minion.Register[*MovieDelete](m, &MovieDelete{}); err != nil {
 		return fae.Wrap(err, "registering worker: movie_delete (MovieDelete)")
 	}
@@ -197,10 +201,6 @@ func setupWorkers(app *Application) error {
 
 	if err := minion.Register[*SeriesDelete](m, &SeriesDelete{}); err != nil {
 		return fae.Wrap(err, "registering worker: series_delete (SeriesDelete)")
-	}
-
-	if err := minion.RegisterWithQueue[*SeriesImage](m, &SeriesImage{}, "series"); err != nil {
-		return fae.Wrap(err, "registering worker: series_image (SeriesImage)")
 	}
 
 	if err := minion.RegisterWithQueue[*SeriesUpdate](m, &SeriesUpdate{}, "series"); err != nil {

@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"strconv"
 	"time"
 
@@ -307,7 +306,7 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 
 			if len(covers) > 0 {
 				eg.Go(func() error {
-					err := seriesImage(series, "cover", covers[0], posterRatio)
+					err := mediumImageID(series.ID.Hex(), "cover", covers[0], posterRatio)
 					if err != nil {
 						app.Log.Errorf("series %s cover: %v", series.ID.Hex(), err)
 					}
@@ -316,7 +315,7 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 			}
 			if len(backgrounds) > 0 {
 				eg.Go(func() error {
-					err := seriesImage(series, "background", backgrounds[0], backgroundRatio)
+					err := mediumImageID(series.ID.Hex(), "background", backgrounds[0], backgroundRatio)
 					if err != nil {
 						app.Log.Errorf("series %s background: %v", series.ID.Hex(), err)
 					}
@@ -337,72 +336,76 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 	return nil
 }
 
-type SeriesImage struct {
-	minion.WorkerDefaults[*SeriesImage]
-	ID    string
-	Type  string
-	Path  string
-	Ratio float32
-}
-
-func (j *SeriesImage) Kind() string { return "SeriesImage" }
-func (j *SeriesImage) Work(ctx context.Context, job *minion.Job[*SeriesImage]) error {
-	id := job.Args.ID
-	t := job.Args.Type
-	remote := job.Args.Path
-	ratio := job.Args.Ratio
-
-	series := &Series{}
-	if err := app.DB.Series.Find(id, series); err != nil {
-		return fae.Wrap(err, "finding series")
-	}
-
-	return seriesImage(series, t, remote, ratio)
-}
-
-func seriesImage(series *Series, t string, remote string, ratio float32) error {
-	extension := filepath.Ext(remote)
-	if len(extension) > 0 && extension[0] == '.' {
-		extension = extension[1:]
-	}
-	local := fmt.Sprintf("series-%s/%s", series.ID.Hex(), t)
-	dest := fmt.Sprintf("%s/%s.%s", app.Config.DirectoriesImages, local, extension)
-	thumb := fmt.Sprintf("%s/%s_thumb.%s", app.Config.DirectoriesImages, local, extension)
-
-	if err := imageDownload(remote, dest); err != nil {
-		return fae.Wrap(err, "downloading image")
-	}
-
-	height := 400
-	width := int(float32(height) * ratio)
-	if err := imageResize(dest, thumb, width, height); err != nil {
-		return fae.Wrap(err, "resizing image")
-	}
-
-	var img *Path
-	for _, p := range series.Paths {
-		if string(p.Type) == t {
-			img = p
-			break
-		}
-	}
-
-	if img == nil {
-		img = &Path{}
-		series.Paths = append(series.Paths, img)
-	}
-
-	img.Type = primitive.Symbol(t)
-	img.Remote = remote
-	img.Local = local
-	img.Extension = extension
-
-	// if err := app.DB.Series.Update(series); err != nil {
-	// 	return fae.Wrap(err, "updating series")
-	// }
-
-	return nil
-}
+// type SeriesImage struct {
+// 	minion.WorkerDefaults[*SeriesImage]
+// 	ID    string
+// 	Type  string
+// 	Path  string
+// 	Ratio float32
+// }
+//
+// func (j *SeriesImage) Kind() string { return "SeriesImage" }
+// func (j *SeriesImage) Work(ctx context.Context, job *minion.Job[*SeriesImage]) error {
+// 	id := job.Args.ID
+// 	t := job.Args.Type
+// 	remote := job.Args.Path
+// 	ratio := job.Args.Ratio
+//
+// 	series := &Series{}
+// 	if err := app.DB.Series.Find(id, series); err != nil {
+// 		return fae.Wrap(err, "finding series")
+// 	}
+//
+// 	if err := seriesImage(series, t, remote, ratio); err != nil {
+// 		return fae.Wrap(err, "series image")
+// 	}
+//
+// 	if err := app.DB.Series.Save(series); err != nil {
+// 		return fae.Wrap(err, "saving series")
+// 	}
+//
+// 	return nil
+// }
+//
+// func seriesImage(series *Series, t string, remote string, ratio float32) error {
+// 	extension := filepath.Ext(remote)
+// 	if len(extension) > 0 && extension[0] == '.' {
+// 		extension = extension[1:]
+// 	}
+// 	local := fmt.Sprintf("series-%s/%s", series.ID.Hex(), t)
+// 	dest := fmt.Sprintf("%s/%s.%s", app.Config.DirectoriesImages, local, extension)
+// 	thumb := fmt.Sprintf("%s/%s_thumb.%s", app.Config.DirectoriesImages, local, extension)
+//
+// 	if err := imageDownload(remote, dest); err != nil {
+// 		return fae.Wrap(err, "downloading image")
+// 	}
+//
+// 	height := 400
+// 	width := int(float32(height) * ratio)
+// 	if err := imageResize(dest, thumb, width, height); err != nil {
+// 		return fae.Wrap(err, "resizing image")
+// 	}
+//
+// 	var img *Path
+// 	switch t {
+// 	case "cover":
+// 		img = series.GetCover()
+// 	case "background":
+// 		img = series.GetBackground()
+// 	}
+//
+// 	if img == nil {
+// 		img = &Path{}
+// 		series.Paths = append(series.Paths, img)
+// 	}
+//
+// 	img.Type = primitive.Symbol(t)
+// 	img.Remote = remote
+// 	img.Local = local
+// 	img.Extension = extension
+//
+// 	return nil
+// }
 
 func dateFromString(date string) time.Time {
 	t, err := time.Parse("2006-01-02", date)
