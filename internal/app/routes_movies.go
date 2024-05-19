@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 
@@ -65,6 +66,14 @@ func (a *Application) MoviesCreate(c echo.Context, subject *Movie) error {
 
 	subject.Type = "Movie"
 	subject.SearchParams = &SearchParams{Resolution: 1080, Verified: true, Type: "movies"}
+
+	if subject.ReleaseDate.IsZero() {
+		t, err := time.Parse("2006-01-02", "1900-01-01")
+		if err != nil {
+			return err
+		}
+		subject.ReleaseDate = t
+	}
 
 	if err := a.DB.Movie.Save(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Movies"})

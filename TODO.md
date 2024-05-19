@@ -9,10 +9,11 @@
 - [x] Allow managing layouts per library
 - [x] Click watched on media
 - [x] plex webhooks (scrobble and new and others?)
-- [ ] plex: watched (sync for missed scrobbles)
+- [x] plex: watched (sync for missed scrobbles)
   - maybe consider not using local watched status, think through using plex watched status
     when making decisions about new downloads
 - [ ] something wrong with updates (where images stop working)
+  - might have fixed this
 - [ ] downloads: cleaner
 - [ ] downloads: movies
 - [ ] downloads: use runic

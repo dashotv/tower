@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -78,6 +79,15 @@ func (a *Application) SeriesCreate(c echo.Context, subject *Series) error {
 	}
 
 	subject.Type = "Series"
+
+	if subject.ReleaseDate.IsZero() {
+		t, err := time.Parse("2006-01-02", "1900-01-01")
+		if err != nil {
+			return err
+		}
+		subject.ReleaseDate = t
+	}
+
 	subject.SearchParams = &SearchParams{Resolution: 1080, Verified: true, Type: "tv"}
 	if isAnimeKind(string(subject.Kind)) {
 		subject.SearchParams.Type = "anime"
