@@ -3,9 +3,11 @@ package app
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/fae"
 )
@@ -105,12 +107,30 @@ func (a *Application) MoviesShow(c echo.Context, id string) error {
 
 // PUT /movies/:id
 func (a *Application) MoviesUpdate(c echo.Context, id string, subject *Movie) error {
-	// if you need to copy or compare to existing object...
-	// data, err := a.DB.MovieGet(id)
-	// if err != nil {
-	//     return c.JSON(http.StatusNotFound, &Response{Error: true, Message: "not found"})
-	// }
-	// data.Name = subject.Name ...
+	if id != subject.ID.Hex() || id == primitive.NilObjectID.Hex() || subject.ID == primitive.NilObjectID {
+		return fae.New("ID mismatch")
+	}
+
+	if subject.Cover != "" && !strings.HasPrefix(subject.Cover, "/media-images") {
+		remote := subject.Cover
+		image := subject.GetCover()
+		if image == nil || image.Remote != remote {
+			if err := app.Workers.Enqueue(&MediumImage{ID: id, Type: "cover", Path: remote, Ratio: posterRatio}); err != nil {
+				return err
+			}
+		}
+	}
+
+	if subject.Background != "" && !strings.HasPrefix(subject.Background, "/media-images") {
+		remote := subject.Background
+		image := subject.GetBackground()
+		if image == nil || image.Remote != remote {
+			if err := app.Workers.Enqueue(&MediumImage{ID: id, Type: "background", Path: subject.Background, Ratio: backgroundRatio}); err != nil {
+				return err
+			}
+		}
+	}
+
 	if err := a.DB.Movie.Update(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Movies"})
 	}

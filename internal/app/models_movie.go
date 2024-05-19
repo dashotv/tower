@@ -6,6 +6,24 @@ import (
 	"github.com/dashotv/fae"
 )
 
+func (m *Movie) GetCover() *Path {
+	for _, p := range m.Paths {
+		if p.Type == "cover" {
+			return p
+		}
+	}
+	return nil
+}
+
+func (m *Movie) GetBackground() *Path {
+	for _, p := range m.Paths {
+		if p.Type == "background" {
+			return p
+		}
+	}
+	return nil
+}
+
 func (c *Connector) MovieGet(id string) (*Movie, error) {
 	movie, err := c.Movie.Get(id, &Movie{})
 	if err != nil {
