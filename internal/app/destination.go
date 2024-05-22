@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -132,27 +133,6 @@ func (d *Destinator) Destination(kind primitive.Symbol, m *Medium) (string, erro
 	return out.String(), nil
 }
 
-type DestinatorData struct {
-	path      string
-	kind      string
-	directory string
-	season    int
-	episode   int
-	absolute  int
-}
-
-func (d *DestinatorData) Path() string      { return d.path }
-func (d *DestinatorData) Kind() string      { return d.kind }
-func (d *DestinatorData) Directory() string { return d.directory }
-func (d *DestinatorData) Season() string    { return fmt.Sprintf("%02d", d.season) }
-func (d *DestinatorData) Episode() string   { return fmt.Sprintf("%02d", d.episode) }
-func (d *DestinatorData) Absolute() string {
-	if d.absolute == 0 {
-		return fmt.Sprintf("%02dx%02d", d.season, d.episode)
-	}
-	return fmt.Sprintf("01x%03d", d.absolute)
-}
-
 func NewDestinatorData(m *Medium) (*DestinatorData, error) {
 	d := &DestinatorData{
 		directory: m.Directory,
@@ -167,7 +147,48 @@ func NewDestinatorData(m *Medium) (*DestinatorData, error) {
 			return nil, fae.Wrap(err, "finding series")
 		}
 		d.directory = s.Directory
+		d.title = m.Title
 	}
 
 	return d, nil
+}
+
+type DestinatorData struct {
+	path      string
+	kind      string
+	directory string
+	title     string
+	season    int
+	episode   int
+	absolute  int
+}
+
+var titleCheckRegex = regexp.MustCompile(`(?i)^(episode|第)\s*(\d+)`)
+
+func (d *DestinatorData) Path() string      { return d.path }
+func (d *DestinatorData) Kind() string      { return d.kind }
+func (d *DestinatorData) Directory() string { return d.directory }
+func (d *DestinatorData) Title() string {
+	if d.title != "" && !titleCheckRegex.MatchString(d.title) {
+		return strings.ToLower(" - " + d.title)
+	}
+	return ""
+}
+func (d *DestinatorData) Season() string  { return fmt.Sprintf("%02d", d.season) }
+func (d *DestinatorData) Episode() string { return fmt.Sprintf("%02d", d.episode) }
+func (d *DestinatorData) SeasonEpisode() string {
+	return fmt.Sprintf("%02dx%02d", d.season, d.episode)
+}
+func (d *DestinatorData) SeasonEpisodeAbsolute() string {
+	out := fmt.Sprintf("%02dx%02d", d.season, d.episode)
+	if d.absolute != 0 {
+		out += fmt.Sprintf(" #%03d", d.absolute)
+	}
+	return out
+}
+func (d *DestinatorData) AbsoluteSeasonEpisode() string {
+	if d.absolute == 0 {
+		return fmt.Sprintf("%02dx%02d", d.season, d.episode)
+	}
+	return fmt.Sprintf("01x%03d", d.absolute)
 }
