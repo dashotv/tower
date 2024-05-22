@@ -458,6 +458,7 @@ type Medium struct { // model
 	Paths          []*Path            `bson:"paths,omitempty" json:"paths"`
 	Cover          string             `bson:"-" json:"cover"`
 	Background     string             `bson:"-" json:"background"`
+	Status         string             `bson:"status" json:"status"`
 	SeriesID       primitive.ObjectID `bson:"series_id" json:"series_id"`
 	SeasonNumber   int                `bson:"season_number" json:"season_number"`
 	EpisodeNumber  int                `bson:"episode_number" json:"episode_number"`

@@ -177,8 +177,8 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 	id := job.Args.ID
 	eg, ctx := errgroup.WithContext(ctx)
 
-	series := &Series{}
-	err := app.DB.Series.Find(id, series)
+	series := &Medium{}
+	err := app.DB.Medium.Find(id, series)
 	if err != nil {
 		return err
 	}
@@ -306,7 +306,7 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 
 			if len(covers) > 0 {
 				eg.Go(func() error {
-					err := mediumImageID(series.ID.Hex(), "cover", covers[0], posterRatio)
+					err := mediumImage(series, "cover", covers[0], posterRatio)
 					if err != nil {
 						app.Log.Errorf("series %s cover: %v", series.ID.Hex(), err)
 					}
@@ -315,7 +315,7 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 			}
 			if len(backgrounds) > 0 {
 				eg.Go(func() error {
-					err := mediumImageID(series.ID.Hex(), "background", backgrounds[0], backgroundRatio)
+					err := mediumImage(series, "background", backgrounds[0], backgroundRatio)
 					if err != nil {
 						app.Log.Errorf("series %s background: %v", series.ID.Hex(), err)
 					}
@@ -330,9 +330,10 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 		return fae.Wrapf(err, "series: %s", series.Title)
 	}
 
-	if err := app.DB.Series.Save(series); err != nil {
+	if err := app.DB.Medium.Save(series); err != nil {
 		return fae.Wrapf(err, "saving series: %s", series.Title)
 	}
+
 	return nil
 }
 

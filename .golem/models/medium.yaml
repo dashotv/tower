@@ -59,6 +59,9 @@ fields:
     type: string
     bson: "-"
   # Series
+  - name: status
+    type: string
+  # Episode
   - name: series_id
     type: primitive.ObjectID
   - name: season_number
