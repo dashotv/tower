@@ -170,7 +170,7 @@ func (d *DestinatorData) Kind() string      { return d.kind }
 func (d *DestinatorData) Directory() string { return d.directory }
 func (d *DestinatorData) Title() string {
 	if d.title != "" && !titleCheckRegex.MatchString(d.title) {
-		return strings.ToLower(" - " + d.title)
+		return " - " + path(d.title)
 	}
 	return ""
 }

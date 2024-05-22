@@ -173,7 +173,7 @@ func (m *Mover) moveFile(source string, medium *Medium) error {
 
 	destination := fmt.Sprintf("%s.%s", dest, ext)
 
-	// m.Log.Debugf("%s => %s", source, destination)
+	m.Log.Debugf("%s => %s", source, destination)
 	if !app.Config.Production {
 		return nil
 	}
