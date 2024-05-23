@@ -158,9 +158,9 @@ func (s *Series) Saving() error {
 	if s.SearchParams != nil && s.SearchParams.Type == "" {
 		s.SearchParams.Type = "tv"
 	}
-	if s.SearchParams != nil && s.SearchParams.Resolution < 1080 {
-		s.SearchParams.Resolution = 1080
-	}
+	// if s.SearchParams != nil && s.SearchParams.Resolution == 0 {
+	// 	s.SearchParams.Resolution = 1080
+	// }
 
 	if s.Display == "" {
 		s.Display = s.Title

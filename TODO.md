@@ -1,6 +1,7 @@
 # TODO
 
 - [ ] fix indices on all non-rails dbs
+- [ ] tower: libraries: default search params (for 4k libs, etc)
 - [ ] tower: libraries: integrate with plex more, when adding library load files and ids and match to internal?
 - [ ] plex: scrobble needs more work
 - [ ] downloads: cleaner
