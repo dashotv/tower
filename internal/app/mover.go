@@ -198,7 +198,7 @@ func (m *Mover) moveFile(source string, medium *Medium) error {
 		}
 		if match {
 			// notifier.Log.Warn("DownloadMove", fmt.Sprintf("destination exists, sums match: %s", destination))
-			return nil
+			return fae.Errorf("destination exists, sums match: %s", destination)
 		}
 	}
 
