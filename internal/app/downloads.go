@@ -189,7 +189,7 @@ func (a *Application) downloadsSearch() error {
 	return nil
 }
 
-func (a *Application) downloadsLoad() error {
+func (a *Application) downloadsLoad() (err error) {
 	// defer TickTock("DownloadsProcess: Load")()
 	list, err := app.DB.DownloadByStatus("loading")
 	if err != nil {
@@ -204,7 +204,7 @@ func (a *Application) downloadsLoad() error {
 
 		res, err := app.FlameAdd(d)
 		if err != nil {
-			return fae.Wrap(err, "failed to add to flame")
+			return d.Error(fae.Wrap(err, "failed to add to flame"))
 		}
 
 		d.Status = "downloading"
@@ -410,14 +410,14 @@ func (a *Application) downloadsMove() error {
 		files, err := mover.Move()
 		if err != nil {
 			app.Log.Debugf("error: %+v", err)
-			return fae.Wrap(err, "move download")
+			return d.Error(fae.Wrap(err, "move download"))
 		}
 
 		if d.Multi && d.Medium.Type == "Series" {
 			// update medium and add path
 			if files != nil && len(files) > 0 {
 				if err := updateMedia(files); err != nil {
-					return fae.Wrap(err, "update medium")
+					return d.Error(fae.Wrap(err, "update medium"))
 				}
 			}
 
@@ -425,7 +425,7 @@ func (a *Application) downloadsMove() error {
 			if nums != "" {
 				err := app.FlameTorrentWant(d.Thash, nums)
 				if err != nil {
-					return fae.Wrap(err, "want next")
+					return d.Error(fae.Wrap(err, "want next"))
 				}
 			}
 
@@ -440,7 +440,7 @@ func (a *Application) downloadsMove() error {
 
 		// update medium and add path
 		if err := updateMedia(files); err != nil {
-			return fae.Wrap(err, "update medium")
+			return d.Error(fae.Wrap(err, "update medium"))
 		}
 
 		if d.IsTorrent() {

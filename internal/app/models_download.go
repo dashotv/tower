@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"sort"
@@ -28,6 +29,16 @@ func (c *Connector) DownloadGet(id string) (*Download, error) {
 
 	c.processDownloads([]*Download{d})
 	return d, nil
+}
+
+func (d *Download) Error(e error) error {
+	d.Status = "reviewing"
+
+	if err := app.DB.Download.Save(d); err != nil {
+		return errors.Join(e, fae.Wrap(err, "saving download"))
+	}
+
+	return e
 }
 
 func (d *Download) GetURL() (string, error) {
