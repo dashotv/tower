@@ -30,7 +30,6 @@ func (p *Client) GetWatchlist(token string) (*Watchlist, error) {
 func (p *Client) GetWatchlistDetail(token string, w *Watchlist) ([]*WatchlistDetail, error) {
 	out := []*WatchlistDetail{}
 	for _, d := range w.MediaContainer.Metadata {
-		fmt.Printf("detail: %s\n", d.RatingKey)
 		dest := &WatchlistDetail{}
 		resp, err := p._metadata().
 			SetResult(dest).
