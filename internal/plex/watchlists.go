@@ -30,6 +30,7 @@ func (p *Client) GetWatchlist(token string) (*Watchlist, error) {
 func (p *Client) GetWatchlistDetail(token string, w *Watchlist) ([]*WatchlistDetail, error) {
 	out := []*WatchlistDetail{}
 	for _, d := range w.MediaContainer.Metadata {
+		fmt.Printf("detail: %s\n", d.RatingKey)
 		dest := &WatchlistDetail{}
 		resp, err := p._metadata().
 			SetResult(dest).
@@ -91,6 +92,8 @@ type Watchlist struct {
 	} `json:"MediaContainer"`
 }
 
+// WatchlistDetail is the detail of a watchlist item
+// has duplicate summary and Summary keys
 type WatchlistDetail struct {
 	MediaContainer struct {
 		Offset     int64  `json:"offset"`
@@ -98,43 +101,49 @@ type WatchlistDetail struct {
 		Identifier string `json:"identifier"`
 		Size       int64  `json:"size"`
 		Metadata   []struct {
-			Art                   string     `json:"art"`
-			Banner                string     `json:"banner"`
-			MetadatumGUID         string     `json:"guid"`
-			Key                   string     `json:"key"`
-			MetadatumRating       float64    `json:"rating"`
-			RatingKey             string     `json:"ratingKey"`
-			MetadatumStudio       string     `json:"studio"`
-			Summary               string     `json:"summary"`
-			Tagline               string     `json:"tagline"`
-			Type                  string     `json:"type"`
-			Theme                 string     `json:"theme"`
-			Thumb                 string     `json:"thumb"`
-			AddedAt               int64      `json:"addedAt"`
-			Duration              int64      `json:"duration"`
-			PublicPagesURL        string     `json:"publicPagesURL"`
-			Slug                  string     `json:"slug"`
-			UserState             bool       `json:"userState"`
-			Title                 string     `json:"title"`
-			LeafCount             int64      `json:"leafCount"`
-			ChildCount            int64      `json:"childCount"`
-			ContentRating         string     `json:"contentRating"`
-			OriginallyAvailableAt string     `json:"originallyAvailableAt"`
-			Year                  int64      `json:"year"`
-			RatingImage           string     `json:"ratingImage"`
-			ImdbRatingCount       int64      `json:"imdbRatingCount"`
-			Image                 []Image    `json:"Image"`
-			Genre                 []Genre    `json:"Genre"`
-			GUID                  []GUID     `json:"Guid"`
-			Country               []Country  `json:"Country"`
-			Role                  []Role     `json:"Role"`
-			Director              []Director `json:"Director"`
-			Producer              []Director `json:"Producer"`
-			Writer                []Director `json:"Writer"`
-			Network               []Country  `json:"Network"`
-			Rating                []Rating   `json:"Rating"`
-			Similar               []Similar  `json:"Similar"`
-			Studio                []Country  `json:"Studio"`
+			Art                   string                    `json:"art"`
+			Banner                string                    `json:"banner"`
+			MetadatumGUID         string                    `json:"guid"`
+			Key                   string                    `json:"key"`
+			MetadatumRating       float64                   `json:"rating"`
+			RatingKey             string                    `json:"ratingKey"`
+			MetadatumStudio       string                    `json:"studio"`
+			Summary               string                    `json:"summary"` // simple string
+			Summaries             []*WatchlistDetailSummary `json:"Summary"` // array of objects
+			Tagline               string                    `json:"tagline"`
+			Type                  string                    `json:"type"`
+			Theme                 string                    `json:"theme"`
+			Thumb                 string                    `json:"thumb"`
+			AddedAt               int64                     `json:"addedAt"`
+			Duration              int64                     `json:"duration"`
+			PublicPagesURL        string                    `json:"publicPagesURL"`
+			Slug                  string                    `json:"slug"`
+			UserState             bool                      `json:"userState"`
+			Title                 string                    `json:"title"`
+			LeafCount             int64                     `json:"leafCount"`
+			ChildCount            int64                     `json:"childCount"`
+			ContentRating         string                    `json:"contentRating"`
+			OriginallyAvailableAt string                    `json:"originallyAvailableAt"`
+			Year                  int64                     `json:"year"`
+			RatingImage           string                    `json:"ratingImage"`
+			ImdbRatingCount       int64                     `json:"imdbRatingCount"`
+			Image                 []Image                   `json:"Image"`
+			Genre                 []Genre                   `json:"Genre"`
+			GUID                  []GUID                    `json:"Guid"`
+			Country               []Country                 `json:"Country"`
+			Role                  []Role                    `json:"Role"`
+			Director              []Director                `json:"Director"`
+			Producer              []Director                `json:"Producer"`
+			Writer                []Director                `json:"Writer"`
+			Network               []Country                 `json:"Network"`
+			Rating                []Rating                  `json:"Rating"`
+			Similar               []Similar                 `json:"Similar"`
+			Studio                []Country                 `json:"Studio"`
 		} `json:"Metadata"`
 	} `json:"MediaContainer"`
+}
+
+type WatchlistDetailSummary struct {
+	Size int    `json:"size"`
+	Tag  string `json:"tag"`
 }
