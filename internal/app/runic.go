@@ -1,13 +1,12 @@
 package app
 
 import (
-	"context"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/fae"
 	"github.com/dashotv/grimoire"
 	runic "github.com/dashotv/runic/client"
+	"github.com/dashotv/runic/parser"
 )
 
 func init() {
@@ -20,19 +19,11 @@ func setupRunic(app *Application) error {
 }
 
 func (a *Application) RunicFindEpisode(seriesID primitive.ObjectID, title, type_ string) (*Episode, error) {
-	req := &runic.ParserTitleRequest{Title: title, Type: type_}
-	resp, err := app.Runic.Parser.Title(context.Background(), req)
+	info, err := parser.Parse(title, type_)
 	if err != nil {
 		return nil, fae.Wrap(err, "parsing title")
 	}
-	if resp == nil || resp.Result == nil {
-		return nil, fae.Wrap(err, "parsing title, response nil")
-	}
-	if resp.Error {
-		return nil, fae.Errorf("parsing title: %s", resp.Message)
-	}
 
-	info := resp.Result
 	q := app.DB.Episode.Query().Where("series_id", seriesID).Asc("season_number").Asc("episode_number").Asc("absolute_number")
 	if type_ == "anime" {
 		q = q.Or(func(q *grimoire.QueryBuilder[*Episode]) {
