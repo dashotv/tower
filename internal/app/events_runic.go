@@ -74,6 +74,11 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 		return err
 	}
 
+	medium.Downloaded = true
+	if err := a.DB.Medium.Save(medium); err != nil {
+		return err
+	}
+
 	notifier.Info("Found", fmt.Sprintf("%s (%d) S%02dE%02d", msg.Title, msg.Year, msg.Season, msg.Episode))
 	return nil
 }
