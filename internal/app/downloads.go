@@ -416,6 +416,7 @@ func (a *Application) downloadsMove() error {
 		if d.Multi && d.Medium.Type == "Series" {
 			// update medium and add path
 			if files != nil && len(files) > 0 {
+				moved = append(moved, files...)
 				if err := updateMedia(files); err != nil {
 					return d.Error(fae.Wrap(err, "update medium"))
 				}
