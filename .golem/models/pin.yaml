@@ -5,8 +5,10 @@ fields:
   - name: pin
     type: int
     json: id
+    index: true
   - name: code
     type: string
+    index: true
   - name: token
     type: string
     json: authToken

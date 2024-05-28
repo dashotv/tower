@@ -3,5 +3,6 @@ type: struct
 fields:
   - name: rating_key
     type: string
+    index: true
   - name: title
     type: string

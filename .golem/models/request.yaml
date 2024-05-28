@@ -3,13 +3,17 @@ type: model
 fields:
   - name: title
     type: string
+    index: true
   - name: user
     type: string
+    index: true
   - name: type
     type: string
   - name: source
     type: string
+    index: true
   - name: source_id
     type: string
+    index: true
   - name: status
     type: string

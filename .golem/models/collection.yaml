@@ -3,8 +3,10 @@ type: model
 fields:
   - name: name
     type: string
+    index: true
   - name: library
     type: string
+    index: true
   - name: rating_key
     type: string
   - name: synced_at

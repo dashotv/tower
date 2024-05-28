@@ -3,8 +3,10 @@ type: model
 fields:
   - name: name
     type: string
+    index: true
   - name: email
     type: string
+    index: true
   - name: token
     type: string
   - name: thumb

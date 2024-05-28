@@ -223,8 +223,8 @@ type Collection struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Name      string             `bson:"name" json:"name"`
-	Library   string             `bson:"library" json:"library"`
+	Name      string             `bson:"name" json:"name" grimoire:"index"`
+	Library   string             `bson:"library" json:"library" grimoire:"index"`
 	RatingKey string             `bson:"rating_key" json:"rating_key"`
 	SyncedAt  time.Time          `bson:"synced_at" json:"synced_at"`
 	Media     []*CollectionMedia `bson:"media" json:"media"`
@@ -240,7 +240,7 @@ type Combination struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Name        string   `bson:"name" json:"name"`
+	Name        string   `bson:"name" json:"name" grimoire:"index"`
 	Collections []string `bson:"collections" json:"collections"`
 }
 
@@ -393,11 +393,11 @@ type File struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Type       string             `bson:"type" json:"type"`
-	Path       string             `bson:"path" json:"path"`
+	Type       string             `bson:"type" json:"type" grimoire:"index"`
+	Path       string             `bson:"path" json:"path" grimoire:"index"`
 	Size       int64              `bson:"size" json:"size"`
 	ModifiedAt int64              `bson:"modified_at" json:"modified_at"`
-	MediumID   primitive.ObjectID `bson:"medium_id" json:"medium_id"`
+	MediumID   primitive.ObjectID `bson:"medium_id" json:"medium_id" grimoire:"index"`
 }
 
 type Library struct { // model
@@ -405,8 +405,8 @@ type Library struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Name              string             `bson:"name" json:"name"`
-	Path              string             `bson:"path" json:"path"`
+	Name              string             `bson:"name" json:"name" grimoire:"index"`
+	Path              string             `bson:"path" json:"path" grimoire:"index"`
 	LibraryTypeID     primitive.ObjectID `bson:"library_type_id" json:"library_type_id"`
 	LibraryTemplateID primitive.ObjectID `bson:"library_template_id" json:"library_template_id"`
 	LibraryType       *LibraryType       `bson:"-" json:"library_type"`
@@ -534,8 +534,8 @@ type Pin struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Pin        int    `bson:"pin" json:"id"`
-	Code       string `bson:"code" json:"code"`
+	Pin        int    `bson:"pin" json:"id" grimoire:"index"`
+	Code       string `bson:"code" json:"code" grimoire:"index"`
 	Token      string `bson:"token" json:"authToken"`
 	Product    string `bson:"product" json:"product"`
 	Identifier string `bson:"identifier" json:"clientIdentifier"`
@@ -592,11 +592,11 @@ type Request struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Title    string `bson:"title" json:"title"`
-	User     string `bson:"user" json:"user"`
+	Title    string `bson:"title" json:"title" grimoire:"index"`
+	User     string `bson:"user" json:"user" grimoire:"index"`
 	Type     string `bson:"type" json:"type"`
-	Source   string `bson:"source" json:"source"`
-	SourceID string `bson:"source_id" json:"source_id"`
+	Source   string `bson:"source" json:"source" grimoire:"index"`
+	SourceID string `bson:"source_id" json:"source_id" grimoire:"index"`
 	Status   string `bson:"status" json:"status"`
 }
 
@@ -693,8 +693,8 @@ type User struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	Name  string `bson:"name" json:"name"`
-	Email string `bson:"email" json:"email"`
+	Name  string `bson:"name" json:"name" grimoire:"index"`
+	Email string `bson:"email" json:"email" grimoire:"index"`
 	Token string `bson:"token" json:"token"`
 	Thumb string `bson:"thumb" json:"thumb"`
 	Home  bool   `bson:"home" json:"home"`

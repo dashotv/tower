@@ -3,11 +3,14 @@ type: model
 fields:
   - name: type
     type: string
+    index: true
   - name: path
     type: string
+    index: true
   - name: size
     type: int64
   - name: modified_at
     type: int64
   - name: medium_id
     type: primitive.ObjectID
+    index: true

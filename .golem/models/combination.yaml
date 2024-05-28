@@ -3,5 +3,6 @@ type: model
 fields:
   - name: name
     type: string
+    index: true
   - name: collections
     type: "[]string"
