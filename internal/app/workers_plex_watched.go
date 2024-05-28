@@ -35,6 +35,8 @@ func (j *PlexWatched) Work(ctx context.Context, job *minion.Job[*PlexWatched]) e
 	return nil
 }
 
+var plexWatchedAllBatch = int64(100)
+
 type PlexWatchedAll struct {
 	minion.WorkerDefaults[*PlexWatchedAll]
 }
@@ -56,8 +58,8 @@ func (j *PlexWatchedAll) Work(ctx context.Context, job *minion.Job[*PlexWatchedA
 		return fae.Wrap(err, "getting history")
 	}
 
-	for i := int64(0); i < total; i += 200 {
-		list, err := a.Plex.GetHistory(i, 100)
+	for i := int64(0); i < total; i += plexWatchedAllBatch {
+		list, err := a.Plex.GetHistory(plexWatchedAllBatch, i)
 		if err != nil {
 			return fae.Wrap(err, "getting history media")
 		}
