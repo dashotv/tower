@@ -7,6 +7,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestGetWatchlist(t *testing.T) {
+	c := testClient()
+	token := os.Getenv("PLEX_TOKEN")
+
+	list, err := c.GetWatchlist(token)
+	assert.NoError(t, err)
+	assert.NotNil(t, list)
+}
+
 func TestWatchlists_Detail(t *testing.T) {
 	c := testClient()
 	token := os.Getenv("PLEX_TOKEN")
