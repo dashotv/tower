@@ -206,6 +206,10 @@ func (j *PathDeleteAll) Work(ctx context.Context, job *minion.Job[*PathDeleteAll
 		}
 	}
 
+	if err := app.DB.Medium.Delete(m); err != nil {
+		return fae.Wrap(err, "delete medium")
+	}
+
 	return nil
 }
 

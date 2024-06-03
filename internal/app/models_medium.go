@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -319,4 +320,36 @@ func Cover(m Medium) string {
 		}
 	}
 	return ""
+}
+
+func mediumIdDeletePaths(id string) error {
+	m := &Medium{}
+	if err := app.DB.Medium.Find(id, m); err != nil {
+		return fae.Wrap(err, "find medium")
+	}
+	return mediumDeletePaths(m)
+}
+
+func mediumDeletePaths(m *Medium) error {
+	paths := m.Paths
+	if m.Type == "Series" {
+		err := app.DB.Episode.Query().Where("series_id", m.ID).Batch(100, func(list []*Episode) error {
+			for _, e := range list {
+				paths = append(paths, e.Paths...)
+			}
+			return nil
+		})
+		if err != nil {
+			return fae.Wrap(err, "listing episodes")
+		}
+	}
+
+	for _, p := range paths {
+		if !p.Exists() {
+			continue
+		}
+		_ = os.Remove(p.LocalPath())
+	}
+
+	return nil
 }
