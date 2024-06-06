@@ -28,7 +28,8 @@ func (j *PlexWatchlistUpdates) Work(ctx context.Context, job *minion.Job[*PlexWa
 	for _, u := range users {
 		list, err := app.Plex.GetWatchlist(u.Token)
 		if err != nil {
-			return fae.Wrap(err, "getting watchlist")
+			notifier.Log.Errorf("PlexWatchlistUpdates", "getting watchlist: %s: %s", u.Name, err)
+			continue
 		}
 
 		if list == nil || len(list.MediaContainer.Metadata) == 0 {
