@@ -24,7 +24,8 @@ func (j *PlexUserUpdates) Work(ctx context.Context, job *minion.Job[*PlexUserUpd
 	for _, u := range users {
 		data, err := app.Plex.GetUser(u.Token)
 		if err != nil {
-			return fae.Wrap(err, "getting user data")
+			notifier.Log.Errorf("PlexUser", "getting plex user: %s: %v", u.Email, err)
+			continue
 		}
 
 		u.Name = data.Username

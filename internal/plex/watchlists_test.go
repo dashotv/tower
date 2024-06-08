@@ -9,7 +9,8 @@ import (
 
 func TestGetWatchlist(t *testing.T) {
 	c := testClient()
-	token := os.Getenv("PLEX_TOKEN")
+	// token := os.Getenv("PLEX_TOKEN")
+	token := "hUEDFtTMNJy5c-LPkEcS"
 
 	list, err := c.GetWatchlist(token)
 	assert.NoError(t, err)

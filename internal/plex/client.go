@@ -119,20 +119,6 @@ func (p *Client) _metadata() *resty.Request {
 	return p.metadata.R().SetHeaders(p.Headers)
 }
 
-func (p *Client) GetUser(token string) (*User, error) {
-	user := &User{}
-	resp, err := p._plextv().SetResult(user).
-		SetHeader("X-Plex-Token", token).Get("/user")
-	if err != nil {
-		return nil, fae.Wrap(err, "failed to make request")
-	}
-	if !resp.IsSuccess() {
-		return nil, fae.Errorf("getting user: %s", resp.Status())
-	}
-
-	return user, nil
-}
-
 type Accounts struct {
 	XMLName xml.Name `json:"MediaContainer" xml:"MediaContainer"`
 	Size    int64    `json:"size" xml:"size,attr"`

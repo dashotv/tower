@@ -26,14 +26,6 @@ func testClient() *Client {
 	})
 }
 
-func TestGetUser(t *testing.T) {
-	c := testClient()
-	user, err := c.GetUser(os.Getenv("PLEX_TOKEN"))
-	assert.NoError(t, err)
-	assert.NotNil(t, user)
-	fmt.Printf("user: %+v\n", user)
-}
-
 func TestGetAccounts(t *testing.T) {
 	c := testClient()
 	list, err := c.GetAccounts()

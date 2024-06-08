@@ -33,18 +33,45 @@ func (j *PlexPinToUsers) Work(ctx context.Context, job *minion.Job[*PlexPinToUse
 		}
 
 		check[p.Token] = true
-		app.Log.Debugf("find user by token %s", p.Token)
-		resp, err := app.DB.User.Query().Where("token", p.Token).Run()
+		// app.Log.Debugf("find user by token %s", p.Token)
+		// resp, err := app.DB.User.Query().Where("token", p.Token).Run()
+		// if err != nil {
+		// 	return fae.Wrap(err, "querying user")
+		// }
+		// if len(resp) > 0 {
+		// 	// users exists
+		// 	continue
+		// }
+
+		plexUser, err := app.Plex.GetUser(p.Token)
+		if err != nil {
+			return fae.Wrap(err, "getting plex user")
+		}
+
+		list, err := app.DB.User.Query().Where("email", plexUser.Email).Run()
 		if err != nil {
 			return fae.Wrap(err, "querying user")
 		}
-		if len(resp) > 0 {
-			// users exists
+		if len(list) > 0 {
+			if list[0].Token != p.Token {
+				list[0].Token = p.Token
+				err = app.DB.User.Save(list[0])
+				if err != nil {
+					return fae.Wrap(err, "saving user")
+				}
+			}
 			continue
 		}
 
 		// create user
-		user := &User{Token: p.Token}
+		user := &User{
+			Email: plexUser.Email,
+			Name:  plexUser.Title,
+			Thumb: plexUser.Thumb,
+			Home:  plexUser.Home,
+			Admin: false,
+			Token: p.Token,
+		}
 		err = app.DB.User.Save(user)
 		if err != nil {
 			return fae.Wrap(err, "saving user")
