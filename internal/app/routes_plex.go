@@ -75,6 +75,11 @@ func (a *Application) PlexAuth(c echo.Context) error {
 		return fae.New("something went wrong...")
 	}
 
+	list[0].Token = plexPin.Token
+	if err := app.DB.Pin.Save(list[0]); err != nil {
+		return err
+	}
+
 	if err := app.Workers.Enqueue(&PlexPinToUsers{}); err != nil {
 		return err
 	}
