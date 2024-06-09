@@ -142,6 +142,17 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "registering worker: movie_delete (MovieDelete)")
 	}
 
+	if err := minion.Register[*MovieUpdate](m, &MovieUpdate{}); err != nil {
+		return fae.Wrap(err, "registering worker: movie_update (MovieUpdate)")
+	}
+
+	if err := minion.Register[*MovieUpdateAll](m, &MovieUpdateAll{}); err != nil {
+		return fae.Wrap(err, "registering worker: movie_update_all (MovieUpdateAll)")
+	}
+	if _, err := m.Schedule("0 0 10 * * 0", &MovieUpdateAll{}); err != nil {
+		return fae.Wrap(err, "scheduling worker: movie_update_all (MovieUpdateAll)")
+	}
+
 	if err := minion.Register[*NzbgetProcess](m, &NzbgetProcess{}); err != nil {
 		return fae.Wrap(err, "registering worker: nzbget_process (NzbgetProcess)")
 	}
@@ -237,18 +248,6 @@ func setupWorkers(app *Application) error {
 	}
 	if _, err := m.Schedule("0 0 */12 * * *", &SeriesUpdateToday{}); err != nil {
 		return fae.Wrap(err, "scheduling worker: series_update_today (SeriesUpdateToday)")
-	}
-
-	if err := minion.Register[*TmdbUpdateAll](m, &TmdbUpdateAll{}); err != nil {
-		return fae.Wrap(err, "registering worker: tmdb_update_all (TmdbUpdateAll)")
-	}
-
-	if err := minion.Register[*TmdbUpdateMovie](m, &TmdbUpdateMovie{}); err != nil {
-		return fae.Wrap(err, "registering worker: tmdb_update_movie (TmdbUpdateMovie)")
-	}
-
-	if err := minion.Register[*TmdbUpdateMovieImage](m, &TmdbUpdateMovieImage{}); err != nil {
-		return fae.Wrap(err, "registering worker: tmdb_update_movie_image (TmdbUpdateMovieImage)")
 	}
 
 	if err := minion.Register[*UpdateIndexes](m, &UpdateIndexes{}); err != nil {

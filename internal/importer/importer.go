@@ -61,3 +61,11 @@ func (i *Importer) SeriesEpisodes(tvdbid int64, episodeOrder int) ([]*Episode, e
 func (i *Importer) SeriesImages(tvdbid int64) ([]string, []string, error) {
 	return i.loadSeriesImages(tvdbid)
 }
+
+func (i *Importer) Movie(tmdbid int) (*Movie, error) {
+	return i.loadMovie(tmdbid)
+}
+
+func (i *Importer) MovieImages(tmdbid int) ([]string, []string, error) {
+	return i.loadMovieImages(tmdbid)
+}

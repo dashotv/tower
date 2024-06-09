@@ -19,6 +19,16 @@ type Episode struct {
 	Absolute    int
 }
 
+type Movie struct {
+	ID          int64
+	ImdbID      string
+	Title       string
+	Description string
+	Airdate     string
+	Poster      string
+	Backdrop    string
+}
+
 const (
 	EpisodeOrderUnknown = iota
 	EpisodeOrderDefault

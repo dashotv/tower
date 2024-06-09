@@ -1,4 +1,0 @@
-name: tmdb_update_movie
-fields:
-  - name: id
-    type: string

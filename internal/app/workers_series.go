@@ -204,8 +204,8 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 		return err
 	}
 
-	if series.Source != "tvdb" {
-		return nil
+	if series.Source != "tvdb" || series.SourceID == "" {
+		return fae.New("series source not tvdb or missing id")
 	}
 
 	tvdbid, err := strconv.ParseInt(series.SourceID, 10, 64)

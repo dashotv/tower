@@ -1,0 +1,8 @@
+name: movie_update
+fields:
+    - name: id
+      type: string
+    - name: title
+      type: string
+    - name: skip_images
+      type: bool

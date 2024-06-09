@@ -105,7 +105,7 @@ func createMovieFromRequest(r *Request) error {
 		return fae.Wrap(err, "saving movie")
 	}
 
-	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: m.ID.Hex()}); err != nil {
+	if err := app.Workers.Enqueue(&MovieUpdate{ID: m.ID.Hex()}); err != nil {
 		return fae.Wrap(err, "queueing update job")
 	}
 	return nil

@@ -67,7 +67,11 @@ func mediumImage(medium *Medium, t string, remote string, ratio float32) error {
 	if len(extension) > 0 && extension[0] == '.' {
 		extension = extension[1:]
 	}
-	local := fmt.Sprintf("series-%s/%s", medium.ID.Hex(), t)
+	mt := "series"
+	if medium.Type == "Movie" {
+		mt = "movie"
+	}
+	local := fmt.Sprintf("%s-%s/%s", mt, medium.ID.Hex(), t)
 	dest := fmt.Sprintf("%s/%s.%s", app.Config.DirectoriesImages, local, extension)
 	thumb := fmt.Sprintf("%s/%s_thumb.%s", app.Config.DirectoriesImages, local, extension)
 

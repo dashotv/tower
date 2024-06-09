@@ -80,7 +80,7 @@ func (a *Application) MoviesCreate(c echo.Context, subject *Movie) error {
 	if err := a.DB.Movie.Save(subject); err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving Movies"})
 	}
-	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: subject.ID.Hex()}); err != nil {
+	if err := app.Workers.Enqueue(&MovieUpdate{ID: subject.ID.Hex(), Title: subject.Title}); err != nil {
 		return err
 	}
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
@@ -161,7 +161,7 @@ func (a *Application) MoviesDelete(c echo.Context, id string) error {
 
 // PUT /movies/:id/refresh
 func (a *Application) MoviesRefresh(c echo.Context, id string) error {
-	if err := app.Workers.Enqueue(&TmdbUpdateMovie{ID: id}); err != nil {
+	if err := app.Workers.Enqueue(&MovieUpdate{ID: id}); err != nil {
 		return err
 	}
 
@@ -180,7 +180,7 @@ func (a *Application) MoviesPaths(c echo.Context, id string) error {
 func moviesJob(name string, id string) error {
 	switch name {
 	case "refresh":
-		return app.Workers.Enqueue(&TmdbUpdateMovie{ID: id})
+		return app.Workers.Enqueue(&MovieUpdate{ID: id})
 	case "paths":
 		return app.Workers.Enqueue(&PathCleanup{ID: id})
 	case "files":
@@ -193,7 +193,7 @@ func moviesJob(name string, id string) error {
 // POST /movies/:id/jobs
 func (a *Application) MoviesJobs(c echo.Context, id string, name string) error {
 	if err := moviesJob(name, id); err != nil {
-		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
+		return err
 	}
 
 	return c.JSON(http.StatusOK, &Response{Error: false})
