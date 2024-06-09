@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/dashotv/fae"
@@ -24,13 +25,22 @@ func (j *MovieDelete) Work(ctx context.Context, job *minion.Job[*MovieDelete]) e
 		return fae.Wrap(err, "finding movie")
 	}
 
-	if err := app.DB.Movie.Delete(movie); err != nil {
-		return fae.Wrap(err, "deleting series")
+	// delete files
+	if err := mediumIdDeletePaths(id); err != nil {
+		return fae.Wrap(err, "deleting paths")
 	}
 
-	if err := app.Workers.Enqueue(&PathDeleteAll{MediumID: movie.ID.Hex()}); err != nil {
-		return fae.Wrap(err, "enqueueing paths")
+	// remove downloads referencing movie
+	_, err := app.DB.Download.Collection.DeleteMany(ctx, bson.M{"medium_id": movie.ID})
+	if err != nil {
+		return fae.Wrap(err, "deleting downloads")
 	}
+
+	// remove movie
+	if err := app.DB.Movie.Delete(movie); err != nil {
+		return fae.Wrap(err, "delete medium")
+	}
+
 	return nil
 }
 
