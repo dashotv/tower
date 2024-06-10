@@ -8,18 +8,11 @@ import (
 
 // GET /requests/
 func (a *Application) RequestsIndex(c echo.Context, page int, limit int) error {
-	if page < 1 {
-		page = 1
-	}
-	if limit < 1 {
-		limit = 25
-	}
-	skip := (page - 1) * limit
-	list, err := a.DB.Request.Query().Desc("created_at").Limit(limit).Skip(skip).Run()
+	list, total, err := a.DB.RequestList(page, limit)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error loading Requests"})
 	}
-	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list, Total: total})
 }
 
 // POST /requests/
