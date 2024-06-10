@@ -114,9 +114,8 @@ func (j *MovieUpdate) Work(ctx context.Context, job *minion.Job[*MovieUpdate]) e
 
 		if !job.Args.SkipImages {
 			if m.Poster != "" {
-				// app.Workers.Enqueue(&TmdbUpdateMovieImage{ID: movie.ID.Hex(), Type: "cover", Path: m.Poster, Ratio: posterRatio})
 				eg.Go(func() error {
-					err := mediumImage(movie, "cover", m.Poster, posterRatio)
+					err := mediumImage(movie, "cover", a.Config.TmdbImages+m.Poster, posterRatio)
 					if err != nil {
 						app.Log.Errorf("movie %s cover: %v", movie.ID.Hex(), err)
 					}
@@ -124,9 +123,8 @@ func (j *MovieUpdate) Work(ctx context.Context, job *minion.Job[*MovieUpdate]) e
 				})
 			}
 			if m.Backdrop != "" {
-				// app.Workers.Enqueue(&TmdbUpdateMovieImage{ID: movie.ID.Hex(), Type: "background", Path: m.Backdrop, Ratio: backgroundRatio})
 				eg.Go(func() error {
-					err := mediumImage(movie, "background", m.Backdrop, backgroundRatio)
+					err := mediumImage(movie, "background", a.Config.TmdbImages+m.Backdrop, backgroundRatio)
 					if err != nil {
 						app.Log.Errorf("movie %s background: %v", movie.ID.Hex(), err)
 					}
