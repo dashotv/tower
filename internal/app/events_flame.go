@@ -32,7 +32,7 @@ func onFlameCombined(app *Application, c *FlameCombined) (*EventDownloading, err
 	for i, d := range list {
 		if len(c.Torrents) > 0 {
 			t := lo.Filter(c.Torrents, func(torrent *qbt.TorrentJSON, _ int) bool {
-				return torrent.Hash == d.Thash
+				return strings.ToLower(torrent.Hash) == strings.ToLower(d.Thash)
 			})
 
 			if len(t) > 0 {
@@ -47,9 +47,6 @@ func onFlameCombined(app *Application, c *FlameCombined) (*EventDownloading, err
 				}
 
 				if d.Multi && len(d.Files) > 0 && len(t[0].Files) > 0 {
-					// completed := lo.Filter(t[0].Files, func(file *qbt.TorrentFile, _ int) bool {
-					// 	return file.Progress == 100
-					// })
 					completed := lo.Filter(d.Files, func(file *DownloadFile, _ int) bool {
 						tf := t[0].Files[file.Num]
 						return !file.MediumID.IsZero() && tf.Progress == 100

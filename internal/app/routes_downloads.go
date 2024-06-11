@@ -59,14 +59,18 @@ func (a *Application) DownloadsCreate(c echo.Context, data *Download) error {
 }
 
 func (a *Application) DownloadsShow(c echo.Context, id string) error {
-	result := &Download{}
-	err := app.DB.Download.Find(id, result)
-	if err != nil {
-		return err
+	results := []*Download{}
+	if ok, err := a.Cache.Get("downloads", &results); err != nil || !ok {
+		return fae.Errorf("getting downloads: %w", err)
 	}
 
-	list := []*Download{result}
-	app.DB.processDownloads(list)
+	var result *Download
+	for _, d := range results {
+		if d.ID.Hex() == id {
+			result = d
+			break
+		}
+	}
 
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: result})
 }
