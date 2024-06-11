@@ -321,6 +321,28 @@ func Cover(m Medium) string {
 	}
 	return ""
 }
+func (c *Connector) MediumSetting(id, setting string, value bool) error {
+	m := &Medium{}
+	if err := app.DB.Medium.Find(id, m); err != nil {
+		return err
+	}
+
+	c.Log.Infof("series setting: %s %t", setting, value)
+	switch setting {
+	case "active":
+		m.Active = value
+	case "favorite":
+		m.Favorite = value
+	case "broken":
+		m.Broken = value
+	case "downloaded":
+		m.Downloaded = value
+	case "completed":
+		m.Completed = value
+	}
+
+	return c.Medium.Update(m)
+}
 
 func mediumIdDeletePaths(id string) error {
 	m := &Medium{}

@@ -85,16 +85,19 @@ func (a *Application) DownloadsUpdate(c echo.Context, id string, data *Download)
 	}
 
 	if data.Status == "deleted" {
-		m := &Medium{}
-		err = app.DB.Medium.Find(data.MediumID.Hex(), m)
-		if err != nil {
+		if err := a.DB.MediumSetting(data.MediumID.Hex(), "downloaded", false); err != nil {
 			return err
 		}
-
-		m.Downloaded = false
-		err = app.DB.Medium.Update(m)
-		if err != nil {
-			return err
+		if data.Thash != "" {
+			if err := app.FlameTorrentRemove(data.Thash); err != nil {
+				return err
+			}
+		}
+	} else if data.Status == "done" {
+		if data.Thash != "" {
+			if err := app.FlameTorrentRemove(data.Thash); err != nil {
+				return err
+			}
 		}
 	} else if data.Status == "loading" && (data.URL != "" || data.ReleaseID != "") {
 		if err := app.Workers.Enqueue(&DownloadsProcessLoad{}); err != nil {
