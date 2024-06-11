@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -18,7 +19,8 @@ import (
 
 var nzbgeekRegex = regexp.MustCompile("^https://api.nzbgeek")
 var metubeRegex = regexp.MustCompile("^metube://")
-var activeStates = []string{"searching", "loading", "managing", "downloading", "reviewing", "paused"}
+var activeStates = []string{"searching", "loading", "managing", "downloading", "reviewing"}
+var downloadStates = []string{"searching", "loading", "managing", "downloading", "reviewing", "done"}
 
 func (c *Connector) DownloadGet(id string) (*Download, error) {
 	d := &Download{}
@@ -39,6 +41,10 @@ func (d *Download) Error(e error) error {
 	}
 
 	return e
+}
+
+func (d *Download) StatusIndex() int {
+	return slices.Index(downloadStates, d.Status)
 }
 
 func (d *Download) GetURL() (string, error) {
@@ -231,125 +237,140 @@ func (c *Connector) DownloadByStatus(status string) ([]*Download, error) {
 
 func (c *Connector) processDownloads(list []*Download) {
 	for _, d := range list {
-		m := &Medium{}
-		err := app.DB.Medium.FindByID(d.MediumID, m)
+		c.processDownload(d)
+	}
+}
+
+func (c *Connector) processDownload(d *Download) {
+	m := &Medium{}
+	err := app.DB.Medium.FindByID(d.MediumID, m)
+	if err != nil {
+		c.Log.Errorf("could not find medium: %s", d.MediumID)
+		return
+	}
+
+	d.Title = m.Title
+	d.Kind = m.Kind
+	d.Source = m.Source
+	d.SourceID = m.SourceID
+	d.Directory = m.Directory
+	d.Active = m.Active
+	d.Favorite = m.Favorite
+
+	d.Search = &DownloadSearch{
+		SourceID: m.SourceID,
+		Title:    m.Search,
+		Exact:    false,
+	}
+	if m.SearchParams != nil {
+		d.Search.Type = m.SearchParams.Type
+		d.Search.Source = m.SearchParams.Source
+		d.Search.Resolution = m.SearchParams.Resolution
+		d.Search.Group = m.SearchParams.Group
+		d.Search.Website = m.SearchParams.Group
+		d.Search.Verified = m.SearchParams.Verified
+		d.Search.Uncensored = m.SearchParams.Uncensored
+		d.Search.Bluray = m.SearchParams.Bluray
+	}
+
+	if m.Type == "Movie" {
+		d.Search.SourceID = m.ImdbID
+	}
+
+	paths := m.Paths
+	if m.Type == "Episode" && !m.SeriesID.IsZero() {
+		s := &Series{}
+		err := app.DB.Series.FindByID(m.SeriesID, s)
 		if err != nil {
-			c.Log.Errorf("could not find medium: %s", d.MediumID)
+			c.Log.Errorf("could not find series: %s: %s", d.MediumID, err)
+			return
+		}
+
+		parts := strings.Split(s.Search, ":")
+		title := parts[0]
+		var shift int64
+		if len(parts) > 1 {
+			shift, _ = strconv.ParseInt(parts[1], 10, 64)
+		}
+
+		d.Title = s.Title
+		d.Kind = s.Kind
+		d.Source = s.Source
+		d.SourceID = s.SourceID
+		d.Directory = s.Directory
+		d.Active = s.Active
+		d.Favorite = s.Favorite
+
+		d.Search.Source = s.Source
+		d.Search.SourceID = s.SourceID
+		d.Search.Title = title
+		d.Search.Type = s.SearchParams.Type
+		d.Search.Source = s.SearchParams.Source
+		d.Search.Resolution = s.SearchParams.Resolution
+		d.Search.Group = s.SearchParams.Group
+		d.Search.Website = s.SearchParams.Group
+		d.Search.Verified = s.SearchParams.Verified
+		d.Search.Uncensored = s.SearchParams.Uncensored
+		d.Search.Bluray = s.SearchParams.Bluray
+
+		if isAnimeKind(string(s.Kind)) && m.AbsoluteNumber > 0 {
+			n := m.AbsoluteNumber
+			if shift > 0 && n > int(shift) {
+				n = n - int(shift)
+			}
+			d.Search.Episode = n
+			d.Display = fmt.Sprintf("#%d %s", m.AbsoluteNumber, m.Title)
+		} else {
+			d.Search.Season = m.SeasonNumber
+			d.Search.Episode = m.EpisodeNumber
+			d.Display = fmt.Sprintf("%02dx%02d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)
+		}
+
+		unwatched, err := app.DB.SeriesUserUnwatched(s)
+		if err != nil {
+			c.Log.Errorf("could not get unwatched count: %s: %s", s.ID.Hex(), err)
+		}
+		d.Unwatched = unwatched
+
+		paths = s.Paths
+	}
+
+	for _, p := range paths {
+		if p.Type == "cover" {
+			d.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
 			continue
 		}
-
-		d.Title = m.Title
-		d.Kind = m.Kind
-		d.Source = m.Source
-		d.SourceID = m.SourceID
-		d.Directory = m.Directory
-		d.Active = m.Active
-		d.Favorite = m.Favorite
-
-		d.Search = &DownloadSearch{
-			SourceID: m.SourceID,
-			Title:    m.Search,
-			Exact:    false,
+		if p.Type == "background" {
+			d.Background = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
+			continue
 		}
-		if m.SearchParams != nil {
-			d.Search.Type = m.SearchParams.Type
-			d.Search.Source = m.SearchParams.Source
-			d.Search.Resolution = m.SearchParams.Resolution
-			d.Search.Group = m.SearchParams.Group
-			d.Search.Website = m.SearchParams.Group
-			d.Search.Verified = m.SearchParams.Verified
-			d.Search.Uncensored = m.SearchParams.Uncensored
-			d.Search.Bluray = m.SearchParams.Bluray
-		}
-
-		if m.Type == "Movie" {
-			d.Search.SourceID = m.ImdbID
-		}
-
-		paths := m.Paths
-		if m.Type == "Episode" && !m.SeriesID.IsZero() {
-			s := &Series{}
-			err := app.DB.Series.FindByID(m.SeriesID, s)
-			if err != nil {
-				c.Log.Errorf("could not find series: %s: %s", d.MediumID, err)
-				continue
-			}
-
-			parts := strings.Split(s.Search, ":")
-			title := parts[0]
-			var shift int64
-			if len(parts) > 1 {
-				shift, _ = strconv.ParseInt(parts[1], 10, 64)
-			}
-
-			d.Title = s.Title
-			d.Kind = s.Kind
-			d.Source = s.Source
-			d.SourceID = s.SourceID
-			d.Directory = s.Directory
-			d.Active = s.Active
-			d.Favorite = s.Favorite
-
-			d.Search.Source = s.Source
-			d.Search.SourceID = s.SourceID
-			d.Search.Title = title
-			d.Search.Type = s.SearchParams.Type
-			d.Search.Source = s.SearchParams.Source
-			d.Search.Resolution = s.SearchParams.Resolution
-			d.Search.Group = s.SearchParams.Group
-			d.Search.Website = s.SearchParams.Group
-			d.Search.Verified = s.SearchParams.Verified
-			d.Search.Uncensored = s.SearchParams.Uncensored
-			d.Search.Bluray = s.SearchParams.Bluray
-
-			if isAnimeKind(string(s.Kind)) && m.AbsoluteNumber > 0 {
-				n := m.AbsoluteNumber
-				if shift > 0 && n > int(shift) {
-					n = n - int(shift)
-				}
-				d.Search.Episode = n
-				d.Display = fmt.Sprintf("#%d %s", m.AbsoluteNumber, m.Title)
-			} else {
-				d.Search.Season = m.SeasonNumber
-				d.Search.Episode = m.EpisodeNumber
-				d.Display = fmt.Sprintf("%02dx%02d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)
-			}
-
-			unwatched, err := app.DB.SeriesUserUnwatched(s)
-			if err != nil {
-				c.Log.Errorf("could not get unwatched count: %s: %s", s.ID.Hex(), err)
-			}
-			d.Unwatched = unwatched
-
-			paths = s.Paths
-		}
-
-		for _, p := range paths {
-			if p.Type == "cover" {
-				d.Cover = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
-				continue
-			}
-			if p.Type == "background" {
-				d.Background = fmt.Sprintf("%s/%s.%s", imagesBaseURL, p.Local, p.Extension)
-				continue
-			}
-		}
-
-		for j, f := range d.Files {
-			if !f.MediumID.IsZero() {
-				fm := &Medium{}
-				err := app.DB.Medium.FindByID(f.MediumID, fm)
-				if err != nil {
-					c.Log.Errorf("could not find medium: %s", d.MediumID)
-					continue
-				}
-
-				d.Files[j].Medium = fm
-			}
-		}
-
-		d.Medium = m
 	}
+
+	for j, f := range d.Files {
+		if !f.MediumID.IsZero() {
+			fm := &Medium{}
+			err := app.DB.Medium.FindByID(f.MediumID, fm)
+			if err != nil {
+				c.Log.Errorf("could not find medium: %s", d.MediumID)
+				continue
+			}
+
+			d.Files[j].Medium = fm
+		}
+	}
+
+	// 	completed := lo.Filter(d.Files, func(file *DownloadFile, _ int) bool {
+	// 		tf := t[0].Files[file.Num]
+	// 		return !file.MediumID.IsZero() && tf.Progress == 100
+	// 	})
+	// 	g.Files.Completed = len(completed)
+	//
+	// 	selected := lo.Filter(d.Files, func(file *DownloadFile, _ int) bool {
+	// 		return !file.MediumID.IsZero()
+	// 	})
+	// 	g.Files.Selected = len(selected)
+
+	d.Medium = m
 }
 
 func (c *Connector) DownloadSetting(id, setting string, value bool) error {

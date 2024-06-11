@@ -11,11 +11,10 @@ import (
 )
 
 func (a *Application) DownloadsIndex(c echo.Context, page, limit int) error {
-	results, err := app.DB.ActiveDownloads()
-	if err != nil {
-		return err
+	results := []*Download{}
+	if ok, err := a.Cache.Get("downloads", &results); err != nil || !ok {
+		return fae.Errorf("getting downloads: %w", err)
 	}
-
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: results})
 }
 

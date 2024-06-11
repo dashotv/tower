@@ -322,9 +322,9 @@ func (e *Events) doSend(topic EventsTopic, data any) error {
 }
 
 type EventDownloading struct { // downloading
-	Downloads map[string]*Downloading `bson:"downloads" json:"downloads"`
-	Hashes    map[string]string       `bson:"hashes" json:"hashes"`
-	Metrics   *flame.Metrics          `bson:"metrics" json:"metrics"`
+	Downloads []*Download    `bson:"downloads" json:"downloads"`
+	Hashes    map[string]int `bson:"hashes" json:"hashes"`
+	Metrics   *flame.Metrics `bson:"metrics" json:"metrics"`
 }
 
 type EventDownloads struct { // downloads

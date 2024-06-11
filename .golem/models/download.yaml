@@ -68,6 +68,31 @@ fields:
   - name: search
     type: "*DownloadSearch"
     bson: "-"
+  # torrents
+  - name: torrent
+    type: "*qbt.TorrentJSON"
+    bson: "-"
+  - name: torrent_state
+    type: string
+    bson: "-"
+  - name: eta
+    type: string
+    bson: "-"
+  - name: progress
+    type: float64
+    bson: "-"
+  - name: queue
+    type: float64
+    bson: "-"
+  - name: files_completed
+    type: int
+    bson: "-"
+  - name: files_selected
+    type: int
+    bson: "-"
+  - name: files_wanted
+    type: int
+    bson: "-"
 # not used
 #  - name: timestamps
 #    type: struct

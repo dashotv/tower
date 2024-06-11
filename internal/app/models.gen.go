@@ -269,30 +269,38 @@ type Download struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
-	MediumID   primitive.ObjectID `bson:"medium_id" json:"medium_id"`
-	Auto       bool               `bson:"auto" json:"auto"`
-	Multi      bool               `bson:"multi" json:"multi"`
-	Force      bool               `bson:"force" json:"force"`
-	URL        string             `bson:"url" json:"url"`
-	ReleaseID  string             `bson:"tdo_id" json:"release_id"`
-	Thash      string             `bson:"thash" json:"thash"`
-	Selected   string             `bson:"selected" json:"selected"`
-	Status     string             `bson:"status" json:"status"`
-	Files      []*DownloadFile    `bson:"download_files" json:"files"`
-	Regex      string             `bson:"regex" json:"regex"`
-	Medium     *Medium            `bson:"-" json:"medium"`
-	Title      string             `bson:"-" json:"title"`
-	Display    string             `bson:"-" json:"display"`
-	Source     string             `bson:"-" json:"source"`
-	SourceID   string             `bson:"-" json:"source_id"`
-	Kind       primitive.Symbol   `bson:"-" json:"kind"`
-	Directory  string             `bson:"-" json:"directory"`
-	Active     bool               `bson:"-" json:"active"`
-	Favorite   bool               `bson:"-" json:"favorite"`
-	Unwatched  int                `bson:"-" json:"unwatched"`
-	Cover      string             `bson:"-" json:"cover"`
-	Background string             `bson:"-" json:"background"`
-	Search     *DownloadSearch    `bson:"-" json:"search"`
+	MediumID       primitive.ObjectID `bson:"medium_id" json:"medium_id"`
+	Auto           bool               `bson:"auto" json:"auto"`
+	Multi          bool               `bson:"multi" json:"multi"`
+	Force          bool               `bson:"force" json:"force"`
+	URL            string             `bson:"url" json:"url"`
+	ReleaseID      string             `bson:"tdo_id" json:"release_id"`
+	Thash          string             `bson:"thash" json:"thash"`
+	Selected       string             `bson:"selected" json:"selected"`
+	Status         string             `bson:"status" json:"status"`
+	Files          []*DownloadFile    `bson:"download_files" json:"files"`
+	Regex          string             `bson:"regex" json:"regex"`
+	Medium         *Medium            `bson:"-" json:"medium"`
+	Title          string             `bson:"-" json:"title"`
+	Display        string             `bson:"-" json:"display"`
+	Source         string             `bson:"-" json:"source"`
+	SourceID       string             `bson:"-" json:"source_id"`
+	Kind           primitive.Symbol   `bson:"-" json:"kind"`
+	Directory      string             `bson:"-" json:"directory"`
+	Active         bool               `bson:"-" json:"active"`
+	Favorite       bool               `bson:"-" json:"favorite"`
+	Unwatched      int                `bson:"-" json:"unwatched"`
+	Cover          string             `bson:"-" json:"cover"`
+	Background     string             `bson:"-" json:"background"`
+	Search         *DownloadSearch    `bson:"-" json:"search"`
+	Torrent        *qbt.TorrentJSON   `bson:"-" json:"torrent"`
+	TorrentState   string             `bson:"-" json:"torrent_state"`
+	Eta            string             `bson:"-" json:"eta"`
+	Progress       float64            `bson:"-" json:"progress"`
+	Queue          float64            `bson:"-" json:"queue"`
+	FilesCompleted int                `bson:"-" json:"files_completed"`
+	FilesSelected  int                `bson:"-" json:"files_selected"`
+	FilesWanted    int                `bson:"-" json:"files_wanted"`
 }
 
 type DownloadFile struct { // struct

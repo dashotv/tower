@@ -3,8 +3,8 @@ channel: tower.downloading
 receiver: false
 fields:
   - name: downloads
-    type: "map[string]*Downloading"
+    type: "[]*Download"
   - name: hashes
-    type: "map[string]string"
+    type: "map[string]int"
   - name: metrics
     type: "*flame.Metrics"
