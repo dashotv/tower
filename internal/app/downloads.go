@@ -401,8 +401,9 @@ func (a *Application) downloadsMove() error {
 		if d.IsTorrent() {
 			t, err = app.FlameTorrent(d.Thash)
 			if err != nil {
-				app.Log.Debugf("error: %+v", err)
-				return fae.Wrap(err, "getting torrent")
+				notifier.Log.Errorf("Downloads:Move", "failed to get torrent: %s", err)
+				d.Error(err)
+				continue
 			}
 		}
 
