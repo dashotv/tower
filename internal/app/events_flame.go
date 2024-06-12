@@ -97,6 +97,11 @@ func handleTorrent(d *Download, t *qbt.TorrentJSON) error {
 		d.Eta = time.Now().Add(time.Duration(t.Finish) * time.Second).Format(time.RFC3339)
 	}
 
+	// set torrent file on download files
+	for _, file := range d.Files {
+		file.TorrentFile = t.Files[file.Num]
+	}
+
 	if !d.Multi || len(d.Files) == 0 || len(t.Files) == 0 {
 		return nil
 	}
@@ -121,11 +126,6 @@ func handleTorrent(d *Download, t *qbt.TorrentJSON) error {
 			return file.Priority > 0 && file.Progress < 100
 		})
 		d.FilesWanted = len(wanted)
-	}
-
-	// set torrent file on download files
-	for _, file := range d.Files {
-		file.TorrentFile = t.Files[file.Num]
 	}
 
 	// sort files by torrent name
