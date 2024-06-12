@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/samber/lo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/fae"
 	flame "github.com/dashotv/flame/client"
@@ -52,25 +53,45 @@ func onFlameCombined(app *Application, c *FlameCombined) (*EventDownloading, err
 				continue
 			}
 
-			completed := lo.Filter(d.Files, func(file *DownloadFile, _ int) bool {
-				tf := t[0].Files[file.Num]
-				return !file.MediumID.IsZero() && tf.Progress == 100
-			})
-			d.FilesCompleted = len(completed)
+			{
+				completed := lo.Filter(d.Files, func(file *DownloadFile, _ int) bool {
+					tf := t[0].Files[file.Num]
+					return !file.MediumID.IsZero() && tf.Progress == 100
+				})
+				d.FilesCompleted = len(completed)
+			}
 
-			selected := lo.Filter(d.Files, func(file *DownloadFile, _ int) bool {
-				return !file.MediumID.IsZero()
-			})
-			d.FilesSelected = len(selected)
+			{
+				selected := lo.Filter(d.Files, func(file *DownloadFile, _ int) bool {
+					return !file.MediumID.IsZero()
+				})
+				d.FilesSelected = len(selected)
+			}
 
-			wanted := lo.Filter(t[0].Files, func(file *qbt.TorrentFile, _ int) bool {
-				return file.Priority > 0 && file.Progress < 100
-			})
-			d.FilesWanted = len(wanted)
+			{
+				wanted := lo.Filter(t[0].Files, func(file *qbt.TorrentFile, _ int) bool {
+					return file.Priority > 0 && file.Progress < 100
+				})
+				d.FilesWanted = len(wanted)
+			}
 
+			// set torrent file on download files
 			for _, file := range d.Files {
 				file.TorrentFile = t[0].Files[file.Num]
 			}
+
+			// sort files by torrent name
+			selected := lo.Filter(d.Files, func(item *DownloadFile, index int) bool {
+				return item.TorrentFile != nil && item.MediumID != primitive.NilObjectID
+			})
+			ignored := lo.Filter(d.Files, func(item *DownloadFile, index int) bool {
+				return item.TorrentFile == nil || item.MediumID == primitive.NilObjectID
+			})
+
+			slices.SortFunc(selected, func(a, b *DownloadFile) int {
+				return strings.Compare(a.TorrentFile.Name, b.TorrentFile.Name)
+			})
+			d.Files = append(selected, ignored...)
 		}
 		if len(c.Nzbs) > 0 && d.Torrent == nil {
 			n := lo.Filter(c.Nzbs, func(nzb nzbget.Group, _ int) bool {
