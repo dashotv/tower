@@ -37,6 +37,7 @@ func onFlameCombined(app *Application, c *FlameCombined) (*EventDownloading, err
 			})
 			if len(t) == 0 {
 				app.Log.Debugf("Torrent not found: %s", d.Thash)
+				continue
 			}
 
 			d.Torrent = t[0]
