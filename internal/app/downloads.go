@@ -422,11 +422,16 @@ func (a *Application) downloadsMove() error {
 				}
 			}
 
-			nums := d.NextFileNums(t, 3)
-			if nums != "" {
-				err := app.FlameTorrentWant(d.Thash, nums)
-				if err != nil {
-					return d.Error(fae.Wrap(err, "want next"))
+			wanted := lo.Filter(t.Files, func(f *qbt.TorrentFile, i int) bool {
+				return f.Priority > 0 && f.Progress < 100
+			})
+			if len(wanted) < 3 {
+				nums := d.NextFileNums(t, 3)
+				if nums != "" {
+					err := app.FlameTorrentWant(d.Thash, nums)
+					if err != nil {
+						return d.Error(fae.Wrap(err, "want next"))
+					}
 				}
 			}
 
