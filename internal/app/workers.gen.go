@@ -228,7 +228,7 @@ func setupWorkers(app *Application) error {
 	if err := minion.Register[*SeriesUpdateDonghua](m, &SeriesUpdateDonghua{}); err != nil {
 		return fae.Wrap(err, "registering worker: series_update_donghua (SeriesUpdateDonghua)")
 	}
-	if _, err := m.Schedule("0 0 7 * * *", &SeriesUpdateDonghua{}); err != nil {
+	if _, err := m.Schedule("0 0 0 * * *", &SeriesUpdateDonghua{}); err != nil {
 		return fae.Wrap(err, "scheduling worker: series_update_donghua (SeriesUpdateDonghua)")
 	}
 
