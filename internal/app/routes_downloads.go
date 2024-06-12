@@ -64,14 +64,18 @@ func (a *Application) DownloadsShow(c echo.Context, id string) error {
 		return fae.Errorf("getting downloads: %w", err)
 	}
 
-	var result *Download
 	for _, d := range results {
 		if d.ID.Hex() == id {
-			result = d
-			break
+			return c.JSON(http.StatusOK, &Response{Error: false, Result: d})
 		}
 	}
 
+	result := &Download{}
+	if err := app.DB.Download.Find(id, result); err != nil {
+		return err
+	}
+
+	a.DB.processDownload(result)
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: result})
 }
 
