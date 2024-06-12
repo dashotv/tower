@@ -34,35 +34,42 @@ func onFlameCombined(app *Application, c *FlameCombined) (*EventDownloading, err
 			t := lo.Filter(c.Torrents, func(torrent *qbt.TorrentJSON, _ int) bool {
 				return strings.ToLower(torrent.Hash) == strings.ToLower(d.Thash)
 			})
+			if len(t) == 0 {
+				app.Log.Debugf("Torrent not found: %s", d.Thash)
+			}
 
-			if len(t) > 0 {
-				d.Torrent = t[0]
-				d.TorrentState = t[0].State
-				if t[0].Queue > 0 {
-					d.Queue = t[0].Queue
-				}
-				d.Progress = t[0].Progress
-				if t[0].Finish > 0 && t[0].Finish != 8640000 {
-					d.Eta = time.Now().Add(time.Duration(t[0].Finish) * time.Second).Format(time.RFC3339)
-				}
+			d.Torrent = t[0]
+			d.TorrentState = t[0].State
+			if t[0].Queue > 0 {
+				d.Queue = t[0].Queue
+			}
+			d.Progress = t[0].Progress
+			if t[0].Finish > 0 && t[0].Finish != 8640000 {
+				d.Eta = time.Now().Add(time.Duration(t[0].Finish) * time.Second).Format(time.RFC3339)
+			}
 
-				if d.Multi && len(d.Files) > 0 && len(t[0].Files) > 0 {
-					completed := lo.Filter(d.Files, func(file *DownloadFile, _ int) bool {
-						tf := t[0].Files[file.Num]
-						return !file.MediumID.IsZero() && tf.Progress == 100
-					})
-					d.FilesCompleted = len(completed)
+			if !d.Multi || len(d.Files) == 0 || len(t[0].Files) == 0 {
+				continue
+			}
 
-					selected := lo.Filter(d.Files, func(file *DownloadFile, _ int) bool {
-						return !file.MediumID.IsZero()
-					})
-					d.FilesSelected = len(selected)
+			completed := lo.Filter(d.Files, func(file *DownloadFile, _ int) bool {
+				tf := t[0].Files[file.Num]
+				return !file.MediumID.IsZero() && tf.Progress == 100
+			})
+			d.FilesCompleted = len(completed)
 
-					wanted := lo.Filter(t[0].Files, func(file *qbt.TorrentFile, _ int) bool {
-						return file.Priority > 0 && file.Progress < 100
-					})
-					d.FilesWanted = len(wanted)
-				}
+			selected := lo.Filter(d.Files, func(file *DownloadFile, _ int) bool {
+				return !file.MediumID.IsZero()
+			})
+			d.FilesSelected = len(selected)
+
+			wanted := lo.Filter(t[0].Files, func(file *qbt.TorrentFile, _ int) bool {
+				return file.Priority > 0 && file.Progress < 100
+			})
+			d.FilesWanted = len(wanted)
+
+			for _, file := range d.Files {
+				file.TorrentFile = t[0].Files[file.Num]
 			}
 		}
 		if len(c.Nzbs) > 0 && d.Torrent == nil {

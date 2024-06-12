@@ -308,7 +308,7 @@ type DownloadFile struct { // struct
 	MediumID    primitive.ObjectID `bson:"medium_id" json:"medium_id"`
 	Num         int                `bson:"num" json:"num"`
 	Medium      *Medium            `bson:"-" json:"medium"`
-	TorrentFile *TorrentFile       `bson:"-" json:"-"`
+	TorrentFile *qbt.TorrentFile   `bson:"-" json:"torrent_file"`
 }
 
 type DownloadSearch struct { // struct

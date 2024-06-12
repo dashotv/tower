@@ -14,6 +14,5 @@ fields:
     type: "*Medium"
     bson: "-"
   - name: torrent_file # used by the ui
-    type: "*TorrentFile"
+    type: "*qbt.TorrentFile"
     bson: "-"
-    json: "-"
