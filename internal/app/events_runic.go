@@ -63,7 +63,7 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 		return nil
 	}
 
-	if app.Config.Production {
+	if a.Config.Production {
 		d.Status = "loading"
 	} else {
 		d.Status = "reviewing"
