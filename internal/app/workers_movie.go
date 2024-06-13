@@ -18,6 +18,7 @@ type MovieDelete struct {
 
 func (j *MovieDelete) Kind() string { return "movie_delete" }
 func (j *MovieDelete) Work(ctx context.Context, job *minion.Job[*MovieDelete]) error {
+	a := ContextApp(ctx)
 	id := job.Args.ID
 
 	movie := &Movie{}
@@ -26,7 +27,7 @@ func (j *MovieDelete) Work(ctx context.Context, job *minion.Job[*MovieDelete]) e
 	}
 
 	// delete files
-	if err := mediumIdDeletePaths(id); err != nil {
+	if err := a.DB.mediumIdDeletePaths(id); err != nil {
 		return fae.Wrap(err, "deleting paths")
 	}
 

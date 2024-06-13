@@ -13,7 +13,7 @@ import (
 
 // PATCH /episodes/:id
 func (a *Application) EpisodesSettings(c echo.Context, id string, data *Setting) error {
-	err := app.DB.EpisodeSetting(id, data.Name, data.Value)
+	err := a.DB.EpisodeSetting(id, data.Name, data.Value)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 	}
@@ -44,13 +44,13 @@ func (a *Application) EpisodesSettingsBatch(c echo.Context, settings *SettingsBa
 	if settings.Name == "watched" {
 		for _, id := range ids {
 			// TODO: need CreateOrUpdate method
-			if err := app.DB.Watch.Save(&Watch{MediumID: id, Username: "someone", WatchedAt: time.Now()}); err != nil {
+			if err := a.DB.Watch.Save(&Watch{MediumID: id, Username: "someone", WatchedAt: time.Now()}); err != nil {
 				return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 			}
 		}
 	} else {
 		// a.Log.Debugf("settings: %s => %t :: %s", settings.Name, settings.Value, strings.Join(settings.IDs, ","))
-		_, err := app.DB.Episode.Collection.UpdateMany(context.Background(), bson.M{"_id": bson.M{"$in": ids}}, bson.M{"$set": bson.M{settings.Name: settings.Value}})
+		_, err := a.DB.Episode.Collection.UpdateMany(context.Background(), bson.M{"_id": bson.M{"$in": ids}}, bson.M{"$set": bson.M{settings.Name: settings.Value}})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 		}

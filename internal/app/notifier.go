@@ -3,6 +3,8 @@ package app
 import (
 	"fmt"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 var notifier *Notifier
@@ -13,6 +15,9 @@ func init() {
 
 func setupNotifier(a *Application) error {
 	notifier = &Notifier{
+		DB:     a.DB,
+		Events: a.Events,
+		appLog: a.Log,
 		Log:    &NotifierLog{},
 		Notice: &NotifierNotice{},
 	}
@@ -20,6 +25,9 @@ func setupNotifier(a *Application) error {
 }
 
 type Notifier struct {
+	DB     *Connector
+	Events *Events
+	appLog *zap.SugaredLogger
 	Log    *NotifierLog
 	Notice *NotifierNotice
 }
@@ -35,8 +43,8 @@ func (n *Notifier) notice(level, title, message string) {
 		Level:   level,
 		Message: message,
 	}
-	if err := app.Events.Send("tower.notices", e); err != nil {
-		app.Log.Errorf("sending notice: %s", err)
+	if err := n.Events.Send("tower.notices", e); err != nil {
+		n.Events.Log.Errorf("sending notice: %s", err)
 	}
 }
 func (n *Notifier) log(level, title, message string) {
@@ -46,12 +54,12 @@ func (n *Notifier) log(level, title, message string) {
 		Facility: title,
 	}
 	l.CreatedAt = time.Now()
-	if err := app.DB.Message.Save(l); err != nil {
-		app.Events.Log.Errorf("error saving log: %s", err)
+	if err := n.DB.Message.Save(l); err != nil {
+		n.Events.Log.Errorf("error saving log: %s", err)
 	}
-	app.Log.Named("notifier").Debugf("[%s] %s: %s", level, title, message)
-	if err := app.Events.Send("tower.logs", &EventLogs{Event: "new", ID: l.ID.Hex(), Log: l}); err != nil {
-		app.Events.Log.Errorf("error sending log: %s", err)
+	n.appLog.Named("notifier").Debugf("[%s] %s: %s", level, title, message)
+	if err := n.Events.Send("tower.logs", &EventLogs{Event: "new", ID: l.ID.Hex(), Log: l}); err != nil {
+		n.Events.Log.Errorf("error sending log: %s", err)
 	}
 }
 

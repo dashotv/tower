@@ -323,7 +323,7 @@ func Cover(m Medium) string {
 }
 func (c *Connector) MediumSetting(id, setting string, value bool) error {
 	m := &Medium{}
-	if err := app.DB.Medium.Find(id, m); err != nil {
+	if err := c.Medium.Find(id, m); err != nil {
 		return err
 	}
 
@@ -344,18 +344,18 @@ func (c *Connector) MediumSetting(id, setting string, value bool) error {
 	return c.Medium.Update(m)
 }
 
-func mediumIdDeletePaths(id string) error {
+func (c *Connector) mediumIdDeletePaths(id string) error {
 	m := &Medium{}
-	if err := app.DB.Medium.Find(id, m); err != nil {
+	if err := c.Medium.Find(id, m); err != nil {
 		return fae.Wrap(err, "find medium")
 	}
-	return mediumDeletePaths(m)
+	return c.mediumDeletePaths(m)
 }
 
-func mediumDeletePaths(m *Medium) error {
+func (c *Connector) mediumDeletePaths(m *Medium) error {
 	paths := m.Paths
 	if m.Type == "Series" {
-		err := app.DB.Episode.Query().Where("series_id", m.ID).Batch(100, func(list []*Episode) error {
+		err := c.Episode.Query().Where("series_id", m.ID).Batch(100, func(list []*Episode) error {
 			for _, e := range list {
 				paths = append(paths, e.Paths...)
 			}

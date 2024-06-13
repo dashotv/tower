@@ -20,7 +20,7 @@ func (a *Application) DownloadsIndex(c echo.Context, page, limit int) error {
 
 func (a *Application) DownloadsLast(c echo.Context) error {
 	var t int
-	_, err := app.Cache.Get("seer_downloads", &t)
+	_, err := a.Cache.Get("seer_downloads", &t)
 	if err != nil {
 		return err
 	}
@@ -38,19 +38,19 @@ func (a *Application) DownloadsCreate(c echo.Context, data *Download) error {
 	}
 
 	data.Status = "searching"
-	err := app.DB.Download.Save(data)
+	err := a.DB.Download.Save(data)
 	if err != nil {
 		return err
 	}
 
 	m := &Medium{}
-	err = app.DB.Medium.FindByID(data.MediumID, m)
+	err = a.DB.Medium.FindByID(data.MediumID, m)
 	if err != nil {
 		return err
 	}
 
 	m.Downloaded = true
-	err = app.DB.Medium.Update(m)
+	err = a.DB.Medium.Update(m)
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func (a *Application) DownloadsShow(c echo.Context, id string) error {
 	}
 
 	result := &Download{}
-	if err := app.DB.Download.Find(id, result); err != nil {
+	if err := a.DB.Download.Find(id, result); err != nil {
 		return err
 	}
 
@@ -83,7 +83,7 @@ func (a *Application) DownloadsUpdate(c echo.Context, id string, data *Download)
 	if id != data.ID.Hex() || id == primitive.NilObjectID.Hex() || data.ID == primitive.NilObjectID {
 		return fae.New("ID mismatch")
 	}
-	err := app.DB.Download.Save(data)
+	err := a.DB.Download.Save(data)
 	if err != nil {
 		return err
 	}
@@ -93,18 +93,18 @@ func (a *Application) DownloadsUpdate(c echo.Context, id string, data *Download)
 			return err
 		}
 		if data.Thash != "" {
-			if err := app.FlameTorrentRemove(data.Thash); err != nil {
+			if err := a.FlameTorrentRemove(data.Thash); err != nil {
 				return err
 			}
 		}
 	} else if data.Status == "done" {
 		if data.Thash != "" {
-			if err := app.FlameTorrentRemove(data.Thash); err != nil {
+			if err := a.FlameTorrentRemove(data.Thash); err != nil {
 				return err
 			}
 		}
 	} else if data.Status == "loading" && (data.URL != "" || data.ReleaseID != "") {
-		if err := app.Workers.Enqueue(&DownloadsProcessLoad{}); err != nil {
+		if err := a.Workers.Enqueue(&DownloadsProcessLoad{}); err != nil {
 			return err
 		}
 	}
@@ -113,7 +113,7 @@ func (a *Application) DownloadsUpdate(c echo.Context, id string, data *Download)
 }
 
 func (a *Application) DownloadsSettings(c echo.Context, id string, data *Setting) error {
-	err := app.DB.DownloadSetting(id, data.Name, data.Value)
+	err := a.DB.DownloadSetting(id, data.Name, data.Value)
 	if err != nil {
 		return err
 	}
@@ -130,7 +130,7 @@ func (a *Application) DownloadsRecent(c echo.Context, page int, mid string) erro
 		page = 1
 	}
 
-	results, total, err := app.DB.RecentDownloads(mid, page)
+	results, total, err := a.DB.RecentDownloads(mid, page)
 	if err != nil {
 		return err
 	}
@@ -144,7 +144,7 @@ type DownloadSelector struct {
 }
 
 func (a *Application) DownloadsSelect(c echo.Context, id string, medium_id string, num int) error {
-	err := app.DB.DownloadSelect(id, medium_id, num)
+	err := a.DB.DownloadSelect(id, medium_id, num)
 	if err != nil {
 		return err
 	}
@@ -154,13 +154,13 @@ func (a *Application) DownloadsSelect(c echo.Context, id string, medium_id strin
 
 func (a *Application) DownloadsMedium(c echo.Context, id string) error {
 	download := &Download{}
-	err := app.DB.Download.Find(id, download)
+	err := a.DB.Download.Find(id, download)
 	if err != nil {
 		return err
 	}
 
 	list := []*Download{download}
-	app.DB.processDownloads(list)
+	a.DB.processDownloads(list)
 
 	if download.Medium == nil {
 		return c.JSON(http.StatusOK, &Response{Error: false})
@@ -177,7 +177,7 @@ var thashIsTorrent = regexp.MustCompile(`^[a-f0-9]{40}$`)
 
 func (a *Application) DownloadsTorrent(c echo.Context, id string) error {
 	download := &Download{}
-	err := app.DB.Download.Find(id, download)
+	err := a.DB.Download.Find(id, download)
 	if err != nil {
 		return err
 	}
@@ -186,7 +186,7 @@ func (a *Application) DownloadsTorrent(c echo.Context, id string) error {
 		return c.JSON(http.StatusOK, &Response{Error: false, Message: "No torrent hash available"})
 	}
 
-	torrent, err := app.FlameTorrent(download.Thash)
+	torrent, err := a.FlameTorrent(download.Thash)
 	if err != nil {
 		return err
 	}

@@ -58,7 +58,7 @@ func (c *Connector) processLibraries(list []*Library) {
 }
 
 func (c *Connector) LibraryDestination(m *Medium) (string, error) {
-	lib, err := app.DB.LibraryGetByKind(string(m.Kind))
+	lib, err := c.LibraryGetByKind(string(m.Kind))
 	if err != nil {
 		return "", fae.Wrap(err, "failed to get library")
 	}

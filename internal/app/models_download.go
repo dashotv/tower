@@ -187,12 +187,12 @@ func (c *Connector) ActiveDownloads() ([]*Download, error) {
 }
 
 func (c *Connector) RecentDownloads(mid string, page int) ([]*Download, int64, error) {
-	total, err := app.DB.Download.Query().Count()
+	total, err := c.Download.Query().Count()
 	if err != nil {
 		return nil, 0, err
 	}
 
-	q := app.DB.Download.Query()
+	q := c.Download.Query()
 
 	if mid != "" {
 		m, err := c.Medium.Get(mid, &Medium{})
@@ -223,7 +223,7 @@ func (c *Connector) RecentDownloads(mid string, page int) ([]*Download, int64, e
 		return nil, 0, err
 	}
 
-	app.DB.processDownloads(results)
+	c.processDownloads(results)
 	return results, total, nil
 }
 
@@ -245,7 +245,7 @@ func (c *Connector) processDownloads(list []*Download) {
 
 func (c *Connector) processDownload(d *Download) {
 	m := &Medium{}
-	err := app.DB.Medium.FindByID(d.MediumID, m)
+	err := c.Medium.FindByID(d.MediumID, m)
 	if err != nil {
 		c.Log.Errorf("could not find medium: %s", d.MediumID)
 		return
@@ -282,7 +282,7 @@ func (c *Connector) processDownload(d *Download) {
 	paths := m.Paths
 	if m.Type == "Episode" && !m.SeriesID.IsZero() {
 		s := &Series{}
-		err := app.DB.Series.FindByID(m.SeriesID, s)
+		err := c.Series.FindByID(m.SeriesID, s)
 		if err != nil {
 			c.Log.Errorf("could not find series: %s: %s", d.MediumID, err)
 			return
@@ -328,7 +328,7 @@ func (c *Connector) processDownload(d *Download) {
 			d.Display = fmt.Sprintf("%02dx%02d %s", m.SeasonNumber, m.EpisodeNumber, m.Title)
 		}
 
-		unwatched, err := app.DB.SeriesUserUnwatched(s)
+		unwatched, err := c.SeriesUserUnwatched(s)
 		if err != nil {
 			c.Log.Errorf("could not get unwatched count: %s: %s", s.ID.Hex(), err)
 		}
@@ -351,7 +351,7 @@ func (c *Connector) processDownload(d *Download) {
 	for j, f := range d.Files {
 		if !f.MediumID.IsZero() {
 			fm := &Medium{}
-			err := app.DB.Medium.FindByID(f.MediumID, fm)
+			err := c.Medium.FindByID(f.MediumID, fm)
 			if err != nil {
 				c.Log.Errorf("could not find medium: %s", d.MediumID)
 				continue
@@ -496,7 +496,7 @@ func (c *Connector) DownloadSetting(id, setting string, value bool) error {
 
 func (c *Connector) DownloadSelect(id, mediumID string, num int) error {
 	download := &Download{}
-	err := app.DB.Download.Find(id, download)
+	err := c.Download.Find(id, download)
 	if err != nil {
 		return err
 	}

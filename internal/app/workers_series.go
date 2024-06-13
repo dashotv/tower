@@ -23,20 +23,21 @@ type SeriesDelete struct {
 
 func (j *SeriesDelete) Kind() string { return "series_delete" }
 func (j *SeriesDelete) Work(ctx context.Context, job *minion.Job[*SeriesDelete]) error {
+	a := ContextApp(ctx)
 	id := job.Args.ID
 
 	series := &Series{}
-	if err := app.DB.Series.Find(id, series); err != nil {
+	if err := a.DB.Series.Find(id, series); err != nil {
 		return fae.Wrap(err, "finding series")
 	}
 
 	// delete files
-	if err := mediumIdDeletePaths(id); err != nil {
+	if err := a.DB.mediumIdDeletePaths(id); err != nil {
 		return fae.Wrap(err, "deleting paths")
 	}
 
 	// find episodes
-	list, err := app.DB.Episode.Query().Where("series_id", series.ID).Run()
+	list, err := a.DB.Episode.Query().Where("series_id", series.ID).Run()
 	if err != nil {
 		return fae.Wrap(err, "listing episodes")
 	}
@@ -48,19 +49,19 @@ func (j *SeriesDelete) Work(ctx context.Context, job *minion.Job[*SeriesDelete])
 	eids = append(eids, series.ID)
 
 	// remove downloads referencing episodes or series
-	_, err = app.DB.Download.Collection.DeleteMany(ctx, bson.M{"medium_id": bson.M{"$in": eids}})
+	_, err = a.DB.Download.Collection.DeleteMany(ctx, bson.M{"medium_id": bson.M{"$in": eids}})
 	if err != nil {
 		return fae.Wrap(err, "deleting downloads")
 	}
 
 	// remove episodes
-	_, err = app.DB.Episode.Collection.DeleteMany(ctx, bson.M{"_type": "Episode", "series_id": series.ID})
+	_, err = a.DB.Episode.Collection.DeleteMany(ctx, bson.M{"_type": "Episode", "series_id": series.ID})
 	if err != nil {
 		return fae.Wrap(err, "deleting episodes")
 	}
 
 	// remove series
-	if err := app.DB.Series.Delete(series); err != nil {
+	if err := a.DB.Series.Delete(series); err != nil {
 		return fae.Wrap(err, "delete medium")
 	}
 
@@ -73,7 +74,8 @@ type SeriesUpdateAll struct {
 
 func (j *SeriesUpdateAll) Kind() string { return "series_update_all" }
 func (j *SeriesUpdateAll) Work(ctx context.Context, job *minion.Job[*SeriesUpdateAll]) error {
-	q := app.DB.Series.Query().LessThan("updated_at", time.Now().Add(-24*time.Hour*7))
+	a := ContextApp(ctx)
+	q := a.DB.Series.Query().LessThan("updated_at", time.Now().Add(-24*time.Hour*7))
 	total, err := q.Count()
 	if err != nil {
 		return err
@@ -86,7 +88,7 @@ func (j *SeriesUpdateAll) Work(ctx context.Context, job *minion.Job[*SeriesUpdat
 		}
 
 		for _, series := range list {
-			if err := app.Workers.Enqueue(&SeriesUpdate{ID: series.ID.Hex(), SkipImages: true, Title: series.Title}); err != nil {
+			if err := a.Workers.Enqueue(&SeriesUpdate{ID: series.ID.Hex(), SkipImages: true, Title: series.Title}); err != nil {
 				return err
 			}
 		}
@@ -102,7 +104,8 @@ type SeriesUpdateKind struct {
 
 func (j *SeriesUpdateKind) Kind() string { return "SeriesUpdateKind" }
 func (j *SeriesUpdateKind) Work(ctx context.Context, job *minion.Job[*SeriesUpdateKind]) error {
-	q := app.DB.Series.Query().Where("kind", job.Args.SeriesKind)
+	a := ContextApp(ctx)
+	q := a.DB.Series.Query().Where("kind", job.Args.SeriesKind)
 	total, err := q.Count()
 	if err != nil {
 		return err
@@ -115,7 +118,7 @@ func (j *SeriesUpdateKind) Work(ctx context.Context, job *minion.Job[*SeriesUpda
 		}
 
 		for _, series := range list {
-			if err := app.Workers.Enqueue(&SeriesUpdate{ID: series.ID.Hex(), SkipImages: true, Title: series.Title}); err != nil {
+			if err := a.Workers.Enqueue(&SeriesUpdate{ID: series.ID.Hex(), SkipImages: true, Title: series.Title}); err != nil {
 				return err
 			}
 		}
@@ -131,7 +134,8 @@ type SeriesUpdateDonghua struct {
 func (j *SeriesUpdateDonghua) Kind() string { return "series_update_donghua" }
 func (j *SeriesUpdateDonghua) Work(ctx context.Context, job *minion.Job[*SeriesUpdateDonghua]) error {
 	//args := job.Args
-	return app.Workers.Enqueue(&SeriesUpdateKind{SeriesKind: "donghua"})
+	a := ContextApp(ctx)
+	return a.Workers.Enqueue(&SeriesUpdateKind{SeriesKind: "donghua"})
 }
 
 type SeriesUpdateRecent struct {
@@ -140,18 +144,19 @@ type SeriesUpdateRecent struct {
 
 func (j *SeriesUpdateRecent) Kind() string { return "series_update_recent" }
 func (j *SeriesUpdateRecent) Work(ctx context.Context, job *minion.Job[*SeriesUpdateRecent]) error {
-	ints, err := app.Importer.SeriesUpdated(time.Now().Add(-15 * time.Minute).Unix())
+	a := ContextApp(ctx)
+	ints, err := a.Importer.SeriesUpdated(time.Now().Add(-15 * time.Minute).Unix())
 	if err != nil {
 		return fae.Wrap(err, "recent")
 	}
 
 	for _, id := range ints {
-		list, err := app.DB.Series.Query().Where("source", "tvdb").Where("source_id", fmt.Sprintf("%d", id)).Run()
+		list, err := a.DB.Series.Query().Where("source", "tvdb").Where("source_id", fmt.Sprintf("%d", id)).Run()
 		if err != nil {
 			return fae.Wrap(err, "recent: list")
 		}
 		for _, series := range list {
-			if err := app.Workers.Enqueue(&SeriesUpdate{ID: series.ID.Hex(), SkipImages: true, Title: series.Title}); err != nil {
+			if err := a.Workers.Enqueue(&SeriesUpdate{ID: series.ID.Hex(), SkipImages: true, Title: series.Title}); err != nil {
 				return fae.Wrap(err, "recent: enqueue")
 			}
 		}
@@ -166,8 +171,9 @@ type SeriesUpdateToday struct {
 
 func (j *SeriesUpdateToday) Kind() string { return "series_update_today" }
 func (j *SeriesUpdateToday) Work(ctx context.Context, job *minion.Job[*SeriesUpdateToday]) error {
+	a := ContextApp(ctx)
 	today := time.Now().Format("2006-01-02")
-	list, err := app.DB.Episode.Query().Where("release_date", today).Run()
+	list, err := a.DB.Episode.Query().Where("release_date", today).Run()
 	if err != nil {
 		return fae.Wrap(err, "listing todays episodes")
 	}
@@ -178,7 +184,7 @@ func (j *SeriesUpdateToday) Work(ctx context.Context, job *minion.Job[*SeriesUpd
 	seriesIds = lo.Uniq(seriesIds)
 
 	for _, id := range seriesIds {
-		if err := app.Workers.Enqueue(&SeriesUpdate{ID: id, SkipImages: true}); err != nil {
+		if err := a.Workers.Enqueue(&SeriesUpdate{ID: id, SkipImages: true}); err != nil {
 			return fae.Wrap(err, "enqueueing series")
 		}
 	}
@@ -195,11 +201,12 @@ type SeriesUpdate struct {
 
 func (j *SeriesUpdate) Kind() string { return "series_update" }
 func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate]) error {
+	a := ContextApp(ctx)
 	id := job.Args.ID
 	eg, ctx := errgroup.WithContext(ctx)
 
 	series := &Medium{}
-	err := app.DB.Medium.Find(id, series)
+	err := a.DB.Medium.Find(id, series)
 	if err != nil {
 		return err
 	}
@@ -214,7 +221,7 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 	}
 
 	eg.Go(func() error {
-		s, err := app.Importer.Series(tvdbid)
+		s, err := a.Importer.Series(tvdbid)
 		if err != nil {
 			return fae.Wrap(err, "importer series")
 		}
@@ -243,7 +250,7 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 			order = importer.EpisodeOrderAbsolute
 		}
 
-		eps, err := app.Importer.SeriesEpisodes(tvdbid, order)
+		eps, err := a.Importer.SeriesEpisodes(tvdbid, order)
 		if err != nil {
 			return fae.Wrap(err, "importer series episodes")
 		}
@@ -273,25 +280,25 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 			episode.Description = e.Description
 			episode.ReleaseDate = dateFromString(e.Airdate)
 
-			if err := app.DB.Episode.Save(episode); err != nil {
+			if err := a.DB.Episode.Save(episode); err != nil {
 				return fae.Wrap(err, fmt.Sprintf("updating episode %s %d/%d", id, episode.SeasonNumber, episode.EpisodeNumber))
 			}
 		}
 
 		all := lo.Keys(episodeMap.byID)
 		missing, updated := lo.Difference(all, found)
-		if _, err := app.DB.Episode.Collection.UpdateMany(ctx, bson.M{"_type": "Episode", "series_id": series.ID, "source_id": bson.M{"$in": missing}}, bson.M{"$set": bson.M{"missing": time.Now()}}); err != nil {
+		if _, err := a.DB.Episode.Collection.UpdateMany(ctx, bson.M{"_type": "Episode", "series_id": series.ID, "source_id": bson.M{"$in": missing}}, bson.M{"$set": bson.M{"missing": time.Now()}}); err != nil {
 			return fae.Wrap(err, "missing")
 		}
-		if _, err := app.DB.Episode.Collection.UpdateMany(ctx, bson.M{"_type": "Episode", "series_id": series.ID, "source_id": bson.M{"$in": updated}}, bson.M{"$set": bson.M{"missing": nil}}); err != nil {
+		if _, err := a.DB.Episode.Collection.UpdateMany(ctx, bson.M{"_type": "Episode", "series_id": series.ID, "source_id": bson.M{"$in": updated}}, bson.M{"$set": bson.M{"missing": nil}}); err != nil {
 			return fae.Wrap(err, "found")
 		}
-		if _, err := app.DB.Episode.Collection.DeleteMany(ctx, bson.M{"_type": "Episode", "series_id": series.ID, "missing": bson.M{"$ne": nil}, "paths.type": bson.M{"$ne": "video"}}); err != nil {
+		if _, err := a.DB.Episode.Collection.DeleteMany(ctx, bson.M{"_type": "Episode", "series_id": series.ID, "missing": bson.M{"$ne": nil}, "paths.type": bson.M{"$ne": "video"}}); err != nil {
 			return fae.Wrap(err, "missing delete")
 		}
 
 		// db.media.aggregate([{ $match: { _type: "Episode", series_id: ObjectID("65b572ff28653636fbae17de") } }, { $group: { _id: { s: "$season_number", e: "$episode_number", a: "$absolute_number" }, dups: { $push: '$_id' } } }, { $sort: { dups: -1 } }])
-		cur, err := app.DB.Episode.Collection.Aggregate(ctx, bson.A{
+		cur, err := a.DB.Episode.Collection.Aggregate(ctx, bson.A{
 			bson.M{"$match": bson.M{"_type": "Episode", "series_id": series.ID}},
 			bson.M{"$group": bson.M{
 				"_id":  bson.M{"s": "$season_number", "e": "$episode_number", "a": "$absolute_number"},
@@ -308,7 +315,7 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 			}
 			if len(result.Dups) > 1 {
 				for _, id := range result.Dups[1:] {
-					if _, err := app.DB.Episode.Collection.DeleteOne(ctx, bson.M{"_id": id}); err != nil {
+					if _, err := a.DB.Episode.Collection.DeleteOne(ctx, bson.M{"_id": id}); err != nil {
 						return fae.Wrap(err, "deleting")
 					}
 				}
@@ -320,7 +327,7 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 
 	eg.Go(func() error {
 		if !job.Args.SkipImages {
-			covers, backgrounds, err := app.Importer.SeriesImages(tvdbid)
+			covers, backgrounds, err := a.Importer.SeriesImages(tvdbid)
 			if err != nil {
 				return fae.Wrap(err, "importer series images")
 			}
@@ -329,7 +336,7 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 				eg.Go(func() error {
 					err := mediumImage(series, "cover", covers[0], posterRatio)
 					if err != nil {
-						app.Log.Errorf("series %s cover: %v", series.ID.Hex(), err)
+						a.Log.Errorf("series %s cover: %v", series.ID.Hex(), err)
 					}
 					return nil
 				})
@@ -338,7 +345,7 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 				eg.Go(func() error {
 					err := mediumImage(series, "background", backgrounds[0], backgroundRatio)
 					if err != nil {
-						app.Log.Errorf("series %s background: %v", series.ID.Hex(), err)
+						a.Log.Errorf("series %s background: %v", series.ID.Hex(), err)
 					}
 					return nil
 				})
@@ -351,7 +358,7 @@ func (j *SeriesUpdate) Work(ctx context.Context, job *minion.Job[*SeriesUpdate])
 		return fae.Wrapf(err, "series: %s", series.Title)
 	}
 
-	if err := app.DB.Medium.Save(series); err != nil {
+	if err := a.DB.Medium.Save(series); err != nil {
 		return fae.Wrapf(err, "saving series: %s", series.Title)
 	}
 

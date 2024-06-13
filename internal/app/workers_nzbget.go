@@ -19,16 +19,17 @@ type NzbgetProcess struct {
 
 func (j *NzbgetProcess) Kind() string { return "nzbget_process" }
 func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess]) (err error) {
-	l := app.Log.Named("workers.nzbget")
+	a := ContextApp(ctx)
+	l := a.Log.Named("workers.nzbget")
 	p := job.Args.Payload
 
 	dir := p.Dir
 	if p.FinalDir != "" {
 		dir = p.FinalDir
 	}
-	dir = app.Config.DirectoriesNzbget + dir
+	dir = a.Config.DirectoriesNzbget + dir
 
-	download, err := app.DB.DownloadByHash(p.ID)
+	download, err := a.DB.DownloadByHash(p.ID)
 	if err != nil {
 		return fae.Wrap(err, "getting download by hash")
 	}
@@ -48,7 +49,7 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 
 	if p.Status != "SUCCESS" {
 		download.Status = "reviewing"
-		if err := app.DB.Download.Save(download); err != nil {
+		if err := a.DB.Download.Save(download); err != nil {
 			return fae.Wrap(err, "saving download")
 		}
 
@@ -58,7 +59,7 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 	defer func() {
 		if err != nil {
 			download.Status = "reviewing"
-			if err := app.DB.Download.Save(download); err != nil {
+			if err := a.DB.Download.Save(download); err != nil {
 				l.Error("saving download", "error", err)
 			}
 		}
@@ -85,7 +86,7 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 		ext = ext[1:]
 	}
 
-	dest, err := app.Destinator.Destination(download.Kind, download.Medium)
+	dest, err := a.Destinator.Destination(download.Kind, download.Medium)
 	if err != nil {
 		return fae.Wrap(err, "getting destination")
 	}
@@ -94,7 +95,7 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 	source := filepath.Join(dir, file)
 	l.Debugf("nzbget process: %s: %s => %s", p.ID, source, destination)
 
-	if !app.Config.Production {
+	if !a.Config.Production {
 		l.Debugf("skipping move in dev mode")
 		return nil
 	}
@@ -103,16 +104,16 @@ func (j *NzbgetProcess) Work(ctx context.Context, job *minion.Job[*NzbgetProcess
 		return fae.Wrap(err, "linking file")
 	}
 
-	if err := updateMedia([]*MoverFile{{Medium: download.Medium, Source: source, Destination: destination}}); err != nil {
+	if err := a.updateMedia([]*MoverFile{{Medium: download.Medium, Source: source, Destination: destination}}); err != nil {
 		return fae.Wrap(err, "updating medium")
 	}
 
-	if err := app.Plex.RefreshLibraryPath(filepath.Dir(destination)); err != nil {
+	if err := a.Plex.RefreshLibraryPath(filepath.Dir(destination)); err != nil {
 		return fae.Wrap(err, "refreshing plex library")
 	}
 
 	download.Status = "done"
-	if err := app.DB.Download.Save(download); err != nil {
+	if err := a.DB.Download.Save(download); err != nil {
 		return fae.Wrap(err, "saving download")
 	}
 
