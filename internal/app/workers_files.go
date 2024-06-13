@@ -114,6 +114,11 @@ func (j *FileMatchDir) Work(ctx context.Context, job *minion.Job[*FileMatchDir])
 	l := app.Log.Named("files.match.dir").With("dir", dir)
 	l.Debugf("running")
 
+	if !exists(dir) {
+		notifier.Log.Warnf("files", "dir not found: %s", dir)
+		return nil
+	}
+
 	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			l.Errorw("walk", "error", err)
