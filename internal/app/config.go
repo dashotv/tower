@@ -58,10 +58,11 @@ type Config struct {
 	//golem:template:app/config_partial_struct
 	// DO NOT EDIT. This section is managed by github.com/dashotv/golem.
 	// Models (Database)
-	Connections ConnectionSet `env:"CONNECTIONS"`
+	Connections ConnectionSet `env:"CONNECTIONS,required"`
 
 	// Cache
-	RedisAddress string `env:"REDIS_ADDRESS"`
+	RedisAddress  string `env:"REDIS_ADDRESS,required"`
+	RedisDatabase int    `env:"REDIS_DATABASE" envDefault:"0"`
 
 	// Router Auth
 	Auth           bool   `env:"AUTH" envDefault:"false"`
@@ -69,15 +70,15 @@ type Config struct {
 	ClerkToken     string `env:"CLERK_TOKEN"`
 
 	// Events
-	NatsURL string `env:"NATS_URL"`
+	NatsURL string `env:"NATS_URL,required"`
 
 	// Workers
 	MinionConcurrency int    `env:"MINION_CONCURRENCY" envDefault:"10"`
 	MinionDebug       bool   `env:"MINION_DEBUG" envDefault:"false"`
 	MinionBufferSize  int    `env:"MINION_BUFFER_SIZE" envDefault:"100"`
-	MinionURI         string `env:"MINION_URI"`
-	MinionDatabase    string `env:"MINION_DATABASE"`
-	MinionCollection  string `env:"MINION_COLLECTION"`
+	MinionURI         string `env:"MINION_URI,required"`
+	MinionDatabase    string `env:"MINION_DATABASE,required"`
+	MinionCollection  string `env:"MINION_COLLECTION,required"`
 
 	//golem:template:app/config_partial_struct
 

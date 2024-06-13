@@ -10,6 +10,7 @@ import (
 
 	"github.com/dashotv/fae"
 	flame "github.com/dashotv/flame/client"
+	"github.com/dashotv/golem/plugins/cache"
 	"github.com/dashotv/minion"
 	runic "github.com/dashotv/runic/client"
 	scry "github.com/dashotv/scry/client"
@@ -50,7 +51,7 @@ type Application struct {
 	Workers *minion.Minion
 
 	//Cache
-	Cache *Cache
+	Cache *cache.Cache
 
 	//golem:template:app/app_partial_definitions
 
