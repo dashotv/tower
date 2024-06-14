@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"time"
 
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -184,6 +185,49 @@ func (a *Application) downloadsSearch() error {
 		if err != nil {
 			return fae.Wrap(err, "failed to save download")
 		}
+	}
+
+	return nil
+}
+
+func (a *Application) downloadsSearchMovies() error {
+	// l := a.Workers.Log.Named("downloads_movies")
+
+	query := a.DB.Movie.Query().Where("downloaded", false).LessThanEqual("release_date", time.Now()).NotIn("kind", []string{"movies3d", "movies4k"}).Desc("created_at")
+	err := query.Batch(100, func(movies []*Movie) error {
+		for _, movie := range movies {
+			d := &Download{MediumID: movie.ID, Status: "searching", Auto: true}
+			a.DB.processDownload(d)
+
+			found, err := a.ScrySearchMovie(d.Search)
+			if err != nil {
+				return fae.Wrap(err, "failed to search releases")
+			}
+			if found == nil {
+				continue
+			}
+
+			name := d.Display
+			if name == "" {
+				name = d.Title
+			}
+			a.Workers.Log.Debugf("download found (movie) %s", name)
+			notifier.Info("Downloads::Found", fmt.Sprintf("%s (movie)", name))
+
+			d.Status = "loading"
+			if !a.Config.Production {
+				d.Status = "reviewing"
+			}
+			d.URL = found.Download
+
+			if err := a.DB.Download.Save(d); err != nil {
+				return fae.Wrap(err, "failed to save download")
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return fae.Wrap(err, "failed to query movies")
 	}
 
 	return nil

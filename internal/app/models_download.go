@@ -277,6 +277,10 @@ func (c *Connector) processDownload(d *Download) {
 
 	if m.Type == "Movie" {
 		d.Search.SourceID = m.ImdbID
+		d.Display = m.Display
+		if !m.ReleaseDate.IsZero() {
+			d.Search.Year = m.ReleaseDate.Year()
+		}
 	}
 
 	paths := m.Paths

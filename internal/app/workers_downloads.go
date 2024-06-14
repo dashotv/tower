@@ -63,3 +63,13 @@ func (j *DownloadsProcessLoad) Work(ctx context.Context, job *minion.Job[*Downlo
 	//args := job.Args
 	return a.downloadsLoad()
 }
+
+type DownloadsMovies struct {
+	minion.WorkerDefaults[*DownloadsMovies]
+}
+
+func (j *DownloadsMovies) Kind() string { return "downloads_movies" }
+func (j *DownloadsMovies) Work(ctx context.Context, job *minion.Job[*DownloadsMovies]) error {
+	a := ContextApp(ctx)
+	return a.downloadsSearchMovies()
+}
