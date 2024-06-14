@@ -53,14 +53,14 @@ func (j *MovieUpdateAll) Kind() string { return "movie_update_al" }
 func (j *MovieUpdateAll) Work(ctx context.Context, job *minion.Job[*MovieUpdateAll]) error {
 	a := ContextApp(ctx)
 
-	movies, err := a.DB.Movie.Query().Limit(-1).Run()
+	err := a.DB.Movie.Query().Limit(-1).Batch(100, func(list []*Movie) error {
+		for _, m := range list {
+			a.Workers.Enqueue(&MovieUpdate{ID: m.ID.Hex(), Title: m.Display, SkipImages: true})
+		}
+		return nil
+	})
 	if err != nil {
 		return fae.Wrap(err, "querying movies")
-	}
-
-	for _, m := range movies {
-		a.Log.Infof("updating movie: %s", m.Title)
-		a.Workers.Enqueue(&MovieUpdate{ID: m.ID.Hex(), Title: m.Display, SkipImages: true})
 	}
 
 	return nil
