@@ -269,7 +269,6 @@ func (j *PathDelete) Work(ctx context.Context, job *minion.Job[*PathDelete]) err
 	}
 
 	if medium_id != m.ID.Hex() {
-
 		medium, err := a.DB.Medium.Get(medium_id, &Medium{})
 		if err != nil {
 			return fae.Wrap(err, "error getting medium")
