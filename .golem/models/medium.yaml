@@ -51,7 +51,8 @@ fields:
     type: time.Time
   - name: paths
     type: "[]*Path"
-    bson: "paths,omitempty"
+    bson: "paths"
+  # convenience for ui
   - name: cover
     type: string
     bson: "-"

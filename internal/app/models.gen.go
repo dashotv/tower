@@ -463,7 +463,7 @@ type Medium struct { // model
 	Favorite       bool               `bson:"favorite" json:"favorite"`
 	Unwatched      int                `bson:"unwatched" json:"unwatched"`
 	ReleaseDate    time.Time          `bson:"release_date" json:"release_date"`
-	Paths          []*Path            `bson:"paths,omitempty" json:"paths"`
+	Paths          []*Path            `bson:"paths" json:"paths"`
 	Cover          string             `bson:"-" json:"cover"`
 	Background     string             `bson:"-" json:"background"`
 	Status         string             `bson:"status" json:"status"`

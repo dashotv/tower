@@ -206,7 +206,7 @@ func (j *PathDeleteAll) Work(ctx context.Context, job *minion.Job[*PathDeleteAll
 		}
 	}
 
-	if err := app.DB.Medium.Delete(m); err != nil {
+	if err := app.DB.Medium.Delete(m); err != nil { // TODO: why?
 		return fae.Wrap(err, "delete medium")
 	}
 
@@ -227,6 +227,7 @@ func (j *PathDelete) Work(ctx context.Context, job *minion.Job[*PathDelete]) err
 		return fae.New("no app in context")
 	}
 
+	medium_id := job.Args.MediumID
 	path_id := job.Args.PathID
 
 	oid, err := primitive.ObjectIDFromHex(path_id)
@@ -253,7 +254,7 @@ func (j *PathDelete) Work(ctx context.Context, job *minion.Job[*PathDelete]) err
 	removed, _ := lo.Difference(m.Paths, list)
 	if len(removed) > 0 {
 		for _, p := range removed {
-			a.Log.Named("path_delete").Debugf("removing path: %s", p.LocalPath())
+			a.Log.Named("path_delete").Debugf("removing path: %s %s", path_id, p.LocalPath())
 			if p.Exists() {
 				if err := os.Remove(p.LocalPath()); err != nil {
 					return fae.Wrap(err, "removing path")
@@ -265,6 +266,17 @@ func (j *PathDelete) Work(ctx context.Context, job *minion.Job[*PathDelete]) err
 	m.Paths = list
 	if err := a.DB.Medium.Save(m); err != nil {
 		return fae.Wrap(err, "error saving Paths")
+	}
+
+	if medium_id != m.ID.Hex() {
+
+		medium, err := a.DB.Medium.Get(medium_id, &Medium{})
+		if err != nil {
+			return fae.Wrap(err, "error getting medium")
+		}
+		if err := a.DB.Medium.Save(medium); err != nil {
+			return fae.Wrap(err, "error saving medium")
+		}
 	}
 
 	return nil
