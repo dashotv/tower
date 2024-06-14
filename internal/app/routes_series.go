@@ -315,17 +315,17 @@ func (a *Application) SeriesBackgrounds(c echo.Context, id string) error {
 		return fae.New("series not from tvdb")
 	}
 
-	tvdbid, err := strconv.Atoi(series.SourceID)
+	tvdbid, err := strconv.ParseInt(series.SourceID, 10, 64)
 	if err != nil {
-		return fae.Wrap(err, "converting tvdb id")
+		return fae.Wrap(err, "converting source id")
 	}
 
-	resp, err := app.TvdbSeriesBackgrounds(int64(tvdbid))
+	_, backgrounds, err := app.Importer.SeriesImages(tvdbid)
 	if err != nil {
-		return err
+		return fae.Wrap(err, "importer images")
 	}
 
-	return c.JSON(http.StatusOK, &Response{Error: false, Result: resp})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: backgrounds})
 }
 
 func seriesJob(name string, id string) error {

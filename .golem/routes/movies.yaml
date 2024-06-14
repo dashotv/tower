@@ -93,3 +93,17 @@ routes:
       - name: name
         type: string
         query: true
+  - name: covers
+    path: /:id/covers
+    method: GET
+    result: "[]string"
+    params:
+      - name: id
+        type: string
+  - name: backgrounds
+    path: /:id/backgrounds
+    method: GET
+    result: "[]string"
+    params:
+      - name: id
+        type: string

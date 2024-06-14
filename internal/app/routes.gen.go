@@ -170,6 +170,8 @@ func (a *Application) Routes() {
 	movies.PUT("/:id/refresh", a.MoviesRefreshHandler)
 	movies.GET("/:id/paths", a.MoviesPathsHandler)
 	movies.POST("/:id/jobs", a.MoviesJobsHandler)
+	movies.GET("/:id/covers", a.MoviesCoversHandler)
+	movies.GET("/:id/backgrounds", a.MoviesBackgroundsHandler)
 
 	paths := a.Router.Group("/paths")
 	paths.POST("/:id", a.PathsUpdateHandler)
@@ -676,6 +678,14 @@ func (a *Application) MoviesJobsHandler(c echo.Context) error {
 	id := c.Param("id")
 	name := router.QueryParamString(c, "name")
 	return a.MoviesJobs(c, id, name)
+}
+func (a *Application) MoviesCoversHandler(c echo.Context) error {
+	id := c.Param("id")
+	return a.MoviesCovers(c, id)
+}
+func (a *Application) MoviesBackgroundsHandler(c echo.Context) error {
+	id := c.Param("id")
+	return a.MoviesBackgrounds(c, id)
 }
 
 // Paths (/paths)

@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -175,6 +176,62 @@ func (a *Application) MoviesPaths(c echo.Context, id string) error {
 		return err
 	}
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: results})
+}
+
+// GET /movies/:id/covers
+func (a *Application) MoviesCovers(c echo.Context, id string) error {
+	movie, err := a.DB.Movie.Get(id, &Movie{})
+	if err != nil {
+		return fae.Wrap(err, "getting movie")
+	}
+
+	if movie == nil {
+		return fae.New("movie not found")
+	}
+
+	if movie.Source != "tmdb" {
+		return fae.New("movie not from tmdb")
+	}
+
+	tmdbid, err := strconv.Atoi(movie.SourceID)
+	if err != nil {
+		return fae.Wrap(err, "converting source id")
+	}
+
+	covers, _, err := app.Importer.MovieImages(tmdbid)
+	if err != nil {
+		return fae.Wrap(err, "importer images")
+	}
+
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: covers})
+}
+
+// GET /movies/:id/backgrounds
+func (a *Application) MoviesBackgrounds(c echo.Context, id string) error {
+	movie, err := a.DB.Movie.Get(id, &Movie{})
+	if err != nil {
+		return fae.Wrap(err, "getting movie")
+	}
+
+	if movie == nil {
+		return fae.New("movie not found")
+	}
+
+	if movie.Source != "tmdb" {
+		return fae.New("movie not from tmdb")
+	}
+
+	tmdbid, err := strconv.Atoi(movie.SourceID)
+	if err != nil {
+		return fae.Wrap(err, "converting source id")
+	}
+
+	_, backgrounds, err := app.Importer.MovieImages(tmdbid)
+	if err != nil {
+		return fae.Wrap(err, "importer images")
+	}
+
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: backgrounds})
 }
 
 func moviesJob(name string, id string) error {
