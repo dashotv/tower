@@ -193,7 +193,10 @@ func (a *Application) downloadsSearch() error {
 func (a *Application) downloadsSearchMovies() error {
 	// l := a.Workers.Log.Named("downloads_movies")
 
-	query := a.DB.Movie.Query().Where("downloaded", false).LessThanEqual("release_date", time.Now()).NotIn("kind", []string{"movies3d", "movies4k"}).Desc("created_at")
+	query := a.DB.Movie.Query().
+		Where("downloaded", false).Where("completed", false).
+		LessThanEqual("release_date", time.Now()).
+		NotIn("kind", []string{"movies3d", "movies4k"}).Desc("created_at")
 	err := query.Batch(100, func(movies []*Movie) error {
 		for _, movie := range movies {
 			d := &Download{MediumID: movie.ID, Status: "searching", Auto: true}
@@ -222,6 +225,11 @@ func (a *Application) downloadsSearchMovies() error {
 
 			if err := a.DB.Download.Save(d); err != nil {
 				return fae.Wrap(err, "failed to save download")
+			}
+
+			movie.Downloaded = true
+			if err := a.DB.Movie.Save(movie); err != nil {
+				return fae.Wrap(err, "failed to save movie")
 			}
 		}
 		return nil
