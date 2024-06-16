@@ -419,7 +419,9 @@ func (db *Connector) processDownloadExtraTorrent(d *Download, t *qbt.TorrentJSON
 	// set torrent file on download files
 	if len(t.Files) > 0 {
 		for _, file := range d.Files {
-			file.TorrentFile = t.Files[file.Num]
+			if file.Num >= len(t.Files) {
+				file.TorrentFile = t.Files[file.Num]
+			}
 		}
 	}
 
