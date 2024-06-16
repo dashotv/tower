@@ -432,6 +432,9 @@ func (db *Connector) processDownloadExtraTorrent(d *Download, t *qbt.TorrentJSON
 
 	{
 		completed := lo.Filter(d.Files, func(file *DownloadFile, _ int) bool {
+			if file.Num >= len(t.Files) {
+				return false
+			}
 			tf := t.Files[file.Num]
 			return !file.MediumID.IsZero() && tf.Progress == 100
 		})
