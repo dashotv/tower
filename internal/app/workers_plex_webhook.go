@@ -43,7 +43,7 @@ func (j *PlexWebhook) LibraryNew(ctx context.Context, payload *plex.WebhookPaylo
 		return fae.Wrap(err, "medium from metadata")
 	}
 	if m == nil {
-		return fae.New("no medium found")
+		return nil
 	}
 
 	if err := a.DB.Medium.Save(m); err != nil {
