@@ -83,12 +83,25 @@ func (a *Application) DownloadsUpdate(c echo.Context, id string, data *Download)
 	if id != data.ID.Hex() || id == primitive.NilObjectID.Hex() || data.ID == primitive.NilObjectID {
 		return fae.New("ID mismatch")
 	}
-	err := a.DB.Download.Save(data)
+
+	d, err := a.DB.Download.Get(id, &Download{})
 	if err != nil {
 		return err
 	}
 
-	if data.Status == "deleted" {
+	if data.Status == "searching" {
+		data.ReleaseID = ""
+		data.URL = ""
+		data.Thash = ""
+	} else if data.Status == "loading" && (data.URL != "" || data.ReleaseID != "") {
+		if err := a.Workers.Enqueue(&DownloadsProcessLoad{}); err != nil {
+			return err
+		}
+	} else if data.Status == "reviewing" {
+		if data.Multi == true && d.Multi == false {
+			data.Status = "managing"
+		}
+	} else if data.Status == "deleted" {
 		if err := a.DB.MediumSetting(data.MediumID.Hex(), "downloaded", false); err != nil {
 			return err
 		}
@@ -103,10 +116,10 @@ func (a *Application) DownloadsUpdate(c echo.Context, id string, data *Download)
 				return err
 			}
 		}
-	} else if data.Status == "loading" && (data.URL != "" || data.ReleaseID != "") {
-		if err := a.Workers.Enqueue(&DownloadsProcessLoad{}); err != nil {
-			return err
-		}
+	}
+
+	if err := a.DB.Download.Save(data); err != nil {
+		return err
 	}
 
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: data})
