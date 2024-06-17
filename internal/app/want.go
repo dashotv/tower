@@ -68,11 +68,14 @@ func (w *Want) Release(r *runic.Release) string {
 		return ""
 	}
 
-	if r.Source != "rift" && !lo.Contains(w.preferred, r.Group) && !lo.Contains(w.groups, r.Group) {
+	if r.Title == "" {
 		return ""
 	}
 
-	if r.Title == "" {
+	// if r.Source != "rift" && !lo.Contains(w.preferred, r.Group) && !lo.Contains(w.groups, r.Group) {
+	// 	return ""
+	// }
+	if !r.Verified {
 		return ""
 	}
 
