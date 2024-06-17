@@ -227,7 +227,6 @@ type Collection struct { // model
 	Library   string             `bson:"library" json:"library" grimoire:"index"`
 	RatingKey string             `bson:"rating_key" json:"rating_key"`
 	SyncedAt  time.Time          `bson:"synced_at" json:"synced_at"`
-	Blarg     string             `bson:"blarg" json:"blarg"`
 	Media     []*CollectionMedia `bson:"media" json:"media"`
 }
 
