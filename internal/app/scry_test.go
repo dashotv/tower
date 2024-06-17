@@ -30,7 +30,7 @@ func TestScry_Search(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, release)
 
-			fmt.Printf("release: %s => %s (%d) %02dx%02d [%s]\n", name, release.Name, release.Year, release.Season, release.Episode, release.Group)
+			fmt.Printf("release: %s => %s (%d) %02dx%02d [%s/%s]\n", name, release.Title, release.Year, release.Season, release.Episode, release.Group, release.Website)
 		})
 	}
 }

@@ -58,18 +58,19 @@ func (a *Application) ScrySearchMovie(search *DownloadSearch) (*runic.Release, e
 	return selectRunicRelease(search, resp.Result.Releases)
 }
 
-func (a *Application) ScrySearchEpisode(search *DownloadSearch) (*search.Release, error) {
+func (a *Application) ScrySearchEpisode(search *DownloadSearch) (*runic.Release, error) {
 	if search == nil {
 		return nil, fae.New("search is nil")
 	}
-	req := &scry.ReleasesIndexRequest{
+	req := &scry.RunicIndexRequest{
 		Type:       search.Type,
 		Text:       search.Title,
 		Group:      search.Group,
+		Website:    search.Website,
 		Source:     search.Source,
 		Uncensored: search.Uncensored,
 		Bluray:     search.Bluray,
-		Verified:   search.Verified,
+		Verified:   false,
 		Exact:      search.Exact,
 		Year:       -1,
 		Season:     -1,
@@ -89,7 +90,7 @@ func (a *Application) ScrySearchEpisode(search *DownloadSearch) (*search.Release
 		req.Resolution = search.Resolution
 	}
 
-	resp, err := a.Scry.Releases.Index(context.Background(), req)
+	resp, err := a.Scry.Runic.Index(context.Background(), req)
 	if err != nil {
 		return nil, fae.Wrap(err, "failed to search releases")
 	}
@@ -99,7 +100,7 @@ func (a *Application) ScrySearchEpisode(search *DownloadSearch) (*search.Release
 		return nil, nil
 	}
 
-	return selectRelease(search, resp.Result.Releases)
+	return selectRunicRelease(search, resp.Result.Releases)
 }
 
 type Chooser struct {
