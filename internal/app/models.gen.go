@@ -221,8 +221,6 @@ func NewConnector(app *Application) (*Connector, error) {
 type Collection struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt time.Time          `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt time.Time          `bson:"updated_at" json:"updated_at" grimoire:"index"`
 	Name      string             `bson:"name" json:"name" grimoire:"index"`
 	Library   string             `bson:"library" json:"library" grimoire:"index"`
 	RatingKey string             `bson:"rating_key" json:"rating_key"`
@@ -386,8 +384,6 @@ type Episode struct { // model
 type Feed struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt time.Time `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt time.Time `bson:"updated_at" json:"updated_at" grimoire:"index"`
 	Name      string    `bson:"name" json:"name"`
 	URL       string    `bson:"url" json:"url"`
 	Source    string    `bson:"source" json:"source"`
@@ -424,8 +420,6 @@ type Library struct { // model
 type LibraryTemplate struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt time.Time `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt time.Time `bson:"updated_at" json:"updated_at" grimoire:"index"`
 	Name      string    `bson:"name" json:"name"`
 	Template  string    `bson:"template" json:"template"`
 }
@@ -433,8 +427,6 @@ type LibraryTemplate struct { // model
 type LibraryType struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt time.Time `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt time.Time `bson:"updated_at" json:"updated_at" grimoire:"index"`
 	Name      string    `bson:"name" json:"name"`
 }
 
@@ -476,8 +468,6 @@ type Medium struct { // model
 type Message struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt time.Time `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt time.Time `bson:"updated_at" json:"updated_at" grimoire:"index"`
 	Level     string    `bson:"level" json:"level"`
 	Facility  string    `bson:"facility" json:"facility"`
 	Message   string    `bson:"message" json:"message"`
@@ -598,8 +588,6 @@ type Release struct { // model
 type Request struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt time.Time `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt time.Time `bson:"updated_at" json:"updated_at" grimoire:"index"`
 	Title     string    `bson:"title" json:"title" grimoire:"index"`
 	User      string    `bson:"user" json:"user" grimoire:"index"`
 	Type      string    `bson:"type" json:"type"`
@@ -699,8 +687,6 @@ type Upcoming struct { // struct
 type User struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt time.Time `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt time.Time `bson:"updated_at" json:"updated_at" grimoire:"index"`
 	Name      string    `bson:"name" json:"name" grimoire:"index"`
 	Email     string    `bson:"email" json:"email" grimoire:"index"`
 	Token     string    `bson:"token" json:"token"`
@@ -717,8 +703,6 @@ type Wanted struct { // struct
 type Watch struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt time.Time          `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt time.Time          `bson:"updated_at" json:"updated_at" grimoire:"index"`
 	Username  string             `bson:"username" json:"username"`
 	Player    string             `bson:"player" json:"player"`
 	WatchedAt time.Time          `bson:"watched_at" json:"watched_at"`

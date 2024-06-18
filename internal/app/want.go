@@ -194,6 +194,9 @@ func (w *Want) addSeries(s *Series) error {
 }
 
 func (w *Want) addMovie(m *Movie) {
+	if m.Kind != "movies" {
+		return
+	}
 	if m.Directory != "" {
 		w.movies[m.Directory] = m.ID.Hex()
 	}
