@@ -75,23 +75,16 @@ type SeriesUpdateAll struct {
 func (j *SeriesUpdateAll) Kind() string { return "series_update_all" }
 func (j *SeriesUpdateAll) Work(ctx context.Context, job *minion.Job[*SeriesUpdateAll]) error {
 	a := ContextApp(ctx)
-	q := a.DB.Series.Query().LessThan("updated_at", time.Now().Add(-24*time.Hour*7))
-	total, err := q.Count()
-	if err != nil {
-		return err
-	}
-
-	for skip := 0; skip < int(total); skip += 100 {
-		list, err := q.Skip(skip).Limit(100).Run()
-		if err != nil {
-			return err
-		}
-
+	err := a.DB.Series.Query().LessThan("updated_at", time.Now().Add(-24*time.Hour*7)).Batch(100, func(list []*Series) error {
 		for _, series := range list {
-			if err := a.Workers.Enqueue(&SeriesUpdate{ID: series.ID.Hex(), SkipImages: true, Title: series.Title}); err != nil {
+			if err := a.Workers.Enqueue(&SeriesUpdate{ID: series.ID.Hex(), SkipImages: false, Title: series.Title}); err != nil {
 				return err
 			}
 		}
+		return nil
+	})
+	if err != nil {
+		return fae.Wrap(err, "batching series")
 	}
 
 	return nil
