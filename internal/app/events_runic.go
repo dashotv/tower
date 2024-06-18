@@ -17,8 +17,8 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 	}
 
 	if a.Want == nil {
-		log.Warnf("want not initialized, retrying in 10 seconds...")
-		for a.Want == nil {
+		log.Warnf("want not initialized, waiting...")
+		for i := 0; i < 10 && a.Want == nil; i++ {
 			time.Sleep(1 * time.Second)
 		}
 		if a.Want == nil {
@@ -27,42 +27,30 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 		}
 	}
 
-	id := a.Want.Release(msg)
-
-	if id == "" {
+	medium := a.Want.Release(msg)
+	if medium == nil {
 		// log.Debugf("skipping: [%s] %s (%d) %dx%d: not wanted", msg.Type, msg.Title, msg.Year, msg.Season, msg.Episode)
 		return nil
 	}
 
-	medium, err := a.DB.Medium.Get(id, &Medium{})
-
-	if err != nil {
-		return err
-	}
-
 	log.Debugf("found: %s s%02de%02d", msg.Title, msg.Season, msg.Episode)
 	var d *Download
-	downloads, err := a.DB.Download.Query().Where("medium_id", medium.ID).Run()
 
+	downloads, err := a.DB.Download.Query().Where("medium_id", medium.ID).Run()
 	if err != nil {
 		return err
 	}
 
 	switch len(downloads) {
 	case 0:
-
 		d = &Download{MediumID: medium.ID}
-
 	case 1:
-
 		if downloads[0].Status != "searching" {
 			log.Warnf("skipping: %s s%02de%02d: download exists", msg.Title, msg.Season, msg.Episode)
 			return nil
 		}
 		d = downloads[0]
-
 	default:
-
 		log.Warnf("skipping: %s s%02de%02d: multiple download exists", msg.Title, msg.Season, msg.Episode)
 		return nil
 	}
@@ -70,18 +58,15 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 	if a.Config.Production {
 		d.Status = "loading"
 	} else {
-
 		d.Status = "reviewing"
 	}
 
 	d.URL = msg.Download
-
 	if err := a.DB.Download.Save(d); err != nil {
 		return err
 	}
 
 	medium.Downloaded = true
-
 	if err := a.DB.Medium.Save(medium); err != nil {
 		return err
 	}

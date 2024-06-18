@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -42,10 +43,10 @@ func NewWant(db *Connector, log *zap.SugaredLogger) *Want {
 		db:               db,
 		log:              log,
 		series_ids:       []primitive.ObjectID{},
-		movies:           map[string]string{},
+		movies:           map[string]*Medium{},
 		series_unwatched: map[string]int{},
 		series_titles:    map[string]string{},
-		series_episodes:  map[string][]*Episode{},
+		series_episodes:  map[string][]*Medium{},
 	}
 }
 
@@ -59,63 +60,80 @@ type Want struct {
 	series_unwatched map[string]int
 	series_downloads map[string]int
 	series_titles    map[string]string
-	series_episodes  map[string][]*Episode
-	movies           map[string]string
+	series_episodes  map[string][]*Medium
+	movies           map[string]*Medium
 }
 
-func (w *Want) Release(r *runic.Release) string {
+func (w *Want) Release(r *runic.Release) *Medium {
 	if r == nil {
-		return ""
+		return nil
 	}
 
 	if r.Title == "" {
-		return ""
+		return nil
 	}
 
 	// if r.Source != "rift" && !lo.Contains(w.preferred, r.Group) && !lo.Contains(w.groups, r.Group) {
-	// 	return ""
+	// 	return nil
 	// }
 	if !r.Verified {
-		return ""
+		return nil
 	}
 
 	switch r.Type {
 	case "movies":
-		return w.releaseMovie(r.Title)
+		return w.releaseMovie(r)
 	case "tv", "anime":
-		return w.releaseEpisode(r.Title, r.Season, r.Episode)
+		return w.releaseEpisode(r)
 	default:
-		return ""
+		return nil
 	}
 }
 
-func (w *Want) releaseMovie(title string) string {
-	title = path(title)
+func (w *Want) releaseMovie(release *runic.Release) *Medium {
+	title := path(release.Title)
 	// w.log.Debugf("movie %s", title)
-	f, ok := w.movies[title]
+	m, ok := w.movies[title]
 	if !ok {
-		return ""
+		return nil
 	}
-	return f
+	if release.Year == 0 || m.ReleaseDate.Year() != release.Year {
+		return nil
+	}
+	r, err := strconv.Atoi(release.Resolution)
+	if err != nil {
+		return nil
+	}
+	if r == 0 || m.SearchParams.Resolution != r {
+		return nil
+	}
+	return m
 }
 
-func (w *Want) releaseEpisode(seriesTitle string, season int, episode int) string {
-	seriesTitle = path(seriesTitle)
-	w.log.Debugf("series %s", seriesTitle)
+func (w *Want) releaseEpisode(release *runic.Release) *Medium {
+	seriesTitle := path(release.Title)
 	series, ok := w.series_titles[seriesTitle]
 	if !ok {
-		return ""
+		return nil
 	}
-	// w.log.Debugf("series %s %dx%d", seriesTitle, season, episode)
+
+	r, err := strconv.Atoi(release.Resolution)
+	if err != nil {
+		return nil
+	}
+	if r != 1080 { // HACK: fix this
+		return nil
+	}
+
 	for _, e := range w.series_episodes[series] {
-		if e.SeasonNumber == season && e.EpisodeNumber == episode {
-			return e.ID.Hex()
+		if e.SeasonNumber == release.Season && e.EpisodeNumber == release.Episode {
+			return e
 		}
-		if e.AbsoluteNumber == episode {
-			return e.ID.Hex()
+		if e.AbsoluteNumber == release.Episode {
+			return e
 		}
 	}
-	return ""
+	return nil
 }
 
 func (w *Want) SeriesWanted(seriesID string) (*Wanted, error) {
@@ -127,7 +145,7 @@ func (w *Want) SeriesWanted(seriesID string) (*Wanted, error) {
 		}
 	}
 
-	eps := lo.Map(w.series_episodes[seriesID], func(e *Episode, _ int) string {
+	eps := lo.Map(w.series_episodes[seriesID], func(e *Medium, _ int) string {
 		return fmt.Sprintf("%02dx%02d #%03d %s", e.SeasonNumber, e.EpisodeNumber, e.AbsoluteNumber, e.Title)
 	})
 
@@ -142,8 +160,8 @@ func (w *Want) SeriesWanted(seriesID string) (*Wanted, error) {
 func (w *Want) MovieWanted(movieID string) (*Wanted, error) {
 	names := []string{}
 	// we loop so we don't have to load from db
-	for t, id := range w.movies {
-		if id == movieID {
+	for t, m := range w.movies {
+		if m.ID.Hex() == movieID {
 			names = append(names, t)
 		}
 	}
@@ -155,7 +173,7 @@ func (w *Want) MovieWanted(movieID string) (*Wanted, error) {
 	return wanted, nil
 }
 
-func (w *Want) NextEpisode(seriesID string) *Episode {
+func (w *Want) NextEpisode(seriesID string) *Medium {
 	list, ok := w.series_episodes[seriesID]
 	if !ok {
 		return nil
@@ -193,19 +211,19 @@ func (w *Want) addSeries(s *Series) error {
 	return nil
 }
 
-func (w *Want) addMovie(m *Movie) {
+func (w *Want) addMovie(m *Medium) {
 	if m.Kind != "movies" {
 		return
 	}
 	if m.Directory != "" {
-		w.movies[m.Directory] = m.ID.Hex()
+		w.movies[m.Directory] = m
 	}
 	if m.Search != "" && m.Search != m.Directory {
-		w.movies[m.Search] = m.ID.Hex()
+		w.movies[m.Search] = m
 	}
 }
 
-func (w *Want) addEpisode(e *Episode) {
+func (w *Want) addEpisode(e *Medium) {
 	// if len(w.series_episodes[e.SeriesID.Hex()]) < seriesWantedBuffer {
 	if len(w.series_episodes[e.SeriesID.Hex()]) >= (seriesWantedBuffer - w.series_unwatched[e.SeriesID.Hex()]) {
 		return
@@ -238,7 +256,7 @@ func (w *Want) Build() error {
 		return err
 	}
 
-	err = w.db.Movie.Query().Where("downloaded", false).Where("completed", false).Batch(100, func(results []*Movie) error {
+	err = w.db.Medium.Query().Where("_type", "Movie").Where("downloaded", false).Where("completed", false).Batch(100, func(results []*Medium) error {
 		for _, m := range results {
 			w.addMovie(m)
 		}
@@ -248,7 +266,8 @@ func (w *Want) Build() error {
 		return err
 	}
 
-	q := w.db.Episode.Query().
+	q := w.db.Medium.Query().
+		Where("_type", "Episode").
 		In("series_id", w.series_ids).
 		GreaterThan("release_date", start).LessThan("release_date", later).
 		Where("completed", false).
@@ -257,7 +276,7 @@ func (w *Want) Build() error {
 		GreaterThan("season_number", 0).
 		GreaterThan("episode_number", 0).
 		Asc("release_date").Asc("season_number").Asc("episode_number").Asc("absolute_number")
-	err = q.Batch(100, func(results []*Episode) error {
+	err = q.Batch(100, func(results []*Medium) error {
 		for _, e := range results {
 			w.addEpisode(e)
 		}
