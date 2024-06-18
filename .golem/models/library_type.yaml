@@ -1,5 +1,8 @@
 name: library_type
 type: model
+indexes:
+  - created_at
+  - updated_at
 fields:
   - name: name
     type: string

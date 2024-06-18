@@ -1,5 +1,8 @@
 name: file
 type: model
+indexes:
+  - created_at
+  - updated_at
 fields:
   - name: type
     type: string

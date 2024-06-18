@@ -2,6 +2,9 @@ name: download
 type: model
 imports:
   - time
+indexes:
+  - created_at
+  - updated_at
 fields:
   - name: medium_id
     type: primitive.ObjectID

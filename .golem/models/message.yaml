@@ -1,5 +1,8 @@
 name: message
 type: model
+indexes:
+  - created_at
+  - updated_at
 fields:
   - name: level
     type: string

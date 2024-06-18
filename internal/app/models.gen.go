@@ -72,126 +72,137 @@ func NewConnector(app *Application) (*Connector, error) {
 		return nil, err
 	}
 
-	grimoire.Indexes[*Collection](collection, &Collection{})
+	grimoire.CreateIndexes[*Collection](collection, &Collection{}, "created_at;updated_at")
+	grimoire.CreateIndexesFromTags[*Collection](collection, &Collection{})
 
 	combination, err := connection[*Combination]("combination")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*Combination](combination, &Combination{})
+	grimoire.CreateIndexes[*Combination](combination, &Combination{}, "created_at;updated_at")
+	grimoire.CreateIndexesFromTags[*Combination](combination, &Combination{})
 
 	download, err := connection[*Download]("download")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*Download](download, &Download{})
+	grimoire.CreateIndexes[*Download](download, &Download{}, "created_at;updated_at")
+	grimoire.CreateIndexesFromTags[*Download](download, &Download{})
 
 	episode, err := connection[*Episode]("episode")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*Episode](episode, &Episode{})
+	grimoire.CreateIndexesFromTags[*Episode](episode, &Episode{})
 
 	feed, err := connection[*Feed]("feed")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*Feed](feed, &Feed{})
+	grimoire.CreateIndexesFromTags[*Feed](feed, &Feed{})
 
 	file, err := connection[*File]("file")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*File](file, &File{})
+	grimoire.CreateIndexes[*File](file, &File{}, "created_at;updated_at")
+	grimoire.CreateIndexesFromTags[*File](file, &File{})
 
 	library, err := connection[*Library]("library")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*Library](library, &Library{})
+	grimoire.CreateIndexes[*Library](library, &Library{}, "created_at;updated_at")
+	grimoire.CreateIndexesFromTags[*Library](library, &Library{})
 
 	library_template, err := connection[*LibraryTemplate]("library_template")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*LibraryTemplate](library_template, &LibraryTemplate{})
+	grimoire.CreateIndexes[*LibraryTemplate](library_template, &LibraryTemplate{}, "created_at;updated_at")
+	grimoire.CreateIndexesFromTags[*LibraryTemplate](library_template, &LibraryTemplate{})
 
 	library_type, err := connection[*LibraryType]("library_type")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*LibraryType](library_type, &LibraryType{})
+	grimoire.CreateIndexes[*LibraryType](library_type, &LibraryType{}, "created_at;updated_at")
+	grimoire.CreateIndexesFromTags[*LibraryType](library_type, &LibraryType{})
 
 	medium, err := connection[*Medium]("medium")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*Medium](medium, &Medium{})
+	grimoire.CreateIndexesFromTags[*Medium](medium, &Medium{})
 
 	message, err := connection[*Message]("message")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*Message](message, &Message{})
+	grimoire.CreateIndexes[*Message](message, &Message{}, "created_at;updated_at")
+	grimoire.CreateIndexesFromTags[*Message](message, &Message{})
 
 	movie, err := connection[*Movie]("movie")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*Movie](movie, &Movie{})
+	grimoire.CreateIndexesFromTags[*Movie](movie, &Movie{})
 
 	pin, err := connection[*Pin]("pin")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*Pin](pin, &Pin{})
+	grimoire.CreateIndexes[*Pin](pin, &Pin{}, "created_at;updated_at")
+	grimoire.CreateIndexesFromTags[*Pin](pin, &Pin{})
 
 	release, err := connection[*Release]("release")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*Release](release, &Release{})
+	grimoire.CreateIndexesFromTags[*Release](release, &Release{})
 
 	request, err := connection[*Request]("request")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*Request](request, &Request{})
+	grimoire.CreateIndexes[*Request](request, &Request{}, "created_at;updated_at")
+	grimoire.CreateIndexesFromTags[*Request](request, &Request{})
 
 	series, err := connection[*Series]("series")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*Series](series, &Series{})
+	grimoire.CreateIndexesFromTags[*Series](series, &Series{})
 
 	user, err := connection[*User]("user")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*User](user, &User{})
+	grimoire.CreateIndexes[*User](user, &User{}, "created_at;updated_at")
+	grimoire.CreateIndexesFromTags[*User](user, &User{})
 
 	watch, err := connection[*Watch]("watch")
 	if err != nil {
 		return nil, err
 	}
 
-	grimoire.Indexes[*Watch](watch, &Watch{})
+	grimoire.CreateIndexesFromTags[*Watch](watch, &Watch{})
 
 	c := &Connector{
 		Log:             app.Log.Named("db"),
@@ -221,6 +232,8 @@ func NewConnector(app *Application) (*Connector, error) {
 type Collection struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
 	Name      string             `bson:"name" json:"name" grimoire:"index"`
 	Library   string             `bson:"library" json:"library" grimoire:"index"`
 	RatingKey string             `bson:"rating_key" json:"rating_key"`
@@ -236,10 +249,10 @@ type CollectionMedia struct { // struct
 type Combination struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt   time.Time `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt   time.Time `bson:"updated_at" json:"updated_at" grimoire:"index"`
-	Name        string    `bson:"name" json:"name" grimoire:"index"`
-	Collections []string  `bson:"collections" json:"collections"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
+	Name        string   `bson:"name" json:"name" grimoire:"index"`
+	Collections []string `bson:"collections" json:"collections"`
 }
 
 type CombinationChild struct { // struct
@@ -265,8 +278,8 @@ type CombinationChild struct { // struct
 type Download struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt      time.Time          `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt      time.Time          `bson:"updated_at" json:"updated_at" grimoire:"index"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
 	MediumID       primitive.ObjectID `bson:"medium_id" json:"medium_id"`
 	Auto           bool               `bson:"auto" json:"auto"`
 	Multi          bool               `bson:"multi" json:"multi"`
@@ -352,8 +365,8 @@ type DownloadingFiles struct { // struct
 type Episode struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt       time.Time          `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt       time.Time          `bson:"updated_at" json:"updated_at" grimoire:"index"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
 	Type            string             `bson:"_type" json:"type"`
 	SeriesID        primitive.ObjectID `bson:"series_id" json:"series_id"`
 	SourceID        string             `bson:"source_id" json:"source_id"`
@@ -384,6 +397,8 @@ type Episode struct { // model
 type Feed struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
 	Name      string    `bson:"name" json:"name"`
 	URL       string    `bson:"url" json:"url"`
 	Source    string    `bson:"source" json:"source"`
@@ -395,8 +410,8 @@ type Feed struct { // model
 type File struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt  time.Time          `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt  time.Time          `bson:"updated_at" json:"updated_at" grimoire:"index"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
 	Type       string             `bson:"type" json:"type" grimoire:"index"`
 	Path       string             `bson:"path" json:"path" grimoire:"index"`
 	Size       int64              `bson:"size" json:"size"`
@@ -407,8 +422,8 @@ type File struct { // model
 type Library struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt         time.Time          `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt         time.Time          `bson:"updated_at" json:"updated_at" grimoire:"index"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
 	Name              string             `bson:"name" json:"name" grimoire:"index"`
 	Path              string             `bson:"path" json:"path" grimoire:"index"`
 	LibraryTypeID     primitive.ObjectID `bson:"library_type_id" json:"library_type_id"`
@@ -420,21 +435,25 @@ type Library struct { // model
 type LibraryTemplate struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Name      string    `bson:"name" json:"name"`
-	Template  string    `bson:"template" json:"template"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
+	Name     string `bson:"name" json:"name"`
+	Template string `bson:"template" json:"template"`
 }
 
 type LibraryType struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Name      string    `bson:"name" json:"name"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
+	Name string `bson:"name" json:"name"`
 }
 
 type Medium struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt      time.Time          `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt      time.Time          `bson:"updated_at" json:"updated_at" grimoire:"index"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
 	Type           string             `bson:"_type" json:"type"`
 	Kind           primitive.Symbol   `bson:"kind" json:"kind"`
 	Source         string             `bson:"source" json:"source"`
@@ -468,16 +487,18 @@ type Medium struct { // model
 type Message struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Level     string    `bson:"level" json:"level"`
-	Facility  string    `bson:"facility" json:"facility"`
-	Message   string    `bson:"message" json:"message"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
+	Level    string `bson:"level" json:"level"`
+	Facility string `bson:"facility" json:"facility"`
+	Message  string `bson:"message" json:"message"`
 }
 
 type Movie struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt    time.Time        `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt    time.Time        `bson:"updated_at" json:"updated_at" grimoire:"index"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
 	Type         string           `bson:"_type" json:"type"`
 	Kind         primitive.Symbol `bson:"kind" json:"kind"`
 	Source       string           `bson:"source" json:"source"`
@@ -530,13 +551,13 @@ type Path struct { // struct
 type Pin struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt  time.Time `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt  time.Time `bson:"updated_at" json:"updated_at" grimoire:"index"`
-	Pin        int       `bson:"pin" json:"id" grimoire:"index"`
-	Code       string    `bson:"code" json:"code" grimoire:"index"`
-	Token      string    `bson:"token" json:"authToken"`
-	Product    string    `bson:"product" json:"product"`
-	Identifier string    `bson:"identifier" json:"clientIdentifier"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
+	Pin        int    `bson:"pin" json:"id" grimoire:"index"`
+	Code       string `bson:"code" json:"code" grimoire:"index"`
+	Token      string `bson:"token" json:"authToken"`
+	Product    string `bson:"product" json:"product"`
+	Identifier string `bson:"identifier" json:"clientIdentifier"`
 }
 
 type Popular struct { // struct
@@ -555,8 +576,8 @@ type PopularResponse struct { // struct
 type Release struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt   time.Time `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt   time.Time `bson:"updated_at" json:"updated_at" grimoire:"index"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
 	Type        string    `bson:"type" json:"type"`
 	Source      string    `bson:"source" json:"source"`
 	Raw         string    `bson:"raw" json:"raw"`
@@ -588,12 +609,14 @@ type Release struct { // model
 type Request struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Title     string    `bson:"title" json:"title" grimoire:"index"`
-	User      string    `bson:"user" json:"user" grimoire:"index"`
-	Type      string    `bson:"type" json:"type"`
-	Source    string    `bson:"source" json:"source" grimoire:"index"`
-	SourceID  string    `bson:"source_id" json:"source_id" grimoire:"index"`
-	Status    string    `bson:"status" json:"status"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
+	Title    string `bson:"title" json:"title" grimoire:"index"`
+	User     string `bson:"user" json:"user" grimoire:"index"`
+	Type     string `bson:"type" json:"type"`
+	Source   string `bson:"source" json:"source" grimoire:"index"`
+	SourceID string `bson:"source_id" json:"source_id" grimoire:"index"`
+	Status   string `bson:"status" json:"status"`
 }
 
 type SearchParams struct { // struct
@@ -610,8 +633,8 @@ type SearchParams struct { // struct
 type Series struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	CreatedAt     time.Time        `bson:"created_at" json:"created_at" grimoire:"index"`
-	UpdatedAt     time.Time        `bson:"updated_at" json:"updated_at" grimoire:"index"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
 	Type          string           `bson:"_type" json:"type"`
 	Kind          primitive.Symbol `bson:"kind" json:"kind"`
 	Source        string           `bson:"source" json:"source"`
@@ -687,12 +710,14 @@ type Upcoming struct { // struct
 type User struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Name      string    `bson:"name" json:"name" grimoire:"index"`
-	Email     string    `bson:"email" json:"email" grimoire:"index"`
-	Token     string    `bson:"token" json:"token"`
-	Thumb     string    `bson:"thumb" json:"thumb"`
-	Home      bool      `bson:"home" json:"home"`
-	Admin     bool      `bson:"admin" json:"admin"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
+	Name  string `bson:"name" json:"name" grimoire:"index"`
+	Email string `bson:"email" json:"email" grimoire:"index"`
+	Token string `bson:"token" json:"token"`
+	Thumb string `bson:"thumb" json:"thumb"`
+	Home  bool   `bson:"home" json:"home"`
+	Admin bool   `bson:"admin" json:"admin"`
 }
 
 type Wanted struct { // struct
@@ -703,6 +728,8 @@ type Wanted struct { // struct
 type Watch struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
 	Username  string             `bson:"username" json:"username"`
 	Player    string             `bson:"player" json:"player"`
 	WatchedAt time.Time          `bson:"watched_at" json:"watched_at"`

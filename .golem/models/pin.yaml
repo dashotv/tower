@@ -1,6 +1,8 @@
 name: pin
 type: model
-imports:
+indexes:
+  - created_at
+  - updated_at
 fields:
   - name: pin
     type: int

@@ -1,5 +1,8 @@
 name: request
 type: model
+indexes:
+  - created_at
+  - updated_at
 fields:
   - name: title
     type: string

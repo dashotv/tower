@@ -1,6 +1,5 @@
 name: feed
 type: model
-imports:
 fields:
   - name: name
     type: string
@@ -14,5 +13,3 @@ fields:
     type: bool
   - name: processed
     type: time.Time
-
-
