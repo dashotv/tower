@@ -173,7 +173,7 @@ func (a *Application) downloadsSearch() error {
 		}
 
 		a.Workers.Log.Debugf("download found %s - %s", d.Title, d.Display)
-		notifier.Info("Downloads::Found", fmt.Sprintf("%s - %s", d.Title, d.Display))
+		notifier.Info("SearchFound", fmt.Sprintf("%s - %s", d.Title, d.Display))
 
 		d.Status = "loading"
 		if !a.Config.Production {

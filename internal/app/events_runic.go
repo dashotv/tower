@@ -71,6 +71,6 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 		return err
 	}
 
-	notifier.Info("Found", fmt.Sprintf("[event] %s (%d) S%02dE%02d", msg.Title, msg.Year, msg.Season, msg.Episode))
+	notifier.Info("EventFound", fmt.Sprintf("%s (%d) S%02dE%02d", msg.Title, msg.Year, msg.Season, msg.Episode))
 	return nil
 }
