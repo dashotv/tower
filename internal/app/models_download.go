@@ -121,7 +121,7 @@ func (d *Download) HasMedia() bool {
 }
 
 func (c *Connector) DownloadByHash(hash string) (*Download, error) {
-	list, err := c.Download.Query().Where("thash", hash).Run()
+	list, err := c.Download.Query().In("status", activeStates).Where("thash", hash).Run()
 	if err != nil {
 		return nil, err
 	}
