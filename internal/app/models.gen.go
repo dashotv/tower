@@ -412,11 +412,16 @@ type File struct { // model
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	//CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
+	LibraryID  primitive.ObjectID `bson:"library_id" json:"library_id" grimoire:"index"`
+	MediumID   primitive.ObjectID `bson:"medium_id" json:"medium_id" grimoire:"index"`
 	Type       string             `bson:"type" json:"type" grimoire:"index"`
+	Name       string             `bson:"name" json:"name"`
+	Extension  string             `bson:"extension" json:"extension"`
 	Path       string             `bson:"path" json:"path" grimoire:"index"`
 	Size       int64              `bson:"size" json:"size"`
+	Resolution int                `bson:"resolution" json:"resolution"`
+	Checksum   string             `bson:"checksum" json:"checksum"`
 	ModifiedAt int64              `bson:"modified_at" json:"modified_at"`
-	MediumID   primitive.ObjectID `bson:"medium_id" json:"medium_id" grimoire:"index"`
 }
 
 type Library struct { // model
@@ -426,6 +431,7 @@ type Library struct { // model
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
 	Name              string             `bson:"name" json:"name" grimoire:"index"`
 	Path              string             `bson:"path" json:"path" grimoire:"index"`
+	Count             int                `bson:"count" json:"count"`
 	LibraryTypeID     primitive.ObjectID `bson:"library_type_id" json:"library_type_id"`
 	LibraryTemplateID primitive.ObjectID `bson:"library_template_id" json:"library_template_id"`
 	LibraryType       *LibraryType       `bson:"-" json:"library_type"`

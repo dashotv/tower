@@ -142,6 +142,10 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "registering worker: medium_image (MediumImage)")
 	}
 
+	if err := minion.Register[*MigratePaths](m, &MigratePaths{}); err != nil {
+		return fae.Wrap(err, "registering worker: migrate_paths (MigratePaths)")
+	}
+
 	if err := minion.Register[*MovieDelete](m, &MovieDelete{}); err != nil {
 		return fae.Wrap(err, "registering worker: movie_delete (MovieDelete)")
 	}

@@ -4,16 +4,27 @@ indexes:
   - created_at
   - updated_at
 fields:
-  - name: type
+  - name: library_id
+    type: primitive.ObjectID
+    index: true
+  - name: medium_id
+    type: primitive.ObjectID
+    index: true
+  - name: type # video, audio, image, other
     type: string
     index: true
-  - name: path
+  - name: name # filename
+    type: string
+  - name: extension # file extension
+    type: string
+  - name: path # full path
     type: string
     index: true
   - name: size
     type: int64
+  - name: resolution
+    type: int
+  - name: checksum
+    type: string
   - name: modified_at
     type: int64
-  - name: medium_id
-    type: primitive.ObjectID
-    index: true

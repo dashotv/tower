@@ -56,3 +56,14 @@ func (c *Connector) FileByPath(path string) (*File, error) {
 
 	return list[0], nil
 }
+
+func (c *Connector) FileFindOrCreateByPath(path string) (*File, error) {
+	f, err := c.FileByPath(path)
+	if err != nil {
+		return nil, err
+	}
+	if f == nil {
+		f = &File{Path: path}
+	}
+	return f, nil
+}

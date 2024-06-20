@@ -41,6 +41,20 @@ func (c *Connector) LibraryList(page, limit int) ([]*Library, error) {
 	return list, nil
 }
 
+func (c *Connector) LibraryMap() (map[string]*Library, error) {
+	list, err := c.LibraryList(1, 1000)
+	if err != nil {
+		return nil, err
+	}
+
+	m := make(map[string]*Library)
+	for _, l := range list {
+		m[l.Name] = l
+	}
+
+	return m, nil
+}
+
 func (c *Connector) processLibraries(list []*Library) {
 	for _, l := range list {
 		dt, err := c.LibraryTemplateGet(l.LibraryTemplateID.Hex())

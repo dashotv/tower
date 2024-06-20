@@ -10,6 +10,8 @@ fields:
   - name: path
     type: string
     index: true
+  - name: count
+    type: int
   - name: library_type_id
     type: primitive.ObjectID
   - name: library_template_id
