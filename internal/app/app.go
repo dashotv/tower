@@ -143,6 +143,8 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 	if he, ok := err.(*echo.HTTPError); ok {
 		code = he.Code
 	}
-	// app.Log.Named("router").Errorf("error: [%d] %s", code, err.Error())
-	c.JSON(code, &Response{Error: true, Message: err.Error()})
+	app.Log.Named("router").Errorf("request error: [%d] %s", code, err.Error())
+	if !c.Response().Committed {
+		c.JSON(code, &Response{Error: true, Message: err.Error()})
+	}
 }
