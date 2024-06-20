@@ -1,0 +1,2 @@
+name: plex_files
+schedule: "0 0 * * * *" # every hour

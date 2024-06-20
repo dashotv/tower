@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dashotv/fae"
 	"github.com/dashotv/tower/internal/plex"
@@ -9,7 +10,7 @@ import (
 
 func init() {
 	initializers = append(initializers, setupPlex)
-	// initializers = append(initializers, setupPlexFiles)
+	initializers = append(initializers, setupPlexFiles)
 	// starters = append(starters, startPlexFiles)
 }
 
@@ -32,10 +33,6 @@ func setupPlex(app *Application) error {
 func setupPlexFiles(a *Application) error {
 	a.PlexFileCache = &plexFileCache{files: make(map[string]string)}
 	return nil
-}
-
-func startPlexFiles(_ context.Context, a *Application) error {
-	return a.Workers.Enqueue(&PlexMatch{})
 }
 
 func (a *Application) plexHistoryWatched(list []*plex.SessionMetadata) error {
@@ -116,3 +113,66 @@ func (a *Application) plexAccountTitle(id int64) (string, error) {
 //
 // 	return nil
 // }
+
+type plexFileCache struct {
+	files map[string]string
+}
+
+func buildPlexCache(ctx context.Context) (*plexFileCache, error) {
+	a := ContextApp(ctx)
+	if a == nil {
+		return nil, fae.New("no app context")
+	}
+
+	cache := &plexFileCache{files: make(map[string]string)}
+
+	libs, err := a.Plex.GetLibraries()
+	if err != nil {
+		return nil, fae.Wrap(err, "get libraries")
+	}
+	for _, lib := range libs {
+		t := ""
+		if lib.Type == "show" {
+			t = "4"
+		} else if lib.Type == "movie" {
+			t = "1"
+		} else {
+			continue
+		}
+
+		_, total, err := a.Plex.GetLibrarySection(lib.Key, "all", t, 0, 1)
+		if err != nil {
+			return nil, fae.Wrapf(err, "get library section: %s", lib.Key)
+		}
+
+		for i := int64(0); i < total; i += 50 {
+			list, _, err := a.Plex.GetLibrarySection(lib.Key, "all", t, int(i), 50)
+			if err != nil {
+				return nil, fae.Wrap(err, "get library section")
+			}
+			for _, item := range list {
+				if len(item.Media) == 0 {
+					continue
+				}
+
+				for _, media := range item.Media {
+					if len(media.Part) == 0 {
+						continue
+					}
+
+					for _, part := range media.Part {
+						if part.File == "" {
+							continue
+						}
+
+						if _, ok := cache.files[part.File]; !ok {
+							cache.files[part.File] = fmt.Sprintf("%s", item.RatingKey)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return cache, nil
+}
