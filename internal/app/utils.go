@@ -137,8 +137,8 @@ func QueryParamStringDefault(c echo.Context, name string, def string) string {
 	return def
 }
 
-var pathQuoteRegex = regexp.MustCompile(`'(\w{1,2})`)
-var pathCharRegex = regexp.MustCompile(`[^a-zA-Z0-9]+`)
+var pathQuoteRegex = regexp.MustCompile(`'(\w{1,2})\b`)
+var pathCharRegex = regexp.MustCompile(`[^a-zA-Z0-9-]+`)
 var pathExtraRegex = regexp.MustCompile(`\{(\w+)-(\d+)\}`)
 
 func path(title string) string {
