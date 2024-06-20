@@ -26,27 +26,108 @@ func (j *FileWalk) Kind() string { return "file_walk" }
 func (j *FileWalk) Timeout(job *minion.Job[*FileWalk]) time.Duration {
 	return 60 * time.Minute
 }
+
+//	func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
+//		l := app.Log.Named("file_walk")
+//		if !atomic.CompareAndSwapUint32(&walking, 0, 1) {
+//			l.Warnf("walkFiles: already running")
+//			return fae.Errorf("already running")
+//		}
+//		defer atomic.StoreUint32(&walking, 0)
+//
+//		libs, err := app.Plex.GetLibraries()
+//		if err != nil {
+//			l.Errorw("libs", "error", err)
+//			return fae.Wrap(err, "getting libraries")
+//		}
+//
+//		w := newWalker(app.DB, l.Named("walker"), libs)
+//		if err := w.Walk(); err != nil {
+//			l.Errorw("walk", "error", err)
+//			return fae.Wrap(err, "walking")
+//		}
+//
+//		app.Workers.Enqueue(&FileMatch{})
+//		return nil
+//	}
 func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
-	l := app.Log.Named("file_walk")
+	a := ContextApp(ctx)
+	l := a.Log.Named("file_walk")
 	if !atomic.CompareAndSwapUint32(&walking, 0, 1) {
-		l.Warnf("walkFiles: already running")
+		l.Warnf("already running")
 		return fae.Errorf("already running")
 	}
 	defer atomic.StoreUint32(&walking, 0)
 
-	libs, err := app.Plex.GetLibraries()
+	libs, err := a.DB.LibraryMap()
 	if err != nil {
-		l.Errorw("libs", "error", err)
 		return fae.Wrap(err, "getting libraries")
 	}
 
-	w := newWalker(app.DB, l.Named("walker"), libs)
-	if err := w.Walk(); err != nil {
-		l.Errorw("walk", "error", err)
-		return fae.Wrap(err, "walking")
+	// eg := new(errgroup.Group)
+	for _, lib := range libs {
+		lib := lib
+		// eg.Go(func() error {
+		err := filepath.WalkDir(lib.Path, func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return fae.Wrap(err, "walking")
+			}
+
+			if d.IsDir() {
+				return nil
+			}
+			if filepath.Base(path)[0] == '.' {
+				return nil
+			}
+
+			l.Debugf("path: %s", path)
+			_, _, file, ext, err := pathParts(path)
+			if err != nil {
+				l.Warnf("parts: %s: %s", path, err)
+				return nil
+			}
+
+			f, err := a.DB.FileFindOrCreateByPath(path)
+			if err != nil {
+				return fae.Wrap(err, "finding or creating")
+			}
+
+			i, err := d.Info()
+			if err != nil {
+				return fae.Wrap(err, "info")
+			}
+
+			f.LibraryID = lib.ID
+			f.Name = file
+			f.Extension = ext
+			f.ModifiedAt = i.ModTime().Unix()
+			f.Size = i.Size()
+			f.Type = fileType(path)
+			f.Exists = true
+
+			// sum, err := sumFile(path)
+			// if err != nil {
+			// 	return fae.Wrap(err, "summing")
+			// }
+			// f.Checksum = sum
+
+			if err := a.DB.File.Save(f); err != nil {
+				return fae.Wrap(err, "saving")
+			}
+
+			return nil
+		})
+		// })
+		if err != nil {
+			return fae.Wrap(err, "walking")
+		}
 	}
 
-	app.Workers.Enqueue(&FileMatch{})
+	// if err := eg.Wait(); err != nil {
+	// 	return fae.Wrap(err, "walking")
+	// }
+
+	// app.Workers.Enqueue(&FileMatch{})
 	return nil
 }
 

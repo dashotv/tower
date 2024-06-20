@@ -28,3 +28,5 @@ fields:
     type: string
   - name: modified_at
     type: int64
+  - name: exists
+    type: bool

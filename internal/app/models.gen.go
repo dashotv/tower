@@ -422,6 +422,7 @@ type File struct { // model
 	Resolution int                `bson:"resolution" json:"resolution"`
 	Checksum   string             `bson:"checksum" json:"checksum"`
 	ModifiedAt int64              `bson:"modified_at" json:"modified_at"`
+	Exists     bool               `bson:"exists" json:"exists"`
 }
 
 type Library struct { // model

@@ -141,6 +141,9 @@ func setupWorkers(app *Application) error {
 	if err := minion.Register[*LibraryCounts](m, &LibraryCounts{}); err != nil {
 		return fae.Wrap(err, "registering worker: library_counts (LibraryCounts)")
 	}
+	if _, err := m.Schedule("0 0 * * * *", &LibraryCounts{}); err != nil {
+		return fae.Wrap(err, "scheduling worker: library_counts (LibraryCounts)")
+	}
 
 	if err := minion.Register[*MediumImage](m, &MediumImage{}); err != nil {
 		return fae.Wrap(err, "registering worker: medium_image (MediumImage)")
