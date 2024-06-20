@@ -11,7 +11,7 @@ fields:
     type: string
     index: true
   - name: count
-    type: int
+    type: int64
   - name: library_type_id
     type: primitive.ObjectID
   - name: library_template_id

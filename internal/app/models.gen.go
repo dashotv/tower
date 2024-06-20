@@ -431,7 +431,7 @@ type Library struct { // model
 	//UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
 	Name              string             `bson:"name" json:"name" grimoire:"index"`
 	Path              string             `bson:"path" json:"path" grimoire:"index"`
-	Count             int                `bson:"count" json:"count"`
+	Count             int64              `bson:"count" json:"count"`
 	LibraryTypeID     primitive.ObjectID `bson:"library_type_id" json:"library_type_id"`
 	LibraryTemplateID primitive.ObjectID `bson:"library_template_id" json:"library_template_id"`
 	LibraryType       *LibraryType       `bson:"-" json:"library_type"`

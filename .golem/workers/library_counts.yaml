@@ -1,0 +1,2 @@
+name: library_counts
+schedule: "0 0 * * * *" # every hour

@@ -138,6 +138,10 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "registering worker: file_walk (FileWalk)")
 	}
 
+	if err := minion.Register[*LibraryCounts](m, &LibraryCounts{}); err != nil {
+		return fae.Wrap(err, "registering worker: library_counts (LibraryCounts)")
+	}
+
 	if err := minion.Register[*MediumImage](m, &MediumImage{}); err != nil {
 		return fae.Wrap(err, "registering worker: medium_image (MediumImage)")
 	}
