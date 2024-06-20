@@ -8,17 +8,11 @@ import (
 
 // GET /messages/
 func (a *Application) MessagesIndex(c echo.Context, page int, limit int) error {
-	if page < 1 {
-		page = 1
-	}
-	if limit < 1 {
-		limit = 25
-	}
-	list, err := a.DB.MessageList(page, limit)
+	list, total, err := a.DB.MessageList(page, limit)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error loading Messages"})
 	}
-	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list, Total: total})
 }
 
 // POST /messages/
