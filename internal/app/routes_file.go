@@ -15,6 +15,15 @@ func (a *Application) FileIndex(c echo.Context, page int, limit int) error {
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: list, Total: total})
 }
 
+// GET /file/missing
+func (a *Application) FileMissing(c echo.Context, page int, limit int) error {
+	list, total, err := a.DB.FileMissing(page, limit)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error loading File"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list, Total: total})
+}
+
 // POST /file/
 func (a *Application) FileCreate(c echo.Context, subject *File) error {
 	// TODO: process the subject

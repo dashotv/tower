@@ -135,6 +135,7 @@ func (a *Application) Routes() {
 	file.PUT("/:id", a.FileUpdateHandler)
 	file.PATCH("/:id", a.FileSettingsHandler)
 	file.DELETE("/:id", a.FileDeleteHandler)
+	file.GET("/missing", a.FileMissingHandler)
 
 	hooks := a.Router.Group("/hooks")
 	hooks.POST("/plex", a.HooksPlexHandler)
@@ -529,6 +530,11 @@ func (a *Application) FileSettingsHandler(c echo.Context) error {
 func (a *Application) FileDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
 	return a.FileDelete(c, id)
+}
+func (a *Application) FileMissingHandler(c echo.Context) error {
+	page := router.QueryParamIntDefault(c, "page", "1")
+	limit := router.QueryParamIntDefault(c, "limit", "50")
+	return a.FileMissing(c, page, limit)
 }
 
 // Hooks (/hooks)
