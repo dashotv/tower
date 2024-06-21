@@ -67,6 +67,7 @@ type Application struct {
 	Importer      *importer.Importer
 	Want          *Want
 	Destinator    *Destinator
+	Libs          map[string]*Library
 }
 
 func Setup() error {

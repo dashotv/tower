@@ -38,8 +38,7 @@ func (j *MigratePaths) Work(ctx context.Context, job *minion.Job[*MigratePaths])
 	err = q.Batch(100, func(results []*Medium) error {
 		for _, m := range results {
 			for _, p := range m.Paths {
-				// l.Debugw("path", "local", p.Local, "size", p.Size, "resolution", p.Resolution, "checksum", p.Checksum)
-				if p.Type == "image" || imageRegex.MatchString(p.Local) {
+				if _, ok := a.PlexFileCache.files[p.LocalPath()]; !ok {
 					continue
 				}
 
@@ -62,6 +61,7 @@ func (j *MigratePaths) Work(ctx context.Context, job *minion.Job[*MigratePaths])
 				f.MediumID = m.ID
 
 				f.Path = p.LocalPath()
+				f.Type = fileType(p.LocalPath())
 				f.Name = file
 				f.Extension = ext
 				f.Size = p.Size

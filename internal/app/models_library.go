@@ -1,6 +1,23 @@
 package app
 
-import "github.com/dashotv/fae"
+import (
+	"context"
+
+	"github.com/dashotv/fae"
+)
+
+func init() {
+	starters = append(starters, startLibrary)
+}
+
+func startLibrary(ctx context.Context, a *Application) error {
+	libs, err := a.DB.LibraryMap()
+	if err != nil {
+		return fae.Wrap(err, "getting libraries")
+	}
+	a.Libs = libs
+	return nil
+}
 
 func (c *Connector) LibraryGet(id string) (*Library, error) {
 	m := &Library{}

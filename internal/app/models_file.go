@@ -27,13 +27,21 @@ func (c *Connector) FileGet(id string) (*File, error) {
 	return m, nil
 }
 
-func (c *Connector) FileList() ([]*File, error) {
-	list, err := c.File.Query().Limit(10).Run()
+func (c *Connector) FileList(page, limit int) ([]*File, int64, error) {
+	skip := (page - 1) * limit
+
+	q := c.File.Query() //.Where("medium_id", primitive.NilObjectID)
+
+	total, err := q.Count()
 	if err != nil {
-		return nil, err
+		return nil, 0, err
+	}
+	list, err := q.Limit(limit).Skip(skip).Run()
+	if err != nil {
+		return nil, 0, err
 	}
 
-	return list, nil
+	return list, total, nil
 }
 
 func (c *Connector) FileCount() (int64, error) {

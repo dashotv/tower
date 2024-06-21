@@ -207,11 +207,18 @@ func fileType(file string) string {
 	if ext == "" {
 		return ""
 	}
-	if lo.Contains(app.Config.ExtensionsVideo, ext[1:]) {
+	ext = strings.ToLower(ext)
+	if ext[0] == '.' {
+		ext = ext[1:]
+	}
+	if lo.Contains(app.Config.ExtensionsVideo, ext) {
 		return "video"
 	}
-	if lo.Contains(app.Config.ExtensionsSubtitles, ext[1:]) {
+	if lo.Contains(app.Config.ExtensionsSubtitles, ext) {
 		return "subtitle"
+	}
+	if lo.Contains(app.Config.ExtensionsImages, ext) {
+		return "image"
 	}
 	return ""
 }

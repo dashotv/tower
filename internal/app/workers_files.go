@@ -8,6 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/fae"
@@ -27,29 +28,6 @@ func (j *FileWalk) Timeout(job *minion.Job[*FileWalk]) time.Duration {
 	return 60 * time.Minute
 }
 
-//	func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
-//		l := app.Log.Named("file_walk")
-//		if !atomic.CompareAndSwapUint32(&walking, 0, 1) {
-//			l.Warnf("walkFiles: already running")
-//			return fae.Errorf("already running")
-//		}
-//		defer atomic.StoreUint32(&walking, 0)
-//
-//		libs, err := app.Plex.GetLibraries()
-//		if err != nil {
-//			l.Errorw("libs", "error", err)
-//			return fae.Wrap(err, "getting libraries")
-//		}
-//
-//		w := newWalker(app.DB, l.Named("walker"), libs)
-//		if err := w.Walk(); err != nil {
-//			l.Errorw("walk", "error", err)
-//			return fae.Wrap(err, "walking")
-//		}
-//
-//		app.Workers.Enqueue(&FileMatch{})
-//		return nil
-//	}
 func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
 	a := ContextApp(ctx)
 	l := a.Log.Named("file_walk")
@@ -59,13 +37,13 @@ func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
 	}
 	defer atomic.StoreUint32(&walking, 0)
 
-	libs, err := a.DB.LibraryMap()
+	_, err := a.DB.File.Collection.UpdateMany(ctx, bson.M{}, bson.M{"$set": bson.M{"exists": false}})
 	if err != nil {
-		return fae.Wrap(err, "getting libraries")
+		return fae.Wrap(err, "updating")
 	}
 
 	// eg := new(errgroup.Group)
-	for _, lib := range libs {
+	for _, lib := range a.Libs {
 		lib := lib
 		// eg.Go(func() error {
 		err := filepath.WalkDir(lib.Path, func(path string, d fs.DirEntry, err error) error {
@@ -98,6 +76,7 @@ func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
 			}
 
 			f.LibraryID = lib.ID
+			f.Type = fileType(path)
 			f.Name = file
 			f.Extension = ext
 			f.ModifiedAt = i.ModTime().Unix()
@@ -142,7 +121,7 @@ func (j *FileMatch) Timeout(job *minion.Job[*FileMatch]) time.Duration {
 func (j *FileMatch) Work(ctx context.Context, job *minion.Job[*FileMatch]) error {
 	l := app.Log.Named("files.match")
 
-	for _, kind := range KINDS {
+	for _, kind := range KINDS { // TODO: use libraries
 		dir := filepath.Join(app.Config.DirectoriesCompleted, kind)
 		if err := app.Workers.Enqueue(&FileMatchDir{Dir: dir}); err != nil {
 			l.Errorw("enqueue", "error", err)

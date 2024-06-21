@@ -128,6 +128,14 @@ func (a *Application) Routes() {
 	feeds.PATCH("/:id", a.FeedsSettingsHandler)
 	feeds.DELETE("/:id", a.FeedsDeleteHandler)
 
+	file := a.Router.Group("/file")
+	file.GET("/", a.FileIndexHandler)
+	file.POST("/", a.FileCreateHandler)
+	file.GET("/:id", a.FileShowHandler)
+	file.PUT("/:id", a.FileUpdateHandler)
+	file.PATCH("/:id", a.FileSettingsHandler)
+	file.DELETE("/:id", a.FileDeleteHandler)
+
 	hooks := a.Router.Group("/hooks")
 	hooks.POST("/plex", a.HooksPlexHandler)
 	hooks.POST("/nzbget", a.HooksNzbgetHandler)
@@ -256,6 +264,7 @@ func (a *Application) indexHandler(c echo.Context) error {
 			"downloads":        "/downloads",
 			"episodes":         "/episodes",
 			"feeds":            "/feeds",
+			"file":             "/file",
 			"hooks":            "/hooks",
 			"library":          "/library",
 			"library_template": "/library_template",
@@ -482,6 +491,44 @@ func (a *Application) FeedsSettingsHandler(c echo.Context) error {
 func (a *Application) FeedsDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
 	return a.FeedsDelete(c, id)
+}
+
+// File (/file)
+func (a *Application) FileIndexHandler(c echo.Context) error {
+	page := router.QueryParamIntDefault(c, "page", "1")
+	limit := router.QueryParamIntDefault(c, "limit", "25")
+	return a.FileIndex(c, page, limit)
+}
+func (a *Application) FileCreateHandler(c echo.Context) error {
+	subject := &File{}
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.FileCreate(c, subject)
+}
+func (a *Application) FileShowHandler(c echo.Context) error {
+	id := c.Param("id")
+	return a.FileShow(c, id)
+}
+func (a *Application) FileUpdateHandler(c echo.Context) error {
+	id := c.Param("id")
+	subject := &File{}
+	if err := c.Bind(subject); err != nil {
+		return err
+	}
+	return a.FileUpdate(c, id, subject)
+}
+func (a *Application) FileSettingsHandler(c echo.Context) error {
+	id := c.Param("id")
+	setting := &Setting{}
+	if err := c.Bind(setting); err != nil {
+		return err
+	}
+	return a.FileSettings(c, id, setting)
+}
+func (a *Application) FileDeleteHandler(c echo.Context) error {
+	id := c.Param("id")
+	return a.FileDelete(c, id)
 }
 
 // Hooks (/hooks)
