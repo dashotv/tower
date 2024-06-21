@@ -335,6 +335,13 @@ func FileLink(srcpath, dstpath string, force bool) error {
 	return os.Link(srcpath, dstpath)
 }
 
+func FileMove(srcpath, dstpath string) error {
+	if err := FileLink(srcpath, dstpath, true); err != nil {
+		return fae.Wrap(err, "link")
+	}
+	return os.Remove(srcpath)
+}
+
 func FileDir(file string) error {
 	path := filepath.Dir(file)
 	return os.MkdirAll(path, 0755)

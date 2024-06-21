@@ -553,6 +553,8 @@ type Path struct { // struct
 	Bitrate    int                `bson:"bitrate" json:"bitrate"`
 	Checksum   string             `bson:"checksum" json:"checksum"`
 	UpdatedAt  time.Time          `bson:"updated_at" json:"updated_at"`
+	Old        bool               `bson:"old" json:"old"`
+	Rename     bool               `bson:"rename" json:"rename"`
 }
 
 type Pin struct { // model

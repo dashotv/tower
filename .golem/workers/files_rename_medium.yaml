@@ -1,0 +1,4 @@
+name: files_rename_medium
+fields:
+    - name: id
+      type: string

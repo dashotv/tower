@@ -141,6 +141,14 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "registering worker: file_walk (FileWalk)")
 	}
 
+	if err := minion.Register[*FilesRename](m, &FilesRename{}); err != nil {
+		return fae.Wrap(err, "registering worker: files_rename (FilesRename)")
+	}
+
+	if err := minion.Register[*FilesRenameMedium](m, &FilesRenameMedium{}); err != nil {
+		return fae.Wrap(err, "registering worker: files_rename_medium (FilesRenameMedium)")
+	}
+
 	if err := minion.Register[*LibraryCounts](m, &LibraryCounts{}); err != nil {
 		return fae.Wrap(err, "registering worker: library_counts (LibraryCounts)")
 	}
