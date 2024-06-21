@@ -215,7 +215,7 @@ func (a *Application) downloadsSearchMovies() error {
 				name = d.Title
 			}
 			a.Workers.Log.Debugf("download found (movie) %s", name)
-			notifier.Info("Downloads::Found", fmt.Sprintf("%s (movie)", name))
+			notifier.Info("SearchFound", fmt.Sprintf("%s (movie)", name))
 
 			d.Status = "loading"
 			if !a.Config.Production {

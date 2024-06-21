@@ -33,6 +33,7 @@ func (a *Application) ScrySearchMovie(search *DownloadSearch) (*runic.Release, e
 		Uncensored: search.Uncensored,
 		Bluray:     search.Bluray,
 		Exact:      search.Exact,
+		Verified:   true,
 		Year:       -1,
 		Season:     -1,
 		Episode:    -1,
@@ -50,7 +51,7 @@ func (a *Application) ScrySearchMovie(search *DownloadSearch) (*runic.Release, e
 		return nil, fae.Wrap(err, "failed to search releases")
 	}
 
-	app.Log.Named("search").Warnf("ScrySearchMovie(): %s (%d) %02dx%02d => %d search: %s\n", search.Title, search.Year, search.Season, search.Episode, len(resp.Result.Releases), resp.Result.Search)
+	// app.Log.Named("search").Warnf("ScrySearchMovie(): %s (%d) %02dx%02d => %d search: %s\n", search.Title, search.Year, search.Season, search.Episode, len(resp.Result.Releases), resp.Result.Search)
 	if len(resp.Result.Releases) == 0 {
 		return nil, nil
 	}

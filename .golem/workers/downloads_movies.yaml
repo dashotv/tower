@@ -1,1 +1,2 @@
 name: downloads_movies
+schedule: "0 0 * * * *" # Every hour

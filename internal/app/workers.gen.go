@@ -89,6 +89,9 @@ func setupWorkers(app *Application) error {
 	if err := minion.Register[*DownloadsMovies](m, &DownloadsMovies{}); err != nil {
 		return fae.Wrap(err, "registering worker: downloads_movies (DownloadsMovies)")
 	}
+	if _, err := m.Schedule("0 0 * * * *", &DownloadsMovies{}); err != nil {
+		return fae.Wrap(err, "scheduling worker: downloads_movies (DownloadsMovies)")
+	}
 
 	if err := minion.Register[*DownloadsProcess](m, &DownloadsProcess{}); err != nil {
 		return fae.Wrap(err, "registering worker: downloads_process (DownloadsProcess)")
