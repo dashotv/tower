@@ -100,7 +100,6 @@ func (j *PathCleanup) Work(ctx context.Context, job *minion.Job[*PathCleanup]) e
 			continue
 		}
 		if queuedPaths[p.LocalPath()] == 0 {
-			// app.Workers.Log.Debugf("path import: %s", p.LocalPath())
 			if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: p.ID.Hex(), Title: p.LocalPath()}); err != nil {
 				return fae.Wrap(err, "enqueue path import")
 			}
@@ -115,24 +114,17 @@ func (j *PathCleanup) Work(ctx context.Context, job *minion.Job[*PathCleanup]) e
 	}
 
 	if m.Type == "Series" {
-		q := app.DB.Episode.Query().Where("series_id", m.ID)
-
-		count, err := q.Count()
-		if err != nil {
-			return fae.Wrap(err, "count episodes")
-		}
-
-		for skip := 0; skip < int(count); skip += 100 {
-			eps, err := q.Limit(100).Skip(skip).Run()
-			if err != nil {
-				return fae.Wrap(err, "find episodes")
-			}
-
-			for _, e := range eps {
+		err := app.DB.Episode.Query().Where("series_id", m.ID).Batch(100, func(results []*Episode) error {
+			for _, e := range results {
 				if err := app.Workers.Enqueue(&PathCleanup{ID: e.ID.Hex()}); err != nil {
 					return fae.Wrap(err, "enqueue media paths")
 				}
 			}
+
+			return nil
+		})
+		if err != nil {
+			return fae.Wrap(err, "series batch")
 		}
 	}
 

@@ -205,7 +205,7 @@ func exists(path string) bool {
 func fileType(file string) string {
 	ext := filepath.Ext(file)
 	if ext == "" {
-		return ""
+		return "unknown"
 	}
 	ext = strings.ToLower(ext)
 	if ext[0] == '.' {
@@ -218,9 +218,14 @@ func fileType(file string) string {
 		return "subtitle"
 	}
 	if lo.Contains(app.Config.ExtensionsImages, ext) {
+		if strings.Contains(file, "cover") {
+			return "cover"
+		} else if strings.Contains(file, "background") {
+			return "background"
+		}
 		return "image"
 	}
-	return ""
+	return "unknown"
 }
 
 func pathParts(path string) (string, string, string, string, error) {
