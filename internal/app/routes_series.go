@@ -336,6 +336,8 @@ func seriesJob(name string, id string) error {
 		return app.Workers.Enqueue(&PathCleanup{ID: id})
 	case "files":
 		return app.Workers.Enqueue(&FileMatchMedium{ID: id})
+	case "rename":
+		return app.Workers.Enqueue(&FilesRenameMedium{ID: id})
 	default:
 		return fae.Errorf("unknown job: %s", name)
 	}
