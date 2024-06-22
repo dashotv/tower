@@ -118,6 +118,16 @@ type plexFileCache struct {
 	files map[string]string
 }
 
+func plexLibType(t string) string {
+	switch t {
+	case "show":
+		return "4"
+	case "movie":
+		return "1"
+	}
+	return ""
+}
+
 func buildPlexCache(ctx context.Context) (*plexFileCache, error) {
 	a := ContextApp(ctx)
 	if a == nil {
@@ -131,12 +141,8 @@ func buildPlexCache(ctx context.Context) (*plexFileCache, error) {
 		return nil, fae.Wrap(err, "get libraries")
 	}
 	for _, lib := range libs {
-		t := ""
-		if lib.Type == "show" {
-			t = "4"
-		} else if lib.Type == "movie" {
-			t = "1"
-		} else {
+		t := plexLibType(lib.Type)
+		if t == "" {
 			continue
 		}
 

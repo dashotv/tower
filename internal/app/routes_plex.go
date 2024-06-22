@@ -101,13 +101,14 @@ func (a *Application) PlexLibraries(c echo.Context) error {
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
 }
 
-func (a *Application) PlexSearch(c echo.Context, query, section string) error {
-	list, err := a.Plex.Search(query, section)
+func (a *Application) PlexSearch(c echo.Context, query, section string, start, limit int) error {
+	// TODO: handle filters
+	list, total, err := a.Plex.Search(query, section, map[string]string{}, start, limit)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list, Total: total})
 }
 
 func (a *Application) PlexCollectionsIndex(c echo.Context, section string) error {

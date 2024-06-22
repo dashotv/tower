@@ -7,40 +7,43 @@ import (
 	"github.com/dashotv/fae"
 )
 
-func (p *Client) Search(query, section string) ([]SearchMetadata, error) {
+func (p *Client) Search(query, section string, filters map[string]string, start, limit int) ([]SearchMetadata, int64, error) {
 	id, err := p.LibraryType(section)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	dest := &Search{}
 	path := fmt.Sprintf("/library/sections/%s/search", section)
 
 	params := url.Values{}
-	params.Set("X-Plex-Token", p.Token)
 	params.Set("title", query)
 	params.Set("type", fmt.Sprintf("%d", id))
-	params.Set("limit", "25")
 	params.Set("sort", "createdAt:desc")
 
-	resp, err := p._server().SetResult(dest).
+	resp, err := p._server().
+		SetResult(dest).
+		SetHeaders(p.Headers).
+		SetHeader("X-Plex-Container-Start", fmt.Sprintf("%d", start)).
+		SetHeader("X-Plex-Container-Size", fmt.Sprintf("%d", limit)).
 		SetQueryParamsFromValues(params).
 		Get(path)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	if !resp.IsSuccess() {
-		return nil, fae.Errorf("failed to get search: %s", resp.Status())
+		return nil, 0, fae.Errorf("failed to get search: %s", resp.Status())
 	}
 
 	// app.Log.Debugf("search req url: %s", resp.Request.URL)
 	// app.Log.Debugf("search result: %s", resp.String())
-	return dest.MediaContainer.Metadata, nil
+	return dest.MediaContainer.Metadata, dest.MediaContainer.TotalSize, nil
 }
 
 type Search struct {
 	MediaContainer struct {
 		Size         int64            `json:"size"`
+		TotalSize    int64            `json:"totalSize"`
 		SectionID    int64            `json:"sectionID"`
 		AllowSync    bool             `json:"allowSync"`
 		Art          string           `json:"art"`

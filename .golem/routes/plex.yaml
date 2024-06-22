@@ -1,84 +1,92 @@
 name: plex
 path: /plex
 routes:
-    - name: auth
-      path: /auth
-      method: GET
-    - name: index
-      path: /
-      method: GET
-    - name: update
-      path: /update
-      method: GET
-    - name: search
-      path: /search
-      method: GET
-      params:
-        - name: query
-          type: string
-          query: true
-        - name: section
-          type: string
-          query: true
-      result: '[]plex.SearchMetadata'
-    - name: libraries
-      path: /libraries
-      method: GET
-      result: '[]*plex.Library'
-    - name: collectionsIndex
-      path: /libraries/:section/collections
-      method: GET
-      params:
-        - name: section
-          type: string
-      result: '[]*plex.Collection'
-    - name: collectionsShow
-      path: /libraries/:section/collections/:ratingKey
-      method: GET
-      params:
-        - name: section
-          type: string
-        - name: ratingKey
-          type: string
-    - name: metadata
-      path: /metadata/:key
-      method: GET
-      params:
-        - name: key
-          type: string
-    - name: clients
-      path: /clients
-      method: GET
-      result: '[]*plex.Client'
-    - name: devices
-      path: /devices
-      method: GET
-      result: '[]*plex.Device'
-    - name: resources
-      path: /resources
-      method: GET
-      result: '[]*plex.Resource'
-    - name: play
-      path: /play
-      method: GET
-      params:
-        - name: ratingKey
-          type: string
-          query: true
-        - name: player
-          type: string
-          query: true
-    - name: sessions
-      path: /sessions
-      method: GET
-      result: '[]*plex.Session'
-    - name: stop
-      path: /stop
-      method: GET
-      params:
-        - name: session
-          type: string
-          query: true
-    - name: files
-      path: /files
-      method: GET
+  - name: auth
+    path: /auth
+    method: GET
+  - name: index
+    path: /
+    method: GET
+  - name: update
+    path: /update
+    method: GET
+  - name: search
+    path: /search
+    method: GET
+    params:
+      - name: query
+        type: string
+        query: true
+      - name: section
+        type: string
+        query: true
+      - name: start
+        type: int
+        default: 0
+        query: true
+      - name: limit
+        type: int
+        default: 25
+        query: true
+    result: "[]plex.SearchMetadata"
+  - name: libraries
+    path: /libraries
+    method: GET
+    result: "[]*plex.Library"
+  - name: collectionsIndex
+    path: /libraries/:section/collections
+    method: GET
+    params:
+      - name: section
+        type: string
+    result: "[]*plex.Collection"
+  - name: collectionsShow
+    path: /libraries/:section/collections/:ratingKey
+    method: GET
+    params:
+      - name: section
+        type: string
+      - name: ratingKey
+        type: string
+  - name: metadata
+    path: /metadata/:key
+    method: GET
+    params:
+      - name: key
+        type: string
+  - name: clients
+    path: /clients
+    method: GET
+    result: "[]*plex.Client"
+  - name: devices
+    path: /devices
+    method: GET
+    result: "[]*plex.Device"
+  - name: resources
+    path: /resources
+    method: GET
+    result: "[]*plex.Resource"
+  - name: play
+    path: /play
+    method: GET
+    params:
+      - name: ratingKey
+        type: string
+        query: true
+      - name: player
+        type: string
+        query: true
+  - name: sessions
+    path: /sessions
+    method: GET
+    result: "[]*plex.Session"
+  - name: stop
+    path: /stop
+    method: GET
+    params:
+      - name: session
+        type: string
+        query: true
+  - name: files
+    path: /files
+    method: GET

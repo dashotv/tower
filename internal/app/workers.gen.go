@@ -206,6 +206,10 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "scheduling worker: plex_files (PlexFiles)")
 	}
 
+	if err := minion.Register[*PlexLibraryShoworder](m, &PlexLibraryShoworder{}); err != nil {
+		return fae.Wrap(err, "registering worker: plex_library_showorder (PlexLibraryShoworder)")
+	}
+
 	if err := minion.Register[*PlexPinToUsers](m, &PlexPinToUsers{}); err != nil {
 		return fae.Wrap(err, "registering worker: plex_pin_to_users (PlexPinToUsers)")
 	}

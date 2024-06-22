@@ -89,7 +89,12 @@ type KeyResponseMetadata struct {
 
 func (p *Client) GetMetadataByKey(key string) ([]*KeyResponseMetadata, error) {
 	m := &KeyResponse{}
-	resp, err := p._server().SetResult(m).SetFormDataFromValues(p.data).Get("/library/metadata/" + key)
+	params := map[string]string{
+		"includeExternalMedia": "1",
+		"includePreferences":   "1",
+		"skipRefresh":          "1",
+	}
+	resp, err := p._server().SetResult(m).SetFormDataFromValues(p.data).SetQueryParams(params).Get("/library/metadata/" + key)
 	if err != nil {
 		return nil, fae.Wrap(err, "failed to make request")
 	}
@@ -132,4 +137,14 @@ func (p *Client) GetSeriesEpisodesUnwatched(key string) (*LeavesMetadata, error)
 		}
 	}
 	return nil, nil
+}
+func (p *Client) PutMetadataPrefs(key string, prefs map[string]string) error {
+	resp, err := p._server().SetHeaders(p.Headers).SetQueryParams(prefs).Put("/library/metadata/" + key + "/prefs")
+	if err != nil {
+		return fae.Wrap(err, "failed to make request")
+	}
+	if !resp.IsSuccess() {
+		return fae.Errorf("failed to put metadata prefs: %s", resp.Status())
+	}
+	return nil
 }

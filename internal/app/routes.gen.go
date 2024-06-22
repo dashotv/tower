@@ -770,7 +770,9 @@ func (a *Application) PlexUpdateHandler(c echo.Context) error {
 func (a *Application) PlexSearchHandler(c echo.Context) error {
 	query := router.QueryParamString(c, "query")
 	section := router.QueryParamString(c, "section")
-	return a.PlexSearch(c, query, section)
+	start := router.QueryParamIntDefault(c, "start", "0")
+	limit := router.QueryParamIntDefault(c, "limit", "25")
+	return a.PlexSearch(c, query, section, start, limit)
 }
 func (a *Application) PlexLibrariesHandler(c echo.Context) error {
 	return a.PlexLibraries(c)
