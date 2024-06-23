@@ -11,7 +11,7 @@ require (
 	github.com/dashotv/grimoire v0.5.7
 	github.com/dashotv/mercury v0.3.2
 	github.com/dashotv/minion v0.4.12
-	github.com/dashotv/runic v0.5.0
+	github.com/dashotv/runic v0.5.1
 	github.com/dashotv/scry v0.10.4
 	github.com/dashotv/tmdb v0.2.0
 	github.com/dashotv/tvdb v0.3.0
