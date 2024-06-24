@@ -8,11 +8,12 @@ import (
 	"github.com/sourcegraph/conc"
 	"go.uber.org/ratelimit"
 
+	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
 )
 
 var batchSize = 100
-var scryRateLimit = 50 // per second
+var scryRateLimit = 100 // per second
 
 type Count struct {
 	sync.Mutex
@@ -34,6 +35,7 @@ func (j *UpdateIndexes) Timeout(job *minion.Job[*UpdateIndexes]) time.Duration {
 	return 60 * time.Minute
 }
 func (j *UpdateIndexes) Work(ctx context.Context, job *minion.Job[*UpdateIndexes]) error {
+	a := ContextApp(ctx)
 	log := app.Log.Named("update_indexes")
 	// ctx, cancel := context.WithCancel(ctx)
 	// defer cancel()
@@ -42,74 +44,62 @@ func (j *UpdateIndexes) Work(ctx context.Context, job *minion.Job[*UpdateIndexes
 
 	wg := conc.NewWaitGroup()
 	wg.Go(func() {
-		count := &Count{}
-		total, err := app.DB.Series.Query().Limit(-1).Count()
+		err := a.DB.Series.Query().Desc("created_at").Each(100, func(s *Series) error {
+			select {
+			case <-ctx.Done():
+				return fae.Errorf("cancelled")
+			default:
+				// proceed
+			}
+
+			rl.Take()
+			if err := a.DB.Series.Update(s); err != nil {
+				return fae.Wrapf(err, "updating series %s", s.ID.Hex())
+			}
+			return nil
+		})
 		if err != nil {
-			app.Workers.Log.Errorf("getting series count: %s", err)
-			return
-		}
-		for i := 0; i < int(total); i += batchSize {
-			series, err := app.DB.Series.Query().Desc("created_at").Limit(batchSize).Skip(i).Run()
-			if err != nil {
-				app.Workers.Log.Errorf("getting series: %s", err)
-				return
-			}
-			for _, s := range series {
-				rl.Take()
-				if err := app.DB.Series.Update(s); err != nil {
-					app.Workers.Log.Errorf("updating series: %s", err)
-				}
-				count.Inc()
-			}
-			log.Debugf("series: %d/%d", count.i, total)
+			log.Errorf("%s", err)
 		}
 	})
 
 	wg.Go(func() {
-		count := &Count{}
-		total, err := app.DB.Movie.Query().Limit(-1).Count()
+		err := a.DB.Movie.Query().Desc("created_at").Each(100, func(s *Movie) error {
+			select {
+			case <-ctx.Done():
+				return fae.Errorf("cancelled")
+			default:
+				// proceed
+			}
+
+			rl.Take()
+			if err := a.DB.Movie.Update(s); err != nil {
+				return fae.Wrapf(err, "updating movie %s", s.ID.Hex())
+			}
+			return nil
+		})
 		if err != nil {
-			app.Workers.Log.Errorf("getting movies count: %s", err)
-			return
-		}
-		for i := 0; i < int(total); i += batchSize {
-			movies, err := app.DB.Movie.Query().Desc("created_at").Limit(batchSize).Skip(i).Run()
-			if err != nil {
-				app.Workers.Log.Errorf("getting movie: %s", err)
-				return
-			}
-			for _, m := range movies {
-				rl.Take()
-				if err := app.DB.Movie.Update(m); err != nil {
-					app.Workers.Log.Errorf("updating movie: %s", err)
-				}
-				count.Inc()
-			}
-			log.Debugf("series: %d/%d", count.i, total)
+			log.Errorf("%s", err)
 		}
 	})
 
 	wg.Go(func() {
-		count := &Count{}
-		total, err := app.DB.Release.Query().Limit(-1).Count()
+		err := a.DB.Episode.Query().Desc("created_at").Each(100, func(s *Episode) error {
+			select {
+			case <-ctx.Done():
+				return fae.Errorf("cancelled")
+			default:
+				// proceed
+			}
+
+			rl.Take()
+			if err := a.DB.Episode.Update(s); err != nil {
+				return fae.Wrapf(err, "updating episode %s", s.ID.Hex())
+			}
+			return nil
+		})
 		if err != nil {
-			app.Workers.Log.Errorf("getting releases count: %s", err)
-			return
-		}
-		for i := 0; i < int(total); i += batchSize {
-			releases, err := app.DB.Release.Query().Desc("created_at").Limit(batchSize).Skip(i).Run()
-			if err != nil {
-				app.Workers.Log.Errorf("getting release: %s", err)
-				return
-			}
-			for _, r := range releases {
-				rl.Take()
-				if err := app.DB.Release.Update(r); err != nil {
-					app.Workers.Log.Errorf("updating release: %s", err)
-				}
-				count.Inc()
-			}
-			log.Debugf("series: %d/%d", count.i, total)
+			log.Errorf("%s", err)
 		}
 	})
 

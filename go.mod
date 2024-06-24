@@ -8,9 +8,9 @@ require (
 	github.com/dashotv/fae v0.1.9
 	github.com/dashotv/flame v0.10.6
 	github.com/dashotv/golem v0.14.27
-	github.com/dashotv/grimoire v0.5.7
+	github.com/dashotv/grimoire v0.5.9
 	github.com/dashotv/mercury v0.3.2
-	github.com/dashotv/minion v0.4.12
+	github.com/dashotv/minion v0.4.13
 	github.com/dashotv/runic v0.5.1
 	github.com/dashotv/scry v0.10.4
 	github.com/dashotv/tmdb v0.2.0
