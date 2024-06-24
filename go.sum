@@ -123,12 +123,12 @@ github.com/dashotv/grimoire v0.5.9 h1:3MAQbIhosREIrww98N0rP9WHH0r2u61svcc1a4YsS9
 github.com/dashotv/grimoire v0.5.9/go.mod h1:oeSS1+bBA0ip8ULTaqX6tAnkxqNDg7NF7+mwwiByM3M=
 github.com/dashotv/mercury v0.3.2 h1:88bvWsp5l823wTR1XbIB+LBiAFeCRZfe+JyIKf4nV/0=
 github.com/dashotv/mercury v0.3.2/go.mod h1:OZ140gozVBT0iyOwKIJSoSd3yyPgjgq2fI4baqtFBGs=
-github.com/dashotv/minion v0.4.13 h1:ozRkhLNs842wsug15IkAPTU0emdxE/QTtj8z2Cjb5fs=
-github.com/dashotv/minion v0.4.13/go.mod h1:LfDs7CHpNdiLrKuXKxAOPwS8r0nSPsThILkh07wb7Dk=
+github.com/dashotv/minion v0.4.14 h1:HELHqNR3NIW7zo4VCrDrpx2OoT3AcbIWXmcA/u/oYo4=
+github.com/dashotv/minion v0.4.14/go.mod h1:LfDs7CHpNdiLrKuXKxAOPwS8r0nSPsThILkh07wb7Dk=
 github.com/dashotv/runic v0.5.1 h1:5sAM1Yw+/2SwN5xaS+kWBACtDEcHgju7MmPil4q6k20=
 github.com/dashotv/runic v0.5.1/go.mod h1:F9BpdoDcuwgLWcpvmI7DcXe0C2QPrpr5lQLVPJeJ5Hg=
-github.com/dashotv/scry v0.10.5 h1:w3ofd2OcIvz//I/2nldUO3Lq7wH+HEw2ikUMsJmoAwQ=
-github.com/dashotv/scry v0.10.5/go.mod h1:1ko2kJ1EZQKhnOukC9V5BvwJG1JOLvVbLWEWscuKFfA=
+github.com/dashotv/scry v0.10.6 h1:3O6gTnI4Bj/Os08tpuTyW2J4AvhfRMJrJeaPC8ovKyY=
+github.com/dashotv/scry v0.10.6/go.mod h1:1ko2kJ1EZQKhnOukC9V5BvwJG1JOLvVbLWEWscuKFfA=
 github.com/dashotv/tmdb v0.2.0 h1:Vd8DKZrrzVqob5k8wsNRfyyFUDj2jix5gIyJR6OWpdo=
 github.com/dashotv/tmdb v0.2.0/go.mod h1:XPLyPCuK16hlLIrAt/Bva8fBTUL+vD9VaOgFWtBAv+Q=
 github.com/dashotv/tvdb v0.3.0 h1:yiJzVqLTaPCtejbLk9FYl5AoMAwbReXD4KnCNugN9Pg=
