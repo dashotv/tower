@@ -12,7 +12,7 @@ require (
 	github.com/dashotv/mercury v0.3.2
 	github.com/dashotv/minion v0.4.13
 	github.com/dashotv/runic v0.5.1
-	github.com/dashotv/scry v0.10.4
+	github.com/dashotv/scry v0.10.5
 	github.com/dashotv/tmdb v0.2.0
 	github.com/dashotv/tvdb v0.3.0
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
@@ -69,6 +69,7 @@ require (
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/deepmap/oapi-codegen v1.16.3 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/elastic/go-elasticsearch/v7 v7.17.10 // indirect
 	github.com/elastic/go-sysinfo v1.14.0 // indirect
 	github.com/elastic/go-windows v1.0.1 // indirect
 	github.com/ericlagergren/decimal v0.0.0-20240411145413-00de7ca16731 // indirect

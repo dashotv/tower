@@ -104,7 +104,7 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "registering worker: downloads_process_load (DownloadsProcessLoad)")
 	}
 
-	if err := minion.Register[*FileMatch](m, &FileMatch{}); err != nil {
+	if err := minion.RegisterWithQueue[*FileMatch](m, &FileMatch{}, "paths"); err != nil {
 		return fae.Wrap(err, "registering worker: file_match (FileMatch)")
 	}
 	if _, err := m.Schedule("0 0 12 * * 0", &FileMatch{}); err != nil {
@@ -118,7 +118,7 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "scheduling worker: file_match_anime (FileMatchAnime)")
 	}
 
-	if err := minion.Register[*FileMatchDir](m, &FileMatchDir{}); err != nil {
+	if err := minion.RegisterWithQueue[*FileMatchDir](m, &FileMatchDir{}, "paths"); err != nil {
 		return fae.Wrap(err, "registering worker: file_match_dir (FileMatchDir)")
 	}
 
@@ -241,6 +241,10 @@ func setupWorkers(app *Application) error {
 
 	if err := minion.Register[*PlexWebhook](m, &PlexWebhook{}); err != nil {
 		return fae.Wrap(err, "registering worker: plex_webhook (PlexWebhook)")
+	}
+
+	if err := minion.Register[*ResetIndexes](m, &ResetIndexes{}); err != nil {
+		return fae.Wrap(err, "registering worker: reset_indexes (ResetIndexes)")
 	}
 
 	if err := minion.Register[*SeriesDelete](m, &SeriesDelete{}); err != nil {

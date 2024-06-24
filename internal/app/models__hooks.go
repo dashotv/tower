@@ -33,11 +33,25 @@ func (d *Download) Saving() error {
 	return nil
 }
 
+func sendEpisodeEvent(event string, e *Episode) {
+	go func() {
+		app.DB.processEpisode(e)
+		if err := app.Events.Send("tower.episodes", &EventEpisodes{event, e.ID.Hex(), e}); err != nil {
+			app.DB.Log.Errorf("error updating movie: %s", err)
+		}
+	}()
+}
 func (e *Episode) Created(ctx context.Context) error {
-	return app.Events.Send("tower.episodes", &EventEpisodes{"created", e.ID.Hex(), e})
+	sendEpisodeEvent("created", e)
+	return nil
 }
 func (e *Episode) Updated(ctx context.Context, result *mongo.UpdateResult) error {
-	return app.Events.Send("tower.episodes", &EventEpisodes{"updated", e.ID.Hex(), e})
+	sendEpisodeEvent("updated", e)
+	return nil
+}
+func (e *Episode) Deleted(ctx context.Context, result *mongo.DeleteResult) error {
+	sendEpisodeEvent("deleted", e)
+	return nil
 }
 func (e *Episode) Saving() error {
 	// Call the DefaultModel Saving hook
@@ -60,22 +74,24 @@ func (e *Episode) Saving() error {
 	return nil
 }
 
-func (m *Movie) Created(ctx context.Context) error {
+func sendMovieEvent(event string, m *Movie) {
 	go func() {
 		app.DB.processMovies([]*Movie{m})
-		if err := app.Events.Send("tower.movies", &EventMovies{"created", m.ID.Hex(), m}); err != nil {
+		if err := app.Events.Send("tower.movies", &EventMovies{event, m.ID.Hex(), m}); err != nil {
 			app.DB.Log.Errorf("error updating movie: %s", err)
 		}
 	}()
+}
+func (m *Movie) Created(ctx context.Context) error {
+	sendMovieEvent("created", m)
 	return nil
 }
 func (m *Movie) Updated(ctx context.Context, result *mongo.UpdateResult) error {
-	go func() {
-		app.DB.processMovies([]*Movie{m})
-		if err := app.Events.Send("tower.movies", &EventMovies{"updated", m.ID.Hex(), m}); err != nil {
-			app.DB.Log.Errorf("error updating movie: %s", err)
-		}
-	}()
+	sendMovieEvent("updated", m)
+	return nil
+}
+func (m *Movie) Deleted(ctx context.Context, result *mongo.DeleteResult) error {
+	sendMovieEvent("deleted", m)
 	return nil
 }
 func (m *Movie) Saving() error {
@@ -116,22 +132,25 @@ func (m *Movie) Saving() error {
 
 	return nil
 }
-func (s *Series) Created(ctx context.Context) error {
+
+func sendSeriesEvent(event string, s *Series) {
 	go func() {
 		app.DB.processSeries(s)
-		if err := app.Events.Send("tower.series", &EventSeries{"created", s.ID.Hex(), s}); err != nil {
+		if err := app.Events.Send("tower.series", &EventSeries{event, s.ID.Hex(), s}); err != nil {
 			app.DB.Log.Errorf("error updating series: %s", err)
 		}
 	}()
+}
+func (s *Series) Created(ctx context.Context) error {
+	sendSeriesEvent("created", s)
 	return nil
 }
 func (s *Series) Updated(ctx context.Context, result *mongo.UpdateResult) error {
-	go func() {
-		app.DB.processSeries(s)
-		if err := app.Events.Send("tower.series", &EventSeries{"updated", s.ID.Hex(), s}); err != nil {
-			app.DB.Log.Errorf("error updating series: %s", err)
-		}
-	}()
+	sendSeriesEvent("updated", s)
+	return nil
+}
+func (s *Series) Deleted(ctx context.Context, result *mongo.DeleteResult) error {
+	sendSeriesEvent("updated", s)
 	return nil
 }
 func (s *Series) Saving() error {
@@ -184,7 +203,7 @@ func (s *Series) Saving() error {
 	return nil
 }
 
-func (m *Medium) Created(ctx context.Context) error {
+func sendMediumEvent(event string, m *Medium) {
 	go func() {
 		switch m.Type {
 		case "Movie":
@@ -194,7 +213,7 @@ func (m *Medium) Created(ctx context.Context) error {
 				return
 			}
 			app.DB.processMovies([]*Movie{n})
-			if err := app.Events.Send("tower.movies", &EventMovies{"created", n.ID.Hex(), n}); err != nil {
+			if err := app.Events.Send("tower.movies", &EventMovies{event, n.ID.Hex(), n}); err != nil {
 				app.DB.Log.Errorf("error updating movie: %s", err)
 			}
 		case "Series":
@@ -204,38 +223,23 @@ func (m *Medium) Created(ctx context.Context) error {
 				return
 			}
 			app.DB.processSeries(s)
-			if err := app.Events.Send("tower.series", &EventSeries{"created", s.ID.Hex(), s}); err != nil {
+			if err := app.Events.Send("tower.series", &EventSeries{event, s.ID.Hex(), s}); err != nil {
 				app.DB.Log.Errorf("error updating series: %s", err)
 			}
 		}
 	}()
+}
+
+func (m *Medium) Created(ctx context.Context) error {
+	sendMediumEvent("created", m)
 	return nil
 }
 func (m *Medium) Updated(ctx context.Context, result *mongo.UpdateResult) error {
-	go func() {
-		switch m.Type {
-		case "Movie":
-			n := &Movie{}
-			if err := app.DB.Movie.FindByID(m.ID, n); err != nil {
-				app.DB.Log.Errorf("error finding movie: %s", err)
-				return
-			}
-			app.DB.processMovies([]*Movie{n})
-			if err := app.Events.Send("tower.movies", &EventMovies{"updated", n.ID.Hex(), n}); err != nil {
-				app.DB.Log.Errorf("error updating movie: %s", err)
-			}
-		case "Series":
-			s := &Series{}
-			if err := app.DB.Series.FindByID(m.ID, s); err != nil {
-				app.DB.Log.Errorf("error finding series: %s", err)
-				return
-			}
-			app.DB.processSeries(s)
-			if err := app.Events.Send("tower.series", &EventSeries{"updated", s.ID.Hex(), s}); err != nil {
-				app.DB.Log.Errorf("error updating series: %s", err)
-			}
-		}
-	}()
+	sendMediumEvent("updated", m)
+	return nil
+}
+func (m *Medium) Deleted(ctx context.Context, result *mongo.DeleteResult) error {
+	sendMediumEvent("deleted", m)
 	return nil
 }
 func (m *Medium) Saving() error {

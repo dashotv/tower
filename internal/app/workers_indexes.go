@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	"github.com/sourcegraph/conc"
@@ -10,20 +9,34 @@ import (
 
 	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
+	scry "github.com/dashotv/scry/client"
 )
 
 var batchSize = 100
 var scryRateLimit = 100 // per second
 
-type Count struct {
-	sync.Mutex
-	i int
+type ResetIndexes struct {
+	minion.WorkerDefaults[*ResetIndexes]
 }
 
-func (c *Count) Inc() {
-	c.Lock()
-	defer c.Unlock()
-	c.i++
+func (j *ResetIndexes) Kind() string { return "reset_indexes" }
+func (j *ResetIndexes) Work(ctx context.Context, job *minion.Job[*ResetIndexes]) error {
+	a := ContextApp(ctx)
+	index := "media"
+	if !a.Config.Production {
+		index = "media_development"
+	}
+
+	_, err := a.Scry.Es.Delete(ctx, &scry.EsDeleteRequest{Index: index})
+	if err != nil {
+		return fae.Wrap(err, "failed to delete media index")
+	}
+
+	if err := a.Workers.Enqueue(&UpdateIndexes{}); err != nil {
+		return fae.Wrap(err, "failed to enqueue update indexes job")
+	}
+
+	return nil
 }
 
 type UpdateIndexes struct {
@@ -32,13 +45,11 @@ type UpdateIndexes struct {
 
 func (j *UpdateIndexes) Kind() string { return "UpdateIndexes" }
 func (j *UpdateIndexes) Timeout(job *minion.Job[*UpdateIndexes]) time.Duration {
-	return 60 * time.Minute
+	return 2 * 60 * time.Minute
 }
 func (j *UpdateIndexes) Work(ctx context.Context, job *minion.Job[*UpdateIndexes]) error {
 	a := ContextApp(ctx)
 	log := app.Log.Named("update_indexes")
-	// ctx, cancel := context.WithCancel(ctx)
-	// defer cancel()
 
 	rl := ratelimit.New(scryRateLimit) // per second
 
