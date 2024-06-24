@@ -14,17 +14,17 @@ type MediaImages struct {
 func (j *MediaImages) Kind() string { return "media_images" }
 func (j *MediaImages) Work(ctx context.Context, job *minion.Job[*MediaImages]) error {
 	a := ContextApp(ctx)
-	l := a.Workers.Log.Named("media_images")
+	// l := a.Workers.Log.Named("media_images")
 	err := a.DB.Series.Query().NotIn("paths.type", []string{"cover", "background"}).Each(100, func(m *Series) error {
-		l.Infof("media_images: %s", m.ID)
-		return nil // return a.Workers.Enqueue(&SeriesUpdate{ID: m.ID.Hex(), SkipImages: false, Title: m.Title})
+		// l.Infof("media_images: %s", m.ID)
+		return a.Workers.Enqueue(&SeriesUpdate{ID: m.ID.Hex(), SkipImages: false, Title: m.Title})
 	})
 	if err != nil {
 		return fae.Wrap(err, "querying media")
 	}
 	err = a.DB.Movie.Query().NotIn("paths.type", []string{"cover", "background"}).Each(100, func(m *Movie) error {
-		l.Infof("media_images: %s", m.ID)
-		return nil // return a.Workers.Enqueue(&MovieUpdate{ID: m.ID.Hex(), SkipImages: false, Title: m.Title})
+		// l.Infof("media_images: %s", m.ID)
+		return a.Workers.Enqueue(&MovieUpdate{ID: m.ID.Hex(), SkipImages: false, Title: m.Title})
 	})
 	if err != nil {
 		return fae.Wrap(err, "querying media")
