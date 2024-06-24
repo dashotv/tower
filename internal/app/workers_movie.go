@@ -49,13 +49,13 @@ type MovieUpdateAll struct {
 	minion.WorkerDefaults[*MovieUpdateAll]
 }
 
-func (j *MovieUpdateAll) Kind() string { return "movie_update_al" }
+func (j *MovieUpdateAll) Kind() string { return "movie_update_all" }
 func (j *MovieUpdateAll) Work(ctx context.Context, job *minion.Job[*MovieUpdateAll]) error {
 	a := ContextApp(ctx)
 
 	err := a.DB.Movie.Query().Limit(-1).Batch(100, func(list []*Movie) error {
 		for _, m := range list {
-			a.Workers.Enqueue(&MovieUpdate{ID: m.ID.Hex(), Title: m.Display, SkipImages: true})
+			a.Workers.Enqueue(&MovieUpdate{ID: m.ID.Hex(), Title: m.Display, SkipImages: false})
 		}
 		return nil
 	})
