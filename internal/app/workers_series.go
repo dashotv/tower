@@ -77,7 +77,7 @@ func (j *SeriesUpdateAll) Work(ctx context.Context, job *minion.Job[*SeriesUpdat
 	a := ContextApp(ctx)
 	err := a.DB.Series.Query().LessThan("updated_at", time.Now().Add(-24*time.Hour*7)).Batch(100, func(list []*Series) error {
 		for _, series := range list {
-			if err := a.Workers.Enqueue(&SeriesUpdate{ID: series.ID.Hex(), SkipImages: false, Title: series.Title}); err != nil {
+			if err := a.Workers.Enqueue(&SeriesUpdate{ID: series.ID.Hex(), SkipImages: true, Title: series.Title}); err != nil {
 				return err
 			}
 		}
