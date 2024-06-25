@@ -1,10 +1,13 @@
 package app
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/samber/lo"
 
 	"github.com/dashotv/fae"
 )
@@ -38,7 +41,7 @@ func (c *Connector) FileList(page, limit int) ([]*File, int64, error) {
 	if err != nil {
 		return nil, 0, err
 	}
-	list, err := q.Limit(limit).Skip(skip).Run()
+	list, err := q.Desc("modified_at").Limit(limit).Skip(skip).Run()
 	if err != nil {
 		return nil, 0, err
 	}
@@ -91,4 +94,100 @@ func (c *Connector) FileFindOrCreateByPath(path string) (*File, error) {
 		f = &File{Path: path}
 	}
 	return f, nil
+}
+
+func (c *Connector) DirectoryFiles(media string, page, limit int) ([]*File, int64, error) {
+	skip := (page - 1) * limit
+
+	m := &Medium{}
+	if err := c.Medium.Find(media, m); err != nil {
+		return nil, 0, fae.Wrap(err, "finding medium")
+	}
+
+	q := c.File.Query()
+	if m.Type == "Series" {
+		eids, err := c.SeriesEpisodeIDs(m.ID, skip, limit)
+		if err != nil {
+			return nil, 0, fae.Wrap(err, "finding series episodes")
+		}
+		q.In("medium_id", eids)
+	} else {
+		q.Where("medium_id", m.ID)
+	}
+
+	total, err := q.Count()
+	if err != nil {
+		return nil, 0, err
+	}
+	list, err := q.Desc("name").Limit(limit).Skip(skip).Run()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return list, total, nil
+}
+
+func (c *Connector) DirectoryMedia(library string, page, limit int) ([]*Directory, int64, error) {
+	skip := (page - 1) * limit
+
+	libs, err := c.Library.Query().Where("name", library).Run()
+	if err != nil {
+		return nil, 0, fae.Wrap(err, "finding library")
+	}
+	if len(libs) != 1 {
+		return nil, 0, fae.Errorf("library not found: %s", library)
+	}
+	lib := libs[0]
+
+	q := c.Medium.Query().Where("kind", lib.Name)
+
+	total, err := q.Count()
+	if err != nil {
+		return nil, 0, fae.Wrap(err, "counting media")
+	}
+	media, err := q.Asc("title").Limit(limit).Skip(skip).Run()
+	if err != nil {
+		return nil, 0, fae.Wrap(err, "finding media")
+	}
+
+	list := lo.Map(media, func(m *Medium, _ int) *Directory {
+		count, err := c.FileCountByMedium(m)
+		if err != nil {
+			c.Log.Errorf("counting files for medium %s: %v", m.ID.Hex(), err)
+		}
+		return &Directory{Name: m.Title, Path: fmt.Sprintf("%s%c%s", lib.ID.Hex(), filepath.Separator, m.ID.Hex()), Count: count}
+	})
+
+	return list, total, nil
+}
+
+func (c *Connector) FileCountByMedium(m *Medium) (int64, error) {
+	if m.Type == "Series" {
+		eids, err := c.SeriesEpisodeIDs(m.ID, 0, 0)
+		if err != nil {
+			return 0, fae.Wrap(err, "finding series episodes")
+		}
+		return c.File.Query().In("medium_id", eids).Count()
+	}
+	return c.File.Query().Where("medium_id", m.ID).Count()
+}
+
+func (c *Connector) DirectoryLibraries(page, limit int) ([]*Directory, int64, error) {
+	skip := (page - 1) * limit
+
+	total, err := c.Library.Query().Count()
+	if err != nil {
+		return nil, 0, fae.Wrap(err, "counting libraries")
+	}
+
+	libs, err := c.Library.Query().Limit(limit).Skip(skip).Run()
+	if err != nil {
+		return nil, 0, fae.Wrap(err, "finding libraries")
+	}
+
+	list := lo.Map(libs, func(l *Library, _ int) *Directory {
+		return &Directory{Name: l.Name, Path: l.Name, Count: l.Count}
+	})
+
+	return list, total, nil
 }

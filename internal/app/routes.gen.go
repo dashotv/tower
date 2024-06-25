@@ -102,6 +102,9 @@ func (a *Application) Routes() {
 	config := a.Router.Group("/config")
 	config.PATCH("/:id", a.ConfigSettingsHandler)
 
+	directory := a.Router.Group("/directory")
+	directory.GET("/index", a.DirectoryIndexHandler)
+
 	downloads := a.Router.Group("/downloads")
 	downloads.GET("/", a.DownloadsIndexHandler)
 	downloads.POST("/", a.DownloadsCreateHandler)
@@ -136,6 +139,7 @@ func (a *Application) Routes() {
 	file.PATCH("/:id", a.FileSettingsHandler)
 	file.DELETE("/:id", a.FileDeleteHandler)
 	file.GET("/missing", a.FileMissingHandler)
+	file.GET("/list", a.FileListHandler)
 
 	hooks := a.Router.Group("/hooks")
 	hooks.POST("/plex", a.HooksPlexHandler)
@@ -262,6 +266,7 @@ func (a *Application) indexHandler(c echo.Context) error {
 			"collections":      "/collections",
 			"combinations":     "/combinations",
 			"config":           "/config",
+			"directory":        "/directory",
 			"downloads":        "/downloads",
 			"episodes":         "/episodes",
 			"feeds":            "/feeds",
@@ -369,6 +374,14 @@ func (a *Application) ConfigSettingsHandler(c echo.Context) error {
 		return err
 	}
 	return a.ConfigSettings(c, id, settings)
+}
+
+// Directory (/directory)
+func (a *Application) DirectoryIndexHandler(c echo.Context) error {
+	path := router.QueryParamString(c, "path")
+	page := router.QueryParamIntDefault(c, "page", "1")
+	limit := router.QueryParamIntDefault(c, "limit", "50")
+	return a.DirectoryIndex(c, path, page, limit)
 }
 
 // Downloads (/downloads)
@@ -534,7 +547,14 @@ func (a *Application) FileDeleteHandler(c echo.Context) error {
 func (a *Application) FileMissingHandler(c echo.Context) error {
 	page := router.QueryParamIntDefault(c, "page", "1")
 	limit := router.QueryParamIntDefault(c, "limit", "50")
-	return a.FileMissing(c, page, limit)
+	medium_id := router.QueryParamString(c, "medium_id")
+	return a.FileMissing(c, page, limit, medium_id)
+}
+func (a *Application) FileListHandler(c echo.Context) error {
+	page := router.QueryParamIntDefault(c, "page", "1")
+	limit := router.QueryParamIntDefault(c, "limit", "50")
+	medium_id := router.QueryParamString(c, "medium_id")
+	return a.FileList(c, page, limit, medium_id)
 }
 
 // Hooks (/hooks)

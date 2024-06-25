@@ -1,0 +1,19 @@
+name: directory
+path: /directory
+routes:
+  - name: index
+    path: /index
+    method: GET
+    result: "[]*Directory"
+    params:
+      - name: path
+        type: string
+        query: true
+      - name: page
+        type: int
+        default: 1
+        query: true
+      - name: limit
+        type: int
+        default: 50
+        query: true

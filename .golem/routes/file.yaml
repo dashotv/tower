@@ -10,9 +10,28 @@ routes:
     params:
       - name: page
         type: int
-        default: 1
+        default: "1"
         query: true
       - name: limit
         type: int
-        default: 50
+        default: "50"
+        query: true
+      - name: medium_id
+        type: string
+        query: true
+  - name: list
+    path: /list
+    method: GET
+    result: "[]*File"
+    params:
+      - name: page
+        type: int
+        default: "1"
+        query: true
+      - name: limit
+        type: int
+        default: "50"
+        query: true
+      - name: medium_id
+        type: string
         query: true

@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+
+	"github.com/dashotv/fae"
 )
 
 // GET /file/
@@ -16,7 +18,7 @@ func (a *Application) FileIndex(c echo.Context, page int, limit int) error {
 }
 
 // GET /file/missing
-func (a *Application) FileMissing(c echo.Context, page int, limit int) error {
+func (a *Application) FileMissing(c echo.Context, page int, limit int, medium_id string) error {
 	list, total, err := a.DB.FileMissing(page, limit)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error loading File"})
@@ -86,4 +88,20 @@ func (a *Application) FileDelete(c echo.Context, id string) error {
 		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error deleting File"})
 	}
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
+}
+
+// GET /file/list
+func (a *Application) FileList(c echo.Context, page int, limit int, medium_id string) error {
+	if medium_id != "" {
+		list, total, err := a.DB.DirectoryFiles(medium_id, page, limit)
+		if err != nil {
+			return fae.Wrap(err, "directory files")
+		}
+		return c.JSON(http.StatusOK, &Response{Error: false, Result: list, Total: total})
+	}
+	list, total, err := a.DB.FileList(page, limit)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error loading File"})
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list, Total: total})
 }

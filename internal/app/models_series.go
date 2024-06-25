@@ -224,6 +224,25 @@ func (c *Connector) SeriesSeasonEpisodesAll(id string) ([]*Episode, error) {
 	return eps, nil
 }
 
+func (c *Connector) SeriesEpisodeIDs(id primitive.ObjectID, skip, limit int) ([]primitive.ObjectID, error) {
+	eps, err := c.Episode.Query().Where("series_id", id).
+		Asc("season_number").
+		Asc("episode_number").
+		Asc("absolute_number").
+		Limit(-1).
+		Run()
+	if err != nil {
+		return nil, err
+	}
+
+	var out []primitive.ObjectID
+	for _, e := range eps {
+		out = append(out, e.ID)
+	}
+
+	return out, nil
+}
+
 func (c *Connector) SeriesSetting(id, setting string, value bool) error {
 	s := &Series{}
 	err := c.Series.Find(id, s)

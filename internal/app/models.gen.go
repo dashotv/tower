@@ -275,6 +275,12 @@ type CombinationChild struct { // struct
 	UpdatedAt    int64  `bson:"updated_at" json:"updated_at"`
 }
 
+type Directory struct { // struct
+	Name  string `bson:"name" json:"name"`
+	Path  string `bson:"path" json:"path"`
+	Count int64  `bson:"count" json:"count"`
+}
+
 type Download struct { // model
 	grimoire.Document `bson:",inline"` // includes default model settings
 	//ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`

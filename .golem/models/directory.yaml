@@ -1,0 +1,9 @@
+name: directory
+type: struct
+fields:
+  - name: name
+    type: string
+  - name: path
+    type: string
+  - name: count
+    type: int64
