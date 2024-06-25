@@ -524,7 +524,7 @@ func (a *Application) downloadsMove() error {
 		dirs = lo.Uniq(dirs)
 
 		for _, dir := range dirs {
-			notifier.Log.Info("downloads: refresh: ", dir)
+			notifier.Log.Info("refresh", dir)
 			err := a.Plex.RefreshLibraryPath(dir)
 			if err != nil {
 				return fae.Wrap(err, "failed to refresh library")
