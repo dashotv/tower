@@ -169,6 +169,9 @@ func (a *Application) Routes() {
 	library_type.PATCH("/:id", a.LibraryTypeSettingsHandler)
 	library_type.DELETE("/:id", a.LibraryTypeDeleteHandler)
 
+	medium := a.Router.Group("/medium")
+	medium.GET("/medium/:id", a.MediumShowHandler)
+
 	messages := a.Router.Group("/messages")
 	messages.GET("/", a.MessagesIndexHandler)
 	messages.POST("/", a.MessagesCreateHandler)
@@ -275,6 +278,7 @@ func (a *Application) indexHandler(c echo.Context) error {
 			"library":          "/library",
 			"library_template": "/library_template",
 			"library_type":     "/library_type",
+			"medium":           "/medium",
 			"messages":         "/messages",
 			"movies":           "/movies",
 			"paths":            "/paths",
@@ -681,6 +685,12 @@ func (a *Application) LibraryTypeSettingsHandler(c echo.Context) error {
 func (a *Application) LibraryTypeDeleteHandler(c echo.Context) error {
 	id := c.Param("id")
 	return a.LibraryTypeDelete(c, id)
+}
+
+// Medium (/medium)
+func (a *Application) MediumShowHandler(c echo.Context) error {
+	id := c.Param("id")
+	return a.MediumShow(c, id)
 }
 
 // Messages (/messages)

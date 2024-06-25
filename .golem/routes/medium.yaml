@@ -1,0 +1,10 @@
+name: medium
+path: /medium
+routes:
+  - name: show
+    path: /medium/:id
+    method: GET
+    result: "*Medium"
+    params:
+      - name: id
+        type: string

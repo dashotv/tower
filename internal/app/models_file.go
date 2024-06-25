@@ -155,7 +155,7 @@ func (c *Connector) DirectoryMedia(library string, page, limit int) ([]*Director
 		if err != nil {
 			c.Log.Errorf("counting files for medium %s: %v", m.ID.Hex(), err)
 		}
-		return &Directory{Name: m.Title, Path: fmt.Sprintf("%s%c%s", lib.ID.Hex(), filepath.Separator, m.ID.Hex()), Count: count}
+		return &Directory{Name: m.Title, Path: fmt.Sprintf("%s%c%s", lib.Name, filepath.Separator, m.ID.Hex()), Count: count}
 	})
 
 	return list, total, nil
