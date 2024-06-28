@@ -15,3 +15,9 @@ fields:
     type: string
   - name: status
     type: string
+  - name: status_detail
+    type: string
+  - name: status_par
+    type: string
+  - name: status_unpack
+    type: string

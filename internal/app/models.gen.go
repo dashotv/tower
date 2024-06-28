@@ -539,13 +539,16 @@ type Movie struct { // model
 }
 
 type NzbgetPayload struct { // struct
-	ID       string `bson:"id" json:"id"`
-	Name     string `bson:"name" json:"name"`
-	Category string `bson:"category" json:"category"`
-	Dir      string `bson:"dir" json:"dir"`
-	FinalDir string `bson:"final_dir" json:"final_dir"`
-	File     string `bson:"file" json:"file"`
-	Status   string `bson:"status" json:"status"`
+	ID           string `bson:"id" json:"id"`
+	Name         string `bson:"name" json:"name"`
+	Category     string `bson:"category" json:"category"`
+	Dir          string `bson:"dir" json:"dir"`
+	FinalDir     string `bson:"final_dir" json:"final_dir"`
+	File         string `bson:"file" json:"file"`
+	Status       string `bson:"status" json:"status"`
+	StatusDetail string `bson:"status_detail" json:"status_detail"`
+	StatusPar    string `bson:"status_par" json:"status_par"`
+	StatusUnpack string `bson:"status_unpack" json:"status_unpack"`
 }
 
 type Path struct { // struct
