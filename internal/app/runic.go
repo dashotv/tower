@@ -23,6 +23,9 @@ func (a *Application) RunicFindEpisode(seriesID primitive.ObjectID, title, type_
 	if err != nil {
 		return nil, fae.Wrap(err, "parsing title")
 	}
+	if info.Season == 0 && info.Episode == 0 {
+		return nil, nil
+	}
 
 	q := app.DB.Episode.Query().Where("series_id", seriesID).Asc("season_number").Asc("episode_number").Asc("absolute_number")
 	if type_ == "anime" {
