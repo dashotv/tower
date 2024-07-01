@@ -460,13 +460,26 @@ func (db *Connector) processDownloadExtraTorrent(d *Download, t *qbt.TorrentJSON
 		return item.TorrentFile != nil && item.MediumID != primitive.NilObjectID
 	})
 	ignored := lo.Filter(d.Files, func(item *DownloadFile, index int) bool {
-		return item.TorrentFile == nil || item.MediumID == primitive.NilObjectID
+		return item.MediumID == primitive.NilObjectID
+	})
+	missing := lo.Filter(d.Files, func(item *DownloadFile, index int) bool {
+		return item.TorrentFile == nil
 	})
 
 	slices.SortFunc(selected, func(a, b *DownloadFile) int {
+		if a.Medium == nil || b.Medium == nil {
+			return strings.Compare(a.TorrentFile.Name, b.TorrentFile.Name)
+		}
+		return strings.Compare(
+			fmt.Sprintf("%d %d %d %s %s", a.Medium.AbsoluteNumber, a.Medium.SeasonNumber, a.Medium.EpisodeNumber, a.Medium.Title, a.Medium.Display),
+			fmt.Sprintf("%d %d %d %s %s", b.Medium.AbsoluteNumber, b.Medium.SeasonNumber, b.Medium.EpisodeNumber, b.Medium.Title, b.Medium.Display),
+		)
+	})
+	slices.SortFunc(ignored, func(a, b *DownloadFile) int {
 		return strings.Compare(a.TorrentFile.Name, b.TorrentFile.Name)
 	})
 	d.Files = append(selected, ignored...)
+	d.Files = append(d.Files, missing...)
 
 	return nil
 }
