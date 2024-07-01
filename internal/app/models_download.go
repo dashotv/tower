@@ -75,7 +75,11 @@ func (d *Download) SortedFileNums(t *qbt.Torrent) ([]string, error) {
 		if df.MediumID.IsZero() {
 			return fmt.Sprintf("100%03d", df.Num)
 		}
-		return fmt.Sprintf("%03d%03d", df.Medium.SeasonNumber, df.Medium.EpisodeNumber)
+		s := df.Medium.SeasonNumber
+		if s == 0 {
+			s = 100 // sort specials last
+		}
+		return fmt.Sprintf("%03d%03d", s, df.Medium.EpisodeNumber)
 	})
 
 	keys := lo.Keys(grouped)
@@ -471,8 +475,8 @@ func (db *Connector) processDownloadExtraTorrent(d *Download, t *qbt.TorrentJSON
 			return strings.Compare(a.TorrentFile.Name, b.TorrentFile.Name)
 		}
 		return strings.Compare(
-			fmt.Sprintf("%d %d %d %s %s", a.Medium.AbsoluteNumber, a.Medium.SeasonNumber, a.Medium.EpisodeNumber, a.Medium.Title, a.Medium.Display),
-			fmt.Sprintf("%d %d %d %s %s", b.Medium.AbsoluteNumber, b.Medium.SeasonNumber, b.Medium.EpisodeNumber, b.Medium.Title, b.Medium.Display),
+			fmt.Sprintf("%03d %03d %03d %s %s", a.Medium.AbsoluteNumber, a.Medium.SeasonNumber, a.Medium.EpisodeNumber, a.Medium.Title, a.Medium.Display),
+			fmt.Sprintf("%03d %03d %03d %s %s", b.Medium.AbsoluteNumber, b.Medium.SeasonNumber, b.Medium.EpisodeNumber, b.Medium.Title, b.Medium.Display),
 		)
 	})
 	slices.SortFunc(ignored, func(a, b *DownloadFile) int {
