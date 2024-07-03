@@ -7,7 +7,7 @@ require (
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/dashotv/fae v0.1.9
 	github.com/dashotv/flame v0.10.6
-	github.com/dashotv/golem v0.14.27
+	github.com/dashotv/golem v0.14.30
 	github.com/dashotv/grimoire v0.5.10
 	github.com/dashotv/mercury v0.3.2
 	github.com/dashotv/minion v0.4.14
@@ -26,7 +26,7 @@ require (
 	github.com/philippgille/gokv/redis v0.7.0
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.5.3
-	github.com/samber/lo v1.39.0
+	github.com/samber/lo v1.44.0
 	github.com/sourcegraph/conc v0.3.0
 	github.com/spf13/cobra v1.8.1
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091

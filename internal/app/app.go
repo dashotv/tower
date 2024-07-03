@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"go.elastic.co/apm/module/apmechov4/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.uber.org/zap"
 
@@ -70,6 +69,12 @@ type Application struct {
 	Libs          map[string]*Library
 }
 
+type Plugin interface {
+	Name() string
+	Setup() error
+	Start(context.Context) error
+}
+
 func Setup() error {
 	if app != nil {
 		return fae.New("application already setup")
@@ -108,9 +113,6 @@ func Start() error {
 	// 	fmt.Printf("res: %s\n", resBody)
 	// }))
 	app.Engine.HTTPErrorHandler = customHTTPErrorHandler
-	app.Engine.Use(apmechov4.Middleware())
-	app.Default.Use(apmechov4.Middleware())
-	app.Router.Use(apmechov4.Middleware())
 
 	for _, f := range starters {
 		if err := f(ctx, app); err != nil {
