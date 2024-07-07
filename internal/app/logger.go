@@ -19,8 +19,6 @@ func setupLogger(app *Application) (err error) {
 		log := zap.New(zapcore.NewCore(logging.NewEncoder(verbosity, isTTY), logStdoutWriter, zapcore.DebugLevel))
 		app.Log = log.Sugar().Named("app")
 	case "release":
-		// zapcfg := zap.NewProductionConfig()
-		// zapcfg.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
 		log, err := zap.NewProduction()
 		app.Log = log.Sugar().Named("app")
 		if err != nil {

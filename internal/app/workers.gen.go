@@ -61,9 +61,6 @@ func setupWorkers(app *Application) error {
 	if err := minion.Register[*PathCleanupAll](m, &PathCleanupAll{}); err != nil {
 		return fae.Wrap(err, "registering worker: PathCleanupAll (PathCleanupAll)")
 	}
-	if _, err := m.Schedule("0 0 10 * * 0", &PathCleanupAll{}); err != nil {
-		return fae.Wrap(err, "scheduling worker: PathCleanupAll (PathCleanupAll)")
-	}
 
 	if err := minion.Register[*CleanPlexPins](m, &CleanPlexPins{}); err != nil {
 		return fae.Wrap(err, "registering worker: clean_plex_pins (CleanPlexPins)")
@@ -111,9 +108,6 @@ func setupWorkers(app *Application) error {
 	if err := minion.Register[*FileMatchAnime](m, &FileMatchAnime{}); err != nil {
 		return fae.Wrap(err, "registering worker: file_match_anime (FileMatchAnime)")
 	}
-	if _, err := m.Schedule("0 0 11 * * *", &FileMatchAnime{}); err != nil {
-		return fae.Wrap(err, "scheduling worker: file_match_anime (FileMatchAnime)")
-	}
 
 	if err := minion.RegisterWithQueue[*FileMatchDir](m, &FileMatchDir{}, "paths"); err != nil {
 		return fae.Wrap(err, "registering worker: file_match_dir (FileMatchDir)")
@@ -121,9 +115,6 @@ func setupWorkers(app *Application) error {
 
 	if err := minion.Register[*FileMatchDonghua](m, &FileMatchDonghua{}); err != nil {
 		return fae.Wrap(err, "registering worker: file_match_donghua (FileMatchDonghua)")
-	}
-	if _, err := m.Schedule("0 0 11 * * *", &FileMatchDonghua{}); err != nil {
-		return fae.Wrap(err, "scheduling worker: file_match_donghua (FileMatchDonghua)")
 	}
 
 	if err := minion.Register[*FileMatchKind](m, &FileMatchKind{}); err != nil {
@@ -203,7 +194,7 @@ func setupWorkers(app *Application) error {
 	if err := minion.RegisterWithQueue[*PathManageAll](m, &PathManageAll{}, "paths"); err != nil {
 		return fae.Wrap(err, "registering worker: path_manage_all (PathManageAll)")
 	}
-	if _, err := m.Schedule("0 0 12 * * *", &PathManageAll{}); err != nil {
+	if _, err := m.Schedule("0 0 11 * * *", &PathManageAll{}); err != nil {
 		return fae.Wrap(err, "scheduling worker: path_manage_all (PathManageAll)")
 	}
 
