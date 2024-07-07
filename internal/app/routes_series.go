@@ -328,24 +328,25 @@ func (a *Application) SeriesBackgrounds(c echo.Context, id string) error {
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: backgrounds})
 }
 
-func seriesJob(name string, id string) error {
+func seriesJob(name string, id string) (string, error) {
 	switch name {
 	case "refresh":
-		return app.Workers.Enqueue(&SeriesUpdate{ID: id})
+		return app.Workers.EnqueueID(&SeriesUpdate{ID: id})
 	case "paths":
-		return app.Workers.Enqueue(&PathManage{MediumID: id})
+		return app.Workers.EnqueueID(&PathManage{MediumID: id})
 	case "rename":
-		return app.Workers.Enqueue(&FilesRenameMedium{ID: id})
+		return app.Workers.EnqueueID(&FilesRenameMedium{ID: id})
 	default:
-		return fae.Errorf("unknown job: %s", name)
+		return "", fae.Errorf("unknown job: %s", name)
 	}
 }
 
 // POST /series/:id/jobs
 func (a *Application) SeriesJobs(c echo.Context, id string, name string) error {
-	if err := seriesJob(name, id); err != nil {
-		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
+	id, err := seriesJob(name, id)
+	if err != nil {
+		return fae.Wrap(err, "enqueueing job")
 	}
 
-	return c.JSON(http.StatusOK, &Response{Error: false})
+	return c.JSON(http.StatusOK, &Response{Error: false, Message: id})
 }
