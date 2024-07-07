@@ -33,6 +33,21 @@ type Media struct {
 	Has64BitOffsets       *bool   `json:"has64bitOffsets,omitempty"`
 }
 
+func (m *Media) GetVideoResolution() int {
+	switch m.VideoResolution {
+	case "480", "sd", "576":
+		return 480
+	case "720":
+		return 720
+	case "1080", "2k":
+		return 1080
+	case "2160", "4k":
+		return 2160
+	default:
+		return 0
+	}
+}
+
 type Part struct {
 	ID                    int64   `json:"id"`
 	Key                   string  `json:"key"`

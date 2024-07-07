@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/samber/lo"
 
@@ -144,17 +143,21 @@ func (j *FileMatchMedium) Timeout(job *minion.Job[*FileMatchMedium]) time.Durati
 	return 60 * time.Minute
 }
 func (j *FileMatchMedium) Work(ctx context.Context, job *minion.Job[*FileMatchMedium]) error {
-	l := app.Log.Named("files.match.medium")
+	a := ContextApp(ctx)
+	if a == nil {
+		return fae.Errorf("no app context")
+	}
+	l := a.Log.Named("files.match.medium")
 
 	m := &Medium{}
-	if err := app.DB.Medium.Find(job.Args.ID, m); err != nil {
+	if err := a.DB.Medium.Find(job.Args.ID, m); err != nil {
 		l.Errorw("find", "error", err)
 		return fae.Wrap(err, "finding")
 	}
 
 	dest := m.Destination()
-	dir := filepath.Join(app.Config.DirectoriesCompleted, dest)
-	if err := app.Workers.Enqueue(&FileMatchDir{Dir: dir}); err != nil {
+	dir := filepath.Join(a.Config.DirectoriesCompleted, dest)
+	if err := a.Workers.Enqueue(&FileMatchDir{Dir: dir}); err != nil {
 		l.Errorw("enqueue", "error", err)
 		return fae.Wrap(err, "enqueue")
 	}
@@ -172,6 +175,11 @@ func (j *FileMatchDir) Timeout(job *minion.Job[*FileMatchDir]) time.Duration {
 	return 60 * time.Minute
 }
 func (j *FileMatchDir) Work(ctx context.Context, job *minion.Job[*FileMatchDir]) error {
+	a := ContextApp(ctx)
+	if a == nil {
+		return fae.Errorf("no app context")
+	}
+
 	dir := job.Args.Dir
 	l := app.Log.Named("files.match.dir").With("dir", dir)
 	l.Debugf("running")
@@ -181,63 +189,7 @@ func (j *FileMatchDir) Work(ctx context.Context, job *minion.Job[*FileMatchDir])
 		return nil
 	}
 
-	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			l.Errorw("walk", "error", err)
-			return fae.Wrap(err, "walking")
-		}
-
-		if d.IsDir() {
-			if path != dir {
-				return app.Workers.Enqueue(&FileMatchDir{Dir: path})
-			}
-			return nil
-		}
-
-		if filepath.Base(path)[0] == '.' {
-			return nil
-		}
-
-		filetype := fileType(path)
-		if filetype == "" {
-			l.Warnf("path: unknown type: %s", path)
-			return nil
-		}
-
-		kind, name, file, ext, err := pathParts(path)
-		if err != nil {
-			l.Errorw("parts", "error", err)
-			return nil
-		}
-		local := fmt.Sprintf("%s/%s/%s", kind, name, file)
-
-		m, ok, err := app.DB.MediumBy(kind, name, file, ext)
-		if err != nil {
-			l.Errorw("medium", "error", err)
-			return nil
-		}
-		if ok {
-			return nil
-		}
-		if m == nil {
-			l.Warnw("medium", "not found", local)
-			return nil
-		}
-
-		m.Completed = true
-		m.Paths = append(m.Paths, &Path{Type: primitive.Symbol(filetype), Local: local, Extension: ext})
-		if err := app.DB.Medium.Save(m); err != nil {
-			l.Errorw("save", "error", err)
-			return fae.Wrap(err, "saving")
-		}
-
-		return nil
-	})
-	if err != nil {
-		l.Errorw("walk", "error", err)
-		return fae.Wrap(err, "walking")
-	}
-	return nil
+	return a.fileMatchDir(dir)
 }
 
 type FileMatchAnime struct {

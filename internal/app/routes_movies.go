@@ -239,9 +239,9 @@ func moviesJob(name string, id string) error {
 	case "refresh":
 		return app.Workers.Enqueue(&MovieUpdate{ID: id})
 	case "paths":
-		return app.Workers.Enqueue(&PathCleanup{ID: id})
-	case "files":
-		return app.Workers.Enqueue(&FileMatchMedium{ID: id})
+		return app.Workers.Enqueue(&PathManage{MediumID: id})
+	case "rename":
+		return app.Workers.Enqueue(&FilesRenameMedium{ID: id})
 	default:
 		return fae.Errorf("unknown job: %s", name)
 	}

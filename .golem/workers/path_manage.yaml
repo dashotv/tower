@@ -1,0 +1,4 @@
+name: path_manage
+fields:
+    - name: medium_id
+      type: string

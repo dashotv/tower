@@ -107,9 +107,6 @@ func setupWorkers(app *Application) error {
 	if err := minion.RegisterWithQueue[*FileMatch](m, &FileMatch{}, "paths"); err != nil {
 		return fae.Wrap(err, "registering worker: file_match (FileMatch)")
 	}
-	if _, err := m.Schedule("0 0 12 * * 0", &FileMatch{}); err != nil {
-		return fae.Wrap(err, "scheduling worker: file_match (FileMatch)")
-	}
 
 	if err := minion.Register[*FileMatchAnime](m, &FileMatchAnime{}); err != nil {
 		return fae.Wrap(err, "registering worker: file_match_anime (FileMatchAnime)")
@@ -197,6 +194,17 @@ func setupWorkers(app *Application) error {
 
 	if err := minion.RegisterWithQueue[*PathImport](m, &PathImport{}, "paths"); err != nil {
 		return fae.Wrap(err, "registering worker: path_import (PathImport)")
+	}
+
+	if err := minion.Register[*PathManage](m, &PathManage{}); err != nil {
+		return fae.Wrap(err, "registering worker: path_manage (PathManage)")
+	}
+
+	if err := minion.RegisterWithQueue[*PathManageAll](m, &PathManageAll{}, "paths"); err != nil {
+		return fae.Wrap(err, "registering worker: path_manage_all (PathManageAll)")
+	}
+	if _, err := m.Schedule("0 0 12 * * *", &PathManageAll{}); err != nil {
+		return fae.Wrap(err, "scheduling worker: path_manage_all (PathManageAll)")
 	}
 
 	if err := minion.Register[*PlexCollectionUpdate](m, &PlexCollectionUpdate{}); err != nil {

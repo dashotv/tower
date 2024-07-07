@@ -50,6 +50,10 @@ func (j *PlexWebhook) LibraryNew(ctx context.Context, payload *plex.WebhookPaylo
 		return fae.Wrap(err, "save")
 	}
 
+	if err := a.Workers.Enqueue(&PlexFiles{}); err != nil {
+		return fae.Wrap(err, "enqueue files")
+	}
+
 	return nil
 }
 

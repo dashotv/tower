@@ -2,7 +2,10 @@ package app
 
 import (
 	"context"
+	"fmt"
+	"io/fs"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/samber/lo"
@@ -14,6 +17,185 @@ import (
 
 var TYPES = []string{"Movie", "Series", "Episode"}
 
+type PathManageAll struct {
+	minion.WorkerDefaults[*PathManageAll]
+}
+
+func (j *PathManageAll) Kind() string { return "path_manage_all" }
+func (j *PathManageAll) Work(ctx context.Context, job *minion.Job[*PathManageAll]) error {
+	a := ContextApp(ctx)
+	//l := a.Workers.Log.Named("path_manage_all")
+	err := a.DB.Medium.Query().In("_type", []string{"Movie", "Series"}).Each(100, func(m *Medium) error {
+		return a.Workers.Enqueue(&PathManage{MediumID: m.ID.Hex()})
+	})
+	if err != nil {
+		return fae.Wrap(err, "find media")
+	}
+	return nil
+}
+
+// PathManage removes missing paths and updates path metadata from Plex
+type PathManage struct {
+	minion.WorkerDefaults[*PathManage]
+	MediumID string `bson:"medium_id" json:"medium_id"`
+}
+
+func (j *PathManage) Kind() string { return "path_manage" }
+func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) error {
+	a := ContextApp(ctx)
+	if a == nil {
+		return fae.New("no app in context")
+	}
+
+	// l := a.Workers.Log.Named("path_manage")
+	MediumID := job.Args.MediumID
+
+	if a.PlexFileCache == nil {
+		return fae.New("no plex file cache")
+	}
+	if a.PlexFileCache.files == nil {
+		return fae.New("no plex file cache files")
+	}
+
+	media := []*Medium{}
+
+	medium := &Medium{}
+	if err := app.DB.Medium.Find(MediumID, medium); err != nil {
+		return fae.Wrap(err, "find medium")
+	}
+
+	lib, ok := a.Libs[string(medium.Kind)]
+	if !ok {
+		return fae.Errorf("library not found: %s", medium.Kind)
+	}
+
+	if err := a.fileMatchDir(fmt.Sprintf("%s/%s", lib.Path, medium.Directory)); err != nil {
+		return fae.Wrap(err, "file match dir")
+	}
+
+	media = append(media, medium)
+	if medium.Type == "Series" {
+		err := app.DB.Medium.Query().Where("_type", "Episode").Where("series_id", medium.ID).Each(100, func(e *Medium) error {
+			media = append(media, e)
+			return nil
+		})
+		if err != nil {
+			return fae.Wrap(err, "find episodes")
+		}
+	}
+
+	for _, m := range media {
+		newPaths := []*Path{}
+		for _, path := range m.Paths {
+			if !path.Exists() && !path.IsCoverBackground() {
+				a.Log.Warnf("path does not exist: %s", path.LocalPath())
+				continue
+			}
+
+			newPaths = append(newPaths, path)
+			if !path.IsVideo() {
+				// keep path, but don't process
+				continue
+			}
+
+			if err := a.pathImport(path); err != nil {
+				return fae.Wrap(err, "path import")
+			}
+		}
+
+		m.Paths = newPaths
+		if err := app.DB.Medium.Save(m); err != nil {
+			return fae.Wrap(err, "save path")
+		}
+	}
+	return nil
+}
+
+func (a *Application) pathImport(path *Path) error {
+	f := path.LocalPath()
+	if a.PlexFileCache.files[f] == nil {
+		a.Log.Warnf("path not in cache: %s", f)
+		return nil
+	}
+
+	meta := a.PlexFileCache.files[f]
+	if len(meta.Media) == 0 {
+		a.Log.Warnf("no media in cache: %s", f)
+		return nil
+	}
+	path.Bitrate = int(meta.Media[0].Bitrate)
+	path.Resolution = meta.Media[0].GetVideoResolution()
+
+	if len(meta.Media[0].Part) == 0 {
+		a.Log.Warnf("no parts in cache: %s", f)
+		return nil
+	}
+	path.Size = meta.Media[0].Part[0].Size
+
+	return nil
+}
+
+func (a *Application) fileMatchDir(dir string) error {
+	l := a.Log.Named("file_match_dir")
+	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			l.Errorw("walk", "error", err)
+			return fae.Wrap(err, "walking")
+		}
+
+		if d.IsDir() {
+			if path != dir {
+				return app.Workers.Enqueue(&FileMatchDir{Dir: path})
+			}
+			return nil
+		}
+
+		if filepath.Base(path)[0] == '.' {
+			return nil
+		}
+
+		filetype := fileType(path)
+		if filetype == "" {
+			l.Warnf("path: unknown type: %s", path)
+			return nil
+		}
+
+		kind, name, file, ext, err := pathParts(path)
+		if err != nil {
+			l.Errorw("parts", "error", err)
+			return nil
+		}
+		local := fmt.Sprintf("%s/%s/%s", kind, name, file)
+
+		m, ok, err := app.DB.MediumBy(kind, name, file, ext)
+		if err != nil {
+			l.Errorw("medium", "error", err)
+			return nil
+		}
+		if ok {
+			return nil
+		}
+		if m == nil {
+			l.Warnw("medium", "not found", local)
+			return nil
+		}
+
+		m.Completed = true
+		m.Paths = append(m.Paths, &Path{Type: primitive.Symbol(filetype), Local: local, Extension: ext})
+		if err := app.DB.Medium.Save(m); err != nil {
+			l.Errorw("save", "error", err)
+			return fae.Wrap(err, "saving")
+		}
+
+		return nil
+	})
+	if err != nil {
+		l.Errorw("walk", "error", err)
+		return fae.Wrap(err, "walking")
+	}
+	return nil
+}
+
 type PathImport struct {
 	minion.WorkerDefaults[*PathImport]
 	ID     string `bson:"id" json:"id"`           // medium
@@ -24,53 +206,36 @@ type PathImport struct {
 func (j *PathImport) Kind() string                                       { return "PathImport" }
 func (j *PathImport) Timeout(job *minion.Job[*PathImport]) time.Duration { return 300 * time.Second }
 func (j *PathImport) Work(ctx context.Context, job *minion.Job[*PathImport]) error {
+	a := ContextApp(ctx)
+	if a == nil {
+		return fae.New("no app in context")
+	}
+
 	m := &Medium{}
-	if err := app.DB.Medium.Find(job.Args.ID, m); err != nil {
+	if err := a.DB.Medium.Find(job.Args.ID, m); err != nil {
 		return fae.Wrap(err, "find medium")
 	}
 
 	list := lo.Filter(m.Paths, func(p *Path, i int) bool {
 		return p.ID.Hex() == job.Args.PathID
 	})
-	if len(list) == 0 {
-		return fae.New("no matching path in list")
-	}
-	if len(list) > 1 {
-		return fae.New("multiple paths found")
+	if len(list) != 1 {
+		return fae.New("matching path")
 	}
 
 	path := list[0]
 	if !path.Exists() {
-		return fae.Errorf("path does not exist: %s", path.LocalPath())
+		return nil
 	}
 
-	stat, err := os.Stat(path.LocalPath())
-	if err != nil {
-		return fae.Wrap(err, "stat path")
+	if !path.IsVideo() {
+		// keep path, but don't process
+		return nil
 	}
 
-	path.UpdatedAt = stat.ModTime()
-	path.Size = stat.Size()
-	path.Type = primitive.Symbol(fileType(path.LocalPath()))
-
-	// if path.IsVideo() && lo.Contains(app.Config.ExtensionsSubtitles, path.Extension) {
-	// 	path.Type = "subtitle"
-	// }
-
-	// 	if path.IsVideo() {
-	// 		if sum, err := sumFile(path.LocalPath()); err == nil {
-	// 			path.Checksum = sum
-	// 		} else {
-	// 			app.Workers.Log.Errorf("failed to checksum file: %s", err)
-	// 		}
-	//
-	// 		if v, err := vidio.NewVideo(path.LocalPath()); err == nil {
-	// 			path.Resolution = v.Height()
-	// 			path.Bitrate = v.Bitrate()
-	// 		} else {
-	// 			app.Workers.Log.Warnf("failed to get video info: %s", err)
-	// 		}
-	// 	}
+	if err := a.pathImport(path); err != nil {
+		return fae.Wrap(err, "path import")
+	}
 
 	if err := app.DB.Medium.Save(m); err != nil {
 		return fae.Wrap(err, "save path")

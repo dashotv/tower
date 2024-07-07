@@ -2,16 +2,17 @@ package app
 
 import (
 	"context"
-	"fmt"
+	"time"
 
 	"github.com/dashotv/fae"
 	"github.com/dashotv/tower/internal/plex"
 )
 
+var buildPlexCacheMutex = &CtxMutex{ch: make(chan struct{}, 1)}
+
 func init() {
 	initializers = append(initializers, setupPlex)
-	initializers = append(initializers, setupPlexFiles)
-	// starters = append(starters, startPlexFiles)
+	starters = append(starters, startPlexFiles)
 }
 
 func setupPlex(app *Application) error {
@@ -30,9 +31,8 @@ func setupPlex(app *Application) error {
 	return nil
 }
 
-func setupPlexFiles(a *Application) error {
-	a.PlexFileCache = &plexFileCache{files: make(map[string]string)}
-	return nil
+func startPlexFiles(ctx context.Context, a *Application) error {
+	return a.Workers.Enqueue(&PlexFiles{})
 }
 
 func (a *Application) plexHistoryWatched(list []*plex.SessionMetadata) error {
@@ -115,7 +115,7 @@ func (a *Application) plexAccountTitle(id int64) (string, error) {
 // }
 
 type plexFileCache struct {
-	files map[string]string
+	files map[string]*plex.LeavesMetadata
 }
 
 func plexLibType(t string) string {
@@ -129,12 +129,21 @@ func plexLibType(t string) string {
 }
 
 func buildPlexCache(ctx context.Context) (*plexFileCache, error) {
+	muctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
+	if !buildPlexCacheMutex.Lock(muctx) {
+		app.Log.Named("buildPlexCache").Warn("failed to lock mutex")
+		return nil, nil
+	}
+	defer buildPlexCacheMutex.Unlock()
+
 	a := ContextApp(ctx)
 	if a == nil {
 		return nil, fae.New("no app context")
 	}
 
-	cache := &plexFileCache{files: make(map[string]string)}
+	cache := &plexFileCache{files: make(map[string]*plex.LeavesMetadata)}
 
 	libs, err := a.Plex.GetLibraries()
 	if err != nil {
@@ -172,7 +181,7 @@ func buildPlexCache(ctx context.Context) (*plexFileCache, error) {
 						}
 
 						if _, ok := cache.files[part.File]; !ok {
-							cache.files[part.File] = fmt.Sprintf("%s", item.RatingKey)
+							cache.files[part.File] = item
 						}
 					}
 				}
