@@ -62,7 +62,7 @@ func (i *Importer) loadEpisodesMap(tvdbid int64, episodeOrder int) (map[int64]*E
 		return nil, fae.New("translated: no data")
 	}
 	if trans.Data.Episodes == nil || len(trans.Data.Episodes) == 0 {
-		return nil, fae.New("translated: no episodes")
+		return episodeMap, nil
 	}
 	for _, e := range trans.Data.Episodes {
 		if ep, ok := episodeMap[tvdb.Int64Value(e.ID)]; ok {
