@@ -104,6 +104,10 @@ func (a *Application) downloadsCreate() error {
 	if err != nil {
 		return fae.Wrap(err, "failed to get series download counts")
 	}
+	seriesMulti, err := a.DB.SeriesMultiDownloads()
+	if err != nil {
+		return fae.Wrap(err, "failed to get series multi")
+	}
 
 	list, err := a.DB.UpcomingNow()
 	if err != nil {
@@ -122,7 +126,7 @@ func (a *Application) downloadsCreate() error {
 			return fae.Wrap(err, "failed to get unwatched")
 		}
 
-		if unwatched+seriesDownloads[ep.SeriesID.Hex()] >= 3 {
+		if unwatched+seriesDownloads[ep.SeriesID.Hex()] >= 3 || seriesMulti[ep.SeriesID.Hex()] {
 			continue
 		}
 
@@ -468,7 +472,7 @@ func (a *Application) downloadsMove() error {
 
 		if d.Multi && d.Medium.Type == "Series" {
 			// update medium and add path
-			if files != nil && len(files) > 0 {
+			if files != nil && len(files) > 0 && a.Config.Production {
 				moved = append(moved, files...)
 				if err := a.updateMedia(files); err != nil {
 					return d.Error(fae.Wrap(err, "update medium"))
@@ -497,27 +501,29 @@ func (a *Application) downloadsMove() error {
 
 		moved = append(moved, files...)
 
-		// update medium and add path
-		if err := a.updateMedia(files); err != nil {
-			return d.Error(fae.Wrap(err, "update medium"))
-		}
-
-		if d.IsTorrent() {
-			if err := a.FlameTorrentRemove(d.Thash); err != nil {
-				return fae.Wrap(err, "failed to remove torrent")
+		if a.Config.Production {
+			// update medium and add path
+			if err := a.updateMedia(files); err != nil {
+				return d.Error(fae.Wrap(err, "update medium"))
 			}
-		}
 
-		d.Status = "done"
-		err = a.DB.Download.Save(d)
-		if err != nil {
-			return fae.Wrap(err, "failed to save download")
-		}
+			if d.IsTorrent() {
+				if err := a.FlameTorrentRemove(d.Thash); err != nil {
+					return fae.Wrap(err, "failed to remove torrent")
+				}
+			}
 
-		notifier.Success("Downloads::Completed", fmt.Sprintf("%s - %s", d.Title, d.Display))
+			d.Status = "done"
+			err = a.DB.Download.Save(d)
+			if err != nil {
+				return fae.Wrap(err, "failed to save download")
+			}
+
+			notifier.Success("Downloads::Completed", fmt.Sprintf("%s - %s", d.Title, d.Display))
+		}
 	}
 
-	if len(moved) > 0 {
+	if len(moved) > 0 && a.Config.Production {
 		dirs := lo.Map(moved, func(f *MoverFile, i int) string {
 			return filepath.Dir(f.Destination)
 		})

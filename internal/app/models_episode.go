@@ -116,6 +116,27 @@ func (c *Connector) SeriesDownloadCounts() (map[string]int, error) {
 
 	return counts, nil
 }
+func (c *Connector) SeriesMultiDownloads() (map[string]bool, error) {
+	out := map[string]bool{}
+
+	list, err := c.ActiveDownloads()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, d := range list {
+		m := &Medium{}
+		err := c.Medium.Find(d.MediumID.Hex(), m)
+		if err != nil {
+			return nil, err
+		}
+		if m.Type == "Episode" {
+			out[m.SeriesID.Hex()] = true
+		}
+	}
+
+	return out, nil
+}
 
 func (c *Connector) EpisodeGet(id string) (*Episode, error) {
 	e := &Episode{}

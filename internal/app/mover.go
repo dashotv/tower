@@ -20,7 +20,11 @@ func NewMover(log *zap.SugaredLogger, download *Download, torrent *qbt.Torrent) 
 		Download: download,
 		Torrent:  torrent,
 		moved:    []*MoverFile{},
-		movefunc: FileLink,
+	}
+
+	m.movefunc = m.FileLink
+	if !app.Config.Production {
+		m.movefunc = m.testFileLink
 	}
 
 	return m
@@ -171,12 +175,12 @@ func (m *Mover) moveFile(source string, medium *Medium) error {
 		return fae.Wrap(err, "getting destination")
 	}
 
-	destination := fmt.Sprintf("%s.%s", dest, ext)
-
-	// m.Log.Debugf("%s => %s", source, destination)
-	if !app.Config.Production {
-		return nil
+	tag := ""
+	if m.Download.Tag != "" {
+		tags := strings.Split(m.Download.Tag, ",")
+		tag = fmt.Sprintf(" [%s]", strings.Join(tags, " "))
 	}
+	destination := fmt.Sprintf("%s%s.%s", dest, tag, ext)
 
 	if medium == nil {
 		m.Log.Debugf("skipping %s", source)
@@ -210,11 +214,11 @@ func (m *Mover) moveFile(source string, medium *Medium) error {
 	return nil
 }
 
-func testFileLink(source, destination string, force bool) error {
-	if force {
-		fmt.Printf("linking %s -> %s (force)\n", source, destination)
-		return nil
-	}
-	fmt.Printf("linking %s -> %s\n", source, destination)
+func (m *Mover) FileLink(source, destination string, force bool) error {
+	return FileLink(source, destination, force)
+}
+
+func (m *Mover) testFileLink(source, destination string, force bool) error {
+	m.Log.Warnf("linking[%t] %s -> %s\n", force, source, destination)
 	return nil
 }

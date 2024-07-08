@@ -31,6 +31,8 @@ fields:
     bson: download_files
   - name: regex
     type: string
+  - name: tag
+    type: string
   # for the UI
   - name: medium
     type: "*Medium"

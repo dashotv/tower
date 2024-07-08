@@ -297,6 +297,7 @@ type Download struct { // model
 	Status         string             `bson:"status" json:"status"`
 	Files          []*DownloadFile    `bson:"download_files" json:"files"`
 	Regex          string             `bson:"regex" json:"regex"`
+	Tag            string             `bson:"tag" json:"tag"`
 	Medium         *Medium            `bson:"-" json:"medium"`
 	Title          string             `bson:"-" json:"title"`
 	Display        string             `bson:"-" json:"display"`

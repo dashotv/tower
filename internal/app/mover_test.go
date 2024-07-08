@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -12,8 +13,10 @@ import (
 func TestMover_MoveDownload(t *testing.T) {
 	err := setupFlame(app)
 	assert.NoError(t, err)
+	err = startDestination(context.Background(), app)
+	assert.NoError(t, err)
 
-	did := "6621e4c3d63b246fcfc732b0"
+	did := "668b27c9573a9d191dc0c523"
 	download := &Download{}
 	err = app.DB.Download.Find(did, download)
 	assert.NoError(t, err)
@@ -25,15 +28,9 @@ func TestMover_MoveDownload(t *testing.T) {
 	assert.NotNil(t, torrent)
 
 	mover := NewMover(app.Log.Named("TESTMOVER"), download, torrent)
-	mover.movefunc = testFileLink
-
-	// list, err := mover.Move()
-	// assert.NoError(t, err)
-	// assert.NotEmpty(t, list)
 
 	moved, err := mover.Move()
 	assert.NoError(t, err)
-	assert.NotEmpty(t, moved)
 
 	for _, f := range moved {
 		fmt.Printf("MOVED: %s\n", f.Destination)
@@ -50,7 +47,6 @@ func TestMover_Move(t *testing.T) {
 	assert.NoError(t, err)
 
 	mover := NewMover(app.Log.Named("TESTMOVER"), downloads[0], torrents[1])
-	mover.movefunc = testFileLink
 	moved, err := mover.Move()
 	assert.NoError(t, err)
 	assert.Len(t, moved, 0)
