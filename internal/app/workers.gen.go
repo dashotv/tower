@@ -54,14 +54,6 @@ func setupWorkers(app *Application) error {
 	m.Queue("paths", 3, 3, 0)
 	m.Queue("series", 3, 0, 5)
 
-	if err := minion.RegisterWithQueue[*PathCleanup](m, &PathCleanup{}, "paths"); err != nil {
-		return fae.Wrap(err, "registering worker: PathCleanup (PathCleanup)")
-	}
-
-	if err := minion.Register[*PathCleanupAll](m, &PathCleanupAll{}); err != nil {
-		return fae.Wrap(err, "registering worker: PathCleanupAll (PathCleanupAll)")
-	}
-
 	if err := minion.Register[*CleanPlexPins](m, &CleanPlexPins{}); err != nil {
 		return fae.Wrap(err, "registering worker: clean_plex_pins (CleanPlexPins)")
 	}
@@ -99,30 +91,6 @@ func setupWorkers(app *Application) error {
 
 	if err := minion.Register[*DownloadsProcessLoad](m, &DownloadsProcessLoad{}); err != nil {
 		return fae.Wrap(err, "registering worker: downloads_process_load (DownloadsProcessLoad)")
-	}
-
-	if err := minion.RegisterWithQueue[*FileMatch](m, &FileMatch{}, "paths"); err != nil {
-		return fae.Wrap(err, "registering worker: file_match (FileMatch)")
-	}
-
-	if err := minion.Register[*FileMatchAnime](m, &FileMatchAnime{}); err != nil {
-		return fae.Wrap(err, "registering worker: file_match_anime (FileMatchAnime)")
-	}
-
-	if err := minion.RegisterWithQueue[*FileMatchDir](m, &FileMatchDir{}, "paths"); err != nil {
-		return fae.Wrap(err, "registering worker: file_match_dir (FileMatchDir)")
-	}
-
-	if err := minion.Register[*FileMatchDonghua](m, &FileMatchDonghua{}); err != nil {
-		return fae.Wrap(err, "registering worker: file_match_donghua (FileMatchDonghua)")
-	}
-
-	if err := minion.Register[*FileMatchKind](m, &FileMatchKind{}); err != nil {
-		return fae.Wrap(err, "registering worker: file_match_kind (FileMatchKind)")
-	}
-
-	if err := minion.Register[*FileMatchMedium](m, &FileMatchMedium{}); err != nil {
-		return fae.Wrap(err, "registering worker: file_match_medium (FileMatchMedium)")
 	}
 
 	if err := minion.RegisterWithQueue[*FileWalk](m, &FileWalk{}, "paths"); err != nil {

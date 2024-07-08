@@ -14,20 +14,7 @@ import (
 var workersList = map[string]minion.Payload{
 	"DownloadsProcess": &DownloadsProcess{},
 
-	"CleanupLogs":             &CleanupLogs{},
-	"CleanPlexPins":           &CleanPlexPins{},
-	"PlexPinToUsers":          &PlexPinToUsers{},
-	"PlexUserUpdates":         &PlexUserUpdates{},
-	"PlexWatchlistUpdates":    &PlexWatchlistUpdates{},
-	"CreateMediaFromRequests": &CreateMediaFromRequests{},
-
-	"UpdateIndexes": &UpdateIndexes{},
-	// "DownloadsFileMove":        &DownloadFileMover{},
-
-	"FileWalk":  &FileWalk{},
-	"FileMatch": &FileMatch{},
-
-	"PathCleanupAll": &PathCleanupAll{},
+	"FileWalk": &FileWalk{},
 
 	"SeriesUpdateAll":     &SeriesUpdateAll{},
 	"SeriesUpdateDonghua": &SeriesUpdateKind{SeriesKind: "donghua"},

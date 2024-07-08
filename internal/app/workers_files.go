@@ -111,137 +111,137 @@ func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
 	return nil
 }
 
-type FileMatch struct {
-	minion.WorkerDefaults[*FileMatch]
-}
-
-func (j *FileMatch) Kind() string { return "file_match" }
-func (j *FileMatch) Timeout(job *minion.Job[*FileMatch]) time.Duration {
-	return 60 * time.Minute
-}
-func (j *FileMatch) Work(ctx context.Context, job *minion.Job[*FileMatch]) error {
-	l := app.Log.Named("files.match")
-
-	for _, kind := range KINDS { // TODO: use libraries
-		dir := filepath.Join(app.Config.DirectoriesCompleted, kind)
-		if err := app.Workers.Enqueue(&FileMatchDir{Dir: dir}); err != nil {
-			l.Errorw("enqueue", "error", err)
-			return fae.Wrap(err, "enqueue")
-		}
-	}
-
-	return nil
-}
-
-type FileMatchMedium struct {
-	minion.WorkerDefaults[*FileMatchMedium]
-	ID string
-}
-
-func (j *FileMatchMedium) Kind() string { return "file_match_medium" }
-func (j *FileMatchMedium) Timeout(job *minion.Job[*FileMatchMedium]) time.Duration {
-	return 60 * time.Minute
-}
-func (j *FileMatchMedium) Work(ctx context.Context, job *minion.Job[*FileMatchMedium]) error {
-	a := ContextApp(ctx)
-	if a == nil {
-		return fae.Errorf("no app context")
-	}
-	l := a.Log.Named("files.match.medium")
-
-	m := &Medium{}
-	if err := a.DB.Medium.Find(job.Args.ID, m); err != nil {
-		l.Errorw("find", "error", err)
-		return fae.Wrap(err, "finding")
-	}
-
-	dest := m.Destination()
-	dir := filepath.Join(a.Config.DirectoriesCompleted, dest)
-	if err := a.Workers.Enqueue(&FileMatchDir{Dir: dir}); err != nil {
-		l.Errorw("enqueue", "error", err)
-		return fae.Wrap(err, "enqueue")
-	}
-
-	return nil
-}
-
-type FileMatchDir struct {
-	minion.WorkerDefaults[*FileMatchDir]
-	Dir string
-}
-
-func (j *FileMatchDir) Kind() string { return "file_match_dir" }
-func (j *FileMatchDir) Timeout(job *minion.Job[*FileMatchDir]) time.Duration {
-	return 60 * time.Minute
-}
-func (j *FileMatchDir) Work(ctx context.Context, job *minion.Job[*FileMatchDir]) error {
-	a := ContextApp(ctx)
-	if a == nil {
-		return fae.Errorf("no app context")
-	}
-
-	dir := job.Args.Dir
-	l := app.Log.Named("files.match.dir").With("dir", dir)
-	l.Debugf("running")
-
-	if !exists(dir) {
-		notifier.Log.Warnf("files", "dir not found: %s", dir)
-		return nil
-	}
-
-	return a.fileMatchDir(dir)
-}
-
-type FileMatchAnime struct {
-	minion.WorkerDefaults[*FileMatchAnime]
-}
-
-func (j *FileMatchAnime) Kind() string { return "file_match_anime" }
-func (j *FileMatchAnime) Work(ctx context.Context, job *minion.Job[*FileMatchAnime]) error {
-	a := ContextApp(ctx)
-	if err := a.Workers.Enqueue(&FileMatchKind{Input: "anime"}); err != nil {
-		return fae.Wrap(err, "enqueue")
-	}
-	return nil
-}
-
-type FileMatchDonghua struct {
-	minion.WorkerDefaults[*FileMatchDonghua]
-}
-
-func (j *FileMatchDonghua) Kind() string { return "file_match_donghua" }
-func (j *FileMatchDonghua) Work(ctx context.Context, job *minion.Job[*FileMatchDonghua]) error {
-	a := ContextApp(ctx)
-	if err := a.Workers.Enqueue(&FileMatchKind{Input: "donghua"}); err != nil {
-		return fae.Wrap(err, "enqueue")
-	}
-	return nil
-}
-
-type FileMatchKind struct {
-	minion.WorkerDefaults[*FileMatchKind]
-	Input string `bson:"input" json:"input"`
-}
-
-func (j *FileMatchKind) Kind() string { return "file_match_kind" }
-func (j *FileMatchKind) Work(ctx context.Context, job *minion.Job[*FileMatchKind]) error {
-	kind := job.Args.Input
-	a := ContextApp(ctx)
-
-	err := a.DB.Medium.Query().Where("kind", kind).Batch(100, func(media []*Medium) error {
-		for _, m := range media {
-			if err := a.Workers.Enqueue(&FileMatchMedium{ID: m.ID.Hex()}); err != nil {
-				return fae.Wrapf(err, "enqueue medium: %s", m.ID.Hex())
-			}
-		}
-		return nil
-	})
-	if err != nil {
-		return fae.Wrap(err, "querying")
-	}
-
-	return nil
-}
+// type FileMatch struct {
+// 	minion.WorkerDefaults[*FileMatch]
+// }
+//
+// func (j *FileMatch) Kind() string { return "file_match" }
+// func (j *FileMatch) Timeout(job *minion.Job[*FileMatch]) time.Duration {
+// 	return 60 * time.Minute
+// }
+// func (j *FileMatch) Work(ctx context.Context, job *minion.Job[*FileMatch]) error {
+// 	l := app.Log.Named("files.match")
+//
+// 	for _, kind := range KINDS { // TODO: use libraries
+// 		dir := filepath.Join(app.Config.DirectoriesCompleted, kind)
+// 		if err := app.Workers.Enqueue(&FileMatchDir{Dir: dir}); err != nil {
+// 			l.Errorw("enqueue", "error", err)
+// 			return fae.Wrap(err, "enqueue")
+// 		}
+// 	}
+//
+// 	return nil
+// }
+//
+// type FileMatchMedium struct {
+// 	minion.WorkerDefaults[*FileMatchMedium]
+// 	ID string
+// }
+//
+// func (j *FileMatchMedium) Kind() string { return "file_match_medium" }
+// func (j *FileMatchMedium) Timeout(job *minion.Job[*FileMatchMedium]) time.Duration {
+// 	return 60 * time.Minute
+// }
+// func (j *FileMatchMedium) Work(ctx context.Context, job *minion.Job[*FileMatchMedium]) error {
+// 	a := ContextApp(ctx)
+// 	if a == nil {
+// 		return fae.Errorf("no app context")
+// 	}
+// 	l := a.Log.Named("files.match.medium")
+//
+// 	m := &Medium{}
+// 	if err := a.DB.Medium.Find(job.Args.ID, m); err != nil {
+// 		l.Errorw("find", "error", err)
+// 		return fae.Wrap(err, "finding")
+// 	}
+//
+// 	dest := m.Destination()
+// 	dir := filepath.Join(a.Config.DirectoriesCompleted, dest)
+// 	if err := a.Workers.Enqueue(&FileMatchDir{Dir: dir}); err != nil {
+// 		l.Errorw("enqueue", "error", err)
+// 		return fae.Wrap(err, "enqueue")
+// 	}
+//
+// 	return nil
+// }
+//
+// type FileMatchDir struct {
+// 	minion.WorkerDefaults[*FileMatchDir]
+// 	Dir string
+// }
+//
+// func (j *FileMatchDir) Kind() string { return "file_match_dir" }
+// func (j *FileMatchDir) Timeout(job *minion.Job[*FileMatchDir]) time.Duration {
+// 	return 60 * time.Minute
+// }
+// func (j *FileMatchDir) Work(ctx context.Context, job *minion.Job[*FileMatchDir]) error {
+// 	a := ContextApp(ctx)
+// 	if a == nil {
+// 		return fae.Errorf("no app context")
+// 	}
+//
+// 	dir := job.Args.Dir
+// 	l := app.Log.Named("files.match.dir").With("dir", dir)
+// 	l.Debugf("running")
+//
+// 	if !exists(dir) {
+// 		notifier.Log.Warnf("files", "dir not found: %s", dir)
+// 		return nil
+// 	}
+//
+// 	return a.fileMatchDir(dir)
+// }
+//
+// type FileMatchAnime struct {
+// 	minion.WorkerDefaults[*FileMatchAnime]
+// }
+//
+// func (j *FileMatchAnime) Kind() string { return "file_match_anime" }
+// func (j *FileMatchAnime) Work(ctx context.Context, job *minion.Job[*FileMatchAnime]) error {
+// 	a := ContextApp(ctx)
+// 	if err := a.Workers.Enqueue(&FileMatchKind{Input: "anime"}); err != nil {
+// 		return fae.Wrap(err, "enqueue")
+// 	}
+// 	return nil
+// }
+//
+// type FileMatchDonghua struct {
+// 	minion.WorkerDefaults[*FileMatchDonghua]
+// }
+//
+// func (j *FileMatchDonghua) Kind() string { return "file_match_donghua" }
+// func (j *FileMatchDonghua) Work(ctx context.Context, job *minion.Job[*FileMatchDonghua]) error {
+// 	a := ContextApp(ctx)
+// 	if err := a.Workers.Enqueue(&FileMatchKind{Input: "donghua"}); err != nil {
+// 		return fae.Wrap(err, "enqueue")
+// 	}
+// 	return nil
+// }
+//
+// type FileMatchKind struct {
+// 	minion.WorkerDefaults[*FileMatchKind]
+// 	Input string `bson:"input" json:"input"`
+// }
+//
+// func (j *FileMatchKind) Kind() string { return "file_match_kind" }
+// func (j *FileMatchKind) Work(ctx context.Context, job *minion.Job[*FileMatchKind]) error {
+// 	kind := job.Args.Input
+// 	a := ContextApp(ctx)
+//
+// 	err := a.DB.Medium.Query().Where("kind", kind).Batch(100, func(media []*Medium) error {
+// 		for _, m := range media {
+// 			if err := a.Workers.Enqueue(&FileMatchMedium{ID: m.ID.Hex()}); err != nil {
+// 				return fae.Wrapf(err, "enqueue medium: %s", m.ID.Hex())
+// 			}
+// 		}
+// 		return nil
+// 	})
+// 	if err != nil {
+// 		return fae.Wrap(err, "querying")
+// 	}
+//
+// 	return nil
+// }
 
 type FilesRename struct {
 	minion.WorkerDefaults[*FilesRename]

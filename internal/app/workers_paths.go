@@ -144,9 +144,9 @@ func (a *Application) fileMatchDir(dir string) error {
 		}
 
 		if d.IsDir() {
-			if path != dir {
-				return app.Workers.Enqueue(&FileMatchDir{Dir: path})
-			}
+			// if path != dir {
+			// 	return app.Workers.Enqueue(&FileMatchDir{Dir: path})
+			// }
 			return nil
 		}
 
@@ -244,88 +244,88 @@ func (j *PathImport) Work(ctx context.Context, job *minion.Job[*PathImport]) err
 	return nil
 }
 
-type PathCleanup struct {
-	minion.WorkerDefaults[*PathCleanup]
-	ID string // medium
-}
-
-func (j *PathCleanup) Kind() string { return "PathCleanup" }
-func (j *PathCleanup) Work(ctx context.Context, job *minion.Job[*PathCleanup]) error {
-	l := app.Log.Named("path.cleanup")
-	m := &Medium{}
-	if err := app.DB.Medium.Find(job.Args.ID, m); err != nil {
-		l.Errorf("find medium: %s", err)
-		return fae.Wrap(err, "find medium")
-	}
-
-	queuedPaths := map[string]int{}
-	newPaths := []*Path{}
-	for _, p := range m.Paths {
-		if !p.Exists() {
-			continue
-		}
-		if queuedPaths[p.LocalPath()] == 0 {
-			if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: p.ID.Hex(), Title: p.LocalPath()}); err != nil {
-				return fae.Wrap(err, "enqueue path import")
-			}
-			queuedPaths[p.LocalPath()]++
-			newPaths = append(newPaths, p)
-		}
-	}
-
-	m.Paths = newPaths
-	if err := app.DB.Medium.Save(m); err != nil {
-		return fae.Wrap(err, "save medium")
-	}
-
-	if m.Type == "Series" {
-		err := app.DB.Episode.Query().Where("series_id", m.ID).Batch(100, func(results []*Episode) error {
-			for _, e := range results {
-				if err := app.Workers.Enqueue(&PathCleanup{ID: e.ID.Hex()}); err != nil {
-					return fae.Wrap(err, "enqueue media paths")
-				}
-			}
-
-			return nil
-		})
-		if err != nil {
-			return fae.Wrap(err, "series batch")
-		}
-	}
-
-	return nil
-}
-
-type PathCleanupAll struct {
-	minion.WorkerDefaults[*PathCleanupAll]
-}
-
-func (j *PathCleanupAll) Kind() string { return "PathCleanupAll" }
-func (j *PathCleanupAll) Work(ctx context.Context, job *minion.Job[*PathCleanupAll]) error {
-	for _, t := range TYPES {
-		total, err := app.DB.Medium.Query().Where("_type", t).Count()
-		if err != nil {
-			return fae.Wrap(err, "count media")
-		}
-		if total == 0 {
-			continue
-		}
-		for skip := 0; skip < int(total); skip += 100 {
-			media, err := app.DB.Medium.Query().Limit(100).Skip(skip).Run()
-			if err != nil {
-				return fae.Wrap(err, "find media")
-			}
-
-			for _, m := range media {
-				if err := app.Workers.Enqueue(&PathCleanup{ID: m.ID.Hex()}); err != nil {
-					return fae.Wrap(err, "enqueue path cleanup")
-				}
-			}
-		}
-	}
-
-	return nil
-}
+// type PathCleanup struct {
+// 	minion.WorkerDefaults[*PathCleanup]
+// 	ID string // medium
+// }
+//
+// func (j *PathCleanup) Kind() string { return "PathCleanup" }
+// func (j *PathCleanup) Work(ctx context.Context, job *minion.Job[*PathCleanup]) error {
+// 	l := app.Log.Named("path.cleanup")
+// 	m := &Medium{}
+// 	if err := app.DB.Medium.Find(job.Args.ID, m); err != nil {
+// 		l.Errorf("find medium: %s", err)
+// 		return fae.Wrap(err, "find medium")
+// 	}
+//
+// 	queuedPaths := map[string]int{}
+// 	newPaths := []*Path{}
+// 	for _, p := range m.Paths {
+// 		if !p.Exists() {
+// 			continue
+// 		}
+// 		if queuedPaths[p.LocalPath()] == 0 {
+// 			if err := app.Workers.Enqueue(&PathImport{ID: m.ID.Hex(), PathID: p.ID.Hex(), Title: p.LocalPath()}); err != nil {
+// 				return fae.Wrap(err, "enqueue path import")
+// 			}
+// 			queuedPaths[p.LocalPath()]++
+// 			newPaths = append(newPaths, p)
+// 		}
+// 	}
+//
+// 	m.Paths = newPaths
+// 	if err := app.DB.Medium.Save(m); err != nil {
+// 		return fae.Wrap(err, "save medium")
+// 	}
+//
+// 	if m.Type == "Series" {
+// 		err := app.DB.Episode.Query().Where("series_id", m.ID).Batch(100, func(results []*Episode) error {
+// 			for _, e := range results {
+// 				if err := app.Workers.Enqueue(&PathCleanup{ID: e.ID.Hex()}); err != nil {
+// 					return fae.Wrap(err, "enqueue media paths")
+// 				}
+// 			}
+//
+// 			return nil
+// 		})
+// 		if err != nil {
+// 			return fae.Wrap(err, "series batch")
+// 		}
+// 	}
+//
+// 	return nil
+// }
+//
+// type PathCleanupAll struct {
+// 	minion.WorkerDefaults[*PathCleanupAll]
+// }
+//
+// func (j *PathCleanupAll) Kind() string { return "PathCleanupAll" }
+// func (j *PathCleanupAll) Work(ctx context.Context, job *minion.Job[*PathCleanupAll]) error {
+// 	for _, t := range TYPES {
+// 		total, err := app.DB.Medium.Query().Where("_type", t).Count()
+// 		if err != nil {
+// 			return fae.Wrap(err, "count media")
+// 		}
+// 		if total == 0 {
+// 			continue
+// 		}
+// 		for skip := 0; skip < int(total); skip += 100 {
+// 			media, err := app.DB.Medium.Query().Limit(100).Skip(skip).Run()
+// 			if err != nil {
+// 				return fae.Wrap(err, "find media")
+// 			}
+//
+// 			for _, m := range media {
+// 				if err := app.Workers.Enqueue(&PathCleanup{ID: m.ID.Hex()}); err != nil {
+// 					return fae.Wrap(err, "enqueue path cleanup")
+// 				}
+// 			}
+// 		}
+// 	}
+//
+// 	return nil
+// }
 
 type PathDeleteAll struct {
 	minion.WorkerDefaults[*PathDeleteAll]

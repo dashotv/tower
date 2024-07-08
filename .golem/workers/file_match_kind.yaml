@@ -1,4 +1,0 @@
-name: file_match_kind
-fields:
-    - name: kind
-      type: string

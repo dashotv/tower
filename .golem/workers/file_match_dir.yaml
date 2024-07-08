@@ -1,5 +1,0 @@
-name: file_match_dir
-queue: paths
-fields:
-  - name: dir
-    type: string
