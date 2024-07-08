@@ -22,7 +22,7 @@ import (
 var nzbgeekRegex = regexp.MustCompile("^https://api.nzbgeek")
 var metubeRegex = regexp.MustCompile("^metube://")
 var activeStates = []string{"searching", "loading", "managing", "downloading", "reviewing"}
-var downloadStates = []string{"searching", "loading", "managing", "downloading", "reviewing", "done"}
+var downloadStates = []string{"reviewing", "searching", "loading", "managing", "downloading", "done"}
 
 func (c *Connector) DownloadGet(id string) (*Download, error) {
 	d := &Download{}
