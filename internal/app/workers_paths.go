@@ -75,6 +75,11 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 
 	media = append(media, medium)
 	if medium.Type == "Series" {
+		// remove any paths that are not covers or backgrounds, videos should be on the episode not the series
+		medium.Paths = lo.Filter(medium.Paths, func(p *Path, i int) bool {
+			return p.IsCoverBackground()
+		})
+		// add episodes to list
 		err := app.DB.Medium.Query().Where("_type", "Episode").Where("series_id", medium.ID).Each(100, func(e *Medium) error {
 			media = append(media, e)
 			return nil
