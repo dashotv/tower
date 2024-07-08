@@ -14,7 +14,7 @@ require (
 	github.com/dashotv/runic v0.5.1
 	github.com/dashotv/scry v0.10.6
 	github.com/dashotv/tmdb v0.2.0
-	github.com/dashotv/tvdb v0.5.1
+	github.com/dashotv/tvdb v0.5.2
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/dotenv-org/godotenvvault v0.6.0
 	github.com/go-cmd/cmd v1.4.2
