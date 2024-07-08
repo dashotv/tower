@@ -86,7 +86,7 @@ func (i *Importer) loadSeriesCovers(tvdbid int64, tmdbid int) ([]string, error) 
 func (i *Importer) loadSeriesCoversTvdb(tvdbid int64) ([]string, error) {
 	covers := []string{}
 
-	r, err := i.Tvdb.GetSeriesArtworks(tvdbid, nil, tvdb.Int64(int64(2)))
+	r, err := i.Tvdb.GetSeriesArtworks(float64(tvdbid), nil, tvdb.Int64(int64(2)))
 	if err != nil {
 		return nil, fae.Wrap(err, "covers")
 	}
@@ -185,7 +185,7 @@ func (i *Importer) loadSeriesBackgrounds(tvdbid int64, tmdbid int) ([]string, er
 func (i *Importer) loadSeriesBackgroundsTvdb(tvdbid int64) ([]string, error) {
 	backgrounds := []string{}
 
-	r, err := i.Tvdb.GetSeriesArtworks(tvdbid, nil, tvdb.Int64(int64(3)))
+	r, err := i.Tvdb.GetSeriesArtworks(float64(tvdbid), nil, tvdb.Int64(int64(3)))
 	if err != nil {
 		return nil, fae.Wrap(err, "backgrounds")
 	}

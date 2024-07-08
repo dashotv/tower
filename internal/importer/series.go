@@ -13,7 +13,7 @@ func (i *Importer) loadSeries(id int64) (*Series, error) {
 	}
 
 	if series.Language != i.Opts.Language {
-		translated, err := i.Tvdb.GetSeriesTranslation(id, i.Opts.Language)
+		translated, err := i.Tvdb.GetSeriesTranslation(float64(id), i.Opts.Language)
 		if err != nil {
 			return nil, fae.Wrap(err, "translation")
 		}
@@ -26,24 +26,23 @@ func (i *Importer) loadSeries(id int64) (*Series, error) {
 }
 
 func (i *Importer) loadSeriesUpdated(since int64) ([]int64, error) {
-	resp, err := i.Tvdb.Updates(since, operations.ActionUpdate.ToPointer(), tvdb.Int64(1), operations.TypeSeries.ToPointer())
+	resp, err := i.Tvdb.Updates(since, operations.ActionUpdate.ToPointer(), tvdb.Float64(0), operations.TypeSeries.ToPointer())
 	if err != nil {
 		return nil, err
 	}
-
 	ints := []int64{}
 	for _, s := range resp.Data {
-		if s.SeriesID == nil {
+		if s.RecordID == nil {
 			continue
 		}
-		ints = append(ints, tvdb.Int64Value(s.SeriesID))
+		ints = append(ints, tvdb.Int64Value(s.RecordID))
 	}
 
 	return ints, nil
 }
 
 func (i *Importer) loadSeriesTvdb(id int64) (*Series, error) {
-	resp, err := i.Tvdb.GetSeriesBase(id)
+	resp, err := i.Tvdb.GetSeriesBase(float64(id))
 	if err != nil {
 		return nil, err
 	}

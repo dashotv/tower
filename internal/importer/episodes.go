@@ -29,7 +29,7 @@ func (i *Importer) loadEpisodes(tvdbid int64) ([]*Episode, error) {
 
 func (i *Importer) loadEpisodesMap(tvdbid int64, episodeOrder int) (map[int64]*Episode, error) {
 	req := tvdb.GetSeriesEpisodesRequest{
-		ID:         tvdbid,
+		ID:         float64(tvdbid),
 		Page:       0,
 		SeasonType: episodeOrderString(episodeOrder),
 	}
@@ -54,14 +54,14 @@ func (i *Importer) loadEpisodesMap(tvdbid int64, episodeOrder int) (map[int64]*E
 		episodeMap[ep.ID] = ep
 	}
 
-	trans, err := i.Tvdb.GetSeriesSeasonEpisodesTranslated(tvdbid, i.Opts.Language, 0, episodeOrderString(episodeOrder))
+	trans, err := i.Tvdb.GetSeriesSeasonEpisodesTranslated(float64(tvdbid), i.Opts.Language, 0, episodeOrderString(episodeOrder))
 	if err != nil {
 		return nil, fae.Wrap(err, "translated")
 	}
 	if trans.Data == nil {
 		return nil, fae.New("translated: no data")
 	}
-	for _, e := range trans.Data.Episodes {
+	for _, e := range trans.Data.Series.Episodes {
 		if ep, ok := episodeMap[tvdb.Int64Value(e.ID)]; ok {
 			if e.Name != nil {
 				ep.Title = tvdb.StringValue(e.Name)

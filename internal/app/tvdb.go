@@ -24,7 +24,7 @@ func setupTvdb(app *Application) error {
 func (a *Application) TvdbSeriesCovers(id int64) ([]string, error) {
 	out := make([]string, 0)
 
-	if resp, err := a.Tvdb.GetSeriesArtworks(id, nil, tvdb.Int64(2)); err == nil {
+	if resp, err := a.Tvdb.GetSeriesArtworks(float64(id), nil, tvdb.Int64(2)); err == nil {
 		for _, v := range resp.Data.Artworks {
 			out = append(out, tvdb.StringValue(v.Image))
 		}
@@ -91,7 +91,7 @@ func (a *Application) TvdbSeriesCoversFanart(id string) ([]string, error) {
 func (a *Application) TvdbSeriesBackgrounds(id int64) ([]string, error) {
 	out := make([]string, 0)
 
-	if resp, err := a.Tvdb.GetSeriesArtworks(id, nil, tvdb.Int64(3)); err == nil {
+	if resp, err := a.Tvdb.GetSeriesArtworks(float64(id), nil, tvdb.Int64(3)); err == nil {
 		for _, v := range resp.Data.Artworks {
 			out = append(out, tvdb.StringValue(v.Image))
 		}
