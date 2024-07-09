@@ -109,6 +109,10 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 		}
 
 		m.Paths = newPaths
+		if len(m.Paths) > 0 {
+			m.Downloaded = true
+			m.Completed = true
+		}
 		if err := app.DB.Medium.Save(m); err != nil {
 			return fae.Wrap(err, "save path")
 		}
