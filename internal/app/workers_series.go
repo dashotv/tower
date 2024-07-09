@@ -143,6 +143,8 @@ func (j *SeriesUpdateRecent) Work(ctx context.Context, job *minion.Job[*SeriesUp
 		return fae.Wrap(err, "recent")
 	}
 
+	ints = lo.Uniq(ints)
+
 	for _, id := range ints {
 		list, err := a.DB.Series.Query().Where("source", "tvdb").Where("source_id", fmt.Sprintf("%d", id)).Run()
 		if err != nil {
