@@ -117,6 +117,7 @@ func (a *Application) Routes() {
 	downloads.GET("/recent", a.DownloadsRecentHandler)
 	downloads.PUT("/:id/select", a.DownloadsSelectHandler)
 	downloads.GET("/:id/torrent", a.DownloadsTorrentHandler)
+	downloads.PUT("/:id/clear", a.DownloadsClearHandler)
 
 	episodes := a.Router.Group("/episodes")
 	episodes.PATCH("/:id", a.EpisodesSettingsHandler)
@@ -446,6 +447,11 @@ func (a *Application) DownloadsSelectHandler(c echo.Context) error {
 func (a *Application) DownloadsTorrentHandler(c echo.Context) error {
 	id := c.Param("id")
 	return a.DownloadsTorrent(c, id)
+}
+func (a *Application) DownloadsClearHandler(c echo.Context) error {
+	id := router.QueryParamString(c, "id")
+	nums := router.QueryParamString(c, "nums")
+	return a.DownloadsClear(c, id, nums)
 }
 
 // Episodes (/episodes)

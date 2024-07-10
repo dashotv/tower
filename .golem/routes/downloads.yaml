@@ -1,23 +1,22 @@
 name: downloads
 path: /downloads
-model: "*Download"
 rest: true
+model: "*Download"
 routes:
   - name: last
     path: /last
-    result: int
     method: GET
+    result: int
   - name: medium
     path: /:id/medium
     method: GET
-    result: "[]*Medium"
     params:
       - name: id
         type: string
+    result: "[]*Medium"
   - name: recent
     path: /recent
     method: GET
-    result: "[]*Download"
     params:
       - name: page
         type: int
@@ -25,6 +24,7 @@ routes:
       - name: medium_id
         type: string
         query: true
+    result: "[]*Download"
   - name: select
     path: /:id/select
     method: PUT
@@ -43,3 +43,13 @@ routes:
     params:
       - name: id
         type: string
+  - name: clear
+    path: /:id/clear
+    method: PUT
+    params:
+      - name: id
+        type: string
+        query: true
+      - name: nums
+        type: string
+        query: true

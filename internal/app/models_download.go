@@ -546,3 +546,43 @@ func (c *Connector) DownloadSelect(id, mediumID string, num int) error {
 
 	return fae.New("could not match num with download file")
 }
+func (c *Connector) DownloadClear(id string, nums string) error {
+	list := strings.Split(nums, ",")
+	if len(list) == 0 {
+		return fae.New("no nums")
+	}
+
+	download := &Download{}
+	err := c.Download.Find(id, download)
+	if err != nil {
+		return err
+	}
+
+	files := lo.Filter(download.Files, func(f *DownloadFile, _ int) bool {
+		return lo.Contains(list, fmt.Sprintf("%d", f.Num)) && f.MediumID != primitive.NilObjectID
+	})
+
+	for _, f := range files {
+		f.MediumID = primitive.NilObjectID
+	}
+
+	return c.Download.Save(download)
+
+	//	for _, f := range download.Files {
+	//		if f.Num == num {
+	//			if mediumID == "" {
+	//				f.MediumID = primitive.NilObjectID
+	//				return c.Download.Update(download)
+	//			}
+	//
+	//			mid, err := primitive.ObjectIDFromHex(mediumID)
+	//			if err != nil {
+	//				return err
+	//			}
+	//			f.MediumID = mid
+	//			return c.Download.Update(download)
+	//		}
+	//	}
+	//
+	// return fae.New("could not match num with download file")
+}

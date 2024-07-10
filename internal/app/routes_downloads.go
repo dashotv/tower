@@ -165,6 +165,15 @@ func (a *Application) DownloadsSelect(c echo.Context, id string, medium_id strin
 	return c.JSON(http.StatusOK, &Response{Error: false})
 }
 
+func (a *Application) DownloadsClear(c echo.Context, id string, nums string) error {
+	err := a.DB.DownloadClear(id, nums)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, &Response{Error: false})
+}
+
 func (a *Application) DownloadsMedium(c echo.Context, id string) error {
 	download := &Download{}
 	err := a.DB.Download.Find(id, download)
