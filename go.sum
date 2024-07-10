@@ -121,8 +121,8 @@ github.com/dashotv/golem v0.14.30 h1:lZgPRXE/d+X0yBeMenPIgHDpCXo3vQ4Zr+f1CAkvNEg
 github.com/dashotv/golem v0.14.30/go.mod h1:nQICFzLDGx3W/13vZVp0O42suG04CFu6jSYVhqgBkpw=
 github.com/dashotv/grimoire v0.5.10 h1:F4CKMjG/E+W+qUosBXMwDd3aYNoul+A+p2o+v4UKUEc=
 github.com/dashotv/grimoire v0.5.10/go.mod h1:oeSS1+bBA0ip8ULTaqX6tAnkxqNDg7NF7+mwwiByM3M=
-github.com/dashotv/mercury v0.3.2 h1:88bvWsp5l823wTR1XbIB+LBiAFeCRZfe+JyIKf4nV/0=
-github.com/dashotv/mercury v0.3.2/go.mod h1:OZ140gozVBT0iyOwKIJSoSd3yyPgjgq2fI4baqtFBGs=
+github.com/dashotv/mercury v0.4.0 h1:1OqNP6L4ogl2Q39M39M+OXpI8fszcNV/Dp/EIpz9thg=
+github.com/dashotv/mercury v0.4.0/go.mod h1:fsDPrso3Gkb99vBOlxMSWl2PCZ8VZk76N2ZvSm/Ta+U=
 github.com/dashotv/minion v0.4.15 h1:1zdMM9FTz3N9N6tpdzCrntg3wPK7Zk6Cu0RC2pzb4e0=
 github.com/dashotv/minion v0.4.15/go.mod h1:HnB6YiSFW6XHqmhxYtbbSEXYGjJrNzppgo76bZzNMx8=
 github.com/dashotv/runic v0.5.1 h1:5sAM1Yw+/2SwN5xaS+kWBACtDEcHgju7MmPil4q6k20=
