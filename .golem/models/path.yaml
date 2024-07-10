@@ -6,6 +6,8 @@ fields:
     bson: _id,omitempty
   - name: type
     type: primitive.Symbol
+  - name: tag
+    type: string
   - name: remote
     type: string
   - name: local

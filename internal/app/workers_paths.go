@@ -58,11 +58,11 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 	}
 
 	media := []*Medium{}
-
 	medium := &Medium{}
 	if err := app.DB.Medium.Find(MediumID, medium); err != nil {
 		return fae.Wrap(err, "find medium")
 	}
+	// kind := medium.Kind
 
 	lib, ok := a.Libs[string(medium.Kind)]
 	if !ok {
@@ -106,6 +106,9 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 			if err := a.pathImport(path); err != nil {
 				return fae.Wrap(err, "path import")
 			}
+			// if err := a.pathDest(m, kind, path); err != nil {
+			// 	return fae.Wrap(err, "path check")
+			// }
 		}
 
 		m.Paths = newPaths
@@ -117,6 +120,21 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 			return fae.Wrap(err, "save path")
 		}
 	}
+	return nil
+}
+
+func (a *Application) pathDest(m *Medium, kind primitive.Symbol, path *Path) error {
+	dest, err := a.Destinator.Destination(kind, m)
+	if err != nil {
+		return fae.Wrap(err, "destination")
+	}
+
+	path.Rename = false
+	if path.LocalPath() != dest {
+		a.Log.Debugw("pathcheck", "path", path.LocalPath(), "dest", dest)
+		path.Rename = true
+	}
+
 	return nil
 }
 
@@ -134,6 +152,8 @@ func (a *Application) pathImport(path *Path) error {
 	}
 	path.Bitrate = int(meta.Media[0].Bitrate)
 	path.Resolution = meta.Media[0].GetVideoResolution()
+
+	path.ParseTag()
 
 	if len(meta.Media[0].Part) == 0 {
 		a.Log.Warnf("no parts in cache: %s", f)
@@ -171,7 +191,7 @@ func (a *Application) fileMatchDir(dir string) error {
 
 		kind, name, file, ext, err := pathParts(path)
 		if err != nil {
-			l.Errorw("parts", "error", err)
+			l.Errorw("parts", "error", err, "path", path)
 			return nil
 		}
 		local := fmt.Sprintf("%s/%s/%s", kind, name, file)

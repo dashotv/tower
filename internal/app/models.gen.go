@@ -555,6 +555,7 @@ type NzbgetPayload struct { // struct
 type Path struct { // struct
 	ID         primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Type       primitive.Symbol   `bson:"type" json:"type"`
+	Tag        string             `bson:"tag" json:"tag"`
 	Remote     string             `bson:"remote" json:"remote"`
 	Local      string             `bson:"local" json:"local"`
 	Extension  string             `bson:"extension" json:"extension"`

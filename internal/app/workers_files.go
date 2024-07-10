@@ -53,6 +53,11 @@ func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
 			}
 
 			if d.IsDir() {
+				if filepath.Base(path)[0] == '@' || filepath.Base(path)[0] == '.' {
+					// skip directories starting with .
+					// skip directories starting with @ (e.g. @eaDir from synology)
+					return filepath.SkipDir
+				}
 				return nil
 			}
 			if filepath.Base(path)[0] == '.' {
