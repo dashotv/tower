@@ -43,10 +43,8 @@ func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
 		return fae.Wrap(err, "updating")
 	}
 
-	// eg := new(errgroup.Group)
 	for _, lib := range a.Libs {
 		lib := lib
-		// eg.Go(func() error {
 		err := filepath.WalkDir(lib.Path, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return fae.Wrap(err, "walking")
@@ -102,17 +100,15 @@ func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
 
 			return nil
 		})
-		// })
 		if err != nil {
 			return fae.Wrap(err, "walking")
 		}
 	}
 
-	// if err := eg.Wait(); err != nil {
-	// 	return fae.Wrap(err, "walking")
-	// }
-
-	// app.Workers.Enqueue(&FileMatch{})
+	_, err = a.DB.File.Collection.DeleteMany(ctx, bson.M{"exists": false})
+	if err != nil {
+		return fae.Wrap(err, "updating")
+	}
 	return nil
 }
 
