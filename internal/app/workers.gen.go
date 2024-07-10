@@ -96,6 +96,9 @@ func setupWorkers(app *Application) error {
 	if err := minion.RegisterWithQueue[*FileWalk](m, &FileWalk{}, "paths"); err != nil {
 		return fae.Wrap(err, "registering worker: file_walk (FileWalk)")
 	}
+	if _, err := m.Schedule("0 0 * * * *", &FileWalk{}); err != nil {
+		return fae.Wrap(err, "scheduling worker: file_walk (FileWalk)")
+	}
 
 	if err := minion.Register[*FilesRename](m, &FilesRename{}); err != nil {
 		return fae.Wrap(err, "registering worker: files_rename (FilesRename)")
