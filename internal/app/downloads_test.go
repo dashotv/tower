@@ -57,3 +57,24 @@ func TestWantNext(t *testing.T) {
 		})
 	}
 }
+
+func TestDownloadsManageOne(t *testing.T) {
+	err := setupFlame(app)
+	require.NoError(t, err)
+
+	err = setupWorkers(app)
+	require.NoError(t, err)
+
+	did := "668de54abfa2eb945a2c600c"
+	d := &Download{}
+	err = app.DB.Download.Find(did, d)
+	require.NoError(t, err)
+	app.DB.processDownload(d)
+
+	hash := "82b00ef729ee6ef2d3cdb57aa13265fd1d8d06f9"
+	torrent, err := app.FlameTorrent(hash)
+	require.NoError(t, err)
+
+	err = app.downloadsManageOne(d, torrent)
+	require.NoError(t, err)
+}

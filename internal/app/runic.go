@@ -29,10 +29,16 @@ func (a *Application) RunicFindEpisode(seriesID primitive.ObjectID, title, type_
 
 	q := app.DB.Episode.Query().Where("series_id", seriesID).Asc("season_number").Asc("episode_number").Asc("absolute_number")
 	if type_ == "anime" {
-		q = q.Or(func(q *grimoire.QueryBuilder[*Episode]) {
-			q.Where("episode_number", info.Episode)
-			q.Where("absolute_number", info.Episode)
-		})
+		if info.Season == 0 {
+			// if season is 0, only check absolute number
+			q = q.Where("absolute_number", info.Episode)
+		} else {
+			// if season > 0, check both absolute and season/episode number
+			q = q.ComplexOr(func(qq, qr *grimoire.QueryBuilder[*Episode]) {
+				qq.Where("season_number", info.Season).Where("episode_number", info.Episode)
+				qr.Where("absolute_number", info.Episode)
+			})
+		}
 	} else {
 		q = q.Where("season_number", info.Season).Where("episode_number", info.Episode)
 	}
