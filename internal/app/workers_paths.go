@@ -50,11 +50,13 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 	// l := a.Workers.Log.Named("path_manage")
 	MediumID := job.Args.MediumID
 
-	if a.PlexFileCache == nil {
+	tctx, timeout := context.WithTimeout(ctx, 20*time.Second)
+	defer timeout()
+	ok := checkContextTimeout(tctx, func() bool {
+		return a.PlexFileCache != nil && a.PlexFileCache.files != nil
+	})
+	if !ok {
 		return fae.New("no plex file cache")
-	}
-	if a.PlexFileCache.files == nil {
-		return fae.New("no plex file cache files")
 	}
 
 	media := []*Medium{}
@@ -173,12 +175,13 @@ func (a *Application) fileMatchDir(dir string) error {
 		}
 
 		if d.IsDir() {
-			// if path != dir {
-			// 	return app.Workers.Enqueue(&FileMatchDir{Dir: path})
-			// }
+			if filepath.Base(path)[0] == '@' || filepath.Base(path)[0] == '.' {
+				// skip directories starting with .
+				// skip directories starting with @ (e.g. @eaDir from synology)
+				return filepath.SkipDir
+			}
 			return nil
 		}
-
 		if filepath.Base(path)[0] == '.' {
 			return nil
 		}

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/xml"
 	"fmt"
@@ -394,6 +395,26 @@ func WithTimeout(delegate func() interface{}, timeout time.Duration) (ret interf
 	case <-time.After(timeout):
 	}
 	return nil, false
+}
+
+// checkContextTimeout checks a function with a timeout
+func checkContextTimeout(ctx context.Context, f func() bool) bool {
+	if f() {
+		return true
+	}
+
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return false
+		case <-ticker.C:
+			if b := f(); b {
+				return b
+			}
+		}
+	}
 }
 
 func TickTock(tag string) func() {
