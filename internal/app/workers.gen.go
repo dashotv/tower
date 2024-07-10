@@ -180,8 +180,15 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "scheduling worker: plex_files (PlexFiles)")
 	}
 
+	if err := minion.Register[*PlexFilesPartial](m, &PlexFilesPartial{}); err != nil {
+		return fae.Wrap(err, "registering worker: plex_files_partial (PlexFilesPartial)")
+	}
+
 	if err := minion.Register[*PlexLibraryShoworder](m, &PlexLibraryShoworder{}); err != nil {
 		return fae.Wrap(err, "registering worker: plex_library_showorder (PlexLibraryShoworder)")
+	}
+	if _, err := m.Schedule("0 0 10 * * *", &PlexLibraryShoworder{}); err != nil {
+		return fae.Wrap(err, "scheduling worker: plex_library_showorder (PlexLibraryShoworder)")
 	}
 
 	if err := minion.Register[*PlexPinToUsers](m, &PlexPinToUsers{}); err != nil {

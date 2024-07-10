@@ -1,0 +1,4 @@
+name: plex_files_partial
+fields:
+    - name: title
+      type: string

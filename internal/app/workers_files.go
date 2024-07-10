@@ -38,6 +38,8 @@ func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
 	}
 	defer atomic.StoreUint32(&walking, 0)
 
+	defer TickTock("FileWalk")()
+
 	_, err := a.DB.File.Collection.UpdateMany(ctx, bson.M{}, bson.M{"$set": bson.M{"exists": false}})
 	if err != nil {
 		return fae.Wrap(err, "updating")
@@ -62,7 +64,7 @@ func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
 				return nil
 			}
 
-			l.Debugf("path: %s", path)
+			// l.Debugf("path: %s", path)
 			_, _, file, ext, err := pathParts(path)
 			if err != nil {
 				l.Warnf("parts: %s: %s", path, err)

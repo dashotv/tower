@@ -34,7 +34,7 @@ func (a *Application) HooksPlex(c echo.Context) error {
 	}
 
 	if lo.Contains(plexSupportedHooks, payload.Event) { // only create jobs for handled events
-		if err := a.Workers.Enqueue(&PlexWebhook{Payload: payload}); err != nil {
+		if err := a.Workers.Enqueue(&PlexWebhook{Payload: payload, Title: payload.Event}); err != nil {
 			return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: err.Error()})
 		}
 	}

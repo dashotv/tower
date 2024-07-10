@@ -1,1 +1,2 @@
 name: plex_library_showorder
+schedule: "0 0 10 * * *"

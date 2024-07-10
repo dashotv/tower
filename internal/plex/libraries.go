@@ -114,6 +114,27 @@ func (p *Client) GetLibrarySection(section string, directory string, libtype str
 
 	return dest.MediaContainer.Metadata, dest.MediaContainer.TotalSize, nil
 }
+func (p *Client) GetLibrarySectionFolder(section string, parent string, libtype string, start, limit int) ([]*LeavesMetadata, int64, error) {
+	dest := &LeavesMetadataContainer{}
+	req := p._server().
+		SetResult(dest).
+		SetHeaders(p.Headers).
+		SetHeader("X-Plex-Container-Start", fmt.Sprintf("%d", start)).
+		SetHeader("X-Plex-Container-Size", fmt.Sprintf("%d", limit))
+	if libtype != "" {
+		req.SetQueryParam("type", libtype)
+		req.SetQueryParam("parent", parent)
+	}
+	resp, err := req.Get(fmt.Sprintf("/library/sections/%s/%s", section, "folder"))
+	if err != nil {
+		return nil, 0, err
+	}
+	if !resp.IsSuccess() {
+		return nil, 0, fae.Errorf("failed to get libraries: %s", resp.Status())
+	}
+
+	return dest.MediaContainer.Metadata, dest.MediaContainer.TotalSize, nil
+}
 
 func (p *Client) LibraryType(section string) (int, error) {
 	t, err := p.LibraryTypeName(section)

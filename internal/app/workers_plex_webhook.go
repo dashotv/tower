@@ -2,9 +2,13 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/samber/lo"
 
 	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
@@ -17,6 +21,7 @@ var resolutionRegex = regexp.MustCompile(`(?i)(\d{3,4})p`)
 type PlexWebhook struct {
 	minion.WorkerDefaults[*PlexWebhook]
 	Payload *plex.WebhookPayload `bson:"payload" json:"payload"`
+	Title   string               `bson:"title" json:"title"`
 }
 
 func (j *PlexWebhook) Kind() string { return "plex_webhook" }
@@ -35,23 +40,34 @@ func (j *PlexWebhook) Work(ctx context.Context, job *minion.Job[*PlexWebhook]) e
 }
 
 func (j *PlexWebhook) LibraryNew(ctx context.Context, payload *plex.WebhookPayload) error {
-	notifier.Log.Debugf("plex", "added: %s | %s | %s", payload.Metadata.GrandparentTitle, payload.Metadata.ParentTitle, payload.Metadata.Title)
 	a := ContextApp(ctx)
-
-	m, err := j.mediumFromMetadata(ctx, payload.Metadata)
-	if err != nil {
-		return fae.Wrap(err, "medium from metadata")
-	}
-	if m == nil {
-		return nil
+	if a == nil {
+		return fae.New("no app context")
 	}
 
-	if err := a.DB.Medium.Save(m); err != nil {
-		return fae.Wrap(err, "save")
+	list := []string{payload.Metadata.GrandparentTitle, payload.Metadata.ParentTitle, payload.Metadata.Title}
+	list = lo.Filter(list, func(s string, _ int) bool { return s != "" })
+	notifier.Log.Debugf("plex", "added: %s", strings.Join(list, " - "))
+
+	title := payload.Metadata.Title
+	section := fmt.Sprintf("%d", payload.Metadata.LibrarySectionID)
+	libtype := payload.Metadata.LibrarySectionType
+	if err := a.Workers.Enqueue(&PlexFilesPartial{Title: title, Section: section, Libtype: libtype}); err != nil {
+		return fae.Wrap(err, "enqueue files partial")
 	}
 
-	if err := a.Workers.Enqueue(&PlexFiles{}); err != nil {
-		return fae.Wrap(err, "enqueue files")
+	if payload.Metadata.Type != "show" {
+		m, err := j.mediumFromMetadata(ctx, payload.Metadata)
+		if err != nil {
+			return fae.Wrap(err, "medium from metadata")
+		}
+		if m == nil {
+			return nil
+		}
+
+		if err := a.DB.Medium.Save(m); err != nil {
+			return fae.Wrap(err, "save")
+		}
 	}
 
 	return nil

@@ -154,11 +154,11 @@ func (c *Connector) MediumByPlexMedia(media *plex.Media) (*Medium, error) {
 			return nil, fae.Wrap(err, "path parts")
 		}
 
-		m, ok, err := c.MediumBy(kind, name, file, ext)
+		m, _, err := c.MediumBy(kind, name, file, ext)
 		if err != nil {
 			return nil, fae.Wrap(err, "medium by")
 		}
-		if ok || m != nil {
+		if m != nil {
 			return m, nil
 		}
 	}

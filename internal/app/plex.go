@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"net/url"
 	"time"
 
 	"github.com/dashotv/fae"
@@ -32,6 +33,7 @@ func setupPlex(app *Application) error {
 }
 
 func startPlexFiles(ctx context.Context, a *Application) error {
+	a.PlexFileCache = &plexFileCache{}
 	return a.Workers.Enqueue(&PlexFiles{})
 }
 
@@ -115,7 +117,9 @@ func (a *Application) plexAccountTitle(id int64) (string, error) {
 // }
 
 type plexFileCache struct {
-	files map[string]*plex.LeavesMetadata
+	libs    []*plex.Library
+	files   map[string]*plex.LeavesMetadata // absolute path -> plex file metadata
+	parents map[string]string               // title -> parent ID
 }
 
 func plexLibType(t string) string {
@@ -128,28 +132,97 @@ func plexLibType(t string) string {
 	return ""
 }
 
-func buildPlexCache(ctx context.Context) (*plexFileCache, error) {
+func (c *plexFileCache) build(ctx context.Context) error {
 	muctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	defer cancel()
 
 	if !buildPlexCacheMutex.Lock(muctx) {
 		app.Log.Named("buildPlexCache").Warn("failed to lock mutex")
-		return nil, nil
+		return nil
 	}
 	defer buildPlexCacheMutex.Unlock()
 
 	a := ContextApp(ctx)
 	if a == nil {
-		return nil, fae.New("no app context")
+		return fae.New("no app context")
 	}
-
-	cache := &plexFileCache{files: make(map[string]*plex.LeavesMetadata)}
 
 	libs, err := a.Plex.GetLibraries()
 	if err != nil {
-		return nil, fae.Wrap(err, "get libraries")
+		return fae.Wrap(err, "get libraries")
 	}
-	for _, lib := range libs {
+	c.libs = libs
+
+	if err := c.buildFiles(ctx); err != nil {
+		return fae.Wrap(err, "build files")
+	}
+	if err := c.buildFolders(ctx); err != nil {
+		return fae.Wrap(err, "build folders")
+	}
+	return nil
+}
+
+// func (c *plexFileCache) buildPlexCache(ctx context.Context) (*plexFileCache, error) {
+//
+// 	a := ContextApp(ctx)
+// 	if a == nil {
+// 		return fae.New("no app context")
+// 	}
+//
+// 	for _, lib := range c.libs {
+// 		t := plexLibType(lib.Type)
+// 		if t == "" {
+// 			continue
+// 		}
+//
+// 		folders, total, err := a.Plex.GetLibrarySectionFolder(lib.Key, "", t, 0, 500)
+// 		if err != nil {
+// 			return fae.Wrapf(err, "get library section folder: %s", lib.Key)
+// 		}
+//
+// 		_, total, err := a.Plex.GetLibrarySection(lib.Key, "all", t, 0, 1)
+// 		if err != nil {
+// 			return fae.Wrapf(err, "get library section: %s", lib.Key)
+// 		}
+//
+// 		for i := int64(0); i < total; i += 50 {
+// 			list, _, err := a.Plex.GetLibrarySection(lib.Key, "all", t, int(i), 50)
+// 			if err != nil {
+// 				return fae.Wrap(err, "get library section")
+// 			}
+// 			for _, item := range list {
+// 				if len(item.Media) == 0 {
+// 					continue
+// 				}
+//
+// 				for _, media := range item.Media {
+// 					if len(media.Part) == 0 {
+// 						continue
+// 					}
+//
+// 					for _, part := range media.Part {
+// 						if part.File == "" {
+// 							continue
+// 						}
+//
+// 						if _, ok := cache.files[part.File]; !ok {
+// 							cache.files[part.File] = item
+// 						}
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+//
+// 	return cache, nil
+// }
+
+func (c *plexFileCache) buildFiles(ctx context.Context) error {
+	a := ContextApp(ctx)
+
+	files := make(map[string]*plex.LeavesMetadata)
+
+	for _, lib := range c.libs {
 		t := plexLibType(lib.Type)
 		if t == "" {
 			continue
@@ -157,13 +230,13 @@ func buildPlexCache(ctx context.Context) (*plexFileCache, error) {
 
 		_, total, err := a.Plex.GetLibrarySection(lib.Key, "all", t, 0, 1)
 		if err != nil {
-			return nil, fae.Wrapf(err, "get library section: %s", lib.Key)
+			return fae.Wrapf(err, "get library section: %s", lib.Key)
 		}
 
 		for i := int64(0); i < total; i += 50 {
 			list, _, err := a.Plex.GetLibrarySection(lib.Key, "all", t, int(i), 50)
 			if err != nil {
-				return nil, fae.Wrap(err, "get library section")
+				return fae.Wrap(err, "get library section")
 			}
 			for _, item := range list {
 				if len(item.Media) == 0 {
@@ -180,14 +253,97 @@ func buildPlexCache(ctx context.Context) (*plexFileCache, error) {
 							continue
 						}
 
-						if _, ok := cache.files[part.File]; !ok {
-							cache.files[part.File] = item
-						}
+						files[part.File] = item
 					}
 				}
 			}
 		}
 	}
 
-	return cache, nil
+	c.files = files
+	return nil
+}
+
+func (c *plexFileCache) update(ctx context.Context, title string, section string, libtype string) error {
+	a := ContextApp(ctx)
+	parent := c.parents[title]
+	t := plexLibType(libtype)
+	if t == "" {
+		return fae.Errorf("unknown library type: %s", libtype)
+	}
+
+	_, total, err := a.Plex.GetLibrarySectionFolder(section, parent, t, 0, 1)
+	if err != nil {
+		return fae.Wrapf(err, "get library section: %s", section)
+	}
+
+	for i := int64(0); i < total; i += 50 {
+		list, _, err := a.Plex.GetLibrarySection(section, parent, t, int(i), 50)
+		if err != nil {
+			return fae.Wrap(err, "get library section")
+		}
+		for _, item := range list {
+			if len(item.Media) == 0 {
+				continue
+			}
+
+			for _, media := range item.Media {
+				if len(media.Part) == 0 {
+					continue
+				}
+
+				for _, part := range media.Part {
+					if part.File == "" {
+						continue
+					}
+
+					c.files[part.File] = item
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (c *plexFileCache) buildFolders(ctx context.Context) error {
+	a := ContextApp(ctx)
+	parents := make(map[string]string)
+
+	for _, lib := range c.libs {
+		t := plexLibType(lib.Type)
+		if t == "" {
+			continue
+		}
+
+		_, total, err := a.Plex.GetLibrarySectionFolder(lib.Key, "", t, 0, 1)
+		if err != nil {
+			return fae.Wrapf(err, "get library section folder: %s", lib.Key)
+		}
+
+		for i := int64(0); i < total; i += 50 {
+			list, _, err := a.Plex.GetLibrarySectionFolder(lib.Key, "all", t, int(i), 50)
+			if err != nil {
+				return fae.Wrap(err, "get library section")
+			}
+			for _, item := range list {
+				u, err := url.Parse(item.Key)
+				if err != nil {
+					return fae.Wrap(err, "parse uri")
+				}
+				m, err := url.ParseQuery(u.RawQuery)
+				if err != nil {
+					return fae.Wrap(err, "parse query")
+				}
+				parent := m["parent"][0]
+
+				// a.Log.Debugf("folder: %s -> %s", item.Title, parent)
+				if _, ok := parents[item.Title]; !ok {
+					parents[item.Title] = parent
+				}
+			}
+		}
+	}
+
+	c.parents = parents
+	return nil
 }
