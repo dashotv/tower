@@ -1,6 +1,10 @@
 package app
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestPath(t *testing.T) {
 	tests := []struct {
@@ -21,6 +25,34 @@ func TestPath(t *testing.T) {
 			if got := path(tt.title); got != tt.want {
 				t.Errorf("path() = %v, want %v", got, tt.want)
 			}
+		})
+	}
+}
+
+func TestPathParts(t *testing.T) {
+	tests := []struct {
+		title string
+		kind  string
+		name  string
+		file  string
+		ext   string
+	}{
+		{
+			"/mnt/media/anime/my dress up darling/my dress-up darling - 01x001 - someone who lives in the exact opposite world as me.mkv",
+			"anime",
+			"my dress up darling",
+			"my dress-up darling - 01x001 - someone who lives in the exact opposite world as me",
+			"mkv",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.title, func(t *testing.T) {
+			kind, name, file, ext, err := pathParts(tt.title)
+			assert.NoError(t, err)
+			assert.Equal(t, kind, tt.kind)
+			assert.Equal(t, name, tt.name)
+			assert.Equal(t, file, tt.file)
+			assert.Equal(t, ext, tt.ext)
 		})
 	}
 }
