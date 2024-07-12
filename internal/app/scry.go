@@ -9,7 +9,6 @@ import (
 	"github.com/dashotv/fae"
 	runic "github.com/dashotv/runic/client"
 	scry "github.com/dashotv/scry/client"
-	"github.com/dashotv/scry/search"
 )
 
 func init() {
@@ -102,88 +101,6 @@ func (a *Application) ScrySearchEpisode(search *DownloadSearch) (*runic.Release,
 	}
 
 	return selectRunicRelease(search, resp.Result.Releases)
-}
-
-type Chooser struct {
-	Group string
-	Title string
-	Exact bool
-	data  map[string]map[string][]*search.Release
-}
-
-func (c *Chooser) add(r *search.Release) {
-	k := "tors"
-	if r.NZB {
-		k = "nzbs"
-	}
-
-	if lo.Contains(app.Config.DownloadsPreferred, strings.ToLower(r.Group)) {
-		c.data[k]["preferred"] = append(c.data[k]["preferred"], r)
-	}
-	if lo.Contains(app.Config.DownloadsGroups, strings.ToLower(r.Group)) {
-		c.data[k]["good"] = append(c.data[k]["good"], r)
-	}
-}
-
-func (c *Chooser) choose() *search.Release {
-	// app.Log.Debugf("chooser: %+v", c.data)
-	if len(c.data["nzbs"]["preferred"]) > 0 {
-		return c.data["nzbs"]["preferred"][0]
-	}
-	if len(c.data["nzbs"]["good"]) > 0 {
-		return c.data["nzbs"]["good"][0]
-	}
-	if len(c.data["tors"]["preferred"]) > 0 {
-		return c.data["tors"]["preferred"][0]
-	}
-	if len(c.data["tors"]["good"]) > 0 {
-		if !c.Exact {
-			return c.data["tors"]["good"][0]
-		}
-
-		for _, r := range c.data["tors"]["good"] {
-			if c.Title == r.Name {
-				return r
-			}
-		}
-	}
-
-	// 	if r == nil {
-	// 		return nil
-	// 	}
-	//
-	// 	if c.Group == r.Group {
-	// 		return r
-	// 	}
-	// 	if c.Exact && r.Name == c.Title {
-	// 		return r
-	// 	}
-
-	return nil
-}
-
-func selectRelease(s *DownloadSearch, releases []*search.Release) (*search.Release, error) {
-	c := &Chooser{
-		Group: s.Group,
-		Title: s.Title,
-		Exact: s.Exact,
-		data: map[string]map[string][]*search.Release{
-			"nzbs": {
-				"preferred": {},
-				"good":      {},
-			},
-			"tors": {
-				"preferred": {},
-				"good":      {},
-			},
-		},
-	}
-
-	for _, r := range releases {
-		c.add(r)
-	}
-
-	return c.choose(), nil
 }
 
 func selectRunicRelease(s *DownloadSearch, releases []*runic.Release) (*runic.Release, error) {
