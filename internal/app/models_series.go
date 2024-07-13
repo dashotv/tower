@@ -328,7 +328,7 @@ func (c *Connector) SeriesPaths(id string) ([]*Path, error) {
 	eps, err := c.Episode.Query().
 		Where("series_id", oid).
 		Desc("season_number").Desc("episode_number").Desc("absolute_number").
-		Limit(5000).
+		Limit(-1).
 		Run()
 	if err != nil {
 		return nil, err
