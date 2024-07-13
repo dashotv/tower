@@ -329,7 +329,7 @@ func (c *Connector) processDownload(d *Download) {
 				n = n - int(shift)
 			}
 			d.Search.Episode = n
-			d.Display = fmt.Sprintf("#%d %s", m.AbsoluteNumber, m.Title)
+			d.Display = fmt.Sprintf("%02dx%02d #%d %s", m.SeasonNumber, m.EpisodeNumber, m.AbsoluteNumber, m.Title)
 		} else {
 			d.Search.Season = m.SeasonNumber
 			d.Search.Episode = m.EpisodeNumber
