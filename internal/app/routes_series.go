@@ -336,6 +336,8 @@ func seriesJob(name string, id string) (string, error) {
 		return app.Workers.EnqueueID(&PathManage{MediumID: id})
 	case "rename":
 		return app.Workers.EnqueueID(&FilesRenameMedium{ID: id})
+	case "remove_old":
+		return app.Workers.EnqueueID(&FilesRemoveOld{ID: id})
 	default:
 		return "", fae.Errorf("unknown job: %s", name)
 	}
