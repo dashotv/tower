@@ -64,7 +64,7 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 	if err := app.DB.Medium.Find(MediumID, medium); err != nil {
 		return fae.Wrap(err, "find medium")
 	}
-	// kind := medium.Kind
+	kind := medium.Kind
 
 	lib, ok := a.Libs[string(medium.Kind)]
 	if !ok {
@@ -92,14 +92,19 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 	}
 
 	for _, m := range media {
-		newPaths := []*Path{}
+		newPaths := map[string]*Path{}
 		for _, path := range m.Paths {
 			if !path.Exists() && !path.IsCoverBackground() {
 				a.Log.Warnf("path does not exist: %s", path.LocalPath())
 				continue
 			}
 
-			newPaths = append(newPaths, path)
+			if newPaths[path.LocalPath()] != nil {
+				a.Log.Warnf("duplicate path: %s", path.LocalPath())
+				continue
+			}
+
+			newPaths[path.LocalPath()] = path
 			if !path.IsVideo() {
 				// keep path, but don't process
 				continue
@@ -108,12 +113,12 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 			if err := a.pathImport(path); err != nil {
 				return fae.Wrap(err, "path import")
 			}
-			// if err := a.pathDest(m, kind, path); err != nil {
-			// 	return fae.Wrap(err, "path check")
-			// }
+			if err := a.pathDest(m, kind, path); err != nil {
+				return fae.Wrap(err, "path check")
+			}
 		}
 
-		m.Paths = newPaths
+		m.Paths = lo.Values(newPaths)
 		if len(m.Paths) > 0 {
 			m.Downloaded = true
 			m.Completed = true
@@ -132,7 +137,7 @@ func (a *Application) pathDest(m *Medium, kind primitive.Symbol, path *Path) err
 	}
 
 	path.Rename = false
-	if path.LocalPath() != dest {
+	if path.LocalPath() != fmt.Sprintf("%s.%s", dest, path.Extension) {
 		a.Log.Debugw("pathcheck", "path", path.LocalPath(), "dest", dest)
 		path.Rename = true
 	}
