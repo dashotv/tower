@@ -139,7 +139,7 @@ func (c *Connector) DirectoryMedia(library string, page, limit int) ([]*Director
 	}
 	lib := libs[0]
 
-	q := c.Medium.Query().Where("kind", lib.Name)
+	q := c.Medium.Query().In("_type", []string{"Movie", "Series"}).Where("kind", lib.Name)
 
 	total, err := q.Count()
 	if err != nil {
