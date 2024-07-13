@@ -336,6 +336,10 @@ func FileLink(srcpath, dstpath string, force bool) error {
 	return os.Link(srcpath, dstpath)
 }
 
+func FileRemove(path string) error {
+	return os.Remove(path)
+}
+
 func FileMove(srcpath, dstpath string) error {
 	if err := FileLink(srcpath, dstpath, true); err != nil {
 		return fae.Wrap(err, "link")
