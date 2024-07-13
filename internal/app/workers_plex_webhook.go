@@ -50,6 +50,9 @@ func (j *PlexWebhook) LibraryNew(ctx context.Context, payload *plex.WebhookPaylo
 	notifier.Log.Debugf("plex", "added: %s", strings.Join(list, " - "))
 
 	title := payload.Metadata.Title
+	if payload.Metadata.Type == "episode" {
+		title = payload.Metadata.GrandparentTitle
+	}
 	section := fmt.Sprintf("%d", payload.Metadata.LibrarySectionID)
 	libtype := payload.Metadata.LibrarySectionType
 	if err := a.Workers.Enqueue(&PlexFilesPartial{Title: title, Section: section, Libtype: libtype}); err != nil {
