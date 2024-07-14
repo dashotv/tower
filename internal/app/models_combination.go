@@ -118,13 +118,8 @@ func (c *Connector) CombinationChildren(name string) ([]*CombinationChild, error
 			if metadata == nil {
 				return nil, fae.Errorf("metadata not found for %s", child.RatingKey)
 			}
-			if metadata.Leaves == metadata.Viewed {
+			if metadata.Leaves > 0 && metadata.Leaves == metadata.Viewed {
 				continue
-			}
-
-			unwatched, err := app.Plex.GetSeriesEpisodesUnwatched(child.RatingKey)
-			if err != nil {
-				return nil, err
 			}
 
 			stuff := &CombinationChild{
@@ -143,10 +138,20 @@ func (c *Connector) CombinationChildren(name string) ([]*CombinationChild, error
 				Viewed:       metadata.Viewed,
 				LastViewedAt: metadata.LastViewedAt,
 			}
-			if unwatched != nil {
-				stuff.Next = unwatched.RatingKey
-				stuff.AddedAt = unwatched.AddedAt
-				stuff.UpdatedAt = unwatched.UpdatedAt
+
+			if child.Type == "show" {
+				unwatched, err := app.Plex.GetSeriesEpisodesUnwatched(child.RatingKey)
+				if err != nil {
+					return nil, err
+				}
+				if unwatched != nil {
+					stuff.Next = unwatched.RatingKey
+					stuff.AddedAt = unwatched.AddedAt
+					stuff.UpdatedAt = unwatched.UpdatedAt
+				}
+			} else {
+				stuff.AddedAt = child.AddedAt
+				stuff.UpdatedAt = child.UpdatedAt
 			}
 			list = append(list, stuff)
 		}

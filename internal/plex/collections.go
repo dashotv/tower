@@ -206,10 +206,10 @@ func (p *Client) GetCollectionChildren(ratingKey string) ([]*CollectionChild, er
 	return dest.MediaContainer.Directory, nil
 }
 
-func (p *Client) UpdateCollection(section, ratingKey string, keys []string) error {
+func (p *Client) UpdateCollection(section, ratingKey string, keys []string) ([]string, []string, error) {
 	existing, err := p.GetCollection(ratingKey)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	existingKeys := lo.Map(existing.Children, func(c *CollectionChild, i int) string {
@@ -220,19 +220,19 @@ func (p *Client) UpdateCollection(section, ratingKey string, keys []string) erro
 	if len(add) > 0 {
 		for _, k := range add {
 			if err := p.addCollectionItem(ratingKey, k); err != nil {
-				return err
+				return nil, nil, err
 			}
 		}
 	}
 	if len(remove) > 0 {
 		for _, k := range remove {
 			if err := p.removeCollectionItem(ratingKey, k); err != nil {
-				return err
+				return nil, nil, err
 			}
 		}
 	}
 
-	return nil
+	return add, remove, nil
 }
 
 func (p *Client) addCollectionItem(ratingKey, newKey string) error {

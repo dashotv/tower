@@ -116,7 +116,7 @@ func (p *Client) GetViewedByKey(key string) (*LibraryMetadata, error) {
 }
 func (p *Client) GetSeriesEpisodes(key string) ([]*LeavesMetadata, error) {
 	m := &LeavesMetadataContainer{}
-	resp, err := p._server().SetResult(m).SetFormDataFromValues(p.data).Get("/library/metadata/" + key + "/allLeaves")
+	resp, err := p._server().SetResult(m).SetHeader("X-Plex-Container-Size", "500").SetFormDataFromValues(p.data).Get("/library/metadata/" + key + "/allLeaves")
 	if err != nil {
 		return nil, fae.Wrap(err, "failed to make request")
 	}
