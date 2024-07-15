@@ -233,17 +233,31 @@ func pathParts(path string) (string, string, string, string, error) {
 	path = strings.Replace(path, app.Config.DirectoriesCompleted+"/", "", 1)
 	parts := strings.Split(path, "/")
 	if len(parts) < 3 {
-		return "", "", "", "", fae.Errorf("not enough parts")
+		return "", "", "", "", fae.Errorf("not enough parts: %+v", parts)
 	}
 
 	kind, name, file := parts[0], parts[1], parts[2]
-	f := strings.Split(file, ".")
 
+	f := strings.Split(file, ".")
 	if len(f) < 2 {
 		return kind, name, file, "", fae.Errorf("no extension")
 	}
 
-	return kind, name, f[0], f[1], nil
+	file, ext := f[0], f[1]
+	if len(f) > 2 {
+		file = strings.Join(f[:len(f)-1], ".")
+		ext = f[len(f)-1]
+	}
+
+	return kind, name, file, ext, nil
+}
+
+func pathPartsDirFile(path string) (string, string) {
+	df := filepath.SplitList(path)
+	if len(df) < 2 {
+		return "", ""
+	}
+	return df[0], df[1]
 }
 
 func sumFile(path string) (string, error) {

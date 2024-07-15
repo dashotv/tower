@@ -37,11 +37,18 @@ func TestPathParts(t *testing.T) {
 		file  string
 		ext   string
 	}{
+		// {
+		// 	"/mnt/media/anime/my dress up darling/my dress-up darling - 01x001 - someone who lives in the exact opposite world as me.mkv",
+		// 	"anime",
+		// 	"my dress up darling",
+		// 	"my dress-up darling - 01x001 - someone who lives in the exact opposite world as me",
+		// 	"mkv",
+		// },
 		{
-			"/mnt/media/anime/my dress up darling/my dress-up darling - 01x001 - someone who lives in the exact opposite world as me.mkv",
+			"/mnt/media/anime/arifureta from commonplace to worlds strongest/arifureta - from commonplace to worlds strongest - 00x001 - omnibus the great orcus labyrinth episode 5.5.mkv",
 			"anime",
-			"my dress up darling",
-			"my dress-up darling - 01x001 - someone who lives in the exact opposite world as me",
+			"arifureta from commonplace to worlds strongest",
+			"arifureta - from commonplace to worlds strongest - 00x001 - omnibus the great orcus labyrinth episode 5.5",
 			"mkv",
 		},
 	}
