@@ -27,6 +27,19 @@ func (m *Medium) BaseDir() string {
 	return filepath.Join(app.Config.DirectoriesCompleted, string(m.Kind))
 }
 
+func (m *Medium) DisplayTitle() string {
+	if m.Display != "" {
+		return m.Display
+	}
+	return m.Title
+}
+func (m *Medium) Year() string {
+	if m.ReleaseDate.IsZero() {
+		return ""
+	}
+	return m.ReleaseDate.Format("2006")
+}
+
 func (m *Medium) FindPathByFullPath(file string) (*Path, bool) {
 	local := strings.Replace(file, app.Config.DirectoriesCompleted+"/", "", 1)
 	local = strings.TrimSuffix(local, filepath.Ext(file))

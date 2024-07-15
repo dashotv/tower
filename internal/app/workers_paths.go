@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/samber/lo"
@@ -73,6 +74,9 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 
 	if err := a.fileMatchDir(fmt.Sprintf("%s/%s", lib.Path, medium.Directory)); err != nil {
 		return fae.Wrap(err, "file match dir")
+	}
+	if err := a.filePlexmatch(medium); err != nil {
+		return fae.Wrap(err, "file plexmatch")
 	}
 
 	media = append(media, medium)
@@ -168,6 +172,38 @@ func (a *Application) pathImport(path *Path) error {
 	}
 	path.Size = meta.Media[0].Part[0].Size
 
+	return nil
+}
+
+func (a *Application) filePlexmatch(medium *Medium) error {
+	if medium.Type != "Series" && medium.Type != "Movie" {
+		return nil
+	}
+
+	lib := a.Libs[string(medium.Kind)]
+	if lib == nil {
+		return fae.Errorf("library not found: %s", medium.Kind)
+	}
+
+	file := fmt.Sprintf("%s/%s/.plexmatch", lib.Path, medium.Directory)
+	data := []string{}
+	data = append(data, "# PlexMatch - managed by dashotv")
+	data = append(data, fmt.Sprintf("Title: %s", medium.DisplayTitle()))
+	data = append(data, fmt.Sprintf("Year: %s", medium.Year()))
+	if medium.Source == "tvdb" {
+		data = append(data, fmt.Sprintf("tvdbid: %s", medium.SourceID))
+	} else if medium.Source == "tmdb" {
+		data = append(data, fmt.Sprintf("tmdbid: %s", medium.SourceID))
+		if medium.ImdbID != "" {
+			data = append(data, fmt.Sprintf("imdbid: %s", medium.ImdbID))
+		}
+	}
+	data = append(data, "")
+	// TODO: handle episodes as well?
+
+	if err := os.WriteFile(file, []byte(strings.Join(data, "\n")), 0644); err != nil {
+		return fae.Wrap(err, "writing plexmatch")
+	}
 	return nil
 }
 
