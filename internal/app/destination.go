@@ -188,7 +188,7 @@ func (d *DestinatorData) SeasonEpisodeAbsolute() string {
 	return out
 }
 func (d *DestinatorData) AbsoluteSeasonEpisode() string {
-	if d.absolute == 0 {
+	if d.absolute == 0 || d.season == 0 {
 		return fmt.Sprintf("%02dx%02d", d.season, d.episode)
 	}
 	return fmt.Sprintf("01x%03d", d.absolute)
