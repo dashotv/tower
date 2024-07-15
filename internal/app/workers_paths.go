@@ -135,13 +135,14 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 }
 
 func (a *Application) pathDest(m *Medium, kind primitive.Symbol, path *Path) error {
-	dest, err := a.Destinator.Destination(kind, m)
+	d, err := a.Destinator.Destination(kind, m)
 	if err != nil {
 		return fae.Wrap(err, "destination")
 	}
+	dest := fmt.Sprintf("%s.%s", d, path.Extension)
 
 	path.Rename = false
-	if path.LocalPath() != fmt.Sprintf("%s.%s", dest, path.Extension) {
+	if path.LocalPath() != dest {
 		a.Log.Debugw("pathcheck", "path", path.LocalPath(), "dest", dest)
 		path.Rename = true
 	}
@@ -253,8 +254,10 @@ func (a *Application) fileMatchDir(dir string) error {
 			return nil
 		}
 
+		p := &Path{Type: primitive.Symbol(filetype), Local: local, Extension: ext}
+		// l.Debugw("adding", "path", p.LocalPath(), "ext", ext)
 		m.Completed = true
-		m.Paths = append(m.Paths, &Path{Type: primitive.Symbol(filetype), Local: local, Extension: ext})
+		m.Paths = append(m.Paths, p)
 		if err := app.DB.Medium.Save(m); err != nil {
 			l.Errorw("save", "error", err)
 			return fae.Wrap(err, "saving")
