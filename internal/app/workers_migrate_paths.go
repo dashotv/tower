@@ -38,7 +38,7 @@ func (j *MigratePaths) Work(ctx context.Context, job *minion.Job[*MigratePaths])
 	err = q.Batch(100, func(results []*Medium) error {
 		for _, m := range results {
 			for _, p := range m.Paths {
-				if _, ok := a.PlexFileCache.files[p.LocalPath()]; !ok {
+				if p.IsCoverBackground() {
 					continue
 				}
 
