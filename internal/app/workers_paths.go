@@ -26,7 +26,7 @@ func (j *PathManageAll) Kind() string { return "path_manage_all" }
 func (j *PathManageAll) Work(ctx context.Context, job *minion.Job[*PathManageAll]) error {
 	a := ContextApp(ctx)
 	//l := a.Workers.Log.Named("path_manage_all")
-	err := a.DB.Medium.Query().In("_type", []string{"Movie", "Series"}).Each(100, func(m *Medium) error {
+	err := a.DB.Medium.Query().In("_type", []string{"Movie", "Series"}).Where("broken", false).Each(100, func(m *Medium) error {
 		return a.Workers.Enqueue(&PathManage{MediumID: m.ID.Hex()})
 	})
 	if err != nil {
@@ -72,7 +72,16 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 		return fae.Errorf("library not found: %s", medium.Kind)
 	}
 
-	if err := a.fileMatchDir(fmt.Sprintf("%s/%s", lib.Path, medium.Directory)); err != nil {
+	dir := fmt.Sprintf("%s/%s", lib.Path, medium.Directory)
+	if !exists(fmt.Sprintf("%s/%s", lib.Path, medium.Directory)) {
+		medium.Broken = true
+		if err := app.DB.Medium.Save(medium); err != nil {
+			return fae.Wrap(err, "save medium")
+		}
+		return fae.Errorf("directory not found: %s", dir)
+	}
+
+	if err := a.fileMatchDir(dir); err != nil {
 		return fae.Wrap(err, "file match dir")
 	}
 	if err := a.filePlexmatch(medium); err != nil {
