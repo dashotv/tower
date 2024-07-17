@@ -27,31 +27,40 @@ func (a *Application) RunicFindEpisode(seriesID primitive.ObjectID, title, type_
 		return nil, nil
 	}
 
-	q := app.DB.Episode.Query().Where("series_id", seriesID).Asc("season_number").Asc("episode_number").Asc("absolute_number")
+	// run multiple queries to avoid false positives
+	list := []*grimoire.QueryBuilder[*Episode]{}
 	if type_ == "anime" {
 		if info.Season == 0 {
 			// if season is 0, only check absolute number
-			q = q.Where("absolute_number", info.Episode)
+			list = append(list, app.DB.Episode.Query().Where("series_id", seriesID).Asc("season_number").Asc("episode_number").Asc("absolute_number").Where("absolute_number", info.Episode))
 		} else {
 			// if season > 0, check both absolute and season/episode number
-			q = q.ComplexOr(func(qq, qr *grimoire.QueryBuilder[*Episode]) {
-				qq.Where("season_number", info.Season).Where("episode_number", info.Episode)
-				qr.Where("absolute_number", info.Episode)
-			})
+			list = append(list, app.DB.Episode.Query().Where("series_id", seriesID).Asc("season_number").Asc("episode_number").Asc("absolute_number").Where("season_number", info.Season).Where("episode_number", info.Episode))
+			list = append(list, app.DB.Episode.Query().Where("series_id", seriesID).Asc("season_number").Asc("episode_number").Asc("absolute_number").Where("absolute_number", info.Episode))
 		}
 	} else {
-		q = q.Where("season_number", info.Season).Where("episode_number", info.Episode)
+		list = append(list, app.DB.Episode.Query().Where("series_id", seriesID).Asc("season_number").Asc("episode_number").Asc("absolute_number").Where("season_number", info.Season).Where("episode_number", info.Episode))
 	}
-	eps, err := q.Run()
-	if err != nil {
-		return nil, fae.Wrap(err, "querying episode")
+	for _, q := range list {
+		eps, err := q.Run()
+		if err != nil {
+			return nil, fae.Wrap(err, "querying episode")
+		}
+		if len(eps) > 0 {
+			return eps[0], nil
+		}
 	}
-	if len(eps) == 0 {
-		return nil, nil
-	}
+	return nil, nil
+	// eps, err := q.Run()
+	// if err != nil {
+	// 	return nil, fae.Wrap(err, "querying episode")
+	// }
+	// if len(eps) == 0 {
+	// 	return nil, nil
+	// }
 	// if len(eps) > 1 {
 	// 	return nil, fae.Errorf("querying episode: multiple episodes found")
 	// }
 
-	return eps[0], nil
+	// return eps[0], nil
 }
