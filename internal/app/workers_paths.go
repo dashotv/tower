@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 
 	"github.com/dashotv/fae"
 	"github.com/dashotv/minion"
+	"github.com/dashotv/tower/internal/plex"
 )
 
 var TYPES = []string{"Movie", "Series", "Episode"}
@@ -131,7 +133,11 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 			}
 		}
 
-		m.Paths = lo.Values(newPaths)
+		paths := lo.Values(newPaths)
+		slices.SortFunc(paths, func(i, j *Path) int {
+			return j.Resolution - i.Resolution
+		})
+		m.Paths = paths
 		if len(m.Paths) > 0 {
 			m.Downloaded = true
 			m.Completed = true
@@ -171,16 +177,34 @@ func (a *Application) pathImport(path *Path) error {
 		a.Log.Warnf("no media in cache: %s", f)
 		return nil
 	}
-	path.Bitrate = int(meta.Media[0].Bitrate)
-	path.Resolution = meta.Media[0].GetVideoResolution()
+	mediaMatches := lo.Filter(meta.Media, func(m *plex.Media, i int) bool {
+		parts := lo.Filter(m.Part, func(p plex.Part, i int) bool {
+			return p.File == path.LocalPath()
+		})
+		return len(parts) > 0
+	})
+	if len(mediaMatches) == 0 {
+		a.Log.Warnf("no media in cache: %s", f)
+		return nil
+	}
+	media := mediaMatches[0]
+	path.Bitrate = int(media.Bitrate)
+	path.Resolution = media.GetVideoResolution()
 
 	path.ParseTag()
 
-	if len(meta.Media[0].Part) == 0 {
+	if len(media.Part) == 0 {
 		a.Log.Warnf("no parts in cache: %s", f)
 		return nil
 	}
-	path.Size = meta.Media[0].Part[0].Size
+	partMatches := lo.Filter(media.Part, func(p plex.Part, i int) bool {
+		return p.File == path.LocalPath()
+	})
+	if len(partMatches) == 0 {
+		a.Log.Warnf("no parts in cache: %s", f)
+		return nil
+	}
+	path.Size = partMatches[0].Size
 
 	return nil
 }
