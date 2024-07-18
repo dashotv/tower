@@ -265,8 +265,8 @@ func (c *Connector) MediumByFilePartsAnime(kind, name, file string) (*Medium, er
 			return nil, err
 		}
 		if len(list) > 1 {
-			c.Log.Warnf("more than one: %s/%s/%s: %d %d %+v", kind, name, file, absolute, list)
-			return nil, fae.Errorf("more than one: %s/%s/%s: %v", kind, name, file, matches)
+			c.Log.Warnf("more than one episode for: %s/%s/%s: %d %d %+v", kind, name, file, absolute, list)
+			return c.MediumByFilePartsTv(kind, name, file)
 		}
 		if len(list) == 1 {
 			return list[0], nil
@@ -294,7 +294,7 @@ func (c *Connector) MediumByFilePartsAnime(kind, name, file string) (*Medium, er
 	}
 	if len(list) > 1 {
 		c.Log.Warnf("more than one: %s/%s/%s: %d %d %+v", kind, name, file, absolute, episode, list)
-		return nil, fae.Errorf("more than one: %s/%s/%s: %v", kind, name, file, matches)
+		return c.MediumByFilePartsTv(kind, name, file)
 	}
 	return list[0], nil
 }
