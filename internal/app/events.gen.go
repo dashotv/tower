@@ -37,7 +37,7 @@ func setupEvents(app *Application) error {
 }
 
 func startEvents(ctx context.Context, app *Application) error {
-	go app.Events.Start()
+	go app.Events.Start(ctx)
 	return nil
 }
 
@@ -178,53 +178,117 @@ func NewEvents(app *Application) (*Events, error) {
 	return e, nil
 }
 
-func (e *Events) Start() error {
+func (e *Events) Start(ctx context.Context) error {
 	e.Log.Debugf("starting events...")
-	go func() {
-		// wire up receivers
-		for {
-			select {
-			case m := <-e.FlameCombined:
-				v, err := onFlameCombined(e.App, m)
-				if err != nil {
-					e.Log.Errorf("proxy failed: onFlameCombined: %s", err)
-					continue
+	// receiver: FlameCombined
+	for i := 0; i < 1; i++ {
+		go func() {
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case m := <-e.FlameCombined:
+					v, err := onFlameCombined(e.App, m)
+					if err != nil {
+						e.Log.Errorf("proxy failed: onFlameCombined: %s", err)
+						continue
+					}
+					e.Send("tower.downloading", v)
 				}
-				e.Send("tower.downloading", v)
-			case m := <-e.RunicReleases:
-				onRunicReleases(e.App, m)
-
-			case m := <-e.SeerDownloads:
-				v, err := onSeerDownloads(e.App, m)
-				if err != nil {
-					e.Log.Errorf("proxy failed: onSeerDownloads: %s", err)
-					continue
-				}
-				e.Send("tower.downloads", v)
-			case m := <-e.SeerEpisodes:
-				v, err := onSeerEpisodes(e.App, m)
-				if err != nil {
-					e.Log.Errorf("proxy failed: onSeerEpisodes: %s", err)
-					continue
-				}
-				e.Send("tower.episodes", v)
-			case m := <-e.SeerLogs:
-				v, err := onSeerLogs(e.App, m)
-				if err != nil {
-					e.Log.Errorf("proxy failed: onSeerLogs: %s", err)
-					continue
-				}
-				e.Send("tower.logs", v)
-			case m := <-e.SeerNotices:
-				v, err := onSeerNotices(e.App, m)
-				if err != nil {
-					e.Log.Errorf("proxy failed: onSeerNotices: %s", err)
-					continue
-				}
-				e.Send("tower.notices", v)
 			}
-		}
-	}()
+		}()
+	}
+
+	// receiver: RunicReleases
+	for i := 0; i < 1; i++ {
+		go func() {
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case m := <-e.RunicReleases:
+					onRunicReleases(e.App, m)
+				}
+			}
+		}()
+	}
+
+	// receiver: SeerDownloads
+	for i := 0; i < 1; i++ {
+		go func() {
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case m := <-e.SeerDownloads:
+					v, err := onSeerDownloads(e.App, m)
+					if err != nil {
+						e.Log.Errorf("proxy failed: onSeerDownloads: %s", err)
+						continue
+					}
+					e.Send("tower.downloads", v)
+				}
+			}
+		}()
+	}
+
+	// receiver: SeerEpisodes
+	for i := 0; i < 1; i++ {
+		go func() {
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case m := <-e.SeerEpisodes:
+					v, err := onSeerEpisodes(e.App, m)
+					if err != nil {
+						e.Log.Errorf("proxy failed: onSeerEpisodes: %s", err)
+						continue
+					}
+					e.Send("tower.episodes", v)
+				}
+			}
+		}()
+	}
+
+	// receiver: SeerLogs
+	for i := 0; i < 1; i++ {
+		go func() {
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case m := <-e.SeerLogs:
+					v, err := onSeerLogs(e.App, m)
+					if err != nil {
+						e.Log.Errorf("proxy failed: onSeerLogs: %s", err)
+						continue
+					}
+					e.Send("tower.logs", v)
+				}
+			}
+		}()
+	}
+
+	// receiver: SeerNotices
+	for i := 0; i < 1; i++ {
+		go func() {
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case m := <-e.SeerNotices:
+					v, err := onSeerNotices(e.App, m)
+					if err != nil {
+						e.Log.Errorf("proxy failed: onSeerNotices: %s", err)
+						continue
+					}
+					e.Send("tower.notices", v)
+				}
+			}
+		}()
+	}
+
 	return nil
 }
 
