@@ -69,6 +69,7 @@ func (a *Application) updateMedium(m *Medium, files []*MoverFile) error {
 		return fileType(f.Destination) == "video"
 	})
 	if len(videos) > 0 {
+		m.Broken = false
 		m.Downloaded = true
 		m.Completed = true
 	}
