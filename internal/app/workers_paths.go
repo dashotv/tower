@@ -86,6 +86,9 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 	if err := a.fileMatchDir(dir); err != nil {
 		return fae.Wrap(err, "file match dir")
 	}
+	if err := app.DB.Medium.Find(MediumID, medium); err != nil {
+		return fae.Wrap(err, "find medium")
+	}
 	if err := a.filePlexmatch(medium); err != nil {
 		return fae.Wrap(err, "file plexmatch")
 	}
@@ -109,6 +112,7 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 	for _, m := range media {
 		newPaths := map[string]*Path{}
 		for _, path := range m.Paths {
+			a.Log.Debugf("path: %s", path.LocalPath())
 			if !path.Exists() && !path.IsCoverBackground() {
 				a.Log.Warnf("path does not exist: %s", path.LocalPath())
 				continue
