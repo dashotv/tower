@@ -112,7 +112,6 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 	for _, m := range media {
 		newPaths := map[string]*Path{}
 		for _, path := range m.Paths {
-			a.Log.Debugf("path: %s", path.LocalPath())
 			if !path.Exists() && !path.IsCoverBackground() {
 				a.Log.Warnf("path does not exist: %s", path.LocalPath())
 				continue
