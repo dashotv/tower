@@ -73,6 +73,7 @@ func NewConnector(app *Application) (*Connector, error) {
 	}
 
 	grimoire.CreateIndexes[*Collection](collection, &Collection{}, "created_at;updated_at")
+
 	grimoire.CreateIndexesFromTags[*Collection](collection, &Collection{})
 
 	combination, err := connection[*Combination]("combination")
@@ -81,6 +82,7 @@ func NewConnector(app *Application) (*Connector, error) {
 	}
 
 	grimoire.CreateIndexes[*Combination](combination, &Combination{}, "created_at;updated_at")
+
 	grimoire.CreateIndexesFromTags[*Combination](combination, &Combination{})
 
 	download, err := connection[*Download]("download")
@@ -89,6 +91,7 @@ func NewConnector(app *Application) (*Connector, error) {
 	}
 
 	grimoire.CreateIndexes[*Download](download, &Download{}, "created_at;updated_at")
+
 	grimoire.CreateIndexesFromTags[*Download](download, &Download{})
 
 	episode, err := connection[*Episode]("episode")
@@ -111,6 +114,7 @@ func NewConnector(app *Application) (*Connector, error) {
 	}
 
 	grimoire.CreateIndexes[*File](file, &File{}, "created_at;updated_at")
+
 	grimoire.CreateIndexesFromTags[*File](file, &File{})
 
 	library, err := connection[*Library]("library")
@@ -119,6 +123,7 @@ func NewConnector(app *Application) (*Connector, error) {
 	}
 
 	grimoire.CreateIndexes[*Library](library, &Library{}, "created_at;updated_at")
+
 	grimoire.CreateIndexesFromTags[*Library](library, &Library{})
 
 	library_template, err := connection[*LibraryTemplate]("library_template")
@@ -127,6 +132,7 @@ func NewConnector(app *Application) (*Connector, error) {
 	}
 
 	grimoire.CreateIndexes[*LibraryTemplate](library_template, &LibraryTemplate{}, "created_at;updated_at")
+
 	grimoire.CreateIndexesFromTags[*LibraryTemplate](library_template, &LibraryTemplate{})
 
 	library_type, err := connection[*LibraryType]("library_type")
@@ -135,6 +141,7 @@ func NewConnector(app *Application) (*Connector, error) {
 	}
 
 	grimoire.CreateIndexes[*LibraryType](library_type, &LibraryType{}, "created_at;updated_at")
+
 	grimoire.CreateIndexesFromTags[*LibraryType](library_type, &LibraryType{})
 
 	medium, err := connection[*Medium]("medium")
@@ -150,6 +157,7 @@ func NewConnector(app *Application) (*Connector, error) {
 	}
 
 	grimoire.CreateIndexes[*Message](message, &Message{}, "created_at;updated_at")
+
 	grimoire.CreateIndexesFromTags[*Message](message, &Message{})
 
 	movie, err := connection[*Movie]("movie")
@@ -165,6 +173,7 @@ func NewConnector(app *Application) (*Connector, error) {
 	}
 
 	grimoire.CreateIndexes[*Pin](pin, &Pin{}, "created_at;updated_at")
+
 	grimoire.CreateIndexesFromTags[*Pin](pin, &Pin{})
 
 	release, err := connection[*Release]("release")
@@ -180,6 +189,7 @@ func NewConnector(app *Application) (*Connector, error) {
 	}
 
 	grimoire.CreateIndexes[*Request](request, &Request{}, "created_at;updated_at")
+
 	grimoire.CreateIndexesFromTags[*Request](request, &Request{})
 
 	series, err := connection[*Series]("series")
@@ -195,6 +205,7 @@ func NewConnector(app *Application) (*Connector, error) {
 	}
 
 	grimoire.CreateIndexes[*User](user, &User{}, "created_at;updated_at")
+
 	grimoire.CreateIndexesFromTags[*User](user, &User{})
 
 	watch, err := connection[*Watch]("watch")
