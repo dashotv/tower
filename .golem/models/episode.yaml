@@ -31,6 +31,8 @@ fields:
     type: "*time.Time"
   - name: release_date
     type: time.Time
+  - name: overrides
+    type: "*Overrides"
   - name: paths
     type: "[]*Path"
     bson: "paths,omitempty"
@@ -49,6 +51,9 @@ fields:
     type: bool
     bson: "-"
   # Series-related fields
+  - name: has_overrides
+    type: bool
+    bson: "-"
   - name: series_title
     type: string
     bson: "-"

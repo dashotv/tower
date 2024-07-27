@@ -398,11 +398,13 @@ type Episode struct { // model
 	Skipped         bool               `bson:"skipped" json:"skipped"`
 	Missing         *time.Time         `bson:"missing" json:"missing"`
 	ReleaseDate     time.Time          `bson:"release_date" json:"release_date"`
+	Overrides       *Overrides         `bson:"overrides" json:"overrides"`
 	Paths           []*Path            `bson:"paths,omitempty" json:"paths"`
 	Cover           string             `bson:"-" json:"cover"`
 	Background      string             `bson:"-" json:"background"`
 	Watched         bool               `bson:"-" json:"watched"`
 	WatchedAny      bool               `bson:"-" json:"watched_any"`
+	HasOverrides    bool               `bson:"-" json:"has_overrides"`
 	SeriesTitle     string             `bson:"-" json:"series_title"`
 	SeriesDisplay   string             `bson:"-" json:"series_display"`
 	SeriesSource    string             `bson:"-" json:"series_source"`
@@ -561,6 +563,12 @@ type NzbgetPayload struct { // struct
 	StatusDetail string `bson:"status_detail" json:"status_detail"`
 	StatusPar    string `bson:"status_par" json:"status_par"`
 	StatusUnpack string `bson:"status_unpack" json:"status_unpack"`
+}
+
+type Overrides struct { // struct
+	SeasonNumber   string `bson:"season_number" json:"season_number"`
+	EpisodeNumber  string `bson:"episode_number" json:"episode_number"`
+	AbsoluteNumber string `bson:"absolute_number" json:"absolute_number"`
 }
 
 type Path struct { // struct

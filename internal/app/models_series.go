@@ -182,6 +182,7 @@ func (c *Connector) SeriesSeasonEpisodes(id string, season string) ([]*Episode, 
 	eids := map[primitive.ObjectID]*Episode{}
 	for _, e := range eps {
 		eids[e.ID] = e
+		e.ApplyOverrides()
 	}
 
 	watches, err := c.Watch.Query().In("medium_id", lo.Keys(eids)).Limit(-1).Run()

@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -211,6 +212,7 @@ func (c *Connector) processSeriesUpcoming(s *Series, e *Episode) *Upcoming {
 	return u
 }
 func (c *Connector) processSeriesEpisode(s *Series, e *Episode) {
+	e.ApplyOverrides()
 	if isAnimeKind(string(s.Kind)) {
 		e.SeriesDisplay = fmt.Sprintf("#%d %s", e.AbsoluteNumber, e.Title)
 	} else {
@@ -242,6 +244,58 @@ func (c *Connector) processSeriesEpisode(s *Series, e *Episode) {
 			continue
 		}
 	}
+}
+
+func (e *Episode) ApplyOverrides() {
+	if e.Overrides == nil {
+		return
+	}
+	a := e.Overrides.Absolute()
+	if a >= 0 {
+		e.HasOverrides = true
+		e.AbsoluteNumber = a
+	}
+	s := e.Overrides.Season()
+	if s >= 0 {
+		e.HasOverrides = true
+		e.SeasonNumber = s
+	}
+	ep := e.Overrides.Episode()
+	if ep >= 0 {
+		e.HasOverrides = true
+		e.EpisodeNumber = ep
+	}
+}
+
+func (o *Overrides) Episode() int {
+	if o == nil {
+		return -1
+	}
+	if o.EpisodeNumber != "" {
+		num, _ := strconv.Atoi(o.EpisodeNumber)
+		return num
+	}
+	return -1
+}
+func (o *Overrides) Season() int {
+	if o == nil {
+		return -1
+	}
+	if o.SeasonNumber != "" {
+		num, _ := strconv.Atoi(o.SeasonNumber)
+		return num
+	}
+	return -1
+}
+func (o *Overrides) Absolute() int {
+	if o == nil {
+		return -1
+	}
+	if o.AbsoluteNumber != "" {
+		num, _ := strconv.Atoi(o.AbsoluteNumber)
+		return num
+	}
+	return -1
 }
 
 func (c *Connector) EpisodeSetting(id, setting string, value bool) error {

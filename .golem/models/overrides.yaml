@@ -1,0 +1,12 @@
+name: overrides
+type: struct
+indexes:
+  - created_at
+  - updated_at
+fields:
+  - name: season_number
+    type: string
+  - name: episode_number
+    type: string
+  - name: absolute_number
+    type: string
