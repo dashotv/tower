@@ -49,6 +49,8 @@ fields:
     type: int
   - name: release_date
     type: time.Time
+  - name: overrides
+    type: "*Overrides"
   - name: paths
     type: "[]*Path"
     bson: "paths"
@@ -58,6 +60,9 @@ fields:
     bson: "-"
   - name: background
     type: string
+    bson: "-"
+  - name: has_overrides
+    type: bool
     bson: "-"
   # Series
   - name: status

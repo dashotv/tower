@@ -289,6 +289,8 @@ func (c *Connector) processDownload(d *Download) {
 
 	paths := m.Paths
 	if m.Type == "Episode" && !m.SeriesID.IsZero() {
+		m.ApplyOverrides()
+
 		s := &Series{}
 		err := c.Series.FindByID(m.SeriesID, s)
 		if err != nil {

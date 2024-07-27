@@ -27,6 +27,26 @@ func (m *Medium) BaseDir() string {
 	return filepath.Join(app.Config.DirectoriesCompleted, string(m.Kind))
 }
 
+func (e *Medium) ApplyOverrides() {
+	if e.Overrides == nil {
+		return
+	}
+	a := e.Overrides.Absolute()
+	if a >= 0 {
+		e.HasOverrides = true
+		e.AbsoluteNumber = a
+	}
+	s := e.Overrides.Season()
+	if s >= 0 {
+		e.HasOverrides = true
+		e.SeasonNumber = s
+	}
+	ep := e.Overrides.Episode()
+	if ep >= 0 {
+		e.HasOverrides = true
+		e.EpisodeNumber = ep
+	}
+}
 func (m *Medium) DisplayTitle() string {
 	if m.Display != "" {
 		return m.Display

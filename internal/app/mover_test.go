@@ -37,6 +37,28 @@ func TestMover_MoveDownload(t *testing.T) {
 	}
 }
 
+func TestMover_MoveDownloadOverrides(t *testing.T) {
+	err := setupFlame(app)
+	assert.NoError(t, err)
+	err = startDestination(context.Background(), app)
+	assert.NoError(t, err)
+
+	did := "66a43ae0f6d3142430d4f2d7"
+	download := &Download{}
+	err = app.DB.Download.Find(did, download)
+	assert.NoError(t, err)
+
+	app.DB.processDownloads([]*Download{download})
+
+	mover := NewMover(app.Log.Named("TESTMOVER"), download, nil)
+	moved, err := mover.Move()
+	assert.NoError(t, err)
+
+	for _, f := range moved {
+		fmt.Printf("MOVED: %s\n", f.Destination)
+	}
+}
+
 func TestMover_Move(t *testing.T) {
 	var downloads []*Download
 	var torrents []*qbt.Torrent

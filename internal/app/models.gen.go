@@ -402,9 +402,9 @@ type Episode struct { // model
 	Paths           []*Path            `bson:"paths,omitempty" json:"paths"`
 	Cover           string             `bson:"-" json:"cover"`
 	Background      string             `bson:"-" json:"background"`
+	HasOverrides    bool               `bson:"-" json:"has_overrides"`
 	Watched         bool               `bson:"-" json:"watched"`
 	WatchedAny      bool               `bson:"-" json:"watched_any"`
-	HasOverrides    bool               `bson:"-" json:"has_overrides"`
 	SeriesTitle     string             `bson:"-" json:"series_title"`
 	SeriesDisplay   string             `bson:"-" json:"series_display"`
 	SeriesSource    string             `bson:"-" json:"series_source"`
@@ -501,9 +501,11 @@ type Medium struct { // model
 	Favorite       bool               `bson:"favorite" json:"favorite"`
 	Unwatched      int                `bson:"unwatched" json:"unwatched"`
 	ReleaseDate    time.Time          `bson:"release_date" json:"release_date"`
+	Overrides      *Overrides         `bson:"overrides" json:"overrides"`
 	Paths          []*Path            `bson:"paths" json:"paths"`
 	Cover          string             `bson:"-" json:"cover"`
 	Background     string             `bson:"-" json:"background"`
+	HasOverrides   bool               `bson:"-" json:"has_overrides"`
 	Status         string             `bson:"status" json:"status"`
 	SeriesID       primitive.ObjectID `bson:"series_id" json:"series_id"`
 	SeasonNumber   int                `bson:"season_number" json:"season_number"`

@@ -43,6 +43,9 @@ fields:
   - name: background
     type: string
     bson: "-"
+  - name: has_overrides
+    type: bool
+    bson: "-"
   # Simplified access to watched status
   - name: watched
     type: bool
@@ -51,9 +54,6 @@ fields:
     type: bool
     bson: "-"
   # Series-related fields
-  - name: has_overrides
-    type: bool
-    bson: "-"
   - name: series_title
     type: string
     bson: "-"
