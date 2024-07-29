@@ -125,7 +125,8 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 			}
 
 			newPaths[path.LocalPath()] = path
-			if !path.IsVideo() {
+			// if !path.IsVideo() {
+			if path.IsCoverBackground() {
 				// keep path, but don't process
 				continue
 			}
@@ -171,10 +172,12 @@ func (a *Application) pathDest(m *Medium, kind primitive.Symbol, path *Path) err
 }
 
 func (a *Application) pathImport(path *Path) error {
+	path.ParseTag()
 	f := path.LocalPath()
+
 	if a.PlexFileCache.files[f] == nil {
 		a.Log.Warnf("path not in cache: %s", f)
-		return nil
+		return a.pathImportFs(path)
 	}
 
 	meta := a.PlexFileCache.files[f]
@@ -196,8 +199,6 @@ func (a *Application) pathImport(path *Path) error {
 	path.Bitrate = int(media.Bitrate)
 	path.Resolution = media.GetVideoResolution()
 
-	path.ParseTag()
-
 	if len(media.Part) == 0 {
 		a.Log.Warnf("no parts in cache: %s", f)
 		return nil
@@ -211,6 +212,15 @@ func (a *Application) pathImport(path *Path) error {
 	}
 	path.Size = partMatches[0].Size
 
+	return nil
+}
+
+func (a *Application) pathImportFs(path *Path) error {
+	info, err := os.Stat(path.LocalPath())
+	if err != nil {
+		return fae.Wrap(err, "stat")
+	}
+	path.Size = info.Size()
 	return nil
 }
 
