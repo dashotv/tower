@@ -95,6 +95,8 @@ func (m *Medium) AddPathByFullpath(file string) *Path {
 		Extension: ext,
 		Type:      primitive.Symbol(fileType(file)),
 	}
+	path.ParseTag()
+
 	m.Paths = append(m.Paths, path)
 	return path
 }

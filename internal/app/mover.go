@@ -176,8 +176,7 @@ func (m *Mover) moveFile(source string, medium *Medium) error {
 
 	tag := ""
 	if m.Download.Tag != "" {
-		tags := strings.Split(m.Download.Tag, ",")
-		tag = fmt.Sprintf(" [%s]", strings.Join(tags, " "))
+		tag = fmt.Sprintf(" [%s]", m.Download.Tag)
 	}
 	destination := fmt.Sprintf("%s%s.%s", dest, tag, ext)
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/samber/lo"
@@ -165,7 +166,7 @@ func (a *Application) downloadsSearch() error {
 			continue
 		}
 		if d.Medium.Type != "Episode" {
-			//TODO: #4 handle movies
+			//movies handled in downloadsSearchMovies
 			continue
 		}
 
@@ -185,6 +186,17 @@ func (a *Application) downloadsSearch() error {
 			d.Status = "reviewing"
 		}
 		d.URL = match.Download
+		tags := []string{}
+		if match.Group != "" {
+			tags = append(tags, match.Group)
+		}
+		if match.Website != "" {
+			tags = append(tags, match.Website)
+		}
+		if match.Resolution != "" {
+			tags = append(tags, match.Resolution+"p")
+		}
+		d.Tag = strings.Join(tags, " ")
 
 		err = a.DB.Download.Save(d)
 		if err != nil {
