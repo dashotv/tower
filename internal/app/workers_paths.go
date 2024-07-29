@@ -160,7 +160,14 @@ func (a *Application) pathDest(m *Medium, kind primitive.Symbol, path *Path) err
 	if err != nil {
 		return fae.Wrap(err, "destination")
 	}
-	dest := fmt.Sprintf("%s.%s", d, path.Extension)
+
+	path.ParseTag()
+	tags := ""
+	if path.Tag != "" {
+		tags = fmt.Sprintf(" [%s]", path.Tag)
+	}
+
+	dest := fmt.Sprintf("%s%s.%s", d, tags, path.Extension)
 
 	path.Rename = false
 	if path.LocalPath() != dest {
