@@ -30,3 +30,7 @@ fields:
     type: int64
   - name: exists
     type: bool
+  - name: old
+    type: bool
+  - name: rename
+    type: bool

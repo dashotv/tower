@@ -443,6 +443,8 @@ type File struct { // model
 	Checksum   string             `bson:"checksum" json:"checksum"`
 	ModifiedAt int64              `bson:"modified_at" json:"modified_at"`
 	Exists     bool               `bson:"exists" json:"exists"`
+	Old        bool               `bson:"old" json:"old"`
+	Rename     bool               `bson:"rename" json:"rename"`
 }
 
 type Library struct { // model
