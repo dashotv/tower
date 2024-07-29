@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/samber/lo"
@@ -181,22 +180,10 @@ func (a *Application) downloadsSearch() error {
 		a.Workers.Log.Debugf("download found %s - %s", d.Title, d.Display)
 		notifier.Info("SearchFound", fmt.Sprintf("%s - %s", d.Title, d.Display))
 
-		d.Status = "loading"
+		d.SetRelease(match)
 		if !a.Config.Production {
 			d.Status = "reviewing"
 		}
-		d.URL = match.Download
-		tags := []string{}
-		if match.Group != "" {
-			tags = append(tags, match.Group)
-		}
-		if match.Website != "" {
-			tags = append(tags, match.Website)
-		}
-		if match.Resolution != "" {
-			tags = append(tags, match.Resolution+"p")
-		}
-		d.Tag = strings.Join(tags, " ")
 
 		err = a.DB.Download.Save(d)
 		if err != nil {

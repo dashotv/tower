@@ -55,13 +55,10 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 		return nil
 	}
 
-	if a.Config.Production {
-		d.Status = "loading"
-	} else {
+	d.SetRelease(msg)
+	if !a.Config.Production {
 		d.Status = "reviewing"
 	}
-
-	d.URL = msg.Download
 	if err := a.DB.Download.Save(d); err != nil {
 		return err
 	}

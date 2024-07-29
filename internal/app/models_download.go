@@ -17,6 +17,7 @@ import (
 	"github.com/dashotv/fae"
 	"github.com/dashotv/flame/nzbget"
 	"github.com/dashotv/flame/qbt"
+	runic "github.com/dashotv/runic/client"
 )
 
 var nzbgeekRegex = regexp.MustCompile("^https://api.nzbgeek")
@@ -47,6 +48,22 @@ func (d *Download) Error(e error) error {
 
 func (d *Download) StatusIndex() int {
 	return slices.Index(downloadStates, d.Status)
+}
+
+func (d *Download) SetRelease(r *runic.Release) {
+	d.Status = "loading"
+	d.URL = r.Download
+	tags := []string{}
+	if r.Group != "" {
+		tags = append(tags, r.Group)
+	}
+	if r.Website != "" {
+		tags = append(tags, r.Website)
+	}
+	if r.Resolution != "" {
+		tags = append(tags, r.Resolution)
+	}
+	d.Tag = strings.Join(tags, " ")
 }
 
 func (d *Download) GetURL() (string, error) {
