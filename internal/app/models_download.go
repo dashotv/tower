@@ -51,8 +51,9 @@ func (d *Download) StatusIndex() int {
 }
 
 func (d *Download) SetRelease(r *runic.Release) {
-	d.Status = "loading"
 	d.URL = r.Download
+
+	d.Status = "loading"
 	tags := []string{}
 	if r.Group != "" {
 		tags = append(tags, r.Group)
