@@ -100,6 +100,10 @@ func setupWorkers(app *Application) error {
 		return fae.Wrap(err, "scheduling worker: file_walk (FileWalk)")
 	}
 
+	if err := minion.Register[*FilesMove](m, &FilesMove{}); err != nil {
+		return fae.Wrap(err, "registering worker: files_move (FilesMove)")
+	}
+
 	if err := minion.Register[*FilesRemoveOld](m, &FilesRemoveOld{}); err != nil {
 		return fae.Wrap(err, "registering worker: files_remove_old (FilesRemoveOld)")
 	}

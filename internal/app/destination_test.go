@@ -39,3 +39,30 @@ func TestDestinator_Destination(t *testing.T) {
 		})
 	}
 }
+
+func TestDestinator_File(t *testing.T) {
+	err := startDestination(context.TODO(), app)
+	require.NoError(t, err)
+
+	cases := []struct {
+		fileID      string
+		destination string
+	}{
+		{"667504a777694a06672e05d7", "/mnt/media/donghua/mysterious treasures/mysterious treasures s01e01-06.mp4"},
+	}
+
+	destinator := app.Destinator
+
+	for _, c := range cases {
+		t.Run(c.fileID, func(tt *testing.T) {
+			f := &File{}
+			err := app.DB.File.Find(c.fileID, f)
+			require.NoError(tt, err)
+			require.NotNil(tt, f)
+
+			dest, err := destinator.File(f)
+			require.NoError(tt, err)
+			require.Equal(tt, c.destination, dest)
+		})
+	}
+}

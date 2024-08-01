@@ -246,6 +246,41 @@ func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
 // 	return nil
 // }
 
+type FilesMove struct {
+	minion.WorkerDefaults[*FilesMove]
+	ID    string `bson:"id" json:"id"`
+	Title string `bson:"title" json:"title"`
+}
+
+func (j *FilesMove) Kind() string { return "files_move" }
+func (j *FilesMove) Work(ctx context.Context, job *minion.Job[*FilesMove]) error {
+	a := ContextApp(ctx)
+	//l := a.Workers.Log.Named("files_move")
+	id := job.Args.ID
+
+	f, err := a.DB.FileGet(id)
+	if err != nil {
+		return fae.Wrap(err, "getting file")
+	}
+
+	dest, err := a.Destinator.File(f)
+	if err != nil {
+		return fae.Wrap(err, "error creating destination")
+	}
+
+	if f.Path != dest {
+		if err := FileMove(f.Path, dest); err != nil {
+			return fae.Wrap(err, "moving")
+		}
+	}
+
+	f.Path = dest
+	if err := a.DB.File.Save(f); err != nil {
+		return fae.Wrap(err, "error saving File")
+	}
+	return nil
+}
+
 type FilesRename struct {
 	minion.WorkerDefaults[*FilesRename]
 }

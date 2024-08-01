@@ -133,6 +133,44 @@ func (d *Destinator) Destination(kind primitive.Symbol, m *Medium) (string, erro
 	return out.String(), nil
 }
 
+// File returns the destination path for a file
+// this does not use the library template, it just
+// returns the path based on the medium's directory
+func (d *Destinator) File(f *File) (string, error) {
+	if f.MediumID.IsZero() {
+		return "", fae.Errorf("medium ID is empty")
+	}
+
+	m := &Medium{}
+	err := app.DB.Medium.FindByID(f.MediumID, m)
+	if err != nil {
+		return "", fae.Wrap(err, "finding medium")
+	}
+
+	kind := m.Kind
+	dir := m.Directory
+	if m.Type == "Episode" {
+		s := &Medium{}
+		err := app.DB.Medium.FindByID(m.SeriesID, s)
+		if err != nil {
+			return "", fae.Wrap(err, "finding series")
+		}
+		kind = s.Kind
+		dir = s.Directory
+	}
+
+	lib, ok := d.libraries[string(kind)]
+	if !ok || lib == nil {
+		return "", fae.Errorf("library not found for kind: %s", m.Kind)
+	}
+
+	if lib.Path == "" {
+		return "", fae.Errorf("library path is empty for library: %s", lib.Name)
+	}
+
+	return fmt.Sprintf("%s/%s/%s.%s", lib.Path, dir, f.Name, f.Extension), nil
+}
+
 func NewDestinatorData(m *Medium) (*DestinatorData, error) {
 	d := &DestinatorData{
 		directory: m.Directory,

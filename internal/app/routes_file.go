@@ -46,16 +46,11 @@ func (a *Application) FileShow(c echo.Context, id string) error {
 
 // PUT /file/:id
 func (a *Application) FileUpdate(c echo.Context, id string, subject *File) error {
-	// TODO: process the subject
-
-	// if you need to copy or compare to existing object...
-	// data, err := a.DB.FileGet(id)
-	// if err != nil {
-	//     return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "not found"})
-	// }
-	// data.Name = subject.Name ...
 	if err := a.DB.File.Save(subject); err != nil {
-		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error saving File"})
+		return fae.Wrap(err, "error saving File")
+	}
+	if err := a.Workers.Enqueue(&FilesMove{ID: subject.ID.Hex(), Title: subject.Path}); err != nil {
+		return fae.Wrap(err, "error enqueuing move")
 	}
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: subject})
 }

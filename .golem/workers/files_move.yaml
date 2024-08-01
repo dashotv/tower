@@ -1,0 +1,6 @@
+name: files_move
+fields:
+  - name: id
+    type: string
+  - name: title
+    type: string
