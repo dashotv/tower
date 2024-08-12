@@ -28,3 +28,20 @@ func TestConnector_MediumByFile(t *testing.T) {
 		})
 	}
 }
+
+func TestConnector_MediumBy(t *testing.T) {
+	c := testConnector()
+
+	list := []struct{ kind, name, file, ext string }{
+		{"donghua", "battle through the heavens", "battle through the heavens - 01x185", "mp4"},
+		{"donghua", "tomb of fallen gods", "tomb of fallen gods 01x10", "mp4"},
+	}
+
+	for _, tt := range list {
+		t.Run(tt.name, func(t *testing.T) {
+			m, _, err := c.MediumBy(tt.kind, tt.name, tt.file, tt.ext)
+			require.NoError(t, err)
+			require.NotNil(t, m)
+		})
+	}
+}

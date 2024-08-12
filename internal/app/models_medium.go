@@ -12,6 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/dashotv/fae"
+	"github.com/dashotv/grimoire"
 	"github.com/dashotv/tower/internal/plex"
 )
 
@@ -282,12 +283,14 @@ func (c *Connector) MediumByFilePartsAnime(kind, name, file string) (*Medium, er
 
 	absolute, _ := strconv.Atoi(matches[3])
 	if absolute > 0 {
-		list, err := c.Medium.Query().Where("_type", "Episode").Where("series_id", series[0].ID).Where("absolute_number", absolute).Run()
+		list, err := c.Medium.Query().Where("_type", "Episode").Where("series_id", series[0].ID).Or(func(q *grimoire.QueryBuilder[*Medium]) {
+			q.Where("absolute_number", absolute).Where("overrides.absolute_number", fmt.Sprintf("%d", absolute))
+		}).Run()
 		if err != nil {
 			return nil, err
 		}
 		if len(list) > 1 {
-			c.Log.Warnf("more than one episode for: %s/%s/%s: %d %d %+v", kind, name, file, absolute, list)
+			c.Log.Warnf("more than one episode for: %s/%s/%s: %d %+v", kind, name, file, absolute, list)
 			return c.MediumByFilePartsTv(kind, name, file)
 		}
 		if len(list) == 1 {
@@ -306,12 +309,15 @@ func (c *Connector) MediumByFilePartsAnime(kind, name, file string) (*Medium, er
 		return nil, fae.Errorf("episode == 0: %s/%s/%s: %v", kind, name, file, matches)
 	}
 
-	list, err := c.Medium.Query().Where("_type", "Episode").Where("series_id", series[0].ID).Where("absolute_number", episode).Run()
+	list, err := c.Medium.Query().Where("_type", "Episode").Where("series_id", series[0].ID).Or(func(q *grimoire.QueryBuilder[*Medium]) {
+		q.Where("absolute_number", episode).Where("overrides.absolute_number", fmt.Sprintf("%d", episode))
+	}).Run()
 	if err != nil {
 		return nil, err
 	}
 
 	if len(list) == 0 {
+		c.Log.Warnf("not found episode: %s/%s/%s: %d %d %+v", kind, name, file, absolute, episode, list)
 		return c.MediumByFilePartsTv(kind, name, file)
 	}
 	if len(list) > 1 {
