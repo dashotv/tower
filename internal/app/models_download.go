@@ -291,7 +291,7 @@ func (c *Connector) processDownload(d *Download) {
 		d.Search.Source = m.SearchParams.Source
 		d.Search.Resolution = m.SearchParams.Resolution
 		d.Search.Group = m.SearchParams.Group
-		d.Search.Website = m.SearchParams.Group
+		d.Search.Website = m.SearchParams.Author
 		d.Search.Verified = m.SearchParams.Verified
 		d.Search.Uncensored = m.SearchParams.Uncensored
 		d.Search.Bluray = m.SearchParams.Bluray
