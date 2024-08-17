@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	runic "github.com/dashotv/runic/client"
@@ -46,12 +47,28 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 		d = &Download{MediumID: medium.ID}
 	case 1:
 		if downloads[0].Status != "searching" {
-			log.Warnf("skipping: %s s%02de%02d: download exists", msg.Title, msg.Season, msg.Episode)
+			// log.Warnf("skipping: %s s%02de%02d: download exists", msg.Title, msg.Season, msg.Episode)
 			return nil
 		}
 		d = downloads[0]
 	default:
-		log.Warnf("skipping: %s s%02de%02d: multiple download exists", msg.Title, msg.Season, msg.Episode)
+		// log.Warnf("skipping: %s s%02de%02d: multiple download exists", msg.Title, msg.Season, msg.Episode)
+		return nil
+	}
+
+	a.DB.processDownload(d)
+
+	r, _ := strconv.Atoi(msg.Resolution)
+	if d.Search.Resolution > 0 && r < d.Search.Resolution {
+		// log.Warnf("skipping: %s s%02de%02d: resolution mismatch", msg.Title, msg.Season, msg.Episode)
+		return nil
+	}
+	if d.Search.Group != "" && msg.Group != d.Search.Group {
+		// log.Warnf("skipping: %s s%02de%02d: group mismatch", msg.Title, msg.Season, msg.Episode)
+		return nil
+	}
+	if d.Search.Website != "" && msg.Website != d.Search.Website {
+		// log.Warnf("skipping: %s s%02de%02d: website mismatch", msg.Title, msg.Season, msg.Episode)
 		return nil
 	}
 
