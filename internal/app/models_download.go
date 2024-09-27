@@ -298,6 +298,7 @@ func (c *Connector) processDownload(d *Download) {
 	}
 
 	if m.Type == "Movie" {
+		d.Search.Type = "movies"
 		d.Search.SourceID = m.ImdbID
 		d.Display = m.Display
 		if !m.ReleaseDate.IsZero() {
