@@ -18,15 +18,18 @@ type PlexWatchlistUpdates struct {
 
 func (j *PlexWatchlistUpdates) Kind() string { return "PlexWatchlistUpdates" }
 func (j *PlexWatchlistUpdates) Work(ctx context.Context, job *minion.Job[*PlexWatchlistUpdates]) error {
-	// app.Log.Debugf("creating requests from watchlists")
+	a := ContextApp(ctx)
+	if a == nil {
+		return fae.New("PlexWatchlistUpdates: no app in context")
+	}
 
-	users, err := app.DB.User.Query().NotEqual("token", "").Run()
+	users, err := a.DB.User.Query().NotEqual("token", "").Run()
 	if err != nil {
 		return fae.Wrap(err, "querying users")
 	}
 
 	for _, u := range users {
-		list, err := app.Plex.GetWatchlist(u.Token)
+		list, err := a.Plex.GetWatchlist(u.Token)
 		if err != nil {
 			notifier.Log.Errorf("PlexWatchlistUpdates", "getting watchlist: %s: %s", u.Name, err)
 			continue
@@ -36,14 +39,14 @@ func (j *PlexWatchlistUpdates) Work(ctx context.Context, job *minion.Job[*PlexWa
 			continue
 		}
 
-		details, err := app.Plex.GetWatchlistDetail(u.Token, list)
+		details, err := a.Plex.GetWatchlistDetail(u.Token, list)
 		if err != nil {
 			return fae.Wrap(err, "getting watchlist details")
 		}
 
 		for _, d := range details {
 			if d == nil || d.MediaContainer.Size != 1 {
-				app.Log.Debugf("PlexUserUpdates: dm empty? size %d len %d", d.MediaContainer.Size, len(d.MediaContainer.Metadata))
+				a.Log.Debugf("PlexUserUpdates: dm empty? size %d len %d", d.MediaContainer.Size, len(d.MediaContainer.Metadata))
 				continue
 			}
 			dm := d.MediaContainer.Metadata[0]
@@ -54,16 +57,17 @@ func (j *PlexWatchlistUpdates) Work(ctx context.Context, job *minion.Job[*PlexWa
 			if m != nil {
 				continue
 			}
-			// app.Log.Debugf("PlexUserUpdates: NOT FOUND: %s: %s", dm.Title, dm.Type)
 			err = createRequest(u.Name, dm.Title, dm.Type, dm.GUID)
 			if err != nil {
-				return fae.Wrap(err, "creating request")
+				// a.Log.Debugf("PlexUserUpdates: NOT FOUND: %s: %s %+v", dm.Title, dm.Type, dm.GUID)
+				notifier.Log.Warnf("Watchlist", "NOT FOUND: %s: %s %+v", dm.Title, dm.Type, dm.GUID)
+				continue
 			}
-			// app.Log.Infof("PlexUserUpdates: REQUESTED: %s: %s", dm.Title, dm.Type)
+			// a.Log.Infof("PlexUserUpdates: REQUESTED: %s: %s", dm.Title, dm.Type)
 		}
 	}
 
-	return app.Workers.Enqueue(&CreateMediaFromRequests{})
+	return a.Workers.Enqueue(&CreateMediaFromRequests{})
 }
 
 func createRequest(user, title, t string, guids []plex.GUID) error {
