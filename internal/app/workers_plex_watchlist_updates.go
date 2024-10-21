@@ -60,7 +60,7 @@ func (j *PlexWatchlistUpdates) Work(ctx context.Context, job *minion.Job[*PlexWa
 			err = createRequest(u.Name, dm.Title, dm.Type, dm.GUID)
 			if err != nil {
 				// a.Log.Debugf("PlexUserUpdates: NOT FOUND: %s: %s %+v", dm.Title, dm.Type, dm.GUID)
-				notifier.Log.Warnf("Watchlist", "NOT FOUND: %s: %s %+v", dm.Title, dm.Type, dm.GUID)
+				// notifier.Log.Warnf("Watchlist", "NOT FOUND: %s: %s %+v", dm.Title, dm.Type, dm.GUID)
 				continue
 			}
 			// a.Log.Infof("PlexUserUpdates: REQUESTED: %s: %s", dm.Title, dm.Type)
