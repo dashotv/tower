@@ -22,6 +22,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/kamva/mgm/v3 v3.5.0
 	github.com/labstack/echo/v4 v4.12.0
+	github.com/mmcdole/gofeed v1.3.0
 	github.com/nats-io/nats.go v1.36.0
 	github.com/philippgille/gokv/redis v0.7.0
 	github.com/pkg/errors v0.9.1
@@ -128,7 +129,6 @@ require (
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/mmcdole/gofeed v1.3.0 // indirect
 	github.com/mmcdole/goxpp v1.1.1-0.20240225020742-a0c311522b23 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
