@@ -102,6 +102,7 @@ func (j *MovieUpdate) Work(ctx context.Context, job *minion.Job[*MovieUpdate]) e
 
 		movie.Title = m.Title
 		movie.Description = m.Description
+		movie.ImdbID = m.ImdbID
 		movie.ReleaseDate = dateFromString(m.Airdate)
 		if movie.Display == "" {
 			movie.Display = m.Title
