@@ -48,3 +48,16 @@ func (i *Importer) loadMovieImages(id int) ([]string, []string, error) {
 
 	return posters, backdrops, nil
 }
+
+func (i *Importer) ImdbToTmdb(imdb string) (int64, error) {
+	movie, err := i.Tmdb.FindByID(imdb, "imdb_id", nil)
+	if err != nil {
+		return 0, err
+	}
+
+	if len(movie.MovieResults) == 0 {
+		return 0, fae.New("no movie found")
+	}
+
+	return tmdb.Int64Value(movie.MovieResults[0].ID), nil
+}

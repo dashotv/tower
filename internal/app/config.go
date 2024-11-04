@@ -38,6 +38,7 @@ type Config struct {
 	PlexServerURL         string   `env:"PLEX_SERVER_URL"`
 	PlexMetaURL           string   `env:"PLEX_META_URL"`
 	PlexTvURL             string   `env:"PLEX_TV_URL"`
+	PlexWatchlistURL      string   `env:"PLEX_WATCHLIST_URL"`
 	DirectoriesImages     string   `env:"DIRECTORIES_IMAGES"`
 	DirectoriesIncoming   string   `env:"DIRECTORIES_INCOMING"`
 	DirectoriesCompleted  string   `env:"DIRECTORIES_COMPLETED"`
