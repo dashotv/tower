@@ -96,7 +96,7 @@ type Collection struct {
 	Thumb        string             `json:"thumb"`
 	AddedAt      int64              `json:"addedAt"`
 	UpdatedAt    int64              `json:"updatedAt"`
-	ChildCount   string             `json:"childCount"`
+	ChildCount   int64              `json:"childCount"`
 	MaxYear      string             `json:"maxYear"`
 	MinYear      string             `json:"minYear"`
 	Children     []*CollectionChild `json:"children,omitempty"`
