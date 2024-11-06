@@ -14,3 +14,16 @@ func (c *Connector) RequestList(page, limit int) ([]*Request, int64, error) {
 
 	return list, count, nil
 }
+
+func (c *Connector) RequestExists(guid string) (bool, error) {
+	source, source_id := guidSplit(guid)
+	list, err := c.Request.Query().Where("source", source).Where("source_id", source_id).Run()
+	if err != nil {
+		return false, err
+	}
+	if len(list) == 0 {
+		return false, nil
+	}
+
+	return true, nil
+}
