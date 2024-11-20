@@ -153,36 +153,33 @@ func (c *RunicChooser) add(r *runic.Release) {
 func (c *RunicChooser) choose() *runic.Release {
 	// app.Log.Debugf("chooser: %+v", c.data)
 	if len(c.data["nzbs"]["preferred"]) > 0 {
-		return c.data["nzbs"]["preferred"][0]
+		if r := titlesMatch(c.Title, c.data["nzbs"]["preferred"]); r != nil {
+			return r
+		}
 	}
 	if len(c.data["nzbs"]["good"]) > 0 {
-		return c.data["nzbs"]["good"][0]
+		if r := titlesMatch(c.Title, c.data["nzbs"]["good"]); r != nil {
+			return r
+		}
 	}
 	if len(c.data["tors"]["preferred"]) > 0 {
-		return c.data["tors"]["preferred"][0]
+		if r := titlesMatch(c.Title, c.data["tors"]["preferred"]); r != nil {
+			return r
+		}
 	}
 	if len(c.data["tors"]["good"]) > 0 {
-		if !c.Exact {
-			return c.data["tors"]["good"][0]
-		}
-
-		for _, r := range c.data["tors"]["good"] {
-			if c.Title == r.Title {
-				return r
-			}
+		if r := titlesMatch(c.Title, c.data["tors"]["good"]); r != nil {
+			return r
 		}
 	}
 
-	// 	if r == nil {
-	// 		return nil
-	// 	}
-	//
-	// 	if c.Group == r.Group {
-	// 		return r
-	// 	}
-	// 	if c.Exact && r.Name == c.Title {
-	// 		return r
-	// 	}
-
+	return nil
+}
+func titlesMatch(title string, list []*runic.Release) *runic.Release {
+	for _, r := range list {
+		if r.Title == title {
+			return r
+		}
+	}
 	return nil
 }
