@@ -44,7 +44,7 @@ func (j *CreateMediaFromRequests) Work(ctx context.Context, job *minion.Job[*Cre
 				a.Log.Errorf("creating movie from request: %s", err)
 				r.Status = "failed"
 			} else {
-				a.Log.Infof("created series: %s", r.Title)
+				a.Log.Infof("created movie: %s", r.Title)
 				r.Status = "completed"
 			}
 		} else if r.Source == "tvdb" {
