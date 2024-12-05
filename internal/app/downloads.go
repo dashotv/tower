@@ -463,6 +463,10 @@ func (a *Application) downloadsMove() error {
 			}
 		}
 
+		if d.Multi && d.Medium.Type == "Movie" && t.Progress < 100 {
+			continue
+		}
+
 		mover := NewMover(a.Log.Named("mover"), d, t)
 		files, err := mover.Move()
 		if err != nil {
@@ -498,6 +502,8 @@ func (a *Application) downloadsMove() error {
 		if files == nil || len(files) == 0 {
 			continue
 		}
+
+		// check to make sure we don't finish a download before all files are done
 
 		moved = append(moved, files...)
 

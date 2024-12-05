@@ -46,6 +46,16 @@ func (d *Download) Error(e error) error {
 	return e
 }
 
+func (d *Download) File(num int) *DownloadFile {
+	for _, f := range d.Files {
+		if f.Num == num {
+			return f
+		}
+	}
+
+	return nil
+}
+
 func (d *Download) StatusIndex() int {
 	return slices.Index(downloadStates, d.Status)
 }

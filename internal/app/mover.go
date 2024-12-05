@@ -52,7 +52,8 @@ func (m *Mover) torrentList() ([]string, error) {
 
 	for _, f := range m.Torrent.Files {
 		file := fmt.Sprintf("%s/%s", app.Config.DirectoriesIncoming, f.Name)
-		if f.Progress == 100 && shouldDownloadFile(f.Name) && exists(file) {
+		df := m.Download.File(f.ID)
+		if f.Progress == 100 && shouldDownloadFile(f.Name) && exists(file) && df != nil && df.Medium != nil {
 			out = append(out, f.Name)
 		}
 	}
