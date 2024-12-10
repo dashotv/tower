@@ -59,9 +59,11 @@ func (c *Connector) UpcomingNow() ([]*Upcoming, error) {
 	utc := time.Now().UTC()
 	// null time breaks seer, so we set unknown time to unix epoch
 	// we want to avoid including those in the upcoming list
+	after := time.Date(1974, 1, 1, 0, 0, 0, 0, time.UTC)
 	today := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC)
 	tomorrow := today.Add(time.Hour * 24)
 	q := c.UpcomingQuery().
+		GreaterThanEqual("release_date", after).
 		LessThan("release_date", tomorrow).
 		Limit(-1)
 	return c.UpcomingFrom(q)
