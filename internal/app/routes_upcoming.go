@@ -10,7 +10,14 @@ import (
 func (a *Application) UpcomingIndex(c echo.Context) error {
 	list, err := a.DB.Upcoming()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, &Response{Error: true, Message: "error loading Upcoming"})
+		return err
+	}
+	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
+}
+func (a *Application) UpcomingNow(c echo.Context) error {
+	list, err := a.DB.UpcomingNow()
+	if err != nil {
+		return err
 	}
 	return c.JSON(http.StatusOK, &Response{Error: false, Result: list})
 }

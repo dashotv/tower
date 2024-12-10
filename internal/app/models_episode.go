@@ -16,7 +16,7 @@ import (
 const imagesBaseURL = "/media-images" // proxy this instead of dealing with CORS
 
 func (c *Connector) UpcomingQuery() *grimoire.QueryBuilder[*Episode] {
-	series, err := c.Series.Query().Where("active", true).Run()
+	series, err := c.Series.Query().Where("active", true).Limit(-1).Run()
 	if err != nil {
 		c.Log.Errorf("error getting series: %s", err)
 		return nil

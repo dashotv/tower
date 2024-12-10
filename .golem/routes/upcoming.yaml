@@ -1,7 +1,10 @@
 name: upcoming
 path: /upcoming
 routes:
-  - name: index
-    path: /
-    method: GET
-    result: "[]*Upcoming"
+    - name: index
+      path: /
+      method: GET
+      result: '[]*Upcoming'
+    - name: now
+      path: /now
+      method: GET
