@@ -41,7 +41,14 @@ func (c *Connector) Upcoming() ([]*Upcoming, error) {
 	utc := time.Now().UTC()
 	today := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC)
 	later := today.Add(time.Hour * 24 * 90)
-	q := c.UpcomingQuery().
+	q := c.Episode.Query().
+		Where("downloaded", false).
+		Where("completed", false).
+		Where("skipped", false).
+		In("missing", []interface{}{false, nil}).
+		GreaterThan("season_number", 0).
+		GreaterThan("episode_number", 0).
+		Asc("release_date").Asc("season_number").Asc("episode_number").Asc("absolute_number").
 		GreaterThanEqual("release_date", today).
 		LessThanEqual("release_date", later).
 		Limit(-1)
@@ -52,11 +59,9 @@ func (c *Connector) UpcomingNow() ([]*Upcoming, error) {
 	utc := time.Now().UTC()
 	// null time breaks seer, so we set unknown time to unix epoch
 	// we want to avoid including those in the upcoming list
-	after := time.Date(1974, 1, 1, 0, 0, 0, 0, time.UTC)
 	today := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC)
 	tomorrow := today.Add(time.Hour * 24)
 	q := c.UpcomingQuery().
-		GreaterThanEqual("release_date", after).
 		LessThan("release_date", tomorrow).
 		Limit(-1)
 	return c.UpcomingFrom(q)
