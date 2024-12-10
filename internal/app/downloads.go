@@ -105,10 +105,10 @@ func (a *Application) downloadsCreate() error {
 	if err != nil {
 		return fae.Wrap(err, "failed to get series download counts")
 	}
-	seriesMulti, err := a.DB.SeriesMultiDownloads()
-	if err != nil {
-		return fae.Wrap(err, "failed to get series multi")
-	}
+	// seriesMulti, err := a.DB.SeriesMultiDownloads()
+	// if err != nil {
+	// 	return fae.Wrap(err, "failed to get series multi")
+	// }
 
 	list, err := a.DB.UpcomingNow()
 	if err != nil {
@@ -122,12 +122,7 @@ func (a *Application) downloadsCreate() error {
 			continue
 		}
 
-		unwatched, err := a.DB.SeriesUnwatchedByID(ep.SeriesID.Hex())
-		if err != nil {
-			return fae.Wrap(err, "failed to get unwatched")
-		}
-
-		if unwatched+seriesDownloads[ep.SeriesID.Hex()] >= 3 || seriesMulti[ep.SeriesID.Hex()] {
+		if seriesDownloads[ep.SeriesID.Hex()] > 0 || (!ep.SeriesFavorite && ep.SeriesUnwatched >= 3) {
 			continue
 		}
 

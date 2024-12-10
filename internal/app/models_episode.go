@@ -105,13 +105,15 @@ func (c *Connector) SeriesDownloadCounts() (map[string]int, error) {
 	}
 
 	for _, d := range list {
-		m := &Medium{}
-		err := c.Medium.Find(d.MediumID.Hex(), m)
-		if err != nil {
-			return nil, err
+		if d.Medium == nil {
+			c.Log.Warnf("missing medium %s", d.ID.Hex())
+			continue
 		}
-		if m.Type == "Episode" {
-			counts[m.SeriesID.Hex()]++
+		if d.Medium.Type == "Episode" {
+			counts[d.Medium.SeriesID.Hex()]++
+		}
+		if d.Medium.Type == "Series" {
+			counts[d.Medium.ID.Hex()]++
 		}
 	}
 
@@ -126,13 +128,15 @@ func (c *Connector) SeriesMultiDownloads() (map[string]bool, error) {
 	}
 
 	for _, d := range list {
-		m := &Medium{}
-		err := c.Medium.Find(d.MediumID.Hex(), m)
-		if err != nil {
-			return nil, err
+		if d.Medium == nil {
+			c.Log.Warnf("missing medium %s", d.ID.Hex())
+			continue
 		}
-		if m.Type == "Episode" {
-			out[m.SeriesID.Hex()] = true
+		if d.Medium.Type == "Episode" {
+			out[d.Medium.SeriesID.Hex()] = true
+		}
+		if d.Medium.Type == "Series" {
+			out[d.Medium.ID.Hex()] = true
 		}
 	}
 
