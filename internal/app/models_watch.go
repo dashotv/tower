@@ -91,7 +91,8 @@ func (c *Connector) Watches(mediumID, username string) ([]*Watch, error) {
 	for _, w := range watches {
 		m := &Medium{}
 		if err := c.Medium.FindByID(w.MediumID, m); err != nil {
-			return nil, err
+			c.Log.Warnf("watch medium not found: %s", w.MediumID)
+			continue
 		}
 		w.Medium = m
 		if m.Type == "Episode" {

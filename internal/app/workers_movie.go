@@ -37,6 +37,12 @@ func (j *MovieDelete) Work(ctx context.Context, job *minion.Job[*MovieDelete]) e
 		return fae.Wrap(err, "deleting downloads")
 	}
 
+	// remove watches referencing movie
+	_, err = app.DB.Watch.Collection.DeleteMany(ctx, bson.M{"medium_id": movie.ID})
+	if err != nil {
+		return fae.Wrap(err, "deleting downloads")
+	}
+
 	// remove movie
 	if err := app.DB.Movie.Delete(movie); err != nil {
 		return fae.Wrap(err, "delete medium")

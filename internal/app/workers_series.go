@@ -54,6 +54,12 @@ func (j *SeriesDelete) Work(ctx context.Context, job *minion.Job[*SeriesDelete])
 		return fae.Wrap(err, "deleting downloads")
 	}
 
+	// remove watches referencing episodes or series
+	_, err = a.DB.Watch.Collection.DeleteMany(ctx, bson.M{"medium_id": bson.M{"$in": eids}})
+	if err != nil {
+		return fae.Wrap(err, "deleting watches")
+	}
+
 	// remove episodes
 	_, err = a.DB.Episode.Collection.DeleteMany(ctx, bson.M{"_type": "Episode", "series_id": series.ID})
 	if err != nil {
