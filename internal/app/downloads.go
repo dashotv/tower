@@ -163,6 +163,9 @@ func (a *Application) downloadsSearch() error {
 			//movies handled in downloadsSearchMovies
 			continue
 		}
+		if !d.Auto {
+			continue
+		}
 
 		match, err := a.ScrySearchEpisode(d.Search)
 		if err != nil {
