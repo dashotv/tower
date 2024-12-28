@@ -66,6 +66,22 @@ func (c *Connector) SeriesUnwatchedByID(id string) (int, error) {
 }
 
 func (c *Connector) SeriesUnwatched(s *Series, user string) (int, error) {
+	return c.SeriesUnwatchedUncached(s, user)
+}
+
+func (c *Connector) SeriesUnwatchedCached(s *Series, user string) (int, error) {
+	unwatched := 0
+	_, err := app.Cache.Fetch(fmt.Sprintf("series-unwatched-%s-%s", s.ID.Hex(), user), &unwatched, func() (interface{}, error) {
+		return c.SeriesUnwatchedUncached(s, user)
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return unwatched, nil
+}
+
+func (c *Connector) SeriesUnwatchedUncached(s *Series, user string) (int, error) {
 	// get all episodes for series
 	eps, err := c.Episode.Query().
 		Where("series_id", s.ID).

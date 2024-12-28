@@ -213,6 +213,8 @@ func NewConnector(app *Application) (*Connector, error) {
 		return nil, err
 	}
 
+	grimoire.CreateIndexes[*Watch](watch, &Watch{}, "created_at;updated_at;username;medium_id;watched_at")
+
 	grimoire.CreateIndexesFromTags[*Watch](watch, &Watch{})
 
 	c := &Connector{

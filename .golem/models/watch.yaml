@@ -1,6 +1,11 @@
 name: watch
 type: model
-imports:
+indexes:
+  - created_at
+  - updated_at
+  - username
+  - medium_id
+  - watched_at
 fields:
   - name: username
     type: string
@@ -12,6 +17,4 @@ fields:
     type: primitive.ObjectID
   - name: medium
     type: "*Medium"
-    bson: '-'
-
-
+    bson: "-"
