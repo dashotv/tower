@@ -40,7 +40,7 @@ func (c *Connector) UpcomingQuery() *grimoire.QueryBuilder[*Episode] {
 func (c *Connector) Upcoming() ([]*Upcoming, error) {
 	utc := time.Now().UTC()
 	today := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC)
-	later := today.Add(time.Hour * 24 * 90)
+	later := today.Add(time.Hour * 24 * 7)
 	q := c.Episode.Query().
 		Where("downloaded", false).
 		Where("completed", false).
