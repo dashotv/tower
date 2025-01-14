@@ -69,6 +69,25 @@ func (c *Connector) UpcomingNow() ([]*Upcoming, error) {
 	return c.UpcomingFrom(q)
 }
 
+func (c *Connector) UpcomingLater() ([]*Upcoming, error) {
+	utc := time.Now().UTC()
+	today := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC)
+	start := today.Add(time.Hour * 24 * 7)
+	end := start.Add(time.Hour * 24 * 90)
+	q := c.Episode.Query().
+		Where("downloaded", false).
+		Where("completed", false).
+		Where("skipped", false).
+		In("missing", []interface{}{false, nil}).
+		GreaterThan("season_number", 0).
+		GreaterThan("episode_number", 0).
+		Asc("release_date").Asc("season_number").Asc("episode_number").Asc("absolute_number").
+		GreaterThanEqual("release_date", start).
+		LessThanEqual("release_date", end).
+		Limit(-1)
+	return c.UpcomingFrom(q)
+}
+
 func (c *Connector) UpcomingFrom(query *grimoire.QueryBuilder[*Episode]) ([]*Upcoming, error) {
 	// defer TickTock("UpcomingFrom")()
 	seriesMap := map[primitive.ObjectID]*Series{}
