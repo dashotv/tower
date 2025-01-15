@@ -248,6 +248,7 @@ func (a *Application) Routes() {
 	upcoming := a.Router.Group("/upcoming")
 	upcoming.GET("/", a.UpcomingIndexHandler)
 	upcoming.GET("/now", a.UpcomingNowHandler)
+	upcoming.GET("/later", a.UpcomingLaterHandler)
 
 	users := a.Router.Group("/users")
 	users.GET("/", a.UsersIndexHandler)
@@ -1019,6 +1020,9 @@ func (a *Application) UpcomingIndexHandler(c echo.Context) error {
 }
 func (a *Application) UpcomingNowHandler(c echo.Context) error {
 	return a.UpcomingNow(c)
+}
+func (a *Application) UpcomingLaterHandler(c echo.Context) error {
+	return a.UpcomingLater(c)
 }
 
 // Users (/users)
