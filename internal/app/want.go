@@ -121,7 +121,7 @@ func (w *Want) releaseEpisode(release *runic.Release) *Medium {
 	if err != nil {
 		return nil
 	}
-	if r >= 720 { // HACK: fix this
+	if r < 720 { // HACK: fix this
 		return nil
 	}
 

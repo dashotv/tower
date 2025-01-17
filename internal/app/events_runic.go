@@ -10,7 +10,7 @@ import (
 
 func onRunicReleases(a *Application, msg *runic.Release) error {
 	log := a.Log.Named("runic.releases")
-	// log.Infof("received: '%s' %02dx%02d", msg.Title, msg.Season, msg.Episode)
+	log.Infof("received: [%s] '%s' %02dx%02d", msg.Type, msg.Title, msg.Season, msg.Episode)
 
 	if !a.Config.ProcessRunicEvents {
 		// log.Warnf("skipping: runic events disabled")
@@ -18,12 +18,12 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 	}
 
 	if a.Want == nil {
-		log.Warnf("want not initialized, waiting...")
+		// log.Warnf("want not initialized, waiting...")
 		for i := 0; i < 10 && a.Want == nil; i++ {
 			time.Sleep(1 * time.Second)
 		}
 		if a.Want == nil {
-			log.Errorf("want not initialized")
+			// log.Errorf("want not initialized")
 			return nil
 		}
 	}
@@ -34,7 +34,7 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 		return nil
 	}
 
-	log.Debugf("found: %s s%02de%02d", msg.Title, msg.Season, msg.Episode)
+	// log.Debugf("found: %s s%02de%02d", msg.Title, msg.Season, msg.Episode)
 	var d *Download
 
 	downloads, err := a.DB.Download.Query().Where("medium_id", medium.ID).Run()
