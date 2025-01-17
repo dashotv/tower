@@ -76,12 +76,6 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 
 	dir := fmt.Sprintf("%s/%s", lib.Path, medium.Directory)
 	if !exists(dir) {
-		if medium.Completed {
-			medium.Broken = true
-			if err := app.DB.Medium.Save(medium); err != nil {
-				return fae.Wrap(err, "save medium")
-			}
-		}
 		return fae.Errorf("directory not found: %s", dir)
 	}
 
