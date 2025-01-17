@@ -540,6 +540,16 @@ func (a *Application) downloadsMove() error {
 				return fae.Wrap(err, "failed to refresh library")
 			}
 		}
+
+		mids := lo.Map(moved, func(f *MoverFile, i int) string {
+			return f.Medium.ID.Hex()
+		})
+		for _, mid := range lo.Uniq(mids) {
+			err := a.Workers.Enqueue(&PathManage{MediumID: mid})
+			if err != nil {
+				return fae.Wrap(err, "failed to enqueue path")
+			}
+		}
 	}
 
 	return nil

@@ -173,9 +173,6 @@ func setupWorkers(app *Application) error {
 	if err := minion.RegisterWithQueue[*PathManageAll](m, &PathManageAll{}, "paths"); err != nil {
 		return fae.Wrap(err, "registering worker: path_manage_all (PathManageAll)")
 	}
-	if _, err := m.Schedule("0 0 11 * * *", &PathManageAll{}); err != nil {
-		return fae.Wrap(err, "scheduling worker: path_manage_all (PathManageAll)")
-	}
 
 	if err := minion.Register[*PlexCollectionUpdate](m, &PlexCollectionUpdate{}); err != nil {
 		return fae.Wrap(err, "registering worker: plex_collection_update (PlexCollectionUpdate)")
