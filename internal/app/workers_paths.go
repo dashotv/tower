@@ -67,6 +67,11 @@ func (j *PathManage) Work(ctx context.Context, job *minion.Job[*PathManage]) err
 	if err := app.DB.Medium.Find(MediumID, medium); err != nil {
 		return fae.Wrap(err, "find medium")
 	}
+	if medium.Type == "Episode" {
+		if err := app.DB.Medium.FindByID(medium.SeriesID, medium); err != nil {
+			return fae.Wrap(err, "find series")
+		}
+	}
 	kind := medium.Kind
 
 	lib, ok := a.Libs[string(medium.Kind)]
