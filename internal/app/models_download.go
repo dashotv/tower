@@ -219,12 +219,11 @@ func (c *Connector) ActiveDownloads() ([]*Download, error) {
 }
 
 func (c *Connector) RecentDownloads(mid string, page int) ([]*Download, int64, error) {
-	total, err := c.Download.Query().Count()
+	q := c.Download.Query().In("status", []string{"done", "deleted"})
+	total, err := q.Count()
 	if err != nil {
 		return nil, 0, err
 	}
-
-	q := c.Download.Query()
 
 	if mid != "" {
 		m, err := c.Medium.Get(mid, &Medium{})
