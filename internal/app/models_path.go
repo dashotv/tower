@@ -7,7 +7,7 @@ import (
 	"github.com/samber/lo"
 )
 
-var pathTagRegex = regexp.MustCompile(`(?i)\s+\[([\w\s-_]+)\]\.\w+$`)
+var pathTagRegex = regexp.MustCompile(`(?i)\s+\[([^\]]+)\]$`)
 
 func (p *Path) ParseTag() {
 	matches := pathTagRegex.FindStringSubmatch(p.Local)

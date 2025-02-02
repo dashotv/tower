@@ -193,30 +193,38 @@ func (a *Application) pathImport(path *Path) error {
 	}
 	mediaMatches := lo.Filter(meta.Media, func(m *plex.Media, i int) bool {
 		parts := lo.Filter(m.Part, func(p plex.Part, i int) bool {
-			return p.File == path.LocalPath()
+			return p.File == f
 		})
 		return len(parts) > 0
 	})
 	if len(mediaMatches) == 0 {
-		a.Log.Warnf("no media in cache: %s", f)
+		a.Log.Warnf("no matching media in cache: %s", f)
 		return nil
 	}
 	media := mediaMatches[0]
 	path.Bitrate = int(media.Bitrate)
 	path.Resolution = media.GetVideoResolution()
 
-	if len(media.Part) == 0 {
-		a.Log.Warnf("no parts in cache: %s", f)
+	// if len(media.Part) == 0 {
+	// 	a.Log.Warnf("no parts in cache: %s", f)
+	// 	return nil
+	// }
+	// partMatches := lo.Filter(media.Part, func(p plex.Part, i int) bool {
+	// 	return p.File == f
+	// })
+	// if len(partMatches) == 0 {
+	// 	a.Log.Warnf("no parts in cache: %s", f)
+	// 	return nil
+	// }
+	// path.Size = partMatches[0].Size
+
+	stat, err := os.Stat(f)
+	if err != nil {
+		a.Log.Warnf("stat failed: %s", f)
 		return nil
 	}
-	partMatches := lo.Filter(media.Part, func(p plex.Part, i int) bool {
-		return p.File == path.LocalPath()
-	})
-	if len(partMatches) == 0 {
-		a.Log.Warnf("no parts in cache: %s", f)
-		return nil
-	}
-	path.Size = partMatches[0].Size
+	path.UpdatedAt = stat.ModTime()
+	path.Size = stat.Size()
 
 	return nil
 }

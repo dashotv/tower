@@ -172,6 +172,7 @@ func (d *Destinator) File(f *File) (string, error) {
 }
 
 func NewDestinatorData(m *Medium) (*DestinatorData, error) {
+	m.ApplyOverrides()
 	d := &DestinatorData{
 		directory: m.Directory,
 		season:    m.SeasonNumber,
