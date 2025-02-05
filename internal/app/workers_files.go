@@ -111,7 +111,8 @@ func (j *FileWalk) Work(ctx context.Context, job *minion.Job[*FileWalk]) error {
 	if err != nil {
 		return fae.Wrap(err, "updating")
 	}
-	return nil
+
+	return a.Workers.Enqueue(&MigratePaths{})
 }
 
 // type FileMatch struct {
