@@ -202,7 +202,7 @@ type DestinatorData struct {
 	absolute  int
 }
 
-var titleCheckRegex = regexp.MustCompile(`(?i)^(episode|第)\s*(\d+)`)
+var titleCheckRegex = regexp.MustCompile(`(?i)^(episode|第)*\s*(\d+)`)
 
 func (d *DestinatorData) Path() string      { return d.path }
 func (d *DestinatorData) Kind() string      { return d.kind }

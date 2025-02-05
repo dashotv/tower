@@ -341,18 +341,31 @@ func (j *FilesRenameMedium) Work(ctx context.Context, job *minion.Job[*FilesRena
 				if err != nil {
 					return fae.Wrap(err, "destination")
 				}
-				dest := fmt.Sprintf("%s.%s", d, p.Extension)
+
+				p.ParseTag()
+				tags := ""
+				if p.Tag != "" {
+					tags = fmt.Sprintf(" [%s]", p.Tag)
+				}
+				dest := fmt.Sprintf("%s%s.%s", d, tags, p.Extension)
 
 				if p.LocalPath() != dest {
-					a.Log.Warnw("rename", "from", p.Local, "to", dest)
+					l.Warnw("rename", "from", p.LocalPath(), "to", dest)
+					if !a.Config.Production {
+						continue
+					}
 
 					kind, name, file, ext, err := pathParts(dest)
 					if err != nil {
 						return fae.Wrap(err, "parts")
 					}
 
-					p.Old = true
+					if !a.Config.Production {
+						l.Warnw("rename", "from", p.LocalPath(), "to", dest)
+						continue
+					}
 
+					p.Old = true
 					if err := FileLink(p.LocalPath(), dest, false); err != nil {
 						l.Errorf("link: %s: %s", p.Local, err)
 						continue
