@@ -5,12 +5,15 @@ import (
 	"encoding/base64"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/dashotv/fae"
 	flame "github.com/dashotv/flame/client"
 	"github.com/dashotv/flame/metube"
 	"github.com/dashotv/flame/qbt"
 )
+
+var m sync.Mutex
 
 func init() {
 	initializers = append(initializers, setupFlame)
@@ -43,6 +46,9 @@ func (a *Application) FlameMetubeHistory() (*metube.HistoryResponse, error) {
 }
 
 func (a *Application) FlameAdd(d *Download) (string, error) {
+	m.Lock()
+	defer m.Unlock()
+
 	a.Log.Named("flame").Debugf("FlameAdd: %s - %s :: %s", d.Title, d.Display, d.URL)
 	if d.IsNzb() {
 		return a.FlameNzbAdd(d)
