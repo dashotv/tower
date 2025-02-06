@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"sync"
 	"time"
 
 	"github.com/samber/lo"
@@ -15,6 +16,7 @@ import (
 
 var titleRegex = regexp.MustCompile(`(?i)^(?:episode|chapter)`)
 var downloadMultiFiles = 3
+var downloadLoadMutex sync.Mutex
 
 func Extension(path string) string {
 	ext := filepath.Ext(path)
@@ -249,6 +251,9 @@ func (a *Application) downloadsLoad() (err error) {
 	if err != nil {
 		return fae.Wrap(err, "failed to get downloads")
 	}
+
+	downloadLoadMutex.Lock()
+	defer downloadLoadMutex.Unlock()
 
 	for _, d := range list {
 		if d.ReleaseID == "" && d.URL == "" {
