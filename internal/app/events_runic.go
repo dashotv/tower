@@ -44,7 +44,7 @@ func onRunicReleases(a *Application, msg *runic.Release) error {
 
 	switch len(downloads) {
 	case 0:
-		d = &Download{MediumID: medium.ID}
+		d = &Download{MediumID: medium.ID, Auto: true}
 	case 1:
 		if downloads[0].Status != "searching" {
 			// log.Warnf("skipping: %s s%02de%02d: download exists", msg.Title, msg.Season, msg.Episode)
