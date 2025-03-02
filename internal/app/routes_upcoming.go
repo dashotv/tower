@@ -8,7 +8,7 @@ import (
 
 // GET /upcoming/
 func (a *Application) UpcomingIndex(c echo.Context) error {
-	list, err := a.DB.Upcoming()
+	list, err := a.DB.UpcomingLater()
 	if err != nil {
 		return err
 	}
