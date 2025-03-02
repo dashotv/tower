@@ -72,8 +72,8 @@ func (c *Connector) UpcomingNow() ([]*Upcoming, error) {
 func (c *Connector) UpcomingLater() ([]*Upcoming, error) {
 	utc := time.Now().UTC()
 	today := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC)
-	start := today.Add(time.Hour * 24 * 7)
-	end := start.Add(time.Hour * 24 * 90)
+	// start := today.Add(time.Hour * 24 * 7)
+	end := today.Add(time.Hour * 24 * 90)
 	q := c.Episode.Query().
 		Where("downloaded", false).
 		Where("completed", false).
@@ -82,7 +82,7 @@ func (c *Connector) UpcomingLater() ([]*Upcoming, error) {
 		GreaterThan("season_number", 0).
 		GreaterThan("episode_number", 0).
 		Asc("release_date").Asc("season_number").Asc("episode_number").Asc("absolute_number").
-		GreaterThanEqual("release_date", start).
+		GreaterThanEqual("release_date", today).
 		LessThanEqual("release_date", end).
 		Limit(-1)
 	return c.UpcomingFrom(q)
