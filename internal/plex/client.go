@@ -165,3 +165,18 @@ func (p *Client) GetAccount(id int64) (*User, error) {
 
 	return nil, fae.Errorf("account not found: %s", sid)
 }
+
+func (p *Client) GetAccountByUUID(uuid string) (*User, error) {
+	accounts, err := p.GetAccounts()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, a := range accounts {
+		if a.UUID == uuid {
+			return a, nil
+		}
+	}
+
+	return nil, fae.Errorf("account not found: %s", uuid)
+}

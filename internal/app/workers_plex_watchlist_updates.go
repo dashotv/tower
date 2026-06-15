@@ -25,29 +25,38 @@ func (j *PlexWatchlistUpdates) Work(ctx context.Context, job *minion.Job[*PlexWa
 		return fae.New("PlexWatchlistUpdates: no app in context")
 	}
 
-	url := a.Config.PlexWatchlistURL
-	fp := gofeed.NewParser()
-	feed, err := fp.ParseURL(url)
-	if err != nil {
-		return fae.Wrap(err, "parsing feed")
-	}
-
-	for _, item := range feed.Items {
-		a.Log.Debugf("PlexWatchlistUpdates: %s %+v %s", item.Title, item.Categories, item.GUID)
-		m, err := findMediaByGuid(item.GUID)
+	urls := a.Config.PlexWatchlistURLs
+	for _, url := range urls {
+		fp := gofeed.NewParser()
+		feed, err := fp.ParseURL(url)
 		if err != nil {
-			return fae.Wrap(err, "finding media")
+			return fae.Wrap(err, "parsing feed")
 		}
-		if m != nil {
-			continue
-		}
-		if err := createRequest("rss", item.Title, item.Categories[0], item.GUID); err != nil {
-			a.Log.Debugf("PlexUserUpdates: NOT FOUND: %s: %s %+v", item.Title, item.Categories[0], item.GUID)
-			// notifier.Log.Warnf("Watchlist", "NOT FOUND: %s: %s %+v", dm.Title, dm.Type, dm.GUID)
-			continue
+
+		for _, item := range feed.Items {
+			a.Log.Debugf("PlexWatchlistUpdates: %s %+v %s", item.Title, item.Categories, item.GUID)
+			m, err := findMediaByGuid(item.GUID)
+			if err != nil {
+				return fae.Wrap(err, "finding media")
+			}
+			if m != nil {
+				continue
+			}
+			// acc, err := a.Plex.GetAccountByUUID(item.Authors[0].Name)
+			// if err != nil {
+			// 	return fae.Wrap(err, "getting plex account")
+			// }
+			// if acc == nil {
+			// 	a.Log.Debugf("PlexWatchlistUpdates: account not found: %s", item.Authors[0].Name)
+			// 	continue
+			// }
+			if err := createRequest("rss", item.Title, item.Categories[0], item.GUID); err != nil {
+				a.Log.Debugf("PlexUserUpdates: NOT FOUND: %s: %s %+v", item.Title, item.Categories[0], item.GUID)
+				// notifier.Log.Warnf("Watchlist", "NOT FOUND: %s: %s %+v", dm.Title, dm.Type, dm.GUID)
+				continue
+			}
 		}
 	}
-
 	return a.Workers.Enqueue(&CreateMediaFromRequests{})
 }
 

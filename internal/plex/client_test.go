@@ -44,3 +44,11 @@ func TestGetAccount(t *testing.T) {
 	assert.NotNil(t, account)
 	fmt.Printf("account: %+v\n", account)
 }
+
+func TestGetAccountByUUID(t *testing.T) {
+	c := testClient()
+	account, err := c.GetAccountByUUID("48054571d653b8de")
+	assert.NoError(t, err)
+	assert.NotNil(t, account)
+	fmt.Printf("account: %+v\n", account)
+}
